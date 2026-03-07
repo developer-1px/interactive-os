@@ -16,7 +16,7 @@
  *   import { TodoView } from "@apps/todo/TodoView";
  *   runScenarios(scenarios, { app: TodoApp, component: TodoView });
  *
- * That's it. No manual describe/it/goto/cleanup wiring.
+ * That's it. No manual describe/it/setupZone/cleanup wiring.
  */
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
@@ -58,7 +58,7 @@ function runOsScenarios(scenarios: TestScenario[]): void {
       for (const script of scenario.scripts) {
         it(script.name, async () => {
           const items = scenario.getItems?.() ?? scenario.items ?? [];
-          page.goto(scenario.zone, {
+          page.setupZone(scenario.zone, {
             items,
             role: scenario.role,
             ...(scenario.config !== undefined
@@ -96,7 +96,7 @@ function runAppScenarios(
       for (const script of scenario.scripts) {
         it(script.name, async () => {
           const items = scenario.getItems?.() ?? scenario.items ?? [];
-          page.goto(scenario.zone, {
+          page.setupZone(scenario.zone, {
             items,
             ...(scenario.config !== undefined
               ? { config: scenario.config }

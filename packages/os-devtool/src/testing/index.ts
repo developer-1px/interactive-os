@@ -10,7 +10,7 @@
  *   import { createHeadlessPage, expect } from "@os-devtool/testing";
  *
  *   const page = createHeadlessPage();
- *   page.goto("zone", { items: ["a", "b", "c"], role: "listbox" });
+ *   page.setupZone("zone", { items: ["a", "b", "c"], role: "listbox" });
  *   await page.keyboard.press("ArrowDown");
  *   await expect(page.locator("b")).toBeFocused();
  */

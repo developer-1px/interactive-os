@@ -57,9 +57,10 @@ tests/                         ← 유일한 테스트 루트
 
 7. **OS 테스트의 처음과 끝 = Zone → Input → ARIA.**
    - OS의 계약 = "Zone을 선언하면 행동을 보장한다". 테스트는 이 계약을 검증한다.
-   - **처음**: `page.goto("zone", { role, items, config })` — Zone 선언
+   - **처음**: `page.setupZone("zone", { role, items, config })` — Zone 선언 (과도기. 최종 목표는 `page.goto(url)` + App 자동 등록)
    - **입력**: `page.keyboard.press()`, `page.locator("#id").click()` — 사용자 입력
    - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
+   - **`page.goto(url)` = Playwright 동형. URL만 받는다.** zone setup은 `page.setupZone()`으로 분리. `goto`에 zoneId를 넘기는 것은 금지.
    - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. 예외 없음.
    - `createOsPage()` — 삭제 대상. `createHeadlessPage()`가 유일한 OS 테스트 팩토리
    - `createPage(app)` = 앱 통합 테스트 (Builder, Todo)
@@ -100,6 +101,19 @@ runScenarios(scenarios, { app: MyApp, component: MyView });
 - **3-engine 호환**: 같은 `run(page, expect, items?)` 함수가 (1) vitest headless, (2) browser TestBot, (3) Playwright E2E에서 동작
 - **모범 사례**: `todo-interaction.test.ts`, `docs-testbot.test.ts`
 - **Playwright Strict Subset (K2)**: `page.locator("#id").click()`, `page.keyboard.press()`, `expect(loc).toHaveAttribute()`, `expect(loc).toBeFocused()` — 이 API만 사용
+
+### Playwright 동형 전환 경로 (Updated: 2026-03-07)
+
+> `page.goto(url)` = Playwright 동형이 최종 목표. 3단계로 전환한다.
+
+| 단계 | 내용 | 상태 |
+|------|------|------|
+| 1. 환경 정비 | `goto(zoneId)` → `setupZone(zoneId)` 리네임 + 전수 치환 | Now |
+| 2. App 표준화 | APG showcase 22개 패턴에 `App` export 추가 | 미착수 |
+| 3. setupZone 제거 | `setupZone` 삭제, `goto(url)` + App mount → zone 자동 등록 | 미착수 |
+
+- **왜 이름을 바꾸는가**: `goto`라는 이름이 존재하면 새 세션의 에이전트가 Playwright 관성으로 `goto(zoneId)`를 부활시킨다. 이름 분리가 관성 차단의 핵심.
+- **위배 시**: goto에 zoneId를 넘기는 코드가 생기면 headless-only 테스트가 되어 Playwright e2e와 동형이 깨진다.
 
 ## 코드 품질 기준
 

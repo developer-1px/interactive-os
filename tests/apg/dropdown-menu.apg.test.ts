@@ -63,13 +63,13 @@ function openDropdown(focusedItem = "ko") {
   const page = createPage(app);
 
   // Phase 1: Trigger zone
-  page.goto("toolbar", { focusedItemId: "locale-trigger" });
+  page.setupZone("toolbar", { focusedItemId: "locale-trigger" });
 
   // Phase 2: Menu opens (stack push to preserve invoker)
   page.dispatch(OS_STACK_PUSH());
 
   // Phase 3: Menu zone active with items
-  page.goto("locale-menu", { focusedItemId: focusedItem });
+  page.setupZone("locale-menu", { focusedItemId: focusedItem });
 
   return page;
 }

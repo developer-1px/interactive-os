@@ -6,7 +6,7 @@
  *
  * Usage:
  *   const page = createHeadlessPage();
- *   page.goto("zone", { items: ["a", "b", "c"], role: "listbox" });
+ *   page.setupZone("zone", { items: ["a", "b", "c"], role: "listbox" });
  *   await page.locator("a").click();
  *   await expect(page.locator("b")).toBeFocused();
  *
@@ -14,7 +14,7 @@
  * (goto, setItems, etc.) for test setup.
  */
 
-import { createOsPage, type GotoOptions, type OsPage } from "./createOsPage";
+import { createOsPage, type SetupZoneOptions, type OsPage } from "./createOsPage";
 import type { Locator, LocatorAssertions, Page } from "./types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -149,8 +149,8 @@ function createHeadlessLocator(
 // ═══════════════════════════════════════════════════════════════════
 
 export interface HeadlessPage extends Page {
-  /** Setup — create a zone with items */
-  goto(zoneId: string, opts?: GotoOptions): void;
+  /** Setup — create a zone with items (legacy, use goto(url) for Playwright isomorphism) */
+  setupZone(zoneId: string, opts?: SetupZoneOptions): void;
   /** Cleanup test resources */
   cleanup(): void;
 }
@@ -175,8 +175,8 @@ export function createHeadlessPage(): HeadlessPage {
     },
 
     // OS-specific setup helpers
-    goto(zoneId: string, opts?: GotoOptions) {
-      osPage.goto(zoneId, opts);
+    setupZone(zoneId: string, opts?: SetupZoneOptions) {
+      osPage.setupZone(zoneId, opts);
     },
 
     cleanup() {

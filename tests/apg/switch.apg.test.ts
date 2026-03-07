@@ -27,7 +27,7 @@ const SWITCH_ID = SWITCH_IDS[0]!; // "switch-notifications"
 
 function switchFactory() {
   const page = createPage(SwitchApp);
-  page.goto("apg-switch", {
+  page.setupZone("apg-switch", {
     items: SWITCH_IDS,
     focusedItemId: SWITCH_ID,
   });

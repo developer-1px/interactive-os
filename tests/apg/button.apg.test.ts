@@ -29,7 +29,7 @@ const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]!; // "toggle-bold"
 
 function toggleButtonFactory() {
   const page = createPage(ToggleApp);
-  page.goto("apg-toggle-buttons", {
+  page.setupZone("apg-toggle-buttons", {
     items: TOGGLE_ITEMS,
     focusedItemId: TOGGLE_BUTTON_ID,
   });
@@ -69,7 +69,7 @@ function actionButtonFactory() {
     } as any,
   });
   const page = createPage(app);
-  page.goto("action-zone", { focusedItemId: ACTION_BUTTON_ID });
+  page.setupZone("action-zone", { focusedItemId: ACTION_BUTTON_ID });
   return page;
 }
 

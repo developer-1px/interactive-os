@@ -47,7 +47,7 @@ import { createPage } from "./page";
 // OsPage Interface (Headless OS Simulator)
 // ═══════════════════════════════════════════════════════════════════
 
-export interface GotoOptions {
+export interface SetupZoneOptions {
   items?: string[];
   role?: ZoneRole;
   config?: Partial<FocusGroupConfig>;
@@ -87,7 +87,8 @@ export interface OsPage {
     opts?: { shift?: boolean; meta?: boolean; ctrl?: boolean; zoneId?: string },
   ): void;
   attrs(itemId: string, zoneId?: string): ItemAttrs;
-  goto(zoneId: string, opts?: GotoOptions): void;
+  goto(url: string): void;
+  setupZone(zoneId: string, opts?: SetupZoneOptions): void;
   focusedItemId(zoneId?: string): string | null;
   selection(zoneId?: string): string[];
   activeZoneId(): string | null;
@@ -468,7 +469,10 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         },
       });
     },
-    goto(zoneId: string, opts?: GotoOptions) {
+    goto(url: string) {
+      basePage.goto(url);
+    },
+    setupZone(zoneId: string, opts?: SetupZoneOptions) {
       if (opts?.items) mockItems.current = opts.items;
 
       const role = opts?.role ?? ZoneRegistry.get(zoneId)?.role;
@@ -592,10 +596,16 @@ export function createOsPage(overrides?: Partial<AppState>): OsPage {
         initialSelection = [opts.items[0]!];
       }
 
-      basePage.goto(zoneId, {
-        focusedItemId: focusedId ?? undefined,
-        config: mockConfig.current,
-      } as Parameters<typeof basePage.goto>[1]);
+      // Set active zone + focused item directly.
+      // (basePage.goto is now URL-based and no longer seeds state.)
+      os.setState((s: AppState) =>
+        produce(s, (draft) => {
+          draft.os.focus.activeZoneId = zoneId;
+          const z = ensureZone(draft.os, zoneId);
+          z.focusedItemId = focusedId;
+          if (focusedId) z.lastFocusedId = focusedId;
+        }),
+      );
 
       // Apply initial selection and expanded values (no seed needed —
       // computeItem derives key existence from config directly)

@@ -49,7 +49,7 @@ function createDialog(focusedItem = "close-btn") {
     options: DIALOG_CONFIG,
   });
   const page = createPage(app);
-  page.goto("dialog", { focusedItemId: focusedItem });
+  page.setupZone("dialog", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -103,9 +103,9 @@ describe("APG Dialog: Focus Restore", () => {
       options: DIALOG_CONFIG,
     });
     const page = createPage(app);
-    page.goto("toolbar", { focusedItemId: "edit-btn" });
+    page.setupZone("toolbar", { focusedItemId: "edit-btn" });
     page.dispatch(OS_STACK_PUSH());
-    page.goto("dialog", { focusedItemId: "close-btn" });
+    page.setupZone("dialog", { focusedItemId: "close-btn" });
     // Close dialog via stack pop (internal OS mechanism)
     page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("toolbar");
@@ -121,11 +121,11 @@ describe("APG Dialog: Focus Restore", () => {
     const d2 = app.createZone("dialog-2");
     d2.bind({ role: "group", getItems: () => ["d2-yes", "d2-no"] });
     const page = createPage(app);
-    page.goto("toolbar", { focusedItemId: "btn-1" });
+    page.setupZone("toolbar", { focusedItemId: "btn-1" });
     page.dispatch(OS_STACK_PUSH());
-    page.goto("dialog-1", { focusedItemId: "d1-close" });
+    page.setupZone("dialog-1", { focusedItemId: "d1-close" });
     page.dispatch(OS_STACK_PUSH());
-    page.goto("dialog-2", { focusedItemId: "d2-yes" });
+    page.setupZone("dialog-2", { focusedItemId: "d2-yes" });
     page.dispatch(OS_STACK_POP());
     expect(page.activeZoneId()).toBe("dialog-1");
     page.dispatch(OS_STACK_POP());

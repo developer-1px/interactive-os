@@ -62,7 +62,7 @@ function navTreeFactory(focusedItem = "folder:docs") {
     },
   });
   const page = createPage(app);
-  page.goto("nav-tree", { focusedItemId: focusedItem });
+  page.setupZone("nav-tree", { focusedItemId: focusedItem });
   return page;
 }
 

@@ -34,7 +34,7 @@ const TREE_LEVELS = new Map([
 
 function treeFactory(focusedItem = "section-1") {
   const page = createPage(TreeApp);
-  page.goto("apg-explorer", {
+  page.setupZone("apg-explorer", {
     items: TREE_ITEMS,
     focusedItemId: focusedItem,
     expandableItems: EXPANDABLE,
@@ -54,7 +54,7 @@ function multiTreeFactory(focusedItem = "section-1") {
 
 function singleTreeFactory(focusedItem = "section-1") {
   const page = createPage(TreeApp);
-  page.goto("apg-explorer", {
+  page.setupZone("apg-explorer", {
     items: TREE_ITEMS,
     focusedItemId: focusedItem,
     expandableItems: EXPANDABLE,

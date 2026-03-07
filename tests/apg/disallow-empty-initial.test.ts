@@ -7,7 +7,7 @@
  * WITHOUT useLayoutEffect dispatch. The selection must be applied
  * at zone registration time (ensureZone), not at React mount.
  *
- * Input-First: These tests use page.goto() which exercises the
+ * Input-First: These tests use page.setupZone() which exercises the
  * full registration pipeline, not direct command dispatch.
  */
 
@@ -20,7 +20,7 @@ import { describe, expect, it } from "vitest";
 // ═══════════════════════════════════════════════════════════════════
 
 describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
-  it("tab-1 has aria-selected=true after goto", () => {
+  it("tab-1 has aria-selected=true after setupZone", () => {
     const app = defineApp("test-disallow-empty-s1", {});
     const zone = app.createZone("tab-zone");
     zone.bind({
@@ -28,7 +28,7 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
       getItems: () => ["tab-1", "tab-2", "tab-3"],
     });
     const page = createPage(app);
-    page.goto("tab-zone", { focusedItemId: "tab-1" });
+    page.setupZone("tab-zone", { focusedItemId: "tab-1" });
 
     expect(page.attrs("tab-1")["aria-selected"]).toBe(true);
   });
@@ -41,7 +41,7 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
       getItems: () => ["tab-1", "tab-2", "tab-3"],
     });
     const page = createPage(app);
-    page.goto("tab-zone-2", { focusedItemId: "tab-1" });
+    page.setupZone("tab-zone-2", { focusedItemId: "tab-1" });
 
     expect(page.attrs("tab-2")["aria-selected"]).toBe(false);
     expect(page.attrs("tab-3")["aria-selected"]).toBe(false);
@@ -53,7 +53,7 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("T1-S2: radiogroup disallowEmpty auto-selects first radio", () => {
-  it("r-1 has aria-checked=true after goto", () => {
+  it("r-1 has aria-checked=true after setupZone", () => {
     const app = defineApp("test-disallow-empty-s2", {});
     const zone = app.createZone("radio-zone");
     zone.bind({
@@ -61,7 +61,7 @@ describe("T1-S2: radiogroup disallowEmpty auto-selects first radio", () => {
       getItems: () => ["r-1", "r-2"],
     });
     const page = createPage(app);
-    page.goto("radio-zone", { focusedItemId: "r-1" });
+    page.setupZone("radio-zone", { focusedItemId: "r-1" });
 
     // radiogroup uses aria-checked, not aria-selected
     expect(page.attrs("r-1")["aria-checked"]).toBe(true);
@@ -81,7 +81,7 @@ describe("T1-S3: listbox (disallowEmpty=false) does NOT auto-select", () => {
       getItems: () => ["opt-1", "opt-2"],
     });
     const page = createPage(app);
-    page.goto("list-zone", { focusedItemId: "opt-1" });
+    page.setupZone("list-zone", { focusedItemId: "opt-1" });
 
     expect(page.attrs("opt-2")["aria-selected"]).toBe(false);
   });
@@ -100,7 +100,7 @@ describe("T1-S4: existing selection preserved (no overwrite)", () => {
       getItems: () => ["tab-1", "tab-2"],
     });
     const page = createPage(app);
-    page.goto("tab-zone-3", {
+    page.setupZone("tab-zone-3", {
       focusedItemId: "tab-1",
       initial: { selection: ["tab-2"] },
     });

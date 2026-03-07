@@ -40,7 +40,7 @@ const BUTTONS = ["btn-cut", "btn-copy", "btn-paste", "btn-bold", "btn-italic"];
 
 function tooltipFactory(focusedItem = "btn-cut") {
   const page = createPage(TooltipApp);
-  page.goto("apg-tooltip-toolbar", {
+  page.setupZone("apg-tooltip-toolbar", {
     items: BUTTONS,
     focusedItemId: focusedItem,
   });

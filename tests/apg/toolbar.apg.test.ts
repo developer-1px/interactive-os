@@ -55,7 +55,7 @@ function createToolbar(focusedItem = "bold-btn") {
     options: TOOLBAR_CONFIG,
   });
   const page = createPage(app);
-  page.goto("toolbar", { focusedItemId: focusedItem });
+  page.setupZone("toolbar", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -111,8 +111,8 @@ describe("APG Toolbar: Tab Escape", () => {
     });
     const page = createPage(app);
     // Register both zones — order determines Tab navigation
-    page.goto("editor", { focusedItemId: "line-1" });
-    page.goto("toolbar", { focusedItemId: "italic-btn" });
+    page.setupZone("editor", { focusedItemId: "line-1" });
+    page.setupZone("toolbar", { focusedItemId: "italic-btn" });
 
     page.keyboard.press("Tab");
     expect(page.activeZoneId()).toBe("editor");
@@ -147,7 +147,7 @@ describe("APG Toolbar: Tabs Variant", () => {
       },
     });
     const page = createPage(app);
-    page.goto("tablist", { focusedItemId: focusedTab });
+    page.setupZone("tablist", { focusedItemId: focusedTab });
     page.click(focusedTab);
     return page;
   }

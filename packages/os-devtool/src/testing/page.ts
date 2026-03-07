@@ -17,11 +17,16 @@ import {
 } from "@os-core/3-inject/compute";
 import type { ItemAttrs } from "@os-core/3-inject/headless.types";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
-import { initialAppState, os } from "@os-core/engine/kernel";
+import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { DEFAULT_CONFIG } from "@os-core/schema/types/focus/config/FocusGroupConfig";
+import { ensureZone } from "@os-core/schema/state/utils";
+import {
+  DEFAULT_CONFIG,
+  type FocusGroupConfig,
+} from "@os-core/schema/types/focus/config/FocusGroupConfig";
+import { produce } from "immer";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
 import { simulateClick, simulateKeyPress } from "./simulate";
@@ -30,6 +35,7 @@ import { simulateClick, simulateKeyPress } from "./simulate";
 import "@os-core/2-resolve/osDefaults";
 
 import type { BaseCommand } from "@kernel/core/tokens";
+import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type {
   AppPageInternal,
@@ -165,110 +171,174 @@ export function createAppPage<S>(
     // Not in vitest or registration failed — silent fallback
   }
 
-  // ── goto (Playwright-compatible: URL-based, no state seeding) ──
-  function goto(_url: string) {
-    // Register ALL zones from app bindings (equivalent to browser mount).
-    // In the browser, each <Zone> component calls ZoneRegistry.register()
-    // during render. Headless mirrors this by iterating all declared bindings.
+  // ── goto (URL only — Playwright isomorphic) ──
+  function goto(url: string) {
+    if (!url.startsWith("/")) {
+      throw new Error(
+        `page.goto() accepts URLs only (must start with "/"). Got "${url}". Use page.setupZone() for zone-level setup.`,
+      );
+    }
     for (const [zoneName, bindingEntry] of zoneBindingEntries) {
-      const { bindings } = bindingEntry;
-      const overrides = { ...bindings.options } as ZoneOptions;
-      const config = resolveRole(bindingEntry.role, overrides);
+      registerZoneFromBinding(zoneName, bindingEntry);
+    }
+    if (Component) renderHtml();
+    invalidateCache();
+  }
+
+  // ── setupZone (legacy per-zone registration + state seeding) ──
+  function setupZone(
+    target: string,
+    opts?: {
+      focusedItemId?: string | null;
+      config?: Partial<FocusGroupConfig>;
+      role?: ZoneRole;
+      initial?: { selection?: string[]; expanded?: string[] };
+      items?: string[];
+      expandableItems?: Set<string>;
+      treeLevels?: Map<string, number>;
+    },
+  ) {
+    const zoneName = target;
+    const bindingEntry = zoneBindingEntries.get(zoneName);
+    if (bindingEntry) {
+      registerZoneFromBinding(zoneName, bindingEntry, opts?.config, opts?.items, opts?.expandableItems, opts?.treeLevels);
+    } else if (opts?.role) {
+      const config = resolveRole(opts.role, opts.config ?? {});
       ZoneRegistry.register(zoneName, {
-        role: bindingEntry.role,
+        role: opts.role,
         config,
         element: null,
         parentId: null,
-        ...(bindings.onAction ? { onAction: bindings.onAction } : {}),
-        ...(bindings.onCheck ? { onCheck: bindings.onCheck } : {}),
-        ...(bindings.onDelete ? { onDelete: bindings.onDelete } : {}),
-        ...(bindings.onCopy ? { onCopy: bindings.onCopy } : {}),
-        ...(bindings.onCut ? { onCut: bindings.onCut } : {}),
-        ...(bindings.onPaste ? { onPaste: bindings.onPaste } : {}),
-        ...(bindings.onMoveUp ? { onMoveUp: bindings.onMoveUp } : {}),
-        ...(bindings.onMoveDown ? { onMoveDown: bindings.onMoveDown } : {}),
-        ...(bindings.onUndo ? { onUndo: bindings.onUndo } : {}),
-        ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
-        ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
-        ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
-        ...(bindings.getItems
-          ? { getItems: bindings.getItems }
-          : {}),
-        ...(bindings.getExpandableItems
-          ? { getExpandableItems: bindings.getExpandableItems }
-          : {}),
-        ...(bindings.getTreeLevels
-          ? { getTreeLevels: bindings.getTreeLevels }
-          : {}),
+        ...(opts.items ? { getItems: () => opts.items! } : {}),
+        ...(opts.expandableItems ? { getExpandableItems: () => opts.expandableItems! } : {}),
+        ...(opts.treeLevels ? { getTreeLevels: () => opts.treeLevels! } : {}),
       });
+    }
 
-      // Push model: auto-register item-level callbacks from triggers
-      if (bindingEntry.triggers) {
-        for (const trigger of bindingEntry.triggers) {
-          ZoneRegistry.setItemCallback(zoneName, trigger.id, {
-            onActivate: trigger.onActivate,
-          });
-          if (trigger.overlay) {
-            TriggerOverlayRegistry.set(
-              trigger.id,
-              trigger.overlay.id,
-              trigger.overlay.type,
-            );
+    // Set active zone + focused item (state seeding for legacy tests)
+    const focusedId = opts?.focusedItemId ?? null;
+    const zoneEntry = ZoneRegistry.get(zoneName);
+    const zoneConfig = zoneEntry?.config;
+    const items = zoneEntry?.getItems?.() ?? [];
+
+    let initialSelection: string[] | undefined;
+    if (opts?.initial?.selection) {
+      initialSelection = opts.initial.selection;
+    } else if (focusedId && zoneConfig?.select?.followFocus) {
+      initialSelection = [focusedId];
+    } else if (zoneConfig?.select?.disallowEmpty && items.length > 0) {
+      initialSelection = [items[0]!];
+    }
+
+    os.setState((s: AppState) =>
+      produce(s, (draft) => {
+        draft.os.focus.activeZoneId = zoneName;
+        const z = ensureZone(draft.os, zoneName);
+        z.focusedItemId = focusedId;
+        if (focusedId) z.lastFocusedId = focusedId;
+
+        if (initialSelection) {
+          const selectMode = zoneConfig?.select?.mode ?? "none";
+          const inputmapValues = zoneConfig?.inputmap ? Object.values(zoneConfig.inputmap) : [];
+          const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
+            cmds.some((c: unknown) => (c as { type: string }).type === "OS_CHECK"),
+          );
+          for (const id of initialSelection) {
+            if (!z.items[id]) z.items[id] = {};
+            if (hasCheckCmd) z.items[id] = { ...z.items[id], "aria-checked": true };
+            if (selectMode !== "none") z.items[id] = { ...z.items[id], "aria-selected": true };
+          }
+          z.selectionAnchor = initialSelection[0] ?? null;
+        }
+
+        if (opts?.initial?.expanded) {
+          for (const id of opts.initial.expanded) {
+            if (!z.items[id]) z.items[id] = {};
+            z.items[id] = { ...z.items[id], "aria-expanded": true };
           }
         }
-      }
 
-      // Register zone keybindings
-      const keybindings = bindingEntry.keybindings ?? [];
-      if (keybindings.length > 0) {
-        // Accumulate all zone keybindings (not just last zone)
-        const unreg = Keybindings.registerAll(
-          keybindings.map((kb) => ({
-            key: kb.key,
-            command: kb.command,
-            when: "navigating" as const,
-          })),
-        );
-        // Chain unregister callbacks
-        const prev = unregisterKeybindings;
-        unregisterKeybindings = () => {
-          unreg();
-          prev?.();
-        };
-      }
+        if (zoneConfig?.value?.initial) {
+          z.valueNow = { ...zoneConfig.value.initial };
+        }
+      }),
+    );
+    invalidateCache();
+  }
 
-      // Register field in FieldRegistry
-      const field = bindingEntry.field;
-      if (field?.fieldName) {
-        FieldRegistry.register(field.fieldName, {
-          name: field.fieldName,
-          ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
-          ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
-          ...(field.schema !== undefined ? { schema: field.schema } : {}),
-          ...(field.resetOnSubmit !== undefined
-            ? { resetOnSubmit: field.resetOnSubmit }
-            : {}),
-          mode: "immediate",
-          fieldType: "inline",
-        });
-        const zoneEntry = ZoneRegistry.get(zoneName);
-        if (zoneEntry) {
-          zoneEntry.fieldId = field.fieldName;
+  /** Shared: register a single zone from its binding entry */
+  function registerZoneFromBinding(
+    zoneName: string,
+    bindingEntry: ZoneBindingEntry,
+    configOverride?: Partial<FocusGroupConfig>,
+    itemsOverride?: string[],
+    expandableOverride?: Set<string>,
+    treeLevelsOverride?: Map<string, number>,
+  ) {
+    const { bindings } = bindingEntry;
+    const overrides = { ...bindings.options, ...configOverride } as ZoneOptions;
+    const config = resolveRole(bindingEntry.role, overrides);
+    ZoneRegistry.register(zoneName, {
+      role: bindingEntry.role,
+      config,
+      element: null,
+      parentId: null,
+      ...(bindings.onAction ? { onAction: bindings.onAction } : {}),
+      ...(bindings.onCheck ? { onCheck: bindings.onCheck } : {}),
+      ...(bindings.onDelete ? { onDelete: bindings.onDelete } : {}),
+      ...(bindings.onCopy ? { onCopy: bindings.onCopy } : {}),
+      ...(bindings.onCut ? { onCut: bindings.onCut } : {}),
+      ...(bindings.onPaste ? { onPaste: bindings.onPaste } : {}),
+      ...(bindings.onMoveUp ? { onMoveUp: bindings.onMoveUp } : {}),
+      ...(bindings.onMoveDown ? { onMoveDown: bindings.onMoveDown } : {}),
+      ...(bindings.onUndo ? { onUndo: bindings.onUndo } : {}),
+      ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
+      ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
+      ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
+      ...(itemsOverride ? { getItems: () => itemsOverride } : bindings.getItems ? { getItems: bindings.getItems } : {}),
+      ...(expandableOverride ? { getExpandableItems: () => expandableOverride } : bindings.getExpandableItems ? { getExpandableItems: bindings.getExpandableItems } : {}),
+      ...(treeLevelsOverride ? { getTreeLevels: () => treeLevelsOverride } : bindings.getTreeLevels ? { getTreeLevels: bindings.getTreeLevels } : {}),
+    });
+
+    if (bindingEntry.triggers) {
+      for (const trigger of bindingEntry.triggers) {
+        ZoneRegistry.setItemCallback(zoneName, trigger.id, { onActivate: trigger.onActivate });
+        if (trigger.overlay) {
+          TriggerOverlayRegistry.set(trigger.id, trigger.overlay.id, trigger.overlay.type);
         }
       }
     }
 
-    // Render component tree to simulate browser mount (optional projection)
-    if (Component) {
-      renderHtml();
+    // Register zone keybindings
+    const keybindings = bindingEntry.keybindings ?? [];
+    if (keybindings.length > 0) {
+      const unreg = Keybindings.registerAll(
+        keybindings.map((kb) => ({ key: kb.key, command: kb.command, when: "navigating" as const })),
+      );
+      const prev = unregisterKeybindings;
+      unregisterKeybindings = () => { unreg(); prev?.(); };
     }
 
-    invalidateCache();
+    // Register field
+    const field = bindingEntry.field;
+    if (field?.fieldName) {
+      FieldRegistry.register(field.fieldName, {
+        name: field.fieldName,
+        ...(field.onCommit !== undefined ? { onCommit: field.onCommit } : {}),
+        ...(field.trigger !== undefined ? { trigger: field.trigger } : {}),
+        ...(field.schema !== undefined ? { schema: field.schema } : {}),
+        ...(field.resetOnSubmit !== undefined ? { resetOnSubmit: field.resetOnSubmit } : {}),
+        mode: "immediate",
+        fieldType: "inline",
+      });
+      const zoneEntry = ZoneRegistry.get(zoneName);
+      if (zoneEntry) zoneEntry.fieldId = field.fieldName;
+    }
   }
 
   // ── Projection cache ──
   // When Component is provided, renderToString is cached and invalidated
-  // on state-changing operations (click, press, goto, dispatch).
+  // on state-changing operations (click, press, goto, setupZone, dispatch).
   let _htmlCache: string | null = null;
 
   function renderHtml(): string {
@@ -324,6 +394,7 @@ export function createAppPage<S>(
     },
 
     goto,
+    setupZone,
 
     focusedItemId(zoneId?: string) {
       return readFocusedItemId(os, zoneId);

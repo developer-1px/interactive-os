@@ -33,7 +33,7 @@ const MENU_ITEMS = [
 
 function createMenuPage(focusedItem = "action-cut") {
   const page = createPage(MenuButtonApp);
-  page.goto("apg-menu-button-popup", {
+  page.setupZone("apg-menu-button-popup", {
     items: MENU_ITEMS,
     focusedItemId: focusedItem,
     role: "menu",

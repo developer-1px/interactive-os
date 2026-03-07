@@ -47,7 +47,7 @@ export interface TestScript {
  * run() inside each TestScript remains pure Playwright subset (K2).
  */
 export interface TestScenario {
-  /** Zone ID to pass to page.goto() */
+  /** Zone ID to pass to page.setupZone() */
   zone: string;
   /** Item IDs for the zone (static — prefer getItems for real apps) */
   items?: string[];

@@ -16,7 +16,7 @@ const METER_IDS = METERS.map((m) => m.id);
 
 function meterFactory(focusedItem = "meter-cpu") {
   const page = createPage(MeterApp);
-  page.goto("apg-meter-zone", {
+  page.setupZone("apg-meter-zone", {
     items: METER_IDS,
     focusedItemId: focusedItem,
   });

@@ -44,7 +44,7 @@ function createMenubar(focusedItem = "mb-file") {
     getItems: () => MENUBAR_ITEMS,
   });
   const page = createPage(app);
-  page.goto("menubar", { focusedItemId: focusedItem });
+  page.setupZone("menubar", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -77,11 +77,11 @@ function createMenu(focusedItem = "cmd-new") {
   });
   const page = createPage(app);
   // Setup invoker (menubar parent)
-  page.goto("menubar", { focusedItemId: "mb-file" });
+  page.setupZone("menubar", { focusedItemId: "mb-file" });
   // Push stack for popup
   page.dispatch(OS_STACK_PUSH());
   // Setup menu items
-  page.goto("menu", { focusedItemId: focusedItem });
+  page.setupZone("menu", { focusedItemId: focusedItem });
   return page;
 }
 

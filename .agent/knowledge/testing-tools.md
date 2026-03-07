@@ -13,7 +13,7 @@
 
 | 질문 | 예 → | 아니오 → |
 |------|------|----------|
-| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createPage(App, UI)` | **Tier 1** `createOsPage()` |
+| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createPage(App, UI)` | **Tier 1** `createHeadlessPage()` |
 
 ### Tier 1: OS 커널 테스트
 
@@ -23,14 +23,14 @@
 /**
  * @spec docs/1-project/[name]/spec.md
  */
-import { createOsPage, type OsPage } from "@os/createOsPage";
+import { createHeadlessPage } from "@os-devtool/testing";
 
 describe("Feature: [태스크명]", () => {
-  let page: OsPage;
+  let page: HeadlessPage;
 
   beforeEach(() => {
-    page = createOsPage();
-    page.goto(ZONE_ID, { items, role, config });
+    page = createHeadlessPage();
+    page.setupZone(ZONE_ID, { items, role, config });
   });
 
   it("#N [입력] → [결과]", () => {
@@ -58,7 +58,7 @@ describe("Feature: [태스크명]", () => {
 
   beforeEach(() => {
     page = createPage(BuilderApp, BuilderUI);
-    page.goto("zone-name");
+    page.goto("/builder");  // URL only — Playwright 동형
   });
 
   it("#N [사용자 행동] → [결과]", () => {

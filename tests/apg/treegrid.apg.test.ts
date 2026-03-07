@@ -54,7 +54,7 @@ const TREE_LEVELS = new Map([
 
 function treegridFactory(focusedItem = "msg-1") {
   const page = createPage(TreegridApp);
-  page.goto("apg-treegrid", {
+  page.setupZone("apg-treegrid", {
     items: ALL_ROWS,
     focusedItemId: focusedItem,
     expandableItems: EXPANDABLE,

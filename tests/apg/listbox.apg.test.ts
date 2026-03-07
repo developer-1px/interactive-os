@@ -63,7 +63,7 @@ function singleSelect(focusedItem = "apple") {
     options: SINGLE_SELECT,
   });
   const page = createPage(app);
-  page.goto("listbox", { focusedItemId: focusedItem });
+  page.setupZone("listbox", { focusedItemId: focusedItem });
   page.click(focusedItem);
   return page;
 }
@@ -77,7 +77,7 @@ function multiSelect(focusedItem = "apple") {
     options: MULTI_SELECT,
   });
   const page = createPage(app);
-  page.goto("listbox", { focusedItemId: focusedItem });
+  page.setupZone("listbox", { focusedItemId: focusedItem });
   return page;
 }
 
@@ -366,7 +366,7 @@ describe("APG Listbox: Focus Initialization", () => {
       options: SINGLE_SELECT,
     });
     const page = createPage(app);
-    page.goto("listbox", { focusedItemId: null });
+    page.setupZone("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
@@ -381,7 +381,7 @@ describe("APG Listbox: Focus Initialization", () => {
       options: MULTI_SELECT,
     });
     const page = createPage(app);
-    page.goto("listbox", { focusedItemId: null });
+    page.setupZone("listbox", { focusedItemId: null });
     page.keyboard.press("ArrowDown");
     expect(page.focusedItemId()).toBe("apple");
     expect(page.attrs("apple").tabIndex).toBe(0);
@@ -406,7 +406,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
       },
     });
     const page = createPage(app);
-    page.goto("listbox", { focusedItemId: focusedItem });
+    page.setupZone("listbox", { focusedItemId: focusedItem });
     page.click(focusedItem);
     return page;
   }
@@ -451,7 +451,7 @@ describe("APG Listbox: RadioGroup Variant", () => {
       },
     });
     const page = createPage(app);
-    page.goto("radiogroup", { focusedItemId: selected });
+    page.setupZone("radiogroup", { focusedItemId: selected });
     page.click(selected);
     return page;
   }

@@ -42,7 +42,7 @@ const ARTICLES = [
 
 function feedFactory(focusedItem = "article-1") {
   const page = createPage(FeedApp);
-  page.goto("apg-feed", {
+  page.setupZone("apg-feed", {
     items: ARTICLES,
     focusedItemId: focusedItem,
   });
@@ -152,11 +152,11 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
     after.bind({ role: "group", getItems: () => ["after-1"] });
     const page = createPage(app);
     // Register all zones in order
-    page.goto("before-feed", { focusedItemId: "before-1" });
-    page.goto("apg-feed", { focusedItemId: focusedItem });
-    page.goto("after-feed", { focusedItemId: "after-1" });
+    page.setupZone("before-feed", { focusedItemId: "before-1" });
+    page.setupZone("apg-feed", { focusedItemId: focusedItem });
+    page.setupZone("after-feed", { focusedItemId: "after-1" });
     // Activate feed zone
-    page.goto("apg-feed", { focusedItemId: focusedItem });
+    page.setupZone("apg-feed", { focusedItemId: focusedItem });
     return page;
   }
 
@@ -228,10 +228,10 @@ describe("APG Feed: Tab exits zone", () => {
     const next = app.createZone("next-zone");
     next.bind({ role: "group", getItems: () => ["next-1"] });
     const page = createPage(app);
-    page.goto("apg-feed", { focusedItemId: "article-2" });
-    page.goto("next-zone", { focusedItemId: "next-1" });
+    page.setupZone("apg-feed", { focusedItemId: "article-2" });
+    page.setupZone("next-zone", { focusedItemId: "next-1" });
     // Activate feed zone
-    page.goto("apg-feed", { focusedItemId: "article-2" });
+    page.setupZone("apg-feed", { focusedItemId: "article-2" });
 
     page.keyboard.press("Tab");
     // Tab with behavior=escape exits the zone to next zone

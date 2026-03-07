@@ -35,7 +35,7 @@ const HEADERS = SECTIONS.map((s) => s.id);
 
 function accordionFactory(focusedItem = "acc-personal") {
   const page = createPage(AccordionApp);
-  page.goto("apg-accordion", {
+  page.setupZone("apg-accordion", {
     items: HEADERS,
     focusedItemId: focusedItem,
   });

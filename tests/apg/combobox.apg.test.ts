@@ -61,9 +61,9 @@ function createComboboxPopup(focusedItem = "apple") {
     options: POPUP_CONFIG,
   });
   const page = createPage(app);
-  page.goto("combobox", { focusedItemId: "input-field" });
+  page.setupZone("combobox", { focusedItemId: "input-field" });
   page.dispatch(OS_STACK_PUSH());
-  page.goto("popup", { focusedItemId: focusedItem });
+  page.setupZone("popup", { focusedItemId: focusedItem });
   return page;
 }
 

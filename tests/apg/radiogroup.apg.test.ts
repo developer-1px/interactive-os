@@ -21,7 +21,7 @@ const ITEMS = ["radio-regular", "radio-deep", "radio-thin"];
 
 function setup(selected = "radio-regular") {
   const page = createPage(CrustApp);
-  page.goto("radiogroup-crust", {
+  page.setupZone("radiogroup-crust", {
     items: ITEMS,
     focusedItemId: selected,
   });

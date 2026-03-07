@@ -45,7 +45,7 @@ const TABS = [
 
 function tabFactory(focusedTab = "tab-ahlefeldt") {
   const page = createPage(TabsApp);
-  page.goto("tablist-auto", {
+  page.setupZone("tablist-auto", {
     items: TABS,
     focusedItemId: focusedTab,
   });
@@ -65,7 +65,7 @@ function tabFactoryAtFirst() {
 // ─── Manual-activation variant ───
 function manualTabFactory(focusedTab = "tab-ahlefeldt") {
   const page = createPage(TabsApp);
-  page.goto("tablist-manual", {
+  page.setupZone("tablist-manual", {
     items: TABS,
     focusedItemId: focusedTab,
   });

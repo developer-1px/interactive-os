@@ -27,7 +27,7 @@ const CHECKBOX_ID = CONDIMENT_IDS[0]!; // "cond-lettuce"
 
 function checkboxFactory() {
   const page = createPage(CheckboxApp);
-  page.goto("apg-checkbox", {
+  page.setupZone("apg-checkbox", {
     items: CONDIMENT_IDS,
     focusedItemId: CHECKBOX_ID,
   });

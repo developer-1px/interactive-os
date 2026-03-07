@@ -50,7 +50,7 @@ const SLIDES = [
 
 function carouselFactory(focusedTab = "slide-1") {
   const page = createPage(CarouselApp);
-  page.goto("carousel-tabs", {
+  page.setupZone("carousel-tabs", {
     items: SLIDES,
     focusedItemId: focusedTab,
   });

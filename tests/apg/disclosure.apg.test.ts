@@ -28,7 +28,7 @@ const DISCLOSURES = ["disc-faq-1", "disc-faq-2", "disc-faq-3"];
 
 function disclosureFactory(focusedItem = "disc-faq-1") {
   const page = createPage(DisclosureApp);
-  page.goto("apg-disclosure", {
+  page.setupZone("apg-disclosure", {
     items: DISCLOSURES,
     focusedItemId: focusedItem,
   });
