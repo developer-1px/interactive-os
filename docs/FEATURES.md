@@ -17,60 +17,35 @@
 > X축 = OS가 추상화하는 개념 (ZIFT에서 시작, 오른쪽으로 발견).
 >
 > **읽는 법**: ZIFT 열에 매핑되는 부분을 빼면, 남는 것이 새 개념의 핵심이다.
-> "?" = 아직 이름 없는 개념. 이 칸이 로드맵이다.
+> 빈 Pattern 열 = 아직 이름 없는 개념. 이 칸이 로드맵이다.
 >
 > ✅ 구현 완료 · 🔧 부분 구현 · 📋 미착수
 
-### Conquered — ZIFT가 정복한 영역
+| Category | Browser API | Zone | Item | Field | Trigger | Pattern (ZIFT 밖의 새 차원) |
+|---|---|---|---|---|---|---|
+| **Conquered** | KeyboardEvent | inputmap ✅ | navigation ✅ | editing ✅ | activation ✅ | |
+| | PointerEvent | zone activation ✅ | — | — | click ✅ | |
+| | FocusEvent | active zone ✅ | focus tracking ✅ | — | — | |
+| | InputEvent | — | — | value change ✅ | — | |
+| | CompositionEvent | — | — | IME guard ✅ | — | |
+| **Discovered** | ClipboardEvent | paste bubbling ✅ | copied items ✅ | — | Ctrl+C/V ✅ | **Clipboard** (transfer buffer) ✅ |
+| | History API | — | — | — | — | **Routing** (URL ↔ state sync) 🔧 |
+| | localStorage | — | — | — | — | **Persistence** (state ↔ storage sync) ✅ |
+| | setTimeout | — | — | — | — | **History** (undo stack, noise filter) ✅ |
+| **Frontier** | DragEvent | source/target 📋 | dragged item 📋 | — | drag handle 📋 | **DnD** (drop position, visual feedback) 📋 |
+| | TouchEvent | touch zone 📋 | — | — | tap/swipe 📋 | **Gesture** (recognition, multi-touch) 📋 |
+| | WheelEvent | scroll zone 📋 | visible item 📋 | — | — | **Viewport** (virtual list, scroll position) 📋 |
+| | scroll | scroll zone 📋 | visible item 📋 | — | — | **Viewport** 📋 |
+| | IntersectionObserver | — | visibility 📋 | — | — | **Viewport** 📋 |
+| | ResizeObserver | zone resize 📋 | — | — | — | **Responsive** (breakpoint, layout rule) 📋 |
+| | matchMedia | — | — | — | — | **Preference** (reduced-motion, dark mode) 📋 |
+| | Animation API | — | — | — | — | **Transition** (state → visual feedback) 📋 |
+| | Selection API | — | — | text range 📋 | — | **TextRange** (text ≠ item selection) 📋 |
+| | Web Audio | — | — | — | — | **Sound** (auditory feedback) 📋 |
 
-| Browser API | Zone | Item | Field | Trigger |
-|---|---|---|---|---|
-| **KeyboardEvent** | inputmap ✅ | navigation ✅ | editing ✅ | activation ✅ |
-| **PointerEvent** | zone activation ✅ | — | — | click ✅ |
-| **FocusEvent** | active zone ✅ | focus tracking ✅ | — | — |
-| **InputEvent** | — | — | value change ✅ | — |
-| **CompositionEvent** | — | — | IME guard ✅ | — |
-
-### Discovered — ZIFT를 관통하며 새 차원을 추가한 패턴
-
-| Browser API | Zone | Item | Field | Trigger | Pattern (ZIFT 밖의 새 차원) |
-|---|---|---|---|---|---|
-| **ClipboardEvent** | paste bubbling ✅ | copied items ✅ | — | Ctrl+C/V ✅ | **Clipboard** (transfer buffer) ✅ |
-| **History API** | — | — | — | — | **Routing** (URL ↔ state sync) 🔧 |
-| **localStorage** | — | — | — | — | **Persistence** (state ↔ storage sync) ✅ |
-| **setTimeout** | — | — | — | — | **History** (undo stack, noise filter) ✅ |
-
-### Frontier — 아직 정복하지 않은 Browser API
-
-| Browser API | Zone | Item | Field | Trigger | Pattern (ZIFT 밖, 발견 대상) |
-|---|---|---|---|---|---|
-| **DragEvent** | source/target 📋 | dragged item 📋 | — | drag handle 📋 | **DnD** (drop position, visual feedback) 📋 |
-| **TouchEvent** | touch zone 📋 | — | — | tap/swipe 📋 | **Gesture** (recognition, multi-touch) 📋 |
-| **WheelEvent** | scroll zone 📋 | visible item 📋 | — | — | **Viewport** (virtual list, scroll position) 📋 |
-| **scroll** | scroll zone 📋 | visible item 📋 | — | — | **Viewport** 📋 |
-| **IntersectionObserver** | — | visibility 📋 | — | — | **Viewport** 📋 |
-| **ResizeObserver** | zone resize 📋 | — | — | — | **Responsive** (breakpoint, layout rule) 📋 |
-| **matchMedia** | — | — | — | — | **Preference** (reduced-motion, dark mode) 📋 |
-| **Animation API** | — | — | — | — | **Transition** (state → visual feedback) 📋 |
-| **Selection API** | — | — | text range 📋 | — | **TextRange** (text selection ≠ item selection) 📋 |
-| **Web Audio** | — | — | — | — | **Sound** (auditory feedback) 📋 |
-
-### 발견 요약
-
-ZIFT 4개 프리미티브가 정복한 Browser API: **5종** (Keyboard, Pointer, Focus, Input, Composition)
-ZIFT + Pattern으로 정복한 API: **+4종** (Clipboard, History, localStorage, setTimeout)
-**미정복 API: 10종** → 여기서 새 OS 개념이 탄생한다:
-
-| 미정복 API 묶음 | 발견된 이름 | 핵심 (ZIFT로 설명 안 되는 것) |
-|---|---|---|
-| Drag | **DnD** | drop position, visual drag feedback |
-| Touch | **Gesture** | intent recognition, multi-touch |
-| Wheel + Scroll + Intersection | **Viewport** | visible range, virtual list, scroll anchor |
-| Resize + matchMedia | **Responsive** | breakpoint, layout adaptation |
-| Animation API | **Transition** | state change → motion |
-| Selection API | **TextRange** | sub-item text selection |
-| Web Audio | **Sound** | auditory feedback |
-| matchMedia(prefers-*) | **Preference** | user system settings |
+**Conquered** 5종 — ZIFT만으로 완전히 추상화됨
+**Discovered** 4종 — ZIFT를 관통하며 새 Pattern 차원을 추가
+**Frontier** 10종 — 8개 미발견 개념이 잠들어 있음
 
 ---
 
