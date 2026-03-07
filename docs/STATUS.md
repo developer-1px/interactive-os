@@ -57,7 +57,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| apg-suite | WP1~WP7 계획 완료, 시작 전 | 03-07 |
+| apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
