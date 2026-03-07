@@ -57,7 +57,7 @@ const PATTERNS: Record<
   checkbox: { name: "Checkbox", component: CheckboxPattern, status: "dt" },
   composite: { name: "Composite", component: CompositePattern, status: "none" },
   disclosure: { name: "Disclosure", component: DisclosurePattern, status: "dt" },
-  feed: { name: "Feed", component: FeedPattern, status: "test" },
+  feed: { name: "Feed", component: FeedPattern, status: "dt" },
   grid: { name: "Grid", component: GridPattern, status: "none" },
   landmarks: { name: "Landmarks", component: LandmarksPattern, status: "none" },
   link: { name: "Link", component: LinkPattern, status: "none" },
