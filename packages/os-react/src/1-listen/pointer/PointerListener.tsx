@@ -325,6 +325,32 @@ export function PointerListener() {
               break;
             }
 
+            case "simple-trigger": {
+              const cb = ZoneRegistry.findItemCallback(clickTarget.triggerId);
+              if (cb?.onActivate) {
+                const state = os.getState();
+                const { activeZoneId } = state.os.focus;
+                const zone = activeZoneId
+                  ? state.os.focus.zones[activeZoneId]
+                  : undefined;
+                const focusId = zone?.focusedItemId ?? "";
+                const cmd =
+                  typeof cb.onActivate === "function"
+                    ? cb.onActivate(focusId)
+                    : cb.onActivate;
+                dispatchBatch([cmd], {
+                  meta: {
+                    input: {
+                      type: "MOUSE",
+                      key: "click",
+                      elementId: clickTarget.triggerId,
+                    },
+                  },
+                });
+              }
+              break;
+            }
+
             case "expand":
             case "check": {
               os.dispatch(

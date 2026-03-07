@@ -49,7 +49,11 @@ export const OS_ACTIVATE = os.defineCommand("OS_ACTIVATE", [], (ctx) => () => {
         `[OS_ACTIVATE] Trigger '${zone.focusedItemId}' has onActivate callback but is not in zone '${activeZoneId}' items. The trigger may not be reachable by keyboard navigation.`,
       );
     }
-    return { dispatch: itemCb.onActivate };
+    const cmd =
+      typeof itemCb.onActivate === "function"
+        ? itemCb.onActivate(zone.focusedItemId)
+        : itemCb.onActivate;
+    return { dispatch: cmd };
   }
 
   // W3C Tabs/Listbox Pattern: Enter selects the focused item.

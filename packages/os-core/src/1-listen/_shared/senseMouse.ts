@@ -9,6 +9,7 @@
 
 import { os } from "@os-core/engine/kernel";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
 import type { MouseInput } from "../mouse/resolveMouse";
 
@@ -48,6 +49,9 @@ export interface MouseDownSense {
 export function extractMouseInput(input: MouseDownSense): MouseInput | null {
   // Guard: inspector
   if (input.isInspector) return null;
+
+  // Non-overlay trigger: skip focus handling, pointerup will dispatch onActivate
+  if (input.triggerId && !input.triggerOverlayId) return null;
 
   // Label path
   if (input.isLabel) {
@@ -266,6 +270,7 @@ export type ClickTarget =
       overlayType: string;
       isOpen: boolean;
     }
+  | { type: "simple-trigger"; triggerId: string }
   | { type: "expand"; itemId: string; zoneId: string }
   | { type: "check"; itemId: string; zoneId: string }
   | { type: "item"; itemId: string | null; isCurrentPage: boolean }
@@ -283,7 +288,7 @@ export function senseClickTarget(target: HTMLElement): ClickTarget {
   // Inspector: skip entirely
   if (target.closest("[data-inspector]")) return { type: "inspector" };
 
-  // Trigger: overlay toggle
+  // Trigger: overlay toggle or simple (non-overlay) trigger
   const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
   if (triggerEl) {
     const triggerId = triggerEl.getAttribute("data-trigger-id");
@@ -301,6 +306,11 @@ export function senseClickTarget(target: HTMLElement): ClickTarget {
           overlayType: triggerMeta.overlayType,
           isOpen,
         };
+      }
+      // Non-overlay trigger with registered callback
+      const itemCb = ZoneRegistry.findItemCallback(triggerId);
+      if (itemCb?.onActivate) {
+        return { type: "simple-trigger", triggerId };
       }
     }
   }

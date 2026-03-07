@@ -18,8 +18,8 @@ import {
   type MouseInput,
   resolveMouse,
 } from "@os-core/1-listen/mouse/resolveMouse";
-import { normalizeKeyDefinition } from "@os-core/2-resolve/getCanonicalKey";
 import { isKeyDelegatedToOS } from "@os-core/2-resolve/fieldKeyOwnership";
+import { normalizeKeyDefinition } from "@os-core/2-resolve/getCanonicalKey";
 import { ROLE_FIELD_TYPE_MAP } from "@os-core/2-resolve/resolveFieldKey";
 import {
   readActiveZoneId,
@@ -42,12 +42,12 @@ import {
   OS_PASTE,
 } from "@os-core/4-command/clipboard/clipboard";
 import { buildZoneCursor } from "@os-core/4-command/utils/buildZoneCursor";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import {
   getChildRole,
   type ZoneRole,
 } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 
 // ═══════════════════════════════════════════════════════════════════
 // Interaction Observer
@@ -89,7 +89,10 @@ function resolveClipboardShim(key: string): BaseCommand | null {
  * @see senseKeyboard.ts — browser ground truth
  * @see zero-drift.md — L4 Sense Isomorphism
  */
-export function buildKeyboardInput(kernel: HeadlessKernel, key: string): KeyboardInput {
+export function buildKeyboardInput(
+  kernel: HeadlessKernel,
+  key: string,
+): KeyboardInput {
   const activeZoneId = readActiveZoneId(kernel);
   const zone = activeZoneId
     ? kernel.getState().os.focus.zones[activeZoneId]
@@ -117,7 +120,10 @@ export function buildKeyboardInput(kernel: HeadlessKernel, key: string): Keyboar
     // Pure equivalent: if editing, check if the key is NOT delegated to OS
     // (i.e., the field absorbs it)
     isFieldActive: editingFieldId
-      ? !isKeyDelegatedToOS(key, FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline")
+      ? !isKeyDelegatedToOS(
+          key,
+          FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline",
+        )
       : false,
     isComposing: false,
     isDefaultPrevented: false,
@@ -257,7 +263,15 @@ export function simulateClick(
 
   if (itemCb?.onActivate && !triggerZoneId) {
     // Standalone trigger (not in any zone) — fast path
-    kernel.dispatch(itemCb.onActivate);
+    const activeZoneId = readActiveZoneId(kernel);
+    const focusId = activeZoneId
+      ? (readFocusedItemId(kernel, activeZoneId) ?? "")
+      : "";
+    const cmd =
+      typeof itemCb.onActivate === "function"
+        ? itemCb.onActivate(focusId)
+        : itemCb.onActivate;
+    kernel.dispatch(cmd);
     if (_observer && before) {
       _observer({
         type: "click",
@@ -323,7 +337,12 @@ export function simulateClick(
   // Dispatch trigger onActivate AFTER zone focus is set
   // (overlay triggers need invoker saved in focusStack first)
   if (itemCb?.onActivate && triggerZoneId) {
-    kernel.dispatch(itemCb.onActivate);
+    const focusId = readFocusedItemId(kernel, triggerZoneId) ?? "";
+    const cmd =
+      typeof itemCb.onActivate === "function"
+        ? itemCb.onActivate(focusId)
+        : itemCb.onActivate;
+    kernel.dispatch(cmd);
   }
 
   if (_observer && before) {

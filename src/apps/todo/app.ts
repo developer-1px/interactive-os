@@ -271,6 +271,28 @@ export const TodoListUI = listCollection.bind({
   onReorder: (info) => {
     os.dispatch(reorderTodo(info));
   },
+  triggers: [
+    {
+      id: "start-edit",
+      onActivate: (focusId: string) => startEdit({ id: focusId }),
+    },
+    {
+      id: "move-item-up",
+      onActivate: (focusId: string) => moveItemUp({ id: focusId }),
+    },
+    {
+      id: "move-item-down",
+      onActivate: (focusId: string) => moveItemDown({ id: focusId }),
+    },
+    {
+      id: "delete-todo",
+      onActivate: (focusId: string) => deleteTodo({ id: focusId }),
+    },
+    {
+      id: "toggle-todo",
+      onActivate: (focusId: string) => toggleTodo({ id: focusId }),
+    },
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════
