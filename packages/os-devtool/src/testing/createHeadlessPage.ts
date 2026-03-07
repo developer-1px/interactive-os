@@ -11,7 +11,7 @@
  *   await expect(page.locator("b")).toBeFocused();
  *
  * The returned object extends Page with OS-specific helpers
- * (goto, setItems, etc.) for test setup.
+ * (setupZone, setItems, etc.) for test setup.
  */
 
 import { createOsPage, type SetupZoneOptions, type OsPage } from "./createOsPage";

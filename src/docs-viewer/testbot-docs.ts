@@ -286,7 +286,7 @@ export const favoritesScripts: TestScript[] = [
 // §4 Tab Navigation — Zone 간 전환 (cross-zone, 수동 테스트 유지)
 //
 // Cross-zone 시나리오는 auto-runner 대상이 아님.
-// 단일 zone goto()로 표현 불가 — 별도 테스트 파일에서 수동 관리.
+// 단일 zone setupZone()으로 표현 불가 — 별도 테스트 파일에서 수동 관리.
 // ═══════════════════════════════════════════════════════════════════
 
 export const tabNavigationScripts: TestScript[] = [

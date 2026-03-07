@@ -7,7 +7,7 @@
  *   - Playwright E2E:     run(playwrightPage, playwrightExpect)
  *
  * Each TestScript from scripts/todo.ts is executed with the exact same
- * page interface and assertions. No goto("zoneName") seeding.
+ * page interface and assertions. No setupZone("zoneName") seeding.
  */
 
 import { TodoApp } from "@apps/todo/app";
