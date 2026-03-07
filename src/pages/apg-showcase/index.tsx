@@ -65,7 +65,7 @@ const PATTERNS: Record<
   menu: { name: "Menu", component: MenuPattern, status: "test" },
   "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "test" },
   meter: { name: "Meter", component: MeterPattern, status: "test" },
-  radiogroup: { name: "RadioGroup", component: RadioGroupPattern, status: "test" },
+  radiogroup: { name: "RadioGroup", component: RadioGroupPattern, status: "dt" },
   slider: { name: "Slider", component: SliderPattern, status: "none" },
   "slider-multithumb": {
     name: "Slider (Multi)",
