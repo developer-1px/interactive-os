@@ -18,6 +18,7 @@
 import { defineApp } from "@os-sdk/app/defineApp";
 import { os } from "@os-sdk/os";
 import clsx from "clsx";
+import type React from "react";
 
 // ─── Thumb Data ───
 
@@ -95,6 +96,12 @@ function SliderRail({
 
 // ─── Thumb Component ───
 
+// The bound Item type omits HTML attributes that the underlying Item component supports.
+// Cast to accept role, aria-*, and style props that Item.tsx forwards to the DOM element.
+const ThumbItem = SliderUI.Item as React.FC<
+  React.HTMLAttributes<HTMLElement> & { id: string | number; className?: string; children?: React.ReactNode; asChild?: boolean }
+>;
+
 function Thumb({
   thumb,
   value,
@@ -109,7 +116,7 @@ function Thumb({
   const percent = ((value - rangeMin) / (rangeMax - rangeMin)) * 100;
 
   return (
-    <SliderUI.Item
+    <ThumbItem
       id={thumb.id}
       role="slider"
       aria-label={thumb.ariaLabel}
@@ -136,7 +143,7 @@ function Thumb({
       >
         ${value}
       </span>
-    </SliderUI.Item>
+    </ThumbItem>
   );
 }
 
@@ -232,13 +239,13 @@ export function SliderMultiThumbPattern() {
           {/* Thumbs positioned absolutely on the rail */}
           <div className="relative h-0">
             <Thumb
-              thumb={THUMBS[0]}
+              thumb={THUMBS[0]!}
               value={values.min}
               rangeMin={RANGE_MIN}
               rangeMax={RANGE_MAX}
             />
             <Thumb
-              thumb={THUMBS[1]}
+              thumb={THUMBS[1]!}
               value={values.max}
               rangeMin={RANGE_MIN}
               rangeMax={RANGE_MAX}

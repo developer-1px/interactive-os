@@ -17,7 +17,7 @@ const CommandPaletteApp = defineApp("command-palette", {});
 
 export const TOGGLE_COMMAND_PALETTE = CommandPaletteApp.command(
   "TOGGLE_COMMAND_PALETTE",
-  () => {
+  (ctx) => {
     const state = os.getState();
     const isOpen = state.os.overlays.stack.some(
       (e) => e.id === "command-palette",
@@ -25,11 +25,13 @@ export const TOGGLE_COMMAND_PALETTE = CommandPaletteApp.command(
 
     if (isOpen) {
       return {
+        state: ctx.state,
         dispatch: OS_OVERLAY_CLOSE({ id: "command-palette" }),
       };
     }
 
     return {
+      state: ctx.state,
       dispatch: OS_OVERLAY_OPEN({
         id: "command-palette",
         type: "dialog",

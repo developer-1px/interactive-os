@@ -6,7 +6,7 @@ import { useState } from "react";
 import { TestBox } from "../shared/TestLayout";
 
 export function AriaInteractionTest() {
-  const [actionCount, setActionCount] = useState(0);
+  const [actionCount] = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const description = (
     <div className="space-y-2">
@@ -32,13 +32,6 @@ export function AriaInteractionTest() {
     payload: { id: "test-trigger" },
   };
 
-  // Custom dispatch for the test trigger to update DOM for assertion
-  const handleTriggerDispatch = () => {
-    const btn = document.getElementById("test-trigger-btn");
-    if (btn) btn.setAttribute("data-clicked", "true");
-    setActionCount((c) => c + 1);
-  };
-
   return (
     <TestBox title="ARIA Interactions" spec="§9" description={description}>
       <div className="flex flex-col gap-4">
@@ -50,7 +43,6 @@ export function AriaInteractionTest() {
           <Trigger
             id="test-trigger-btn"
             onActivate={mockCommand}
-            dispatch={handleTriggerDispatch}
             className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
           >
             Click Me ({actionCount})

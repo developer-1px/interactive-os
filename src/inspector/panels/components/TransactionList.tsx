@@ -41,7 +41,7 @@ export function groupConsecutive(
     const isSameType = sig.type === prevSig.type;
     const isConsecutiveFocus =
       isSameType &&
-      sig.type === "OS_FOCUS" &&
+      sig.trigger.kind === "OS_FOCUS" &&
       sig.trigger.elementId === prevSig.trigger.elementId;
     const isConsecutiveKey =
       isSameType &&
@@ -145,6 +145,9 @@ export function TimelineGroup({
         : "text-[#94a3b8]";
 
   const cmdType = command.type !== "NO_COMMAND" ? command.type : trigger.raw;
+
+  // toggleGroup is a stub — visual grouping toggle is not yet wired
+  const toggleGroup = (_id: string | number) => {};
 
   return (
     <button

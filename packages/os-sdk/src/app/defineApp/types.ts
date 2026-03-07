@@ -172,6 +172,7 @@ export interface BoundComponents<S> {
           isSelected: boolean;
           isExpanded: boolean;
           isAnchor?: boolean;
+          valueNow?: number;
         }) => ReactNode);
     asChild?: boolean;
   }> & {
@@ -247,10 +248,14 @@ export interface AppPage<_S> {
     zoneName: string,
     opts?: {
       items?: string[];
-      focusedItemId?: string | null;
+      focusedItemId?: string | null | undefined;
       config?: Partial<
         import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig
       >;
+      role?: ZoneRole;
+      initial?: { selection?: string[]; expanded?: string[] };
+      expandableItems?: Set<string>;
+      treeLevels?: Map<string, number>;
     },
   ): void;
 
@@ -283,7 +288,8 @@ export interface AppPage<_S> {
   activeZoneId(): string | null;
 
   /** @internal OS Kernel instance (for OS-level testing only). */
-  readonly kernel: import("@kernel").Kernel<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly kernel: any;
 
   /** Reset to initial state. */
   reset(): void;

@@ -137,7 +137,7 @@ async function quickRunScripts(scripts: TestScript[]): Promise<QuickResult[]> {
         action: s.action,
         detail: s.detail,
         passed: s.result === "pass",
-        error: s.error,
+        ...(s.error !== undefined ? { error: s.error } : {}),
       })),
       consoleLogs,
     });
@@ -198,7 +198,7 @@ export function registerTestBotGlobalApi(
     return idx;
   }
 
-  (window as Record<string, unknown>)["__TESTBOT__"] = {
+  (window as unknown as Record<string, unknown>)["__TESTBOT__"] = {
     // ── Visual Run ───────────────────────────────────────────
 
     /** Run all test suites (with visual effects) */
@@ -353,5 +353,5 @@ export function registerTestBotGlobalApi(
 }
 
 export function unregisterTestBotGlobalApi() {
-  delete (window as Record<string, unknown>)["__TESTBOT__"];
+  delete (window as unknown as Record<string, unknown>)["__TESTBOT__"];
 }

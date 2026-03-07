@@ -19,12 +19,7 @@ import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
 
-// Extend React types to support the inert attribute universally
-declare module "react" {
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    inert?: string;
-  }
-}
+// React 19+ already defines inert as boolean — no augmentation needed
 
 const CANVAS_ZONE_ID = "canvas";
 
@@ -279,7 +274,7 @@ function LiveThumbnail({ block }: { block: Block }) {
         width: "1000px", // Arbitrary large width to force desktop layout rendering
         transform: "scale(0.056)", // Scale down to fit w-14 (56px) roughly
       }}
-      inert="" // Prevent all keyboard/screen reader interaction
+      inert={true} // Prevent all keyboard/screen reader interaction
     >
       <Component id={block.id} />
     </div>

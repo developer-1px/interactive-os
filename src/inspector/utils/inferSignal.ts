@@ -75,7 +75,7 @@ export function inferSignal(tx: Transaction): InspectorSignal {
   // 4. Group = handlerScope (kernel's authoritative group name)
   const group = tx.handlerScope ?? "unknown";
 
-  return {
+  const result: InspectorSignal = {
     type,
     group,
     trigger: {
@@ -93,8 +93,12 @@ export function inferSignal(tx: Transaction): InspectorSignal {
       to: c.to,
     })),
     effects: effectKeys,
-    ...((tx.meta as Record<string, unknown>)?.["pipeline"]
-      ? { pipeline: (tx.meta as Record<string, unknown>)["pipeline"] }
-      : {}),
   };
+
+  const pipelineMeta = (tx.meta as Record<string, unknown>)?.["pipeline"];
+  if (pipelineMeta) {
+    result.pipeline = pipelineMeta as { sensed?: unknown; resolved?: unknown };
+  }
+
+  return result;
 }
