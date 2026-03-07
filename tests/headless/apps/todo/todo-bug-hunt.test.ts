@@ -312,6 +312,98 @@ describe("§14 Delete: full flow", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════
+// §14b Delete dialog — real user flow through overlay
+//
+// BUG HUNT: After delete dialog opens, UI is frozen.
+// Hypothesis: overlay focus trap blocks all input because
+// activeZoneId is still "list", not inside the overlay.
+// ═══════════════════════════════════════════════════════════════════
+
+describe("§14b Delete dialog: overlay interaction flow", () => {
+  it("Delete key opens overlay and overlay stack has dialog entry", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+
+    // Overlay should be open
+    const stack = page.kernel.getState().os.overlays?.stack ?? [];
+    expect(stack.some((e: any) => e.id === "todo-delete-dialog")).toBe(true);
+  });
+
+  it("after dialog opens, Escape should close it", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+
+    // Dialog is open
+    expect(
+      page.kernel.getState().os.overlays.stack.some(
+        (e: any) => e.id === "todo-delete-dialog",
+      ),
+    ).toBe(true);
+
+    // Escape should close the dialog
+    page.keyboard.press("Escape");
+
+    expect(page.kernel.getState().os.overlays.stack).toHaveLength(0);
+    // Todo should still exist (cancel, not confirm)
+    expect(page.state.data.todos.todo_1).toBeDefined();
+  });
+
+  it("after dialog opens, keyboard input on list zone is blocked by overlay trap", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+
+    // Dialog is open, activeZoneId should still be "list"
+    expect(page.activeZoneId()).toBe("list");
+
+    // Arrow keys should be blocked (overlay trap)
+    const focusBefore = page.kernel.getState().os.focus.zones.list?.focusedItemId;
+    page.keyboard.press("ArrowDown");
+    const focusAfter = page.kernel.getState().os.focus.zones.list?.focusedItemId;
+
+    expect(focusAfter).toBe(focusBefore); // No navigation while dialog open
+  });
+
+  it("after dialog closes via Escape, list zone should be interactive again", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+    page.keyboard.press("Escape");
+
+    // After dialog closes, list should work
+    expect(page.kernel.getState().os.overlays.stack).toHaveLength(0);
+
+    // Navigation should work again
+    page.keyboard.press("ArrowDown");
+    expect(page.kernel.getState().os.focus.zones.list?.focusedItemId).toBe("todo_2");
+  });
+
+  it("confirmDeleteTodo via dispatch after dialog open works", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+
+    // Confirm via direct dispatch (bypasses overlay trap)
+    page.dispatch(confirmDeleteTodo());
+
+    expect(page.state.data.todos.todo_1).toBeUndefined();
+    expect(page.kernel.getState().os.overlays.stack).toHaveLength(0);
+  });
+
+  it("after confirm delete and dialog close, list zone is interactive", () => {
+    page.locator("#todo_1").click();
+    page.keyboard.press("Delete");
+    page.dispatch(confirmDeleteTodo());
+
+    // Overlay closed, focus should be restored
+    expect(page.kernel.getState().os.overlays.stack).toHaveLength(0);
+
+    // List should be interactive — can navigate
+    page.keyboard.press("ArrowDown");
+    // Focus should move (not stuck)
+    const focused = page.kernel.getState().os.focus.zones.list?.focusedItemId;
+    expect(focused).toBeDefined();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // §15 Draft Zone — Edge cases
 // ═══════════════════════════════════════════════════════════════════
 
