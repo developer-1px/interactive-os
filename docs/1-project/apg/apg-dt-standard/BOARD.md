@@ -1,0 +1,27 @@
+# apg-dt-standard
+
+## Context
+
+Claim: `.apg.md` = W3C Example 충실 복사 + Decision Table(Given/When/Then) + Traffic Light. 이것이 APG 테스트 충분성의 유일한 보장 메커니즘이다.
+
+Before → After:
+- Compliance Matrix (N/E/S/A/R 카테고리, 1:1 매핑 미보장) → Decision Table (DT 행 = it() 1:1, Playwright 구문)
+- 단일 파일 (tabs.apg.test.ts에 auto+manual 혼재) → Example별 분리 ({pattern}-{example}.apg.md)
+- 스펙 텍스트만 근거 → Example 코드(JS)에서 암묵적 행동 발굴도 포함
+
+Risks: Tabs 패턴 전환 시 TabsApp에 getItems bind 필요할 수 있음 (accordion 프로토타입에서 발견된 패턴)
+
+## Now
+
+- [ ] T1: accordion.apg.md 보강 — ARIA(A1-A5) + 초기상태(I1-I2) + 패널동기화(P1-P2) DT 추가
+- [ ] T2: accordion.apg.test.ts — T1의 새 DT 행에 대한 테스트 추가
+- [ ] T3: /apg 워크플로우 재작성 (.claude/commands/apg.md + .agent/workflows/apg.md)
+- [ ] T4: tabs-auto.apg.md + tabs-auto.apg.test.ts 생성
+- [ ] T5: tabs-manual.apg.md + tabs-manual.apg.test.ts 생성
+- [ ] T6: tabs.apg.test.ts 삭제
+
+## Done
+
+## Unresolved
+
+## Ideas
