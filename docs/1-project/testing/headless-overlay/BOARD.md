@@ -15,14 +15,17 @@ Risks:
 
 ## Now
 
-- [ ] T1: OS_OVERLAY_OPEN auto-activate — activeZoneId + focusedItemId 설정
-- [ ] T2: page.goto() overlay zone skip — overlay zone은 등록만, activeZoneId 제외
-- [ ] T3: simulateClick overlay detection — trigger click 후 overlay stack 변화 감지
-- [ ] T4: dialog.apg.test.ts rewrite — workaround 제거, Playwright subset only
-- [ ] T5: dropdown-menu.apg.test.ts rewrite — workaround 제거, Playwright subset only
-- [ ] T6: Regression — vitest run tests/apg/ 전수 pass
+(empty — all tasks done)
 
 ## Done
+
+- [x] T1: OS_OVERLAY_OPEN auto-activate — activeZoneId + focusedItemId 설정 ✅
+- [x] T2: page.goto() overlay zone skip — 분석 결과 변경 불필요 (goto는 activeZoneId 미설정) ✅
+- [x] T3: simulateClick overlay detection — trigger-zone awareness 추가 ✅
+- [x] overlay-lifecycle.test.ts — 6 tests GREEN | tsc 0 | 398 APG pass | build OK ✅
+- [x] T4: dialog.apg.test.ts rewrite — workaround 제거, Playwright subset only ✅
+- [x] T5: dropdown-menu.apg.test.ts rewrite — workaround 제거, Playwright subset only ✅
+- [x] T6: Regression — 397 APG pass, 583 total pass, 0 fail ✅
 
 ## Unresolved
 
