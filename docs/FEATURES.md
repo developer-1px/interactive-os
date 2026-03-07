@@ -11,29 +11,26 @@
 
 ---
 
-## Summary
+## Interaction Periodic Table
 
-| 카테고리 | 전체 | ✅ | 🔧 | 📋 |
-|---------|------|-----|-----|-----|
-| 1. Topology | 5 | 5 | 0 | 0 |
-| 2. Navigation | 6 | 5 | 1 | 0 |
-| 3. Focus | 6 | 6 | 0 | 0 |
-| 4. Selection | 5 | 5 | 0 | 0 |
-| 5. Activation | 4 | 2 | 0 | 2 |
-| 6. Field | 9 | 8 | 1 | 0 |
-| 7. Overlay | 7 | 5 | 2 | 0 |
-| 8. Expansion | 4 | 4 | 0 | 0 |
-| 9. Drag & Drop | 4 | 1 | 0 | 3 |
-| 10. Clipboard | 4 | 4 | 0 | 0 |
-| 11. History | 4 | 4 | 0 | 0 |
-| 12. Data | 7 | 5 | 1 | 1 |
-| 13. CRUD | 5 | 5 | 0 | 0 |
-| 14. Command | 6 | 6 | 0 | 0 |
-| 15. Pipeline | 6 | 6 | 0 | 0 |
-| 16. ARIA | 5 | 4 | 0 | 1 |
-| 17. App Framework | 8 | 8 | 0 | 0 |
-| 18. Verification | 5 | 4 | 1 | 0 |
-| **합계** | **100** | **91** | **6** | **7** |
+> **읽는 법**: 셀 = "이 의도를 이 범위에 대해 수행하는 기능". 빈 칸(📋)이 아직 정복하지 않은 영역이다.
+>
+> ✅ 구현 완료 · 🔧 부분 구현 · 📋 미착수 · — 해당 없음
+
+| Intent \ Scope | Item | Group | Zone | Layer | App |
+|----------------|------|-------|------|-------|-----|
+| **Navigate** | Arrow ✅ | — | Tab ✅ | — | Route 🔧 |
+| **Select** | Focus ✅ | Multi+Range ✅ | Active Zone ✅ | — | — |
+| **Activate** | Enter/Space ✅ | Bulk Action 📋 | — | Open/Close ✅ | — |
+| **Edit** | Field ✅ | Batch Edit 📋 | — | — | — |
+| **Expand** | Tree Node ✅ | — | Accordion ✅ | — | — |
+| **Reorder** | Move ↑↓ ✅ | Group Move 📋 | Zone Reorder 📋 | — | — |
+| **Transfer** | Copy/Paste ✅ | Bulk Copy ✅ | Cross-Zone DnD 📋 | — | Cross-App 📋 |
+| **Create** | Add ✅ | Duplicate ✅ | — | — | — |
+| **Delete** | Remove ✅ | Bulk Delete ✅ | — | Dismiss ✅ | — |
+| **Recover** | — | — | — | — | Undo/Redo ✅ |
+| **Find** | Typeahead 🔧 | Filter 📋 | — | Cmd Palette 📋 | Global Search 📋 |
+| **Perceive** | Tooltip ✅ | — | ARIA ✅ | Toast 🔧 | Sound 📋 |
 
 ---
 
