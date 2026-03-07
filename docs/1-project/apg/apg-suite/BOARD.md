@@ -1,114 +1,38 @@
 # BOARD — apg-suite
 
-> 목표: APG headless 테스트 331 fail → 0 fail. Role defaults resolver가 핵심 병목이다.
+> 목표: Playwright 동형 테스트 아키텍처. setupZone(과도기) → goto(url) + App 자동 등록(최종).
 > 선행 프로젝트: [apg-test-fidelity](../../../4-archive/2026/03/W10/apg-test-fidelity/BOARD.md), [apg-test-fix-18](../../../4-archive/2026/03/W10/apg-test-fix-18/BOARD.md)
 
-## Baseline (2026-03-07)
+## Baseline
 
-22 files, 396 tests, **331 fail / 65 pass**
+- Before (2026-03-07 12:33): 22 files, 396 tests, **331 fail / 65 pass**
+- After WP0 (2026-03-07 13:21): 22 files, 396 tests, **0 fail / 396 pass** + 전체 30 files 532 tests 0 fail
 
-| File | Pass | Fail | Total | Primary Category |
-|------|------|------|-------|-----------------|
-| accordion | 1 | 23 | 24 | A |
-| button | 2 | 16 | 18 | A |
-| carousel | 1 | 25 | 26 | A |
-| checkbox | 0 | 7 | 7 | E |
-| combobox | 1 | 8 | 9 | A+F |
-| dialog | 1 | 5 | 6 | F |
-| disallow-empty-initial | 0 | 5 | 5 | F |
-| disclosure | 1 | 18 | 19 | A+D |
-| dropdown-menu | 1 | 7 | 8 | F |
-| feed | 1 | 18 | 19 | A |
-| listbox | 33 | 7 | 40 | A |
-| menu-button | 3 | 18 | 21 | A+E |
-| menu | 3 | 23 | 26 | A |
-| meter | 2 | 7 | 9 | E |
-| navtree | 3 | 9 | 12 | F |
-| radiogroup | 0 | 20 | 20 | A |
-| switch | 0 | 12 | 12 | E |
-| tabs | 1 | 30 | 31 | A+C |
-| toolbar | 3 | 9 | 12 | A |
-| tooltip | 2 | 12 | 14 | A |
-| tree | 3 | 28 | 31 | A+B |
-| treegrid | 3 | 24 | 27 | A+B |
+## 3-Stage Transition
 
-### Root Cause Categories (from apg-test-fidelity audit)
-
-| Cat | Name | Est. Failures | Root Cause |
-|-----|------|---------------|------------|
-| **A** | Role defaults not applied | ~200+ | headless pipeline ignores role → config mapping |
-| **B** | Expansion state not projected | ~20 | aria-expanded undefined for tree/treegrid |
-| **C** | Manual tab activation | ~5 | followFocus config not reaching headless |
-| **D** | Flow/Multi-zone tab | ~5 | disclosure flow mode + accordion multi-section |
-| **E** | Pattern-specific gaps | ~20 | checkbox, switch, meter, button individual issues |
-| **F** | Synthetic factory (no App export) | ~50+ | 7 patterns lack App export, factory config drift |
-
-**Key insight**: Category A alone accounts for ~60% of all failures. Single fix location.
-
----
-
-## Phases
-
-### Phase 1: Role Defaults Resolver (unblocks ~60%)
-
-- [ ] **WP1: resolveRole() in headless pipeline**
-  - `page.goto(zoneId, opts)` must apply role defaults when no explicit navigate/select/tab options
-  - Location: os-core roleRegistry → headless resolveNavigation/resolveTab
-  - Affected: accordion, button, carousel, combobox, feed, listbox, menu, menu-button, radiogroup, tabs, toolbar, tooltip, tree, treegrid
-  - Success: ArrowDown/ArrowRight forward navigation works for all role-based zones
-
-### Phase 2: State Pipelines
-
-- [ ] **WP2: Expansion state projection**
-  - expandableItems/treeLevels must produce aria-expanded in computeItem
-  - Affected: tree (28 fail), treegrid (24 fail)
-  - Success: aria-expanded false/true correctly projected
-
-- [ ] **WP3: Select config pipeline**
-  - followFocus: false must reach headless select resolver
-  - Affected: tabs manual activation (5 fail)
-  - Success: navigation does NOT change selection in manual mode
-
-- [ ] **WP4: Tab flow + multi-zone**
-  - disclosure flow mode (each item = own tab stop)
-  - accordion multi-section expand independence
-  - Affected: disclosure (18 fail), accordion subset
-  - Success: Tab/Shift+Tab moves between flow items
-
-### Phase 3: Pattern-Specific
-
-- [ ] **WP5: Individual pattern fixes**
-  - checkbox: Enter/Space toggle (not just Space)
-  - switch: toggle interaction
-  - meter: value projection
-  - button: activation model
-  - menu-button: overlay state + Escape dismiss
-  - Success: each pattern's unique behavior works
-
-### Phase 4: Coverage Completion
-
-- [ ] **WP6: Showcase App export standardization**
-  - 7 patterns need `App` + `testConfig` export: listbox, toolbar, menu, dialog, dropdown-menu, combobox, navtree
-  - Standardize: `export const App`, `export const testConfig = { zoneId, items }`
-  - Success: all 22 test files use real app config (no synthetic factory)
-
-- [ ] **WP7: Final sweep**
-  - Re-classify remaining failures after WP1-WP6
-  - Fix or document as known OS gaps
-  - Success: 0 fail or all remaining failures documented with OS gap tickets
+| Stage | 내용 | 상태 |
+|-------|------|------|
+| 1. 환경 정비 | goto(zoneId) → setupZone(zoneId) 리네임 + 전수 치환 | Done |
+| 2. App 표준화 | APG showcase 22개 패턴에 App export 추가 | 미착수 |
+| 3. setupZone 제거 | setupZone 삭제, goto(url) + App mount → zone 자동 등록 | 미착수 |
 
 ---
 
 ## Now
 
-(시작 전)
+- [ ] **WP1: APG showcase App export 표준화**
+  - 7 patterns need App export: listbox, toolbar, menu, dialog, dropdown-menu, combobox, navtree
+  - 나머지 15 patterns: App export 존재 확인 + testConfig 표준화
+  - Success: 모든 22 showcase가 defineApp() 기반 App export
 
 ## Done
 
-(없음)
+- [x] WP0: goto → setupZone 리네임 — API 4파일 + infra 3파일 + APG 22파일 + knowledge 2파일 전수 치환 — tsc 0 | 532 tests 0 fail ✅
+  - Plan: `notes/2026-0307-1300-[plan]-goto-to-setupZone.md`
+  - Unexpected: 리네임만으로 331 fail → 0 fail. 원인 미규명 (조사 필요)
 
 ## Unresolved
 
-- WP1 구현 위치: roleRegistry.ts → page.goto()? resolveNavigation()? osDefaults?
-- WP6 showcase 리팩토링 범위: Component만? bind config도?
-- Category F (synthetic factory) 실패 중 Category A 겹침 비율 미확인
+- **331 fail → 0 fail 원인**: 순수 리네임(goto→setupZone)이 왜 테스트를 고쳤는지 미규명. 가설: createOsPage의 goto가 basePage.goto를 경유하는 경로가 제거됨?
+- WP1: 7개 showcase App export 미전환
+- Stage 3: setupZone 제거 시점 — WP1 완료 후
