@@ -76,7 +76,7 @@ const PATTERNS: Record<
   switch: { name: "Switch", component: SwitchPattern, status: "dt" },
   table: { name: "Table", component: TablePattern, status: "none" },
   tabs: { name: "Tabs", component: TabsPattern, status: "dt" },
-  toolbar: { name: "Toolbar", component: ToolbarPattern, status: "test" },
+  toolbar: { name: "Toolbar", component: ToolbarPattern, status: "dt" },
   tooltip: { name: "Tooltip", component: TooltipPattern, status: "dt" },
   tree: { name: "Tree", component: TreePattern, status: "test" },
   treegrid: { name: "Treegrid", component: TreegridPattern, status: "test" },
