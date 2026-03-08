@@ -85,7 +85,19 @@ type Layer = (key: string) => LayerResult | null;
 
 export function resolveKeyboard(input: KeyboardInput): ResolveResult {
   if (input.isDefaultPrevented || input.isComposing) return EMPTY;
-  if (input.isCombobox) return EMPTY;
+  // Combobox: relay navigation keys to the layer chain, let character keys pass through to input.
+  // Without this, apps must manually os.dispatch(OS_NAVIGATE) from onKeyDown — violating L2 pure projection.
+  if (input.isCombobox) {
+    const COMBOBOX_NAV_KEYS = new Set([
+      "ArrowUp",
+      "ArrowDown",
+      "Enter",
+      "Escape",
+      "Home",
+      "End",
+    ]);
+    if (!COMBOBOX_NAV_KEYS.has(input.key)) return EMPTY;
+  }
 
   const meta: InputMeta = {
     type: "KEYBOARD",
