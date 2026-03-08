@@ -18,12 +18,12 @@ Risks:
 - 새 OS 상태 축마다 accessor hook 추가 필요
 
 ## Now
-- [ ] T1: accessor hook 3개 신규 — useEditingItem, useZoneValue, useNotifications
-- [ ] T2: 기존 hook 교체 5곳 — QuickPick→useOverlay, LocaleSwitcher→useOverlay, SectionSidebar→useDragState, EditorToolbar(focusedItemId)→useFocusedItem
-- [ ] T3: 신규 hook 교체 5곳 — BuilderCursor, EditorToolbar(editingItemId), BuilderPage, WindowSplitter, SliderMultiThumb
-- [ ] T4: contract-checklist 갱신 — "src/에서 os.useComputed 직접 호출 금지"
-- [ ] T5: rules.md 원칙 추가 — "Pit of Success = 잘못 쓰기 어려운 API"
 
 ## Done
+- [x] T1: accessor hook 4개 신규 — useEditingItem, useZoneValue, useNotifications, useActiveZone — tsc 0 ✅
+- [x] T2: 기존 hook 교체 5곳 — QuickPick→useOverlay, LocaleSwitcher→useOverlay, SectionSidebar→useDragState, EditorToolbar(focusedItemId)→useFocusedItem, ToastContainer→useNotifications — tsc 0 ✅
+- [x] T3: 신규 hook 교체 5곳 — BuilderCursor, EditorToolbar(editingItemId), BuilderPage, WindowSplitter, SliderMultiThumb — tsc 0 ✅
+- [x] T4: contract-checklist 갱신 — os.useComputed 금지 패턴 + accessor hook 수정 대응표 추가 ✅
+- [x] T5: rules.md 원칙 추가 — "Pit of Success = 잘못 쓰기 어려운 API" + Goodhart's Law ✅
 
 ## Unresolved
