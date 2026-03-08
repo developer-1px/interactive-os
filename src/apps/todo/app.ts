@@ -272,26 +272,11 @@ export const TodoListUI = listCollection.bind({
     os.dispatch(reorderTodo(info));
   },
   triggers: [
-    {
-      id: "start-edit",
-      onActivate: (focusId: string) => startEdit({ id: focusId }),
-    },
-    {
-      id: "move-item-up",
-      onActivate: (focusId: string) => moveItemUp({ id: focusId }),
-    },
-    {
-      id: "move-item-down",
-      onActivate: (focusId: string) => moveItemDown({ id: focusId }),
-    },
-    {
-      id: "delete-todo",
-      onActivate: (focusId: string) => deleteTodo({ id: focusId }),
-    },
-    {
-      id: "toggle-todo",
-      onActivate: (focusId: string) => toggleTodo({ id: focusId }),
-    },
+    listCollection.trigger("start-edit", startEdit),
+    listCollection.trigger("move-item-up", moveItemUp),
+    listCollection.trigger("move-item-down", moveItemDown),
+    listCollection.trigger("delete-todo", deleteTodo),
+    listCollection.trigger("toggle-todo", toggleTodo),
   ],
 });
 
@@ -496,16 +481,15 @@ export const TodoList = {
     redoCommand,
   },
   triggers: {
-    ToggleTodo: TodoApp.createTrigger(toggleTodo, { id: "toggle-todo" }),
-    DeleteTodo: TodoApp.createTrigger(deleteTodo, { id: "delete-todo" }),
-    DeleteDialog: TodoApp.createTrigger({
-      id: "todo-delete-dialog",
+    ToggleTodo: listCollection.trigger("toggle-todo", toggleTodo),
+    DeleteTodo: listCollection.trigger("delete-todo", deleteTodo),
+    DeleteDialog: listCollection.overlay("todo-delete-dialog", {
       confirm: confirmDeleteTodo(),
       role: "alertdialog",
     }),
-    StartEdit: TodoApp.createTrigger(startEdit, { id: "start-edit" }),
-    MoveItemUp: TodoApp.createTrigger(moveItemUp, { id: "move-item-up" }),
-    MoveItemDown: TodoApp.createTrigger(moveItemDown, { id: "move-item-down" }),
+    StartEdit: listCollection.trigger("start-edit", startEdit),
+    MoveItemUp: listCollection.trigger("move-item-up", moveItemUp),
+    MoveItemDown: listCollection.trigger("move-item-down", moveItemDown),
   },
 };
 
@@ -517,9 +501,7 @@ export const TodoSidebar = {
     moveCategoryDown: sidebarCollection.moveDown,
   },
   triggers: {
-    SelectCategory: TodoApp.createTrigger(selectCategory, {
-      id: "select-category",
-    }),
+    SelectCategory: sidebarCollection.trigger("select-category", selectCategory),
   },
 };
 
@@ -546,14 +528,23 @@ export const TodoSearch = {
   },
 };
 
+// Toolbar triggers — declared top-down in app.ts (moved from TodoToolbar.tsx)
+const ToggleViewButton = toolbarZone.trigger("toggle-view", toggleView());
+const UndoButton = toolbarZone.trigger("undo", undoCommand());
+const RedoButton = toolbarZone.trigger("redo", redoCommand());
+
 export const TodoToolbar = {
   ...TodoToolbarUI,
   commands: {
     toggleView,
     clearCompleted,
   },
-  ClearDialog: TodoApp.createTrigger({
-    id: "todo-clear-dialog",
+  triggers: {
+    ToggleViewButton,
+    UndoButton,
+    RedoButton,
+  },
+  ClearDialog: toolbarZone.overlay("todo-clear-dialog", {
     confirm: clearCompleted(),
     role: "alertdialog",
   }),

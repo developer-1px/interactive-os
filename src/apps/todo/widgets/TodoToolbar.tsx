@@ -1,12 +1,13 @@
 /**
- * TodoToolbar — v5 native (createTrigger + zone.bind).
+ * TodoToolbar — v5 native (zone.trigger + zone.overlay).
  *
- * Simple triggers + ClearDialog compound — zero OS import.
+ * Triggers declared top-down in app.ts — imported here for JSX rendering.
  */
 
-import { TodoApp, TodoList, TodoToolbar } from "@apps/todo/app";
+import { TodoApp, TodoToolbar } from "@apps/todo/app";
 
 const { ClearDialog } = TodoToolbar;
+const { ToggleViewButton, UndoButton, RedoButton } = TodoToolbar.triggers;
 
 import {
   AlertTriangle,
@@ -16,18 +17,6 @@ import {
   RotateCw,
   Trash2,
 } from "lucide-react";
-
-// Simple triggers — now pass pre-built BaseCommand
-const ToggleViewButton = TodoApp.createTrigger(
-  TodoToolbar.commands.toggleView(),
-  { id: "toggle-view" },
-);
-const UndoButton = TodoApp.createTrigger(TodoList.commands.undoCommand(), {
-  id: "undo",
-});
-const RedoButton = TodoApp.createTrigger(TodoList.commands.redoCommand(), {
-  id: "redo",
-});
 
 export function TodoToolbarView() {
   const isBoard = TodoApp.useComputed((s) => s.ui.viewMode === "board");
