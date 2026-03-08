@@ -15,18 +15,18 @@ Before → After:
 - After: `<button {...deleteTodo(todoId)} />` (payload가 `data-trigger-payload`로 DOM에 바인딩)
 
 ## Now
-**Phase 1: Simple Trigger Migration**
-- [x] T6: `apg-showcase/` (Alert, Button, Link, Table) — Trigger→prop-getter 전환 — tsc 0 | 391 tests PASS ✅
-- [x] T7: `inspector/UnifiedInspector.tsx` — Trigger→prop-getter (scrollToBottom) ✅
-- [x] T8: `AriaInteractionTest.tsx` → defineApp+prop-getter, `BuilderListPage.tsx` → plain button ✅
+**Phase 2: Wrapper 전면 무효화** (plan: `notes/2026-0309-0100-[plan]-wrapper-elimination.md`)
+- [ ] P1: `zone.overlay()` API 변경 — CompoundTriggerComponents → OverlayHandle { overlayId, trigger }
+- [ ] P2: TriggerPortal → ModalPortal 독립 분리 (Trigger 의존 제거)
+- [ ] P3: TriggerPopover → PopoverPortal 독립 분리 (Trigger 의존 제거)
+- [ ] P4: TriggerDismiss 삭제 — dismiss를 bind({ triggers }) prop-getter로 대체
+- [ ] P5: 소비자 마이그레이션 — layer-showcase (7파일) + todo + apg + builder
+- [ ] P6: TriggerBase + OverlayContext + trigger/index.ts 삭제 + trigger test 갱신
+
 ## Done
-- [x] T1: `createFunctionTrigger` — prop-getter가 `data-trigger-payload` 반환 — +3 tests ✅
-- [x] T4: Red 테스트 — payload 기반 trigger dispatch 검증 — 5/5 PASS ✅
-- [x] T2: `senseClickTarget` — `data-trigger-payload` 읽기 + ClickTarget 타입 확장 — regression 0 ✅
-- [x] T3: `PointerListener` — `payload ?? focusId` 전달 — regression 0 ✅
-- [x] T5: Todo app — 모든 trigger 호출에 todoId/categoryId payload 추가 — regression 0 ✅
+**Phase 1: Simple Trigger Migration** ✅
+- [x] T1~T8: prop-getter API 도입 + payload 지원 + 전 소비자 마이그레이션 완료
 
 ## Unresolved
-- Overlay(Dialog/Menu/Popover) trigger를 어떻게 재설계할 것인가 (별도 프로젝트)
 - `<Item>`, `<Field>`도 prop-getter 방식으로 전환할 것인가 (추후 논의)
 
