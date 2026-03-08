@@ -10,8 +10,7 @@
  */
 
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
-import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
+import { closeOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { type FuzzyMatchResult, fuzzyMatch } from "./fuzzyMatch";
@@ -78,9 +77,6 @@ export function CommandPalette() {
   const routes = useRouteList();
   const docs = useDocsList();
 
-  // ── Overlay State (OS hook) ──
-  const isOpen = useOverlay("command-palette");
-
   // ── Build items ──
   const items = useMemo<PaletteItem[]>(() => {
     const routeItems: PaletteItem[] = routes.map((r) => ({
@@ -116,7 +112,7 @@ export function CommandPalette() {
   );
 
   const handleClose = useCallback(() => {
-    os.dispatch(OS_OVERLAY_CLOSE({ id: "command-palette" }));
+    closeOverlay("command-palette");
   }, []);
 
   // ── Typeahead resolver (uses fuzzy-matched label) ──
@@ -182,12 +178,9 @@ export function CommandPalette() {
     [],
   );
 
-  if (!isOpen) return null;
-
   return (
     <QuickPick<PaletteItem>
       id="command-palette"
-      isOpen={isOpen}
       items={items}
       filterFn={fuzzyFilter}
       renderItem={renderItem}

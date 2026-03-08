@@ -34,19 +34,16 @@
  */
 
 import { Kbd } from "@inspector/shell/components/Kbd";
-import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
+import {
+  closeOverlay,
+  useOverlay,
+} from "@os-react/6-project/accessors/useOverlay";
 import { Item } from "@os-react/6-project/Item";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Zone } from "@os-react/6-project/Zone";
-import {
-  OS_FOCUS,
-  OS_NAVIGATE,
-  OS_OVERLAY_CLOSE,
-  OS_OVERLAY_OPEN,
-  os,
-} from "@os-sdk/os";
+import type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Types
@@ -81,9 +78,6 @@ export interface QuickPickProps<T extends QuickPickItem = QuickPickItem> {
 
   /** Called when the picker should close. */
   onClose?: () => void;
-
-  /** Controlled open state. */
-  isOpen?: boolean;
 
   /** Input placeholder text. */
   placeholder?: string;
@@ -175,7 +169,6 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   items,
   onSelect,
   onClose,
-  isOpen,
   placeholder = "Type to search...",
   filterFn,
   renderItem,
@@ -190,47 +183,8 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   const containerRef = useRef<HTMLDivElement>(null);
   const zoneId = `${id}-list`;
 
-  // ── Overlay sync ──
-  useEffect(() => {
-    if (isOpen) {
-      os.dispatch(OS_OVERLAY_OPEN({ id, type: "dialog" }));
-    } else {
-      os.dispatch(OS_OVERLAY_CLOSE({ id }));
-    }
-  }, [isOpen, id]);
-
-  // Detect external close (Esc via DialogZone) → sync back to parent
-  const isOverlayOpen = useOverlay(id);
-
-  useEffect(() => {
-    if (isOpen && !isOverlayOpen && onClose) {
-      onClose();
-    }
-  }, [isOverlayOpen, isOpen, onClose]);
-
-  // ── Auto-focus input on open + activate zone ──
-  // FocusGroup autoFocus (RAF) may race with Dialog zone in nested overlays.
-  // setTimeout(0) runs after RAF, ensuring items are in the DOM.
-  useEffect(() => {
-    if (!isOpen) return;
-    setQuery("");
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-      // Activate the QuickPick zone by focusing the first item.
-      // This sets activeZoneId so OS_NAVIGATE works correctly.
-      const containerEl = containerRef.current;
-      if (containerEl) {
-        const firstItem = containerEl.querySelector<HTMLElement>("[data-item]");
-        if (firstItem) {
-          const itemId = firstItem.id;
-          if (itemId) {
-            os.dispatch(OS_FOCUS({ zoneId, itemId }));
-          }
-        }
-      }
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [isOpen, zoneId]);
+  // ── Overlay visibility (OS is SSOT) ──
+  const isOpen = useOverlay(id);
 
   // ── Filtering ──
   const filter = filterFn ?? defaultFilter;
@@ -269,67 +223,34 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
 
   // ── Close helper ──
   const handleClose = useCallback(() => {
-    os.dispatch(OS_OVERLAY_CLOSE({ id }));
+    closeOverlay(id);
     onClose?.();
   }, [id, onClose]);
 
-  // ── Select from virtual focus ──
-  const handleAction = useCallback(() => {
-    const state = os.getState();
-    const zone = state.os.focus.zones[zoneId];
-    const focusedId = zone?.focusedItemId;
-
-    if (focusedId) {
-      const item = filteredItems.find((r) => r.id === focusedId);
+  // ── Zone onAction: OS_ACTIVATE → select focused item ──
+  const handleAction = useCallback(
+    (cursor: ZoneCursor) => {
+      const item = filteredItems.find((r) => r.id === cursor.focusId);
       if (item) {
         handleClose();
         onSelect(item);
       }
-    }
-  }, [filteredItems, zoneId, handleClose, onSelect]);
+    },
+    [filteredItems, handleClose, onSelect],
+  );
 
-  // ── Key action map — combobox dispatches directly to kernel ──
-  // NOTE: KeyboardListener skips role="combobox", so QuickPick
-  //       dispatches navigation commands itself. The map avoids
-  //       if/else-if e.key branching (OCP).
-  const keyActions = useMemo(() => {
-    const actions: Record<string, (e: React.KeyboardEvent) => void> = {
-      Tab: (e) => {
-        e.preventDefault();
-        if (completion) setQuery((q) => q + completion);
-      },
-      ArrowRight: (e) => {
-        if (completion) {
-          e.preventDefault();
-          setQuery((q) => q + completion);
-        }
-      },
-      ArrowDown: (e) => {
-        e.preventDefault();
-        os.dispatch(OS_NAVIGATE({ direction: "down" }));
-      },
-      ArrowUp: (e) => {
-        e.preventDefault();
-        os.dispatch(OS_NAVIGATE({ direction: "up" }));
-      },
-      Enter: (e) => {
-        e.preventDefault();
-        handleAction();
-      },
-      Escape: (e) => {
-        e.preventDefault();
-        handleClose();
-      },
-    };
-    return actions;
-  }, [completion, handleAction, handleClose]);
-
+  // ── Typeahead keys only — nav keys handled by OS combobox relay ──
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      const action = keyActions[e.key];
-      if (action) action(e);
+      if (e.key === "Tab") {
+        e.preventDefault();
+        if (completion) setQuery((q) => q + completion);
+      } else if (e.key === "ArrowRight" && completion) {
+        e.preventDefault();
+        setQuery((q) => q + completion);
+      }
     },
-    [keyActions],
+    [completion],
   );
 
   if (!isOpen) return null;
@@ -401,6 +322,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
             id={zoneId}
             role="listbox"
             options={QUICKPICK_ZONE_OPTIONS}
+            onAction={handleAction}
             className="min-h-[380px] max-h-[380px] overflow-y-auto p-2 scroll-py-2 custom-scrollbar"
           >
             {filteredItems.length === 0
@@ -418,10 +340,6 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
                         <DefaultQuickPickRow
                           item={item}
                           isFocused={isFocused}
-                          onClick={() => {
-                            handleClose();
-                            onSelect(item);
-                          }}
                         />
                       )
                     }
@@ -483,11 +401,9 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
 function DefaultQuickPickRow({
   item,
   isFocused,
-  onClick,
 }: {
   item: QuickPickItem;
   isFocused: boolean;
-  onClick: () => void;
 }) {
   return (
     <div
@@ -498,7 +414,6 @@ function DefaultQuickPickRow({
         flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer mb-[1px]
         ${isFocused ? "bg-zinc-100 text-zinc-950" : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800"}
       `}
-      onClick={onClick}
     >
       {item.icon && <span className="text-base opacity-70">{item.icon}</span>}
       <span className="flex-1 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">

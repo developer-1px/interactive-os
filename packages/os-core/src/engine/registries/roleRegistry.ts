@@ -335,6 +335,10 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     dismiss: { escape: "close" },
     project: { virtualFocus: true },
     tab: { behavior: "escape" },
+    inputmap: {
+      Enter: [OS_ACTIVATE()],
+      click: [OS_ACTIVATE()],
+    },
   },
 
   // ─── Feed (ARIA APG: Feed Pattern) ───
