@@ -37,6 +37,9 @@
 | **immer를 순수함수에 사용** | 테스트에서 draft 참조 이슈 | 순수함수 레이어는 spread/Object.assign | Green |
 | **과잉 구현** | 테스트에 없는 edge case까지 미리 구현 → 테스트와 구현 괴리 | 테스트가 요구하는 것만 | Green |
 | **standalone trigger click** | `page.click("trigger-id")`가 동작 안 함 → Zone에 속하지 않은 trigger는 findItemCallback에 없음 | beforeEach에서 `ZoneRegistry.setItemCallback("__standalone__", id, { onActivate })` 수동 등록 | Red |
+| **accordion click = expand** | accordion/disclosure의 inputmap에 `click: [OS_EXPAND({action:"toggle"})]`이 있어 click()이 expand를 toggle함 → 테스트에서 click 후 Enter 시 expand 방향이 반대 | /red 작성 전 해당 role의 inputmap(특히 click 바인딩)을 확인 | Red |
+| **Inspector panel goto** | Inspector 내부 panel은 URL route가 없어 `page.goto("zone-name")` 불가 → `page.goto("/")` 사용 | Inspector panel 테스트는 `page.goto("/")` (전체 zone 등록) 후 locator로 접근 | Red |
+| **컴포넌트 교체 시 ...rest 누락** | 기존 컴포넌트가 `...rest` spread로 부모 asChild props를 전달하는데, 대체 컴포넌트에서 누락 → 프로젝션에서 id 미전파 → locator 실패 | 컴포넌트 교체 시 기존의 `...rest` spread 유무를 반드시 확인 | Green |
 
 ## Precedents
 
