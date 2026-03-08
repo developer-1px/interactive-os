@@ -126,7 +126,7 @@ export function createBoundComponents<S>(
 
     return React.createElement(
       Zone,
-      zoneProps as React.ComponentProps<typeof Zone>,
+      zoneProps as unknown as React.ComponentProps<typeof Zone>,
       children,
     );
   };

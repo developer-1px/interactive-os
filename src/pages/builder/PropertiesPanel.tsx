@@ -1,6 +1,6 @@
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
-import { os } from "@os-sdk/os";
 import {
   ChevronDown,
   ChevronRight,
@@ -25,7 +25,7 @@ import {
 } from "@/apps/builder/app";
 import type { Block } from "@/apps/builder/model/appState";
 import { getPropertyDef } from "@/apps/builder/model/blockSchemas";
-import { getWidget } from "./widgets/PropertyWidgets";
+import { getWidget } from "./widgets/widgetRegistry";
 
 const CANVAS_ZONE_ID = "canvas";
 const PANEL_ZONE_ID = "panel";
@@ -55,6 +55,7 @@ const HighlightContext = createContext<{
 // ═══════════════════════════════════════════════════════════════════
 
 export function PropertiesPanel() {
+  const dispatch = useDispatch();
   const blocks = BuilderApp.useComputed((s) => s.data.blocks);
   const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
 
@@ -90,7 +91,7 @@ export function PropertiesPanel() {
     // Expand ancestors via OS_EXPAND
     const ancestors = resolveAncestorIds(ownerBlockId, blocks);
     for (const id of ancestors) {
-      os.dispatch({
+      dispatch({
         type: "OS_EXPAND",
         payload: { itemId: id, zoneId: PANEL_ZONE_ID, action: "expand" },
       });
@@ -275,6 +276,7 @@ function BlockFieldsForm({
   setHeaderRef: (id: string) => (el: HTMLElement | null) => void;
   focusedCanvasId: string | null;
 }) {
+  const dispatch = useDispatch();
   const fields = BuilderApp.useComputed((s): Record<string, string> => {
     function find(blocks: Block[]): Block | null {
       for (const b of blocks) {
@@ -313,7 +315,7 @@ function BlockFieldsForm({
           className="w-full px-2 py-1.5 text-sm border border-slate-200 rounded-md bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 font-medium text-slate-700"
           value={block.label}
           onChange={(e) =>
-            os.dispatch(
+            dispatch(
               renameSectionLabel({ id: block.id, label: e.target.value }),
             )
           }
@@ -468,9 +470,10 @@ function FieldInput({
   value: string;
 }) {
   const { setHighlightedItemId } = useContext(HighlightContext);
+  const dispatch = useDispatch();
 
   const handleChange = (newValue: string) => {
-    os.dispatch(
+    dispatch(
       updateField({ sectionId: blockId, field: fieldKey, value: newValue }),
     );
   };

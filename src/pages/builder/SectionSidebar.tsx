@@ -9,6 +9,7 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useDragState } from "@os-react/6-project/accessors/useDragState";
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
@@ -318,9 +319,10 @@ function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
 
 function AddBlockButton() {
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
 
   const handleAdd = (preset: (typeof BLOCK_PRESETS)[number]) => {
-    os.dispatch(addBlock({ block: preset.block }));
+    dispatch(addBlock({ block: preset.block }));
     setOpen(false);
   };
 

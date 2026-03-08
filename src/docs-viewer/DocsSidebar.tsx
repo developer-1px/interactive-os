@@ -13,7 +13,6 @@ import {
   formatRelativeTime,
   getFavoriteFiles,
   getRecentFiles,
-  toggleFavorite,
 } from "./docsUtils";
 
 /** DocsSidebar flatten: level 0 folders = section headers */
@@ -322,4 +321,3 @@ export function DocsSidebar({
   );
 }
 
-export { toggleFavorite as _toggleFavorite };

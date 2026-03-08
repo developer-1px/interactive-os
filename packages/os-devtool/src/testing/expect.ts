@@ -14,6 +14,11 @@
 
 import type { Locator, LocatorAssertions } from "./types";
 
+/** Accepts both Playwright Locator (async) and headless locator (sync) */
+type LocatorLike = {
+  getAttribute(name: string): string | null | Promise<string | null>;
+};
+
 /**
  * Playwright-compatible expect for Locator.
  *
@@ -21,7 +26,7 @@ import type { Locator, LocatorAssertions } from "./types";
  *   await expect(page.locator("apple")).toHaveAttribute("aria-current", "true");
  *   await expect(page.locator("apple")).toBeFocused();
  */
-export function expect(locator: Locator): LocatorAssertions {
+export function expect(locator: LocatorLike): LocatorAssertions {
   const assertable = locator as Locator & {
     _toHaveAttribute?: (
       name: string,

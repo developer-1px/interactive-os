@@ -57,6 +57,20 @@ interface ZoneOrderEntry {
   lastFocusedId: string | null;
 }
 
+/** Extended locator returned by createAppPage — includes internal expect() hooks */
+interface LocatorResult {
+  readonly attrs: import("@os-core/3-inject/headless.types").ElementAttrs;
+  getAttribute(name: string): string | null;
+  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
+  toHaveAttribute(name: string, value: string | boolean): boolean;
+  toBeFocused(): boolean;
+  toBeChecked(): boolean;
+  toBeDisabled(): boolean;
+  inputValue(): string;
+  _toBeFocused(negated?: boolean): void;
+  _toHaveAttribute(name: string, value: string | RegExp, negated?: boolean): void;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
 // ═══════════════════════════════════════════════════════════════════
@@ -308,40 +322,32 @@ export function createAppPage<S>(
     const { bindings } = bindingEntry;
     const overrides = { ...bindings.options, ...configOverride } as ZoneOptions;
     const config = resolveRole(bindingEntry.role, overrides);
-    ZoneRegistry.register(zoneName, {
-      role: bindingEntry.role,
+    const entry: import("@os-core/engine/registries/zoneRegistry").ZoneEntry = {
       config,
       element: null,
       parentId: null,
-      // ZoneEntry allows undefined for all callbacks
-      onAction: bindings.onAction,
-      onCheck: bindings.onCheck,
-      onDelete: bindings.onDelete,
-      onCopy: bindings.onCopy,
-      onCut: bindings.onCut,
-      onPaste: bindings.onPaste,
-      onMoveUp: bindings.onMoveUp,
-      onMoveDown: bindings.onMoveDown,
-      onUndo: bindings.onUndo,
-      onRedo: bindings.onRedo,
-      onSelect: bindings.onSelect,
-      itemFilter: bindings.itemFilter,
-      ...(itemsOverride
-        ? { getItems: () => itemsOverride }
-        : bindings.getItems
-          ? { getItems: bindings.getItems }
-          : {}),
-      ...(expandableOverride
-        ? { getExpandableItems: () => expandableOverride }
-        : bindings.getExpandableItems
-          ? { getExpandableItems: bindings.getExpandableItems }
-          : {}),
-      ...(treeLevelsOverride
-        ? { getTreeLevels: () => treeLevelsOverride }
-        : bindings.getTreeLevels
-          ? { getTreeLevels: bindings.getTreeLevels }
-          : {}),
-    });
+    };
+    if (bindingEntry.role) entry.role = bindingEntry.role;
+    if (bindings.onAction) entry.onAction = bindings.onAction;
+    if (bindings.onCheck) entry.onCheck = bindings.onCheck;
+    if (bindings.onDelete) entry.onDelete = bindings.onDelete;
+    if (bindings.onCopy) entry.onCopy = bindings.onCopy;
+    if (bindings.onCut) entry.onCut = bindings.onCut;
+    if (bindings.onPaste) entry.onPaste = bindings.onPaste;
+    if (bindings.onMoveUp) entry.onMoveUp = bindings.onMoveUp;
+    if (bindings.onMoveDown) entry.onMoveDown = bindings.onMoveDown;
+    if (bindings.onUndo) entry.onUndo = bindings.onUndo;
+    if (bindings.onRedo) entry.onRedo = bindings.onRedo;
+    if (bindings.onSelect) entry.onSelect = bindings.onSelect;
+    if (bindings.itemFilter) entry.itemFilter = bindings.itemFilter;
+    if (itemsOverride) entry.getItems = () => itemsOverride;
+    else if (bindings.getItems) entry.getItems = bindings.getItems;
+    if (expandableOverride) entry.getExpandableItems = () => expandableOverride;
+    else if (bindings.getExpandableItems) entry.getExpandableItems = bindings.getExpandableItems;
+    if (treeLevelsOverride) entry.getTreeLevels = () => treeLevelsOverride;
+    else if (bindings.getTreeLevels) entry.getTreeLevels = bindings.getTreeLevels;
+    ZoneRegistry.register(zoneName, entry);
+
 
     if (bindingEntry.triggers) {
       for (const trigger of bindingEntry.triggers) {
@@ -596,6 +602,10 @@ export function createAppPage<S>(
       return renderHtml();
     },
 
+    getDOMElement(_id: string): HTMLElement | null {
+      return null; // headless — no real DOM
+    },
+
     locator(selector: string) {
       // Strip # prefix if present (Playwright uses #id, we use bare id)
       const elementId = selector.startsWith("#") ? selector.slice(1) : selector;
@@ -682,7 +692,7 @@ export function createAppPage<S>(
             );
           }
         },
-      } as any;
+      } satisfies LocatorResult;
     },
   };
 }

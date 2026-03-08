@@ -64,7 +64,7 @@ interface FocusSlice {
 
 function collectZoneCards(
   focus: FocusSlice,
-  _zoneSnapshot?: number,
+  _zoneSnapshot?: readonly string[],
 ): ZoneCard[] {
   const zoneIds = [...ZoneRegistry.keys()];
   const activeZoneId = focus.activeZoneId;

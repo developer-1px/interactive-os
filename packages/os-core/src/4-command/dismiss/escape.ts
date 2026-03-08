@@ -46,6 +46,7 @@ export const OS_ESCAPE = os.defineCommand(
     const stack = ctx.state.os.overlays?.stack;
     if (stack?.length && !payload?.force) {
       const topOverlay = stack[stack.length - 1];
+      if (topOverlay === undefined) return;
       if (topOverlay.type === "alertdialog") return;
       return { dispatch: OS_OVERLAY_CLOSE({}) };
     }

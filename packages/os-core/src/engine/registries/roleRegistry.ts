@@ -12,7 +12,6 @@ import {
   OS_ACTIVATE,
   OS_CHECK,
   OS_EXPAND,
-  OS_OVERLAY_CLOSE,
   OS_VALUE_CHANGE,
 } from "@os-core/4-command";
 import { OS_NAVIGATE } from "@os-core/4-command/navigate";

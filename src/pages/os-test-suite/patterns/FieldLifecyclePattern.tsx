@@ -97,7 +97,8 @@ const ChangeFieldUI = changeZone.bind({
 // ─── React Component ───
 
 export function FieldLifecyclePattern() {
-  const state = FieldLifecycleApp.useComputed((s) => s);
+  const enterValue = FieldLifecycleApp.useComputed((s) => s.enterValue);
+  const changeValue = FieldLifecycleApp.useComputed((s) => s.changeValue);
 
   return (
     <div className="max-w-md space-y-8">
@@ -128,7 +129,7 @@ export function FieldLifecyclePattern() {
         <p className="text-xs text-gray-400">
           Committed value:{" "}
           <code className="bg-gray-100 px-1 rounded">
-            {state?.enterValue || "(empty)"}
+            {enterValue || "(empty)"}
           </code>
         </p>
       </div>
@@ -154,7 +155,7 @@ export function FieldLifecyclePattern() {
         <p className="text-xs text-gray-400">
           Committed value:{" "}
           <code className="bg-gray-100 px-1 rounded">
-            {state?.changeValue || "(empty)"}
+            {changeValue || "(empty)"}
           </code>
         </p>
       </div>

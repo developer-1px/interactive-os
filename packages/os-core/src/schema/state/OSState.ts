@@ -1,3 +1,4 @@
+import type { BaseCommand } from "@kernel/core/tokens";
 import type { FocusStackEntry } from "../types/focus/FocusStack";
 
 export interface OverlayEntry {
@@ -24,7 +25,7 @@ export interface NotificationEntry {
   /** Optional action label (e.g. "Undo") */
   actionLabel?: string;
   /** Optional command to dispatch when action is clicked */
-  actionCommand?: { type: string; payload?: unknown; scope?: string[] };
+  actionCommand?: BaseCommand;
   /** Duration in ms before auto-dismiss (0 = manual only). Default: 4000 for toast, 0 for alert */
   duration: number;
   /** Timestamp when notification was created */

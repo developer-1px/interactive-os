@@ -41,7 +41,7 @@ import {
 import { Item } from "@os-react/6-project/Item";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Zone } from "@os-react/6-project/Zone";
-import type { ZoneCursor } from "@os-sdk/os";
+import type { ZoneCallback, ZoneCursor } from "@os-sdk/os";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
@@ -228,13 +228,14 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   }, [id, onClose]);
 
   // ── Zone onAction: OS_ACTIVATE → select focused item ──
-  const handleAction = useCallback(
+  const handleAction: ZoneCallback = useCallback(
     (cursor: ZoneCursor) => {
       const item = filteredItems.find((r) => r.id === cursor.focusId);
       if (item) {
         handleClose();
         onSelect(item);
       }
+      return [];
     },
     [filteredItems, handleClose, onSelect],
   );

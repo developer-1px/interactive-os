@@ -91,15 +91,14 @@ export function DialogPattern() {
               </label>
               <Item
                 id="dialog-name"
-                as="input"
-                type="text"
-                placeholder="Enter name"
                 className="
                   w-full px-3 py-2 border border-gray-300 rounded-md text-sm
                   focus:ring-2 focus:ring-violet-400 focus:outline-none
                   data-[focused=true]:ring-2 data-[focused=true]:ring-violet-400
                 "
-              />
+              >
+                <input type="text" placeholder="Enter name" className="w-full outline-none text-sm bg-transparent" />
+              </Item>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -107,15 +106,14 @@ export function DialogPattern() {
               </label>
               <Item
                 id="dialog-email"
-                as="input"
-                type="email"
-                placeholder="Enter email"
                 className="
                   w-full px-3 py-2 border border-gray-300 rounded-md text-sm
                   focus:ring-2 focus:ring-violet-400 focus:outline-none
                   data-[focused=true]:ring-2 data-[focused=true]:ring-violet-400
                 "
-              />
+              >
+                <input type="email" placeholder="Enter email" className="w-full outline-none text-sm bg-transparent" />
+              </Item>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Dialog.Close

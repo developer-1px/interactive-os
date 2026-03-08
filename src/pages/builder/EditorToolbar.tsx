@@ -1,3 +1,4 @@
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import {
@@ -37,6 +38,7 @@ export function EditorToolbar({
   currentViewport: ViewportMode;
   onViewportChange: (mode: ViewportMode) => void;
 }) {
+  const dispatch = useDispatch();
   return (
     <div className="absolute top-3 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
       <div className="flex items-center gap-1 px-1.5 py-1 bg-white/80 backdrop-blur-2xl rounded-xl ring-1 ring-slate-900/[0.06] shadow-lg shadow-slate-900/[0.04]">
@@ -54,12 +56,12 @@ export function EditorToolbar({
           <ToolButton
             icon={<Undo2 size={15} />}
             disabled={!BuilderApp.useComputed(canUndo.evaluate)}
-            onClick={() => os.dispatch(undoCommand())}
+            onClick={() => dispatch(undoCommand())}
           />
           <ToolButton
             icon={<Redo2 size={15} />}
             disabled={!BuilderApp.useComputed(canRedo.evaluate)}
-            onClick={() => os.dispatch(redoCommand())}
+            onClick={() => dispatch(redoCommand())}
           />
         </div>
 

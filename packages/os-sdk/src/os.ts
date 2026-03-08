@@ -38,7 +38,10 @@ export { os } from "@os-core/engine/kernel";
 
 // ── Chain Resolution ──
 export { NOOP } from "@os-core/2-resolve/chainResolver";
-export type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
+export type {
+  ZoneCallback,
+  ZoneCursor,
+} from "@os-core/engine/registries/zoneRegistry";
 
 // ── Types ──
 export type { NotificationEntry } from "@os-core/schema/state/OSState";

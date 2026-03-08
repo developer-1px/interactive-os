@@ -11,10 +11,9 @@
  * Usage: Place <NotificationContainer /> once at the app root.
  */
 
-import type { BaseCommand } from "@kernel/core/tokens";
+import { useNotificationActions } from "@os-react/6-project/accessors/useNotificationActions";
 import { useNotifications } from "@os-react/6-project/accessors/useNotifications";
 import type { NotificationEntry } from "@os-sdk/os";
-import { OS_NOTIFY_DISMISS, os } from "@os-sdk/os";
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -95,6 +94,7 @@ function NotificationItem({
 
 export function NotificationContainer() {
   const notifications = useNotifications();
+  const { dismiss, executeAction } = useNotificationActions();
 
   if (notifications.length === 0) return null;
 
@@ -104,13 +104,10 @@ export function NotificationContainer() {
         <div key={n.id} className="pointer-events-auto">
           <NotificationItem
             notification={n}
-            onDismiss={() => os.dispatch(OS_NOTIFY_DISMISS({ id: n.id }))}
+            onDismiss={() => dismiss(n.id)}
             {...(n.actionCommand
               ? {
-                  onAction: () => {
-                    os.dispatch(n.actionCommand as BaseCommand);
-                    os.dispatch(OS_NOTIFY_DISMISS({ id: n.id }));
-                  },
+                  onAction: () => executeAction(n.actionCommand!, n.id),
                 }
               : {})}
           />
