@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T05:00
+> Last updated: 2026-03-09T06:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -33,6 +33,8 @@
 | ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
 | ~~action-centric-trigger~~ | ✅ Archived (W11) | 03-09 |
 | ~~seal-useComputed~~ | ✅ Archived (W11) | 03-09 |
+| ban-os-from-tsx | Scaffold | 03-09 |
+| condition-auto-disabled ⚠️ | — | 03-05 |
 | docs-freshness | WP1~WP8 | 03-06 |
 | kernel-docs-sync | — | 03-06 |
 | keyboard-input-isomorphism | — | 03-07 |
@@ -47,6 +49,7 @@
 | ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
 | ~~lint-zero~~ | ✅ Archived (W11) | 03-09 |
 | ~~ban-dispatch-tsx~~ | ✅ Archived (W11) | 03-09 |
+| ~~testbot-apg-fix~~ | ✅ Archived (W11) | 03-09 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
@@ -95,10 +98,10 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 13 |
+| Active Projects | 15 |
 | Epics (confirmed) | 1 (headless-page) |
 | Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
-| Stale (4d+) | 4 (builder-v2, builder-v3, test-observability, replay) |
+| Stale (4d+) | 5 (builder-v2, builder-v3, test-observability, replay, condition-auto-disabled) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
