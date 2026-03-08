@@ -19,6 +19,12 @@ import type {
 } from "@os-sdk/app/defineApp/trigger";
 import type React from "react";
 import type { ReactNode } from "react";
+
+/** Overlay config for zone.overlay() — subset of CompoundTriggerConfig without id (supplied as first arg) */
+export interface ZoneOverlayConfig {
+  confirm?: BaseCommand;
+  role?: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip" | "listbox";
+}
 import type { ZodSchema } from "zod";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -214,6 +220,15 @@ export interface ZoneHandle<S> {
   defineEffect<V>(type: string, handler: (value: V) => void): void;
 
   createZone(name: string): ZoneHandle<S>;
+
+  /** Declare a simple trigger: id + command or factory. Returns TriggerBinding. */
+  trigger(
+    id: string,
+    commandOrFactory: BaseCommand | CommandFactory<string, unknown>,
+  ): TriggerBinding;
+
+  /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
+  overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
 
   bind(
     config: ZoneBindings & {

@@ -54,6 +54,7 @@ import {
   type FlatHandler,
   type Selector,
   type TestInstance,
+  type TriggerBinding,
   type ZoneBindingEntry,
   type ZoneBindings,
   type ZoneHandle,
@@ -277,6 +278,27 @@ export function defineApp<S>(
 
       createZone(childName: string): ZoneHandle<S> {
         return createZone(`${zoneName}:${childName}`, zoneGroup);
+      },
+
+      trigger(
+        id: string,
+        commandOrFactory:
+          | import("@kernel/core/tokens").BaseCommand
+          | import("@kernel/core/tokens").CommandFactory<string, unknown>,
+      ): TriggerBinding {
+        // typeof detection: function → factory (cursor auto-bind), object → command as-is
+        const onActivate =
+          typeof commandOrFactory === "function"
+            ? (commandOrFactory as (focusId: string) => import("@kernel/core/tokens").BaseCommand)
+            : commandOrFactory;
+        return { id, onActivate };
+      },
+
+      overlay(
+        id: string,
+        config: import("@os-sdk/app/defineApp/types").ZoneOverlayConfig,
+      ): CompoundTriggerComponents {
+        return createCompoundTrigger(appId, { ...config, id });
       },
 
       bind(
