@@ -23,40 +23,34 @@ export const NestedShowcaseApp = defineApp("layer-nested-showcase", {});
 const triggerZone = NestedShowcaseApp.createZone("nested-trigger-zone");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-nested-btn"],
-  triggers: [
-    {
-      id: "open-nested-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenNestedBtn"],
+  triggers: {
+    OpenNestedBtn: () =>
+      OS_OVERLAY_OPEN({
         id: "nested-dialog-1",
         type: "dialog",
         entry: "first",
       }),
-      overlay: { id: "nested-dialog-1", type: "dialog" },
-    },
-  ],
+  },
 });
 
 // Dialog 1
 const dialog1Zone = NestedShowcaseApp.createZone("nested-dialog-1");
 dialog1Zone.bind({
   role: "group",
-  getItems: () => ["d1-close", "d1-open-nested"],
+  getItems: () => ["d1-close", "D1OpenNested"],
   options: {
     tab: { behavior: "trap" as const },
     dismiss: { escape: "close" as const },
   },
-  triggers: [
-    {
-      id: "d1-open-nested",
-      onActivate: () => OS_OVERLAY_OPEN({
+  triggers: {
+    D1OpenNested: () =>
+      OS_OVERLAY_OPEN({
         id: "nested-dialog-2",
         type: "dialog",
         entry: "first",
       }),
-      overlay: { id: "nested-dialog-2", type: "dialog" },
-    },
-  ],
+  },
 });
 
 // Dialog 2
@@ -110,7 +104,7 @@ export function NestedPattern() {
           <Dialog id="nested-dialog-2" role="dialog">
             <Dialog.Trigger asChild>
               <Item
-                id="d1-open-nested"
+                id="D1OpenNested"
                 as="button"
                 className="
                   px-4 py-2 text-sm bg-amber-500 text-white rounded-md

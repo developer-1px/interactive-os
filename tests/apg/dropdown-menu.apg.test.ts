@@ -26,18 +26,15 @@ function openDropdown() {
   const toolbar = app.createZone("toolbar");
   toolbar.bind({
     role: "toolbar",
-    getItems: () => ["locale-trigger"],
-    triggers: [
-      {
-        id: "locale-trigger",
-        onActivate: OS_OVERLAY_OPEN({
+    getItems: () => ["LocaleTrigger"],
+    triggers: {
+      LocaleTrigger: () =>
+        OS_OVERLAY_OPEN({
           id: "locale-menu",
           type: "menu",
           entry: "first",
         }),
-        overlay: { id: "locale-menu", type: "menu" },
-      },
-    ],
+    },
   });
 
   const menu = app.createZone("locale-menu");
@@ -52,7 +49,7 @@ function openDropdown() {
 
   const page = createHeadlessPage(app);
   page.goto("/");
-  page.click("locale-trigger");
+  page.click("LocaleTrigger");
   return page;
 }
 
@@ -106,7 +103,7 @@ describe("Dropdown-as-Menu: headless proof", () => {
 
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("locale-trigger");
+    expect(page.focusedItemId("toolbar")).toBe("LocaleTrigger");
   });
 
   // ── Tab trap ──

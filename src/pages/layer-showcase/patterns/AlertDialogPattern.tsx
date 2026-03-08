@@ -22,18 +22,15 @@ export const AlertDialogShowcaseApp = defineApp("layer-alertdialog-showcase", {}
 const triggerZone = AlertDialogShowcaseApp.createZone("alertdialog-trigger-zone");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-alertdialog-btn"],
-  triggers: [
-    {
-      id: "open-alertdialog-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenAlertDialog"],
+  triggers: {
+    OpenAlertDialog: () =>
+      OS_OVERLAY_OPEN({
         id: "layer-alertdialog",
         type: "alertdialog",
         entry: "first",
       }),
-      overlay: { id: "layer-alertdialog", type: "alertdialog" },
-    },
-  ],
+  },
 });
 
 // AlertDialog zone: focus trap, NO escape dismiss

@@ -21,7 +21,7 @@
  */
 
 import type { BaseCommand } from "@kernel";
-import { Trigger } from "@os-react/6-project/Trigger";
+import { Trigger } from "@os-react/6-project/trigger/index";
 import {
   Children,
   isValidElement,

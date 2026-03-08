@@ -1,32 +1,14 @@
 /**
- * defineApp — Trigger & Dialog component factories
+ * defineApp — Compound overlay trigger factory (Dialog/Menu/Popover).
  *
- * Pure functions that create bound trigger and dialog components.
- * Only dependency: appId (for displayName) and OS primitives.
+ * Non-overlay triggers are inline in bind() — no factory needed.
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
-import { Trigger } from "@os-react/6-project/Trigger";
+import { Trigger } from "@os-react/6-project/trigger/index";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import React, { type ReactNode, useEffect } from "react";
-
-/**
- * createFunctionTrigger — returns a prop getter.
- * Returns only data attributes, zero React event handlers.
- * Payload (optional string ID) is bound at render time via data-trigger-payload.
- */
-export function createFunctionTrigger(
-  id: string,
-): <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> {
-  const getProps = <T extends HTMLElement>(payload?: string): React.HTMLAttributes<T> & { "data-trigger-id": string } => {
-    return {
-      "data-trigger-id": id,
-      ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
-    } as React.HTMLAttributes<T> & { "data-trigger-id": string };
-  };
-  return getProps;
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // Compound Trigger (Dialog pattern)

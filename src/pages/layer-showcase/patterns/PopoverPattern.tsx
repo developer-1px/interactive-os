@@ -20,18 +20,15 @@ export const PopoverShowcaseApp = defineApp("layer-popover-showcase", {});
 const triggerZone = PopoverShowcaseApp.createZone("popover-trigger-zone");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-popover-btn"],
-  triggers: [
-    {
-      id: "open-popover-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenPopoverBtn"],
+  triggers: {
+    OpenPopoverBtn: () =>
+      OS_OVERLAY_OPEN({
         id: "layer-popover",
         type: "popover",
         entry: "first",
       }),
-      overlay: { id: "layer-popover", type: "popover" },
-    },
-  ],
+  },
 });
 
 const popoverZone = PopoverShowcaseApp.createZone("layer-popover");

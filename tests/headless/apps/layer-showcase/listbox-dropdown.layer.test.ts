@@ -15,7 +15,7 @@ import { ListboxDropdownShowcaseApp } from "@/pages/layer-showcase/patterns/List
 import { describe, expect, it } from "vitest";
 
 const LISTBOX_ZONE_ID = "layer-listbox";
-const TRIGGER_ID = "open-listbox-btn";
+const TRIGGER_ID = "OpenListboxBtn";
 
 function createPage() {
   const page = createHeadlessPage(ListboxDropdownShowcaseApp);

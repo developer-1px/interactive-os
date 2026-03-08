@@ -1,32 +1,22 @@
 /**
- * TriggerBase — Command dispatcher with overlay support.
+ * TriggerBase — Overlay trigger shell.
  *
- * Base Trigger: dispatches a command when clicked.
- * When an overlay role is set, click opens an overlay.
+ * Only used for overlay patterns (dialog, menu, popover).
+ * Non-overlay triggers use props-spread via bind({ triggers }).
  *
- * Architecture:
- *   Layer 1 (ZIFT Engine): Trigger + Trigger.Portal + Trigger.Dismiss
- *   Layer 2 (Radix Interface): Dialog, Menu, etc. (thin wrappers)
- *
- * Trigger always merges its click handler into the child element
- * (asChild-by-default). It never renders its own <button>.
- * The consumer must provide a clickable element as the child.
+ * Merges overlay ARIA (aria-haspopup, aria-expanded, aria-controls)
+ * into the child element. Never renders its own <button>.
  */
 
-import type { BaseCommand } from "@kernel";
 import { os } from "@os-core/engine/kernel.ts";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import type { OverlayEntry } from "@os-core/schema/state/OSState.ts";
 import { Item } from "@os-react/6-project/Item.tsx";
-import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import type { ReactElement, ReactNode } from "react";
 import {
   cloneElement,
   forwardRef,
   isValidElement,
-  useEffect,
   useMemo,
-  useRef,
 } from "react";
 import { OverlayContext } from "./OverlayContext";
 import { TriggerPopover } from "./TriggerPopover";
@@ -39,11 +29,9 @@ import { TriggerPortal, type TriggerPortalProps } from "./TriggerPortal";
 /** Overlay role — determines trigger mechanism and overlay behavior */
 type OverlayRole = OverlayEntry["type"];
 
-export interface TriggerProps<T extends BaseCommand>
+export interface TriggerProps
   extends React.HTMLAttributes<HTMLElement> {
   id?: string;
-  /** Command or cursor-dependent factory. Functions are registered directly in ZoneRegistry. */
-  onActivate?: T | ((focusId: string) => T);
   children: ReactNode;
 
   /** Overlay role — when set, click opens an overlay */
@@ -65,11 +53,10 @@ function generateOverlayId() {
 // Component
 // ═══════════════════════════════════════════════════════════════════
 
-export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
+export const TriggerBase = forwardRef<HTMLElement, TriggerProps>(
   (
     {
       id,
-      onActivate,
       children,
       className,
       role: overlayRole,
@@ -78,11 +65,6 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     },
     ref,
   ) => {
-    // Behavior removed — OS Pipeline handles all commands:
-    //   Click toggle → PointerListener → resolveTriggerClick
-    //   Keyboard → KeyboardListener → buildTriggerKeymap → resolveChain
-    //   Focus restore → OS_OVERLAY_CLOSE → triggerFocus effect
-
     // Use explicit overlayId if provided, otherwise auto-generate
     // biome-ignore lint/correctness/useExhaustiveDependencies: overlayRole intentionally excluded — ID must be stable
     const overlayId = useMemo(
@@ -91,11 +73,7 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       [externalOverlayId],
     );
 
-    // Internal ref (merged with forwarded ref)
-    const internalRef = useRef<HTMLElement>(null);
     const mergedRef = (node: HTMLElement | null) => {
-      (internalRef as React.MutableRefObject<HTMLElement | null>).current =
-        node;
       if (typeof ref === "function") ref(node);
       else if (ref)
         (ref as React.MutableRefObject<HTMLElement | null>).current = node;
@@ -111,9 +89,6 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
       overlayId ? s.os.overlays.stack.some((e) => e.id === overlayId) : false,
     );
 
-    // Focus restoration: handled by Pipeline's triggerFocus defineEffect.
-    // OS_OVERLAY_CLOSE stores triggerId and triggers focus via effect.
-
     const overlayAriaProps =
       overlayRole && overlayId
         ? {
@@ -123,24 +98,6 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
             "aria-controls": overlayId,
           }
         : {};
-
-    // ── onActivate callback registration ─────────────────────────
-    // Non-overlay triggers: register onActivate with ZoneRegistry
-    // so click path (OS_ACTIVATE → getItemCallback) can dispatch.
-    const zoneCtx = useZoneContext();
-    const zoneId = zoneCtx?.zoneId;
-
-    useEffect(() => {
-      if (!id || !onActivate || overlayRole) return;
-      const targetZoneId = zoneId ?? "__standalone__";
-      // Register function factories directly — preserves focusId argument.
-      // Static BaseCommands are wrapped in a thunk for backward compatibility.
-      const cb = typeof onActivate === "function"
-        ? { onActivate: onActivate as (focusId: string) => BaseCommand }
-        : { onActivate: () => onActivate };
-      ZoneRegistry.setItemCallback(targetZoneId, id, cb);
-      return () => ZoneRegistry.clearItemCallback(targetZoneId, id);
-    }, [id, onActivate, overlayRole, zoneId]);
 
     const baseProps = {
       className,

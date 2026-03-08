@@ -28,18 +28,15 @@ function createDialogApp(entry: "first" | "last" = "first") {
   const toolbar = app.createZone("toolbar");
   toolbar.bind({
     role: "toolbar",
-    getItems: () => ["invoke-btn"],
-    triggers: [
-      {
-        id: "invoke-btn",
-        onActivate: OS_OVERLAY_OPEN({
+    getItems: () => ["InvokeBtn"],
+    triggers: {
+      InvokeBtn: () =>
+        OS_OVERLAY_OPEN({
           id: "dialog",
           type: "dialog",
           entry,
         }),
-        overlay: { id: "dialog", type: "dialog" },
-      },
-    ],
+    },
   });
 
   const dialog = app.createZone("dialog");
@@ -54,7 +51,7 @@ function createDialogApp(entry: "first" | "last" = "first") {
 
   const page = createHeadlessPage(app);
   page.goto("/");
-  page.click("invoke-btn");
+  page.click("InvokeBtn");
   return page;
 }
 
@@ -92,7 +89,7 @@ describe("APG Dialog: Escape", () => {
     t.keyboard.press("Escape");
     // Overlay close restores to invoker zone (not null)
     expect(t.activeZoneId()).toBe("toolbar");
-    expect(t.focusedItemId("toolbar")).toBe("invoke-btn");
+    expect(t.focusedItemId("toolbar")).toBe("InvokeBtn");
   });
 });
 
@@ -108,7 +105,7 @@ describe("APG Dialog: Focus Restore", () => {
     // Escape closes overlay → focus restores to toolbar trigger
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("invoke-btn");
+    expect(page.focusedItemId("toolbar")).toBe("InvokeBtn");
   });
 
   it("nested dialogs: LIFO focus restore", () => {
@@ -117,39 +114,33 @@ describe("APG Dialog: Focus Restore", () => {
     const toolbar = app.createZone("toolbar");
     toolbar.bind({
       role: "toolbar",
-      getItems: () => ["btn-1"],
-      triggers: [
-        {
-          id: "btn-1",
-          onActivate: OS_OVERLAY_OPEN({
+      getItems: () => ["Btn1"],
+      triggers: {
+        Btn1: () =>
+          OS_OVERLAY_OPEN({
             id: "dialog-1",
             type: "dialog",
             entry: "first",
           }),
-          overlay: { id: "dialog-1", type: "dialog" },
-        },
-      ],
+      },
     });
 
     const d1 = app.createZone("dialog-1");
     d1.bind({
       role: "group",
-      getItems: () => ["d1-close", "d1-nested-btn"],
+      getItems: () => ["d1-close", "D1NestedBtn"],
       options: {
         tab: { behavior: "trap" as const },
         dismiss: { escape: "close" as const },
       },
-      triggers: [
-        {
-          id: "d1-nested-btn",
-          onActivate: OS_OVERLAY_OPEN({
+      triggers: {
+        D1NestedBtn: () =>
+          OS_OVERLAY_OPEN({
             id: "dialog-2",
             type: "dialog",
             entry: "first",
           }),
-          overlay: { id: "dialog-2", type: "dialog" },
-        },
-      ],
+      },
     });
 
     const d2 = app.createZone("dialog-2");
@@ -166,22 +157,22 @@ describe("APG Dialog: Focus Restore", () => {
     page.goto("/");
 
     // Open first dialog
-    page.click("btn-1");
+    page.click("Btn1");
     expect(page.activeZoneId()).toBe("dialog-1");
 
     // Navigate to nested trigger and open second dialog
     page.keyboard.press("Tab");
-    page.click("d1-nested-btn");
+    page.click("D1NestedBtn");
     expect(page.activeZoneId()).toBe("dialog-2");
 
     // Escape closes dialog-2 → restores to dialog-1
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("dialog-1");
-    expect(page.focusedItemId("dialog-1")).toBe("d1-nested-btn");
+    expect(page.focusedItemId("dialog-1")).toBe("D1NestedBtn");
 
     // Escape closes dialog-1 → restores to toolbar
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("btn-1");
+    expect(page.focusedItemId("toolbar")).toBe("Btn1");
   });
 });

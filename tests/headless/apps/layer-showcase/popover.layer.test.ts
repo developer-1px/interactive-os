@@ -15,7 +15,7 @@ import { PopoverShowcaseApp } from "@/pages/layer-showcase/patterns/PopoverPatte
 import { describe, expect, it } from "vitest";
 
 const POPOVER_ZONE_ID = "layer-popover";
-const TRIGGER_ID = "open-popover-btn";
+const TRIGGER_ID = "OpenPopoverBtn";
 
 function createPage() {
   const page = createHeadlessPage(PopoverShowcaseApp);

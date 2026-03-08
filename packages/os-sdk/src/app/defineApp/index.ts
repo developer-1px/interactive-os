@@ -38,7 +38,6 @@ import { createTestInstance } from "./testInstance";
 import {
   type CompoundTriggerComponents,
   createCompoundTrigger,
-  createFunctionTrigger,
 } from "./trigger";
 import {
   __conditionBrand,
@@ -301,15 +300,18 @@ export function defineApp<S>(
         triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
       } {
         // Normalize triggers: object map → TriggerBinding[] + prop-getter map
-        const triggerBindings: TriggerBinding[] = [];
+        let triggerBindings: TriggerBinding[] | undefined;
         const triggerGetters: Record<string, <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>> = {};
 
         if (config.triggers) {
+          triggerBindings = [];
           const map = config.triggers;
           for (const [key, onActivate] of Object.entries(map)) {
-            const trigger = createFunctionTrigger(key);
             triggerBindings.push({ id: key, onActivate: onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand });
-            triggerGetters[key] = trigger;
+            triggerGetters[key] = <T extends HTMLElement>(payload?: string): React.HTMLAttributes<T> => ({
+              "data-trigger-id": key,
+              ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
+            });
           }
         }
 

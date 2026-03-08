@@ -20,7 +20,7 @@ import { AlertDialogShowcaseApp } from "@/pages/layer-showcase/patterns/AlertDia
 import { describe, expect, it } from "vitest";
 
 const DIALOG_ZONE_ID = "layer-alertdialog";
-const TRIGGER_ID = "open-alertdialog-btn";
+const TRIGGER_ID = "OpenAlertDialog";
 const ALERTDIALOG_ITEMS = ["alert-cancel", "alert-confirm"];
 
 function createPage() {

@@ -20,18 +20,15 @@ export const ListboxDropdownShowcaseApp = defineApp("layer-listbox-dropdown-show
 const triggerZone = ListboxDropdownShowcaseApp.createZone("listbox-trigger-zone");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-listbox-btn"],
-  triggers: [
-    {
-      id: "open-listbox-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenListboxBtn"],
+  triggers: {
+    OpenListboxBtn: () =>
+      OS_OVERLAY_OPEN({
         id: "layer-listbox",
         type: "menu",
         entry: "first",
       }),
-      overlay: { id: "layer-listbox", type: "menu" },
-    },
-  ],
+  },
 });
 
 const listboxZone = ListboxDropdownShowcaseApp.createZone("layer-listbox");

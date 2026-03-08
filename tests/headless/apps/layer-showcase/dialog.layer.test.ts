@@ -22,7 +22,7 @@ import { describe, expect, it } from "vitest";
 
 const TRIGGER_ZONE_ID = "dialog-trigger-zone";
 const DIALOG_ZONE_ID = "layer-dialog";
-const TRIGGER_ID = "open-dialog-btn";
+const TRIGGER_ID = "OpenDialog";
 const DIALOG_ITEMS = ["dialog-close", "dialog-name", "dialog-email", "dialog-save"];
 
 function createPage() {

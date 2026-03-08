@@ -19,7 +19,7 @@ describe("OS Pipeline: Overlay — Open", () => {
   it("click trigger opens dialog", () => {
     const page = createPage();
 
-    page.click("open-btn");
+    page.click("OpenBtn");
 
     expect(page.activeZoneId()).toBe("test-dialog");
   });
@@ -27,7 +27,7 @@ describe("OS Pipeline: Overlay — Open", () => {
   it("focus moves to first dialog item on open", () => {
     const page = createPage();
 
-    page.click("open-btn");
+    page.click("OpenBtn");
 
     expect(page.focusedItemId()).toBe("dialog-a");
   });
@@ -36,7 +36,7 @@ describe("OS Pipeline: Overlay — Open", () => {
 describe("OS Pipeline: Overlay — Navigation", () => {
   it("ArrowDown navigates within dialog", () => {
     const page = createPage();
-    page.click("open-btn");
+    page.click("OpenBtn");
 
     page.keyboard.press("ArrowDown");
 
@@ -45,7 +45,7 @@ describe("OS Pipeline: Overlay — Navigation", () => {
 
   it("Tab cycles within dialog (focus trap)", () => {
     const page = createPage();
-    page.click("open-btn");
+    page.click("OpenBtn");
     expect(page.focusedItemId()).toBe("dialog-a");
 
     // Tab forward through all items
@@ -59,7 +59,7 @@ describe("OS Pipeline: Overlay — Navigation", () => {
 describe("OS Pipeline: Overlay — Close", () => {
   it("Escape closes dialog", () => {
     const page = createPage();
-    page.click("open-btn");
+    page.click("OpenBtn");
     expect(page.activeZoneId()).toBe("test-dialog");
 
     page.keyboard.press("Escape");
@@ -69,16 +69,16 @@ describe("OS Pipeline: Overlay — Close", () => {
 
   it("Escape restores focus to trigger", () => {
     const page = createPage();
-    page.click("open-btn");
+    page.click("OpenBtn");
 
     page.keyboard.press("Escape");
 
-    expect(page.focusedItemId()).toBe("open-btn");
+    expect(page.focusedItemId()).toBe("OpenBtn");
   });
 
   it("open → navigate → close → focus restores to trigger", () => {
     const page = createPage();
-    page.click("open-btn");
+    page.click("OpenBtn");
 
     page.keyboard.press("ArrowDown"); // navigate inside
     page.keyboard.press("ArrowDown");
@@ -86,6 +86,6 @@ describe("OS Pipeline: Overlay — Close", () => {
 
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("overlay-trigger");
-    expect(page.focusedItemId()).toBe("open-btn");
+    expect(page.focusedItemId()).toBe("OpenBtn");
   });
 });

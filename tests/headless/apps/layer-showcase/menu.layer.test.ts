@@ -16,7 +16,7 @@ import { MenuShowcaseApp } from "@/pages/layer-showcase/patterns/MenuPattern";
 import { describe, expect, it } from "vitest";
 
 const MENU_ZONE_ID = "layer-menu";
-const TRIGGER_ID = "open-menu-btn";
+const TRIGGER_ID = "OpenMenuBtn";
 const MENU_ITEMS = ["menu-cut", "menu-copy", "menu-paste", "menu-delete"];
 
 function createPage() {

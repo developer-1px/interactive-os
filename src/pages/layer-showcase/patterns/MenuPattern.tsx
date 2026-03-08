@@ -20,18 +20,15 @@ export const MenuShowcaseApp = defineApp("layer-menu-showcase", {});
 const triggerZone = MenuShowcaseApp.createZone("menu-trigger-zone");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-menu-btn"],
-  triggers: [
-    {
-      id: "open-menu-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenMenuBtn"],
+  triggers: {
+    OpenMenuBtn: () =>
+      OS_OVERLAY_OPEN({
         id: "layer-menu",
         type: "menu",
         entry: "first",
       }),
-      overlay: { id: "layer-menu", type: "menu" },
-    },
-  ],
+  },
 });
 
 const menuZone = MenuShowcaseApp.createZone("layer-menu");

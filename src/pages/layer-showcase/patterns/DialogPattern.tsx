@@ -24,18 +24,15 @@ export const DialogShowcaseApp = defineApp("layer-dialog-showcase", {});
 const triggerZone = DialogShowcaseApp.createZone("dialog-trigger-zone");
 const TriggerUI = triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-dialog-btn"],
-  triggers: [
-    {
-      id: "open-dialog-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenDialog"],
+  triggers: {
+    OpenDialog: () =>
+      OS_OVERLAY_OPEN({
         id: "layer-dialog",
         type: "dialog",
         entry: "first",
       }),
-      overlay: { id: "layer-dialog", type: "dialog" },
-    },
-  ],
+  },
 });
 
 // Dialog zone: focus trap + escape dismiss

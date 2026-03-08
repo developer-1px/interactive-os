@@ -34,18 +34,15 @@ export const OverlayApp = defineApp("os-test-overlay", {});
 const triggerZone = OverlayApp.createZone("overlay-trigger");
 triggerZone.bind({
   role: "toolbar",
-  getItems: () => ["open-btn"],
-  triggers: [
-    {
-      id: "open-btn",
-      onActivate: () => OS_OVERLAY_OPEN({
+  getItems: () => ["OpenBtn"],
+  triggers: {
+    OpenBtn: () =>
+      OS_OVERLAY_OPEN({
         id: "test-dialog",
         type: "dialog",
         entry: "first",
       }),
-      overlay: { id: "test-dialog", type: "dialog" },
-    },
-  ],
+  },
 });
 
 const dialogZone = OverlayApp.createZone("test-dialog");

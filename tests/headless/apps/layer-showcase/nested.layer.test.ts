@@ -24,7 +24,7 @@ function createPage() {
 describe("Layer Nested: Dialog 1 Opens", () => {
   it("click trigger opens Dialog 1", () => {
     const page = createPage();
-    page.click("open-nested-btn");
+    page.click("OpenNestedBtn");
     expect(page.activeZoneId()).toBe("nested-dialog-1");
     expect(page.focusedItemId()).toBe("d1-close");
   });
@@ -33,12 +33,12 @@ describe("Layer Nested: Dialog 1 Opens", () => {
 describe("Layer Nested: Dialog 2 Stacked", () => {
   it("click nested trigger opens Dialog 2 on top", () => {
     const page = createPage();
-    page.click("open-nested-btn");
+    page.click("OpenNestedBtn");
 
     // Navigate to nested trigger and click
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("d1-open-nested");
-    page.click("d1-open-nested");
+    expect(page.focusedItemId()).toBe("D1OpenNested");
+    page.click("D1OpenNested");
 
     expect(page.activeZoneId()).toBe("nested-dialog-2");
     expect(page.focusedItemId()).toBe("d2-ok");
@@ -48,26 +48,26 @@ describe("Layer Nested: Dialog 2 Stacked", () => {
 describe("Layer Nested: LIFO Escape Chain", () => {
   it("Escape closes Dialog 2, restores to Dialog 1", () => {
     const page = createPage();
-    page.click("open-nested-btn");
+    page.click("OpenNestedBtn");
     page.keyboard.press("Tab");
-    page.click("d1-open-nested");
+    page.click("D1OpenNested");
     expect(page.activeZoneId()).toBe("nested-dialog-2");
 
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("nested-dialog-1");
-    expect(page.focusedItemId("nested-dialog-1")).toBe("d1-open-nested");
+    expect(page.focusedItemId("nested-dialog-1")).toBe("D1OpenNested");
   });
 
   it("full chain: trigger → D1 → D2 → Escape → D1 → Escape → trigger", () => {
     const page = createPage();
 
     // Open D1
-    page.click("open-nested-btn");
+    page.click("OpenNestedBtn");
     expect(page.activeZoneId()).toBe("nested-dialog-1");
 
     // Open D2
     page.keyboard.press("Tab");
-    page.click("d1-open-nested");
+    page.click("D1OpenNested");
     expect(page.activeZoneId()).toBe("nested-dialog-2");
 
     // Escape → D1
@@ -77,6 +77,6 @@ describe("Layer Nested: LIFO Escape Chain", () => {
     // Escape → trigger
     page.keyboard.press("Escape");
     expect(page.activeZoneId()).toBe("nested-trigger-zone");
-    expect(page.focusedItemId("nested-trigger-zone")).toBe("open-nested-btn");
+    expect(page.focusedItemId("nested-trigger-zone")).toBe("OpenNestedBtn");
   });
 });
