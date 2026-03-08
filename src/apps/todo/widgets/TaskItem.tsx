@@ -112,8 +112,8 @@ export function TaskItem({ todoId }: TaskItemProps) {
             ) : (
               <span
                 className={`block text-[15px] leading-relaxed transition-all select-none ${isCompleted
-                    ? "text-slate-400 line-through decoration-slate-300"
-                    : "text-slate-700 font-medium"
+                  ? "text-slate-400 line-through decoration-slate-300"
+                  : "text-slate-700 font-medium"
                   }`}
               >
                 {todo.text}
@@ -137,7 +137,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
             ) : (
               <>
                 <button
-                  {...TodoList.triggers.StartEdit()}
+                  {...TodoList.triggers.StartEdit(todoId)}
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
                   title="Edit (Enter)"
@@ -148,7 +148,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
                 <button
-                  {...TodoList.triggers.MoveItemUp()}
+                  {...TodoList.triggers.MoveItemUp(todoId)}
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                   title="Move Up (Cmd+Up)"
@@ -156,7 +156,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                   <ArrowUp size={14} />
                 </button>
                 <button
-                  {...TodoList.triggers.MoveItemDown()}
+                  {...TodoList.triggers.MoveItemDown(todoId)}
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                   title="Move Down (Cmd+Down)"
@@ -167,7 +167,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
                 <button
-                  {...TodoList.triggers.DeleteTodo()}
+                  {...TodoList.triggers.DeleteTodo(todoId)}
                   type="button"
                   className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title="Delete"

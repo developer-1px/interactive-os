@@ -51,7 +51,7 @@ function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
   return (
     <TodoSidebar.Item id={category.id} asChild>
       <div
-        {...TodoSidebar.triggers.SelectCategory()}
+        {...TodoSidebar.triggers.SelectCategory(categoryId)}
         className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
                           hover:bg-slate-100/80
                           data-[focused=true]:bg-indigo-50
