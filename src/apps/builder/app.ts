@@ -192,10 +192,10 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     tab: { behavior: "flow" },
   },
   triggers: [
-    {
-      id: "locale-switcher-trigger",
-      onActivate: OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
-    },
+    sidebarCollection.trigger(
+      "locale-switcher-trigger",
+      OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
+    ),
   ],
 });
 
@@ -403,12 +403,18 @@ const canvasBindings = canvasCollection.collectionBindings({
   guard: (cursor) => isDynamicItem(cursor.focusId),
 });
 
+// Canvas needs DOM-scanned items (not data-model items) because a single Block
+// renders multiple Builder.Group/Item elements. Without this, bindElement's DOM
+// scanner is suppressed and group/item level navigation gets an empty item list.
+const { getItems: _dataModelGetItems, ...canvasBindingsWithoutGetItems } =
+  canvasBindings;
+
 export const BuilderCanvasUI = canvasCollection.bind({
   role: "grid",
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),
-  ...canvasBindings,
+  ...canvasBindingsWithoutGetItems,
   // Override: static text copy/cut/paste support
   onCopy: canvasOnCopy,
   onCut: canvasOnCut,

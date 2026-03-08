@@ -55,7 +55,7 @@ export const InspectorSearchUI = searchZone.bind({
     trigger: "change",
   },
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: [{ id: "clearBtn", onActivate: clearSearchQuery() }],
+  triggers: [searchZone.trigger("clearBtn", clearSearchQuery())],
 });
 
 export const InspectorSearch = {
@@ -82,7 +82,7 @@ export const InspectorFiltersUI = filtersZone.bind({
   role: "toolbar",
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
-    { id: "groupBtn-kernel", onActivate: toggleGroup({ group: "kernel" }) },
+    filtersZone.trigger("groupBtn-kernel", toggleGroup({ group: "kernel" })),
   ],
 });
 
@@ -124,7 +124,7 @@ export const InspectorScrollUI = scrollZone.bind({
   role: "toolbar", // using a generic role
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
-    { id: "scrollToBottomBtn", onActivate: INSPECTOR_SCROLL_TO_BOTTOM() },
+    scrollZone.trigger("scrollToBottomBtn", INSPECTOR_SCROLL_TO_BOTTOM()),
   ],
 });
 
@@ -145,7 +145,8 @@ export function selectFilteredTransactions(
 ): Transaction[] {
   if (!state) return transactions;
 
-  // Always exclude inspector's own transactions from the app log
+  // Exclude inspector's own transactions from the app log.
+  // Uses prefix match because inspector has sub-scopes (inspector-search, inspector-zift, etc.).
   let result = transactions.filter(
     (tx) => !tx.handlerScope.startsWith(INSPECTOR_SCOPE_PREFIX),
   );
