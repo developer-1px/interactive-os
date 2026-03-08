@@ -286,7 +286,6 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
       if (!isContentEditableRef.current && value !== registryValueRef.current) {
         FieldRegistry.updateValue(fieldId, value);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value, fieldId]); // registryValueRef intentionally excluded — read via ref above
 
     // Initial Value
