@@ -38,18 +38,29 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
   }, [query, allFiles]);
 
   // Reset state when opening
+  const prevSearchOpen = useRef(searchOpen);
   useEffect(() => {
-    if (searchOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-      // Focus input after overlay renders
-      requestAnimationFrame(() => inputRef.current?.focus());
+    if (searchOpen && !prevSearchOpen.current) {
+      requestAnimationFrame(() => {
+        setQuery("");
+        setSelectedIndex(0);
+        inputRef.current?.focus();
+      });
     }
+    prevSearchOpen.current = searchOpen;
   }, [searchOpen]);
 
   // Clamp selectedIndex when results change
+  const prevResultsLength = useRef(results.length);
   useEffect(() => {
-    setSelectedIndex((prev) => Math.min(prev, Math.max(0, results.length - 1)));
+    if (prevResultsLength.current !== results.length) {
+      requestAnimationFrame(() => {
+        setSelectedIndex((prev) =>
+          Math.min(prev, Math.max(0, results.length - 1)),
+        );
+      });
+    }
+    prevResultsLength.current = results.length;
   }, [results.length]);
 
   const handleSelect = useCallback((path: string) => {

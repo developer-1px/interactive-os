@@ -337,7 +337,9 @@ export function TestBotPanel() {
 
   // Ref keeps callbacks stable — prevents useEffect feedback loop
   const scriptsRef = useRef(activeScripts);
-  scriptsRef.current = activeScripts;
+  useEffect(() => {
+    scriptsRef.current = activeScripts;
+  });
 
   // When scripts change, init suites as "planned"
   useEffect(() => {

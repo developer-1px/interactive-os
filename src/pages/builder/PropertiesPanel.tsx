@@ -11,9 +11,11 @@ import {
 } from "lucide-react";
 import {
   createContext,
+  createElement,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -104,7 +106,7 @@ export function PropertiesPanel() {
         headerEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     });
-  }, [focusedCanvasId, blocks]);
+  }, [focusedCanvasId, blocks, dispatch]);
 
   const setHeaderRef = useCallback(
     (id: string) => (el: HTMLElement | null) => {
@@ -484,20 +486,20 @@ function FieldInput({
 
   // Schema-driven: block type + field key → property definition
   const def = getPropertyDef(blockType, fieldKey);
-  const Widget = getWidget(def.type);
+  const widget = useMemo(() => getWidget(def.type), [def.type]);
 
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[10px] text-slate-500 font-medium tracking-wide">
         {def.label}
       </label>
-      <Widget
-        value={value}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        def={def}
-      />
+      {createElement(widget, {
+        value,
+        onChange: handleChange,
+        onFocus: handleFocus,
+        onBlur: handleBlur,
+        def,
+      })}
     </div>
   );
 }

@@ -80,7 +80,7 @@ export function useElementRect(
 
   useEffect(() => {
     if (!element) {
-      setRect(null);
+      requestAnimationFrame(() => setRect(null));
       return;
     }
 
@@ -101,10 +101,11 @@ export function useElementRect(
       });
     }
 
-    // Initial measure
-    measure();
+    // Initial measure (deferred to avoid synchronous setState in effect)
+    const raf = requestAnimationFrame(measure);
 
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
       mo?.disconnect();
     };

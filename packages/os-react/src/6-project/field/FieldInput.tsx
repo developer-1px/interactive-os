@@ -77,9 +77,11 @@ export const FieldInput = forwardRef<HTMLInputElement, FieldInputProps>(
     const onCommitRef = useRef(onCommit);
     const onCancelRef = useRef(onCancel);
     const schemaRef = useRef(schema);
-    onCommitRef.current = onCommit;
-    onCancelRef.current = onCancel;
-    schemaRef.current = schema;
+    useEffect(() => {
+      onCommitRef.current = onCommit;
+      onCancelRef.current = onCancel;
+      schemaRef.current = schema;
+    });
 
     // --- Commit ---
     const handleCommit = useCallback(
@@ -120,18 +122,17 @@ export const FieldInput = forwardRef<HTMLInputElement, FieldInputProps>(
     }, [name, trigger, schema]);
 
     // --- Sync prop value to registry ---
-    const registryValueRef = useRef<string | undefined>(undefined);
     const rawRegistryValue = useFieldRegistry(
       (s) => s.fields.get(name)?.state.value,
     );
-    registryValueRef.current =
+    const registryValue =
       rawRegistryValue != null ? String(rawRegistryValue) : undefined;
 
     useEffect(() => {
-      if (value !== registryValueRef.current) {
+      if (value !== registryValue) {
         FieldRegistry.updateValue(name, value);
       }
-    }, [value, name]);
+    }, [value, name, registryValue]);
 
     // --- Error ---
     const error = useFieldRegistry((s) => s.fields.get(name)?.state.error);
@@ -185,7 +186,7 @@ export const FieldInput = forwardRef<HTMLInputElement, FieldInputProps>(
     };
 
     // --- Render ---
-    const localValue = registryValueRef.current ?? value;
+    const localValue = registryValue ?? value;
 
     return (
       <Item id={name} as="span">

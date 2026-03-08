@@ -1,6 +1,13 @@
 import type React from "react";
 import type { ReactElement } from "react";
-import { cloneElement, forwardRef, isValidElement, useCallback } from "react";
+import {
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 
 export interface LabelProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -43,20 +50,24 @@ export const Label = forwardRef<HTMLDivElement, LabelProps>(
       ...props,
     };
 
-    const callbackRef = useCallback(
-      (node: HTMLDivElement | null) => {
-        if (typeof ref === "function") ref(node);
-        else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-      },
-      [ref],
-    );
+    const forwardedRef = useRef(ref);
+    useEffect(() => {
+      forwardedRef.current = ref;
+    });
+    const callbackRef = useCallback((node: HTMLDivElement | null) => {
+      const r = forwardedRef.current;
+      if (typeof r === "function") r(node);
+      else if (r)
+        (r as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    }, []);
 
     if (asChild && isValidElement(children)) {
       const child = children as ReactElement<Record<string, unknown>>;
       return cloneElement(child, {
         ...baseProps,
         ref: callbackRef,
-        className: `${child.props["className"] || ""} ${className || ""}`.trim(),
+        className:
+          `${child.props["className"] || ""} ${className || ""}`.trim(),
       });
     }
 

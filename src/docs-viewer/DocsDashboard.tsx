@@ -9,6 +9,7 @@ import {
   MoreHorizontal,
   Plus,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { DocItem } from "./docsUtils";
 import { cleanLabel } from "./docsUtils";
 
@@ -18,6 +19,8 @@ interface DocsDashboardProps {
 }
 
 export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
+  const [mountTime] = useState(() => Date.now());
+
   // --- 1. Data Processing (Real + Mock) ---
 
   // Inbox: Filter for docs/0-inbox
@@ -25,44 +28,37 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
     .filter((f) => f.path.includes("0-inbox"))
     .slice(0, 5);
 
-  // Projects: Filter for docs/1-project
-  // MOCK: Adding status and progress to project folders for visualization
-  const projectFolders = Array.from(
-    new Set(
-      allFiles
-        .filter((f) => f.path.includes("1-project"))
-        .map((f) => f.path.split("/")[2]), // Extract project name
-    ),
-  )
-    .filter((name): name is string => Boolean(name))
-    .map((name) => ({
-      name: cleanLabel(name),
-      path: `1-project/${name}`,
-      // Mock data for "feeling"
-      progress: Math.floor(Math.random() * 100),
-      status: ["On Track", "At Risk", "Completed"][
-        Math.floor(Math.random() * 3)
-      ],
-      lastUpdated: new Date(
-        Date.now() - Math.floor(Math.random() * 1000000000),
-      ).toLocaleDateString(),
-    }))
-    .slice(0, 6);
+  // Projects: deterministic mock data (no Math.random)
+  const projectFolders = useMemo(() => {
+    const statuses = ["On Track", "At Risk", "Completed"];
+    return Array.from(
+      new Set(
+        allFiles
+          .filter((f) => f.path.includes("1-project"))
+          .map((f) => f.path.split("/")[2]),
+      ),
+    )
+      .filter((name): name is string => Boolean(name))
+      .map((name, i) => ({
+        name: cleanLabel(name),
+        path: `1-project/${name}`,
+        progress: (i * 37 + 23) % 100,
+        status: statuses[(i * 7 + 1) % 3],
+        lastUpdated: `${(i % 28) + 1} days ago`,
+      }))
+      .slice(0, 6);
+  }, [allFiles]);
 
-  // Recents: Sort by mock date (since we don't have file stats yet)
-  // In a real implementation, we'd parse the YYYY-MMDD prefix or use git stats
-  const recentFiles = [...allFiles]
-    .sort(() => 0.5 - Math.random()) // Shuffle for mock variety
-    .slice(0, 8)
-    .map((f) => ({
+  // Recents: deterministic ordering
+  const recentFiles = useMemo(() => {
+    return allFiles.slice(0, 8).map((f, i) => ({
       ...f,
-      editedAt: new Date(
-        Date.now() - Math.floor(Math.random() * 5 * 24 * 60 * 60 * 1000),
-      ), // Random time within 5 days
+      editedAt: new Date(mountTime - (i + 1) * 12 * 60 * 60 * 1000),
     }));
+  }, [allFiles, mountTime]);
 
-  // Greeting based on time
-  const hour = new Date().getHours();
+  // Greeting based on mount time (pure)
+  const hour = new Date(mountTime).getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -76,7 +72,7 @@ export function DocsDashboard({ allFiles, onSelect }: DocsDashboardProps) {
           </h1>
           <p className="text-slate-500 mt-1 flex items-center gap-2">
             <Calendar size={14} />
-            {new Date().toLocaleDateString(undefined, {
+            {new Date(mountTime).toLocaleDateString(undefined, {
               weekday: "long",
               month: "long",
               day: "numeric",

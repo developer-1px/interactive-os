@@ -106,12 +106,15 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
   });
 
   // ③ DOM focus effect
-  const internalRef = useRef<HTMLElement>(null);
+  const internalNodeRef = useRef<HTMLElement>(null);
+  const internalCallbackRef = useCallback((node: HTMLElement | null) => {
+    internalNodeRef.current = node;
+  }, []);
   useLayoutEffect(() => {
     if (config.project.virtualFocus) return;
-    if (state.isActiveFocused && internalRef.current) {
-      if (document.activeElement !== internalRef.current) {
-        internalRef.current.focus({ preventScroll: true });
+    if (state.isActiveFocused && internalNodeRef.current) {
+      if (document.activeElement !== internalNodeRef.current) {
+        internalNodeRef.current.focus({ preventScroll: true });
       }
     }
   }, [state.isActiveFocused, config.project.virtualFocus]);
@@ -147,14 +150,16 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
         (resolved as ReactElement<any>)
       : null;
 
-  const mergeElRef = (mergeEl as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref;
+  const mergeElRef = (
+    mergeEl as ReactElement & { ref?: React.Ref<HTMLElement> }
+  )?.ref;
   const combinedRef = useCallback(
     (node: HTMLElement | null) => {
       setRef(ref, node);
-      setRef(internalRef, node);
+      internalCallbackRef(node);
       setRef(mergeElRef, node);
     },
-    [ref, mergeElRef],
+    [ref, internalCallbackRef, mergeElRef],
   );
 
   if (mergeEl) {

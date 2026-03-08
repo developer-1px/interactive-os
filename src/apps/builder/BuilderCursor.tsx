@@ -20,7 +20,7 @@ import { useActiveZone } from "@os-react/6-project/accessors/useActiveZone";
 import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import { findItemElement } from "@os-sdk/os";
-import { useContext, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useElementRect } from "@/hooks/useElementRect";
 import { HighlightContext } from "@/pages/builder/PropertiesPanel";
 import { cursorRegistry } from "./model/cursorRegistry";
@@ -33,9 +33,12 @@ const HIGHLIGHT_COLOR = "#6366f1"; // indigo-500 for panel highlight
  * The parent element needs `position: relative`.
  */
 export function BuilderCursor() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
   const prevItemRef = useRef<string | null>(null);
-  const animatingUntilRef = useRef<number>(0);
+
+  const containerCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    setContainer(node?.parentElement ?? null);
+  }, []);
 
   // ── Focus state from OS ──
   const itemId = useFocusedItem("canvas");
@@ -57,17 +60,22 @@ export function BuilderCursor() {
     : null;
 
   // ── Track element positions ──
-  const container = containerRef.current?.parentElement ?? null;
   const rect = useElementRect(el, container);
   const highlightRect = useElementRect(highlightEl, container);
 
   // ── Animation detection ──
-  const now = performance.now();
-  if (prevItemRef.current !== null && prevItemRef.current !== itemId) {
-    animatingUntilRef.current = now + 150;
-  }
-  prevItemRef.current = itemId;
-  const animating = now < animatingUntilRef.current;
+  const [animating, setAnimating] = useState(false);
+  useEffect(() => {
+    if (prevItemRef.current !== null && prevItemRef.current !== itemId) {
+      const raf = requestAnimationFrame(() => setAnimating(true));
+      const timer = setTimeout(() => setAnimating(false), 150);
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(timer);
+      };
+    }
+    prevItemRef.current = itemId;
+  }, [itemId]);
 
   // ── Derived visual state ──
   const dimmed = !isActive;
@@ -80,7 +88,7 @@ export function BuilderCursor() {
 
   return (
     <div
-      ref={containerRef}
+      ref={containerCallbackRef}
       style={{
         position: "absolute",
         inset: 0,

@@ -42,7 +42,6 @@ export function DesignLinterOverlay({
 
   useEffect(() => {
     if (!isEnabled) {
-      setViolations((prev) => (prev.length > 0 ? [] : prev));
       return;
     }
 

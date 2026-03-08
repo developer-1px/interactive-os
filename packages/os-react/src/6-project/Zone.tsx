@@ -142,16 +142,18 @@ export function Zone({
     onReorder,
   };
   const cbRef = useRef(callbacks);
-  cbRef.current = callbacks;
+  useLayoutEffect(() => {
+    cbRef.current = callbacks;
+  });
 
   // ─── Lifecycle: registration (render-time, headless-safe) ───
   useMemo(() => {
     const existing = ZoneRegistry.get(zoneId);
     ZoneRegistry.register(
       zoneId,
-      buildZoneEntry(config, role, null, cbRef.current, existing),
+      buildZoneEntry(config, role, null, callbacks, existing),
     );
-  }, [zoneId, config, role]);
+  }, [zoneId, config, role, callbacks]);
 
   // ─── Lifecycle: commit-phase (dispatch + DOM binding) ───
   const containerRef = useRef<HTMLElement | null>(null);

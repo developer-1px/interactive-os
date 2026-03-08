@@ -62,7 +62,12 @@ const MOCK_PAGES: PageData[] = [
   },
 ];
 
+const relativeFormatter = new Intl.RelativeTimeFormat("en", {
+  style: "short",
+});
+
 export default function BuilderListPage() {
+  const [now] = useState(() => Date.now());
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<
     "all" | "published" | "draft" | "archived"
@@ -224,12 +229,9 @@ export default function BuilderListPage() {
 
                     <div className="col-span-2 text-sm text-slate-500">
                       {/* Simple relative time format */}
-                      {new Intl.RelativeTimeFormat("en", {
-                        style: "short",
-                      }).format(
+                      {relativeFormatter.format(
                         -Math.round(
-                          (Date.now() - page.updatedAt.getTime()) /
-                            (1000 * 60 * 60),
+                          (now - page.updatedAt.getTime()) / (1000 * 60 * 60),
                         ),
                         "hour",
                       )}
