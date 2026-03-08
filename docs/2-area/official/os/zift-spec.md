@@ -247,51 +247,50 @@ interface FieldProps {
 ## 6. Trigger (명령 실행)
 
 ### 6.1 목적
-**클릭/Enter 시 명령 디스패치**. 버튼, 아이콘, 체크박스 등의 인터랙션을 캡슐화합니다.
+**포인터 클릭 시 명령 디스패치**. prop-getter 순수 함수로, data attribute를 반환한다.
 
-### 6.2 이상적인 API
+### 6.2 3-Layer Architecture
 
-```tsx
-interface TriggerProps {
-  // Command (Required)
-  onPress: BaseCommand;
-
-  // Identity (Optional: 포커스 참여)
-  id?: string;
-
-  // Composition
-  asChild?: boolean;
-  children: ReactNode;
-
-  // Behavior
-  allowPropagation?: boolean;  // 이벤트 버블링 허용
-}
+```
+L0 (headless) = 행동의 진실. Click pipeline: PointerEvent → senseMouse → resolveClick → dispatch
+L1 (data-attr) = 프레임워크 경계 contract. data-trigger-id, data-trigger-payload
+L2 (React)     = 순수 투영. prop-getter의 반환값을 JSX에 spread
 ```
 
-### 6.3 사용 예시
+### 6.3 API
+
+Trigger는 `zone.bind({ triggers })` 에서 선언한다:
 
 ```tsx
-// Basic: 버튼 자동 생성
-<Trigger onPress={DeleteItem({ id: item.id })}>
-  Delete
-</Trigger>
-
-// asChild: 기존 버튼 사용
-<Trigger onPress={ToggleTodo({ id: todo.id })} asChild>
-  <Checkbox checked={todo.completed} />
-</Trigger>
-
-// Focusable: Zone 내 탐색 참여
-<Zone role="toolbar">
-  <Trigger id="bold" onPress={Bold()}>B</Trigger>
-  <Trigger id="italic" onPress={Italic()}>I</Trigger>
-</Zone>
+const { Zone, Item, triggers } = todoZone.bind({
+  role: "listbox",
+  triggers: {
+    DeleteTodo: (focusId) => deleteTodo({ id: focusId }),
+    ToggleTodo: (focusId) => toggleTodo({ id: focusId }),
+  },
+});
 ```
 
-### 6.4 Trigger의 이중성
+`triggers.DeleteTodo(todoId)` → `{ "data-trigger-id": "DeleteTodo", "data-trigger-payload": todoId }`
 
-- **ID 없음**: 순수 명령 디스패처 (클릭만)
-- **ID 있음**: FocusItem + 명령 디스패처 (키보드 탐색 + Enter 활성화)
+### 6.4 사용 예시
+
+```tsx
+// Prop-getter: data attributes를 JSX element에 spread
+<button {...triggers.DeleteTodo(todo.id)}>Delete</button>
+
+// Overlay trigger: zone.overlay()가 OverlayHandle 반환
+const dialog = todoZone.overlay("confirm-delete", { role: "alertdialog" });
+<button {...dialog.trigger()}>Delete</button>
+// OverlayHandle.trigger() → { "data-trigger-id", "aria-haspopup", "aria-controls" }
+```
+
+### 6.5 설계 원칙
+
+- **Trigger(포인터)와 Focus(키보드)는 독립 축**. 키보드 활성화는 keybinding/onActivate.
+- **1 trigger = 1 intent = 1 command**. payload = who(대상), trigger name = what(행동).
+- **Trigger와 Overlay는 관심사가 다르다**. Overlay lifecycle은 `zone.overlay()` + ModalPortal/PopoverPortal.
+- **Wrapper(Component) 패턴은 폐기**. `<Trigger asChild>` → `{...triggers.Name()}` prop-getter.
 
 ---
 
@@ -300,30 +299,29 @@ interface TriggerProps {
 ### 7.1 Todo Item 패턴 (표준)
 
 ```tsx
-<Zone id="todos" role="listbox">
+// bind에서 triggers 선언
+const { Zone, Item, Field, triggers } = todoZone.bind({
+  role: "listbox",
+  triggers: {
+    ToggleTodo: (focusId) => toggleTodo({ id: focusId }),
+    DeleteTodo: (focusId) => deleteTodo({ id: focusId }),
+  },
+  field: { onCommit: (value, focusId) => updateTodo({ id: focusId, title: value }) },
+});
+
+// JSX에서 prop-getter spread
+<Zone>
   {todos.map(todo => (
     <Item id={todo.id} key={todo.id}>
       {({ isFocused }) => (
         <div className={cn('flex items-center gap-2', isFocused && 'ring')}>
-          
-          {/* Toggle Trigger */}
-          <Trigger onPress={ToggleTodo({ id: todo.id })}>
+          <button {...triggers.ToggleTodo(todo.id)}>
             <Checkbox checked={todo.completed} />
-          </Trigger>
-          
-          {/* Text Field */}
-          <Field
-            name="EDIT"
-            value={todo.title}
-            mode="deferred"
-            onSubmit={UpdateTodo({ id: todo.id })}
-          />
-          
-          {/* Delete Trigger */}
-          <Trigger onPress={DeleteTodo({ id: todo.id })}>
+          </button>
+          <Field name="EDIT" value={todo.title} mode="deferred" />
+          <button {...triggers.DeleteTodo(todo.id)}>
             <TrashIcon />
-          </Trigger>
-          
+          </button>
         </div>
       )}
     </Item>
@@ -380,6 +378,8 @@ interface TriggerProps {
 | `onClick`에서 focus 호출 | Pipeline의 OS_FOCUS 사용 |
 | 개별 config props 나열 | `options` 객체로 그룹화 |
 | 별도 Zone으로 Input 분리 | 같은 Zone에 Field 통합 |
+| `<Trigger onPress={...}>` 컴포넌트 | `{...triggers.Name(payload)}` prop-getter |
+| Overlay lifecycle을 Trigger에 결합 | `zone.overlay()` + ModalPortal/PopoverPortal |
 
 ### 8.2 핵심 보장
 
