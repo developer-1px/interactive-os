@@ -78,15 +78,24 @@
 2. **OS에 이미 선언형 대안이 있는지** 확인 (Zone callback, trigger, keybinding, overlay auto)
 3. 대안 없으면 **OS gap 카테고리** 명명 (예: "combobox overlay 통합", "toast action dispatch")
 
-## 예상 분류 비율
+## 분류 결과 (수정됨)
 
-- 🔴 LLM 실수 (Zone 전환으로 해소): ~60% (command-palette combobox, builder onAction, undo/redo trigger)
-- 🟡 OS 갭 (OS 개선 필요): ~30% (toast dynamic command, docs-viewer 미적용 앱)
-- ⚪ 정당한 예외: 0% (원칙상 불존재)
+**OS gap = 0. 전원 🔴 LLM 실수.**
+
+Trigger prop-getter(`bind({ triggers })`) + Zone built-in이 25건 전부 커버:
+
+| 대안 메커니즘 | 커버 건수 | 대상 |
+|-------------|---------|------|
+| `zone.overlay().trigger()` | ~10건 | overlay open/close 전부 |
+| `bind({ triggers: { Name: () => cmd } })` | ~11건 | click→app command (selectDoc, addBlock, undo/redo, dismiss 등) |
+| Zone built-in (role keyboard nav) | ~3건 | navigate up/down, focus |
+| overlay auto-dismiss | ~1건 | backdrop click → close |
+
+**근거**: Trigger = `onClick={() => os.dispatch(cmd)}`의 선언형 등가물. 동적 커맨드(toast actionCommand)도 closure capture로 커버.
 
 ## 다음 단계
 
-1. 각 건을 실제 코드 맥락에서 분류 (이 파일의 `?`를 채움)
-2. 🔴 → 수정 프로젝트 생성
-3. 🟡 → `docs/5-backlog/os-gaps.md` 등록
-4. lint rule 추가: `.tsx`에서 `os.dispatch` ERROR
+1. ~~각 건을 실제 코드 맥락에서 분류~~ → **전부 🔴 확정**
+2. 🔴 25건 수정 프로젝트 생성 (영역별 분할: command-palette, docs-viewer, builder, widgets)
+3. lint rule 추가: `.tsx`에서 `os.dispatch` ERROR
+4. 수정 완료 후 lint gate 활성화
