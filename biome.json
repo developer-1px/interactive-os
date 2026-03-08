@@ -43,6 +43,8 @@
         "noStaticElementInteractions": "warn",
         "useFocusableInteractive": "warn",
         "useSemanticElements": "warn",
+        "noInteractiveElementToNoninteractiveRole": "warn",
+        "useAriaPropsSupportedByRole": "warn",
         "noLabelWithoutControl": "warn",
         "useAriaPropsForRole": "warn",
         "useValidAriaRole": "warn",

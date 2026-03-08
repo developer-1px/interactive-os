@@ -62,7 +62,10 @@ interface FocusSlice {
   zones: AppState["os"]["focus"]["zones"];
 }
 
-function collectZoneCards(focus: FocusSlice): ZoneCard[] {
+function collectZoneCards(
+  focus: FocusSlice,
+  _zoneSnapshot?: number,
+): ZoneCard[] {
   const zoneIds = [...ZoneRegistry.keys()];
   const activeZoneId = focus.activeZoneId;
   const fieldState = FieldRegistry.get();
@@ -381,8 +384,7 @@ export const ZiftMonitor = memo(() => {
   const focus = os.useComputed((s: AppState) => s.os.focus);
 
   const cards = useMemo(
-    () => collectZoneCards(focus),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => collectZoneCards(focus, zoneSnapshot),
     [zoneSnapshot, focus],
   );
 
