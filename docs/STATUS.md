@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T04:00
+> Last updated: 2026-03-09T05:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -18,7 +18,6 @@
 | apg | **layer-playground** | T1~T8 Done |
 | inspector | **inspector-dogfooding** | T5 Next |
 | testing | **os-test-suite** | T1~T4 Done |
-| testing | **lint-zero** | T1~T5 Now |
 
 ---
 
@@ -46,7 +45,7 @@
 | **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | os-test-suite | T1~T4 Done | 03-08 |
 | ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
-| lint-zero | T1~T5 Now | 03-09 |
+| ~~lint-zero~~ | ✅ Archived (W11) | 03-09 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
@@ -95,9 +94,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 14 |
+| Active Projects | 13 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 4 (layer-playground, inspector-dogfooding, os-test-suite, lint-zero) |
+| Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
 | Stale (4d+) | 4 (builder-v2, builder-v3, test-observability, replay) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
