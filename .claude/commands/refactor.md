@@ -51,13 +51,13 @@ description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 
 ### Step 5: 검증 (verify 인라인)
 
 ```bash
-source ~/.nvm/nvm.sh && nvm use && npx tsc -p tsconfig.app.json --noEmit
+source ~/.nvm/nvm.sh && nvm use && npm run typecheck
 ```
-- 0 errors → 다음
+- 0 errors → 다음 (절대 0 원칙: pre-existing 면책 없음)
 - errors → 보고하고 멈춘다
 
 ```bash
-source ~/.nvm/nvm.sh && nvm use && npx biome check --write
+source ~/.nvm/nvm.sh && nvm use && npm run lint:biome -- --write
 ```
 
 ```bash

@@ -145,7 +145,7 @@ Coverage 섹션의 합계를 갱신한다.
 
 ```bash
 # tsc
-npx tsc -p tsconfig.app.json --noEmit 2>&1 | tail -3
+npm run typecheck 2>&1 | tail -3
 
 # regression
 source ~/.nvm/nvm.sh && nvm use && npx vitest run tests/apg/ 2>&1 | tail -6

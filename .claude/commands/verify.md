@@ -14,15 +14,16 @@ description: 검증 게이트. tsc, lint, unit, e2e, build를 순차 실행하�
 
 #### Gate 1: Type Check
 ```bash
-npx tsc -p tsconfig.app.json --noEmit
+npm run typecheck
 ```
-- 0 errors → 다음 게이트
+- 0 errors → 다음 게이트 (절대 0 원칙: pre-existing 면책 없음)
 - errors → 보고하고 멈춘다
 
 #### Gate 2: Lint
 ```bash
-npx biome check --write
+npm run lint:biome -- --write
 ```
+- `--write` 후에도 error 0 달성 필요
 
 #### Gate 3: Unit Test
 ```bash

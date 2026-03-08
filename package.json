@@ -10,7 +10,7 @@
     "dev:e2e": "chmod +x scripts/dev-e2e.sh && ./scripts/dev-e2e.sh",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "lint:biome": "biome lint .",
+    "lint:biome": "biome check",
     "format": "biome format --write .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
