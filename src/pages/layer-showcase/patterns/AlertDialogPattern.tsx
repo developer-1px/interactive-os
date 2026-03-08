@@ -8,7 +8,7 @@
  *   - Only Cancel/Confirm buttons can close
  */
 
-import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";

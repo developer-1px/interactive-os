@@ -12,7 +12,7 @@
  *   OG-023 — AlertDialog Escape should be blocked
  */
 
-import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Item } from "@os-react/internal";
 import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
 import { defineApp } from "@os-sdk/app/defineApp";

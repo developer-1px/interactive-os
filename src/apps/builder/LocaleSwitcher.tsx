@@ -13,7 +13,7 @@
 import { localeMenu } from "./app";
 import { Item, Zone } from "@os-react/internal";
 import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
-import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
+import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
 import { resolveFieldValue } from "./entities/i18n";
 import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
 

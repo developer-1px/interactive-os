@@ -9,6 +9,7 @@ Before -> After: `biome check` exit 1 (82 errors) -> exit 0 (0 errors)
 Risks: useExhaustiveDependencies 수정 시 런타임 동작 변경 가능. ARIA role 수정 시 OS Zone 시맨틱과 충돌 가능.
 
 ## Now
+- [ ] T6: no-restricted-imports — @os-core 경계 강제 (eslint rule + 7 violations + stale doc)
 - [ ] T1: biome migrate + temp.html 제외 (-51 errors)
 - [ ] T2: anchor/alt a11y 수정 (-10 errors)
 - [ ] T3: React hook deps 정리 (-9 errors)

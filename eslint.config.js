@@ -58,4 +58,22 @@ export default defineConfig([
       "pipeline/no-imperative-handler": "warn",
     },
   },
+  {
+    files: ["src/apps/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}"],
+    ignores: ["src/inspector/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@os-core/*"],
+              message:
+                "src/ 에서 @os-core/* 직접 import 금지. @os-sdk/os facade를 사용하세요 (rules.md §1).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
