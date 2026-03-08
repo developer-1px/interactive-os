@@ -195,9 +195,9 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
     },
     select: { mode: "none" },
     inputmap: {
-      Space: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
-      Enter: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
-      click: [OS_ACTIVATE(), OS_OVERLAY_CLOSE()],
+      Space: [OS_ACTIVATE()],
+      Enter: [OS_ACTIVATE()],
+      click: [OS_ACTIVATE()],
     },
     dismiss: { escape: "close", outsideClick: "close" },
     tab: { behavior: "trap" },

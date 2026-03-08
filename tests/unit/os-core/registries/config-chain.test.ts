@@ -80,10 +80,10 @@ describe("T1: inputmap replaces action.commands", () => {
     expect(config.inputmap["Space"]?.[0]?.type).toBe("OS_EXPAND");
   });
 
-  it("menu has inputmap with [OS_ACTIVATE, OS_OVERLAY_CLOSE]", () => {
+  it("menu has inputmap with [OS_ACTIVATE] (close delegated to onAction)", () => {
     const config = resolveRole("menu");
     expect(config.inputmap["Space"]?.[0]?.type).toBe("OS_ACTIVATE");
-    expect(config.inputmap["Space"]?.[1]?.type).toBe("OS_OVERLAY_CLOSE");
+    expect(config.inputmap["Space"]?.[1]).toBeUndefined();
   });
 });
 

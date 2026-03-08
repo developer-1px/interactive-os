@@ -118,9 +118,13 @@ export function PointerListener() {
       const itemId = itemEl?.id ?? null;
       const zoneId = zoneEl?.getAttribute("data-zone") ?? null;
 
-      // Detect slider zone
+      // Detect slider zone — only actual sliders support drag-based value change.
+      // Spinbuttons, meters, and separators also have value.mode="continuous"
+      // but use keyboard arrows for value changes, not pointer drag.
       const zoneEntry = zoneId ? ZoneRegistry.get(zoneId) : null;
-      const isSlider = zoneEntry?.config?.value?.mode === "continuous";
+      const isSlider =
+        zoneEntry?.config?.value?.mode === "continuous" &&
+        zoneEntry?.role === "slider";
 
       gestureState = resolvePointerDown(gestureState, {
         clientX: e.clientX,

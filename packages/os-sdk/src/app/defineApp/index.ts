@@ -286,6 +286,7 @@ export function defineApp<S>(
           overlayId: id,
           trigger: <T extends HTMLElement>(payload?: string) =>
             ({
+              id: triggerId,
               "data-trigger-id": triggerId,
               "aria-haspopup": role === "menu" ? "true" : (role as string),
               "aria-controls": id,
@@ -293,6 +294,7 @@ export function defineApp<S>(
                 ? { "data-trigger-payload": payload }
                 : {}),
             }) as React.HTMLAttributes<T> & {
+              id: string;
               "data-trigger-id": string;
               "aria-haspopup"?: string;
               "aria-controls"?: string;

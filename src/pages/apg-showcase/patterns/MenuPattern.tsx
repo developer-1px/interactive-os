@@ -1,4 +1,5 @@
 import { Item, Zone } from "@os-react/internal";
+import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
 import { useState } from "react";
 
 export function MenuPattern() {
@@ -73,11 +74,15 @@ export function MenuPattern() {
           return [];
         }}
         onAction={(c) => {
-          if (c.focusId?.startsWith("check-"))
+          if (c.focusId?.startsWith("check-")) {
             toggleCheck(c.focusId.replace("check-", ""));
-          if (c.focusId?.startsWith("radio-"))
+            return []; // menuitemcheckbox: keep menu open
+          }
+          if (c.focusId?.startsWith("radio-")) {
             setRadioValue(c.focusId.replace("radio-", ""));
-          return [];
+            return []; // menuitemradio: keep menu open
+          }
+          return [OS_OVERLAY_CLOSE()]; // menuitem: close menu
         }}
         className="w-64 bg-white border border-gray-200 rounded-b-md shadow-md py-1"
       >

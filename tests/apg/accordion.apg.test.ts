@@ -43,16 +43,12 @@ const expect = osExpect;
 // ═══════════════════════════════════════════════════
 
 describe("APG Accordion: Initial State", () => {
-  it("initial state: first section expanded", async () => {
-    // I1: W3C Example HTML has first button aria-expanded="true"
+  it("initial state: all sections collapsed", async () => {
+    // All accordion sections start collapsed
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
-      "true",
+      "false",
     );
-  });
-
-  it("initial state: other sections collapsed", async () => {
-    // I2: W3C Example HTML has other buttons aria-expanded="false", panels hidden
     await expect(page.locator("#acc-billing")).toHaveAttribute(
       "aria-expanded",
       "false",
@@ -83,8 +79,13 @@ describe("APG Accordion: Panel Sync", () => {
   });
 
   it("collapse: panel becomes hidden", async () => {
-    // P2: First section starts expanded (I1). Click to collapse.
-    await page.locator("#acc-personal").click(); // collapse (was expanded)
+    // P2: Click to expand, then click again to collapse.
+    await page.locator("#acc-personal").click(); // expand (was collapsed)
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    await page.locator("#acc-personal").click(); // collapse
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "false",
@@ -129,14 +130,7 @@ describe("APG Accordion: Click", () => {
   });
 
   it("click on focused header: toggles expand", async () => {
-    // acc-personal starts expanded (I1). Click collapses.
-    await page.locator("#acc-personal").click();
-    await expect(page.locator("#acc-personal")).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-
-    // Click again → expand
+    // All sections start collapsed. Click expands.
     await page.locator("#acc-personal").click();
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
@@ -149,10 +143,18 @@ describe("APG Accordion: Click", () => {
       "aria-expanded",
       "false",
     );
+
+    // Click again → expand
+    await page.locator("#acc-personal").click();
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 
   it("click headers independently: multiple panels open", async () => {
-    // acc-personal starts expanded (I1). Expand billing too.
+    // All start collapsed. Expand personal and billing.
+    await page.locator("#acc-personal").click();
     await page.locator("#acc-billing").click();
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
@@ -182,53 +184,54 @@ describe("APG Accordion: Click", () => {
 
 describe("APG Accordion: Enter/Space", () => {
   it("Enter toggles expand on focused header", async () => {
-    // acc-personal starts expanded (I1). Click focuses + collapses.
+    // All start collapsed. Click focuses + expands.
     await page.locator("#acc-personal").click();
-    await expect(page.locator("#acc-personal")).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-
-    // Enter expands
-    await page.keyboard.press("Enter");
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
-    // Enter collapses again
+    // Enter collapses
     await page.keyboard.press("Enter");
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "false",
+    );
+
+    // Enter expands again
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
     );
   });
 
   it("Space toggles expand on focused header", async () => {
-    // acc-personal starts expanded (I1). Click focuses + collapses.
+    // All start collapsed. Click focuses + expands.
     await page.locator("#acc-personal").click();
-    await expect(page.locator("#acc-personal")).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-
-    await page.keyboard.press("Space");
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "true",
     );
 
+    // Space collapses
     await page.keyboard.press("Space");
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "false",
     );
+
+    // Space expands again
+    await page.keyboard.press("Space");
+    await expect(page.locator("#acc-personal")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 
   it("multiple headers expanded independently via keyboard", async () => {
-    // acc-personal starts expanded (I1). Focus it, ArrowDown, Enter expands billing.
-    await page.locator("#acc-personal").click(); // focuses + collapses (toggle)
-    await page.keyboard.press("Enter"); // re-expand personal
+    // All start collapsed. Click expands personal.
+    await page.locator("#acc-personal").click();
     await expect(page.locator("#acc-personal")).toHaveAttribute(
       "aria-expanded",
       "true",

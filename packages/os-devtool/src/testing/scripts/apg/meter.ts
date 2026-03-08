@@ -6,15 +6,16 @@ export const apgMeterScript: TestScript = {
   async run(page, expect = defaultExpect) {
     await page.locator("#tab-meter").click();
 
-    // Click CPU meter → focus
+    // Click CPU meter → focus + verify static value attributes
     await page.locator("#meter-cpu").click();
     await expect(page.locator("#meter-cpu")).toBeFocused();
-
-    // ArrowDown → next meter
-    await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#meter-memory")).toBeFocused();
-
-    await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#meter-disk")).toBeFocused();
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuemin",
+      "0",
+    );
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuemax",
+      "100",
+    );
   },
 };

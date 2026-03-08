@@ -67,7 +67,7 @@ const accordionZone = AccordionApp.createZone("apg-accordion");
 const AccordionUI = accordionZone.bind({
   role: "accordion",
   getItems: () => SECTIONS.map((s) => s.id),
-  options: { expand: { initial: [SECTIONS[0]!.id] } },
+  options: { expand: { initial: [] } },
 });
 
 // ─── Accordion Row ───

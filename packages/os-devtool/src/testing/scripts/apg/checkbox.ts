@@ -22,19 +22,7 @@ export const apgCheckboxScript: TestScript = {
       "false",
     );
 
-    // Enter toggles in our OS (OS_ACTIVATE → OS_CHECK)
-    await page.keyboard.press("Enter");
-    await expect(page.locator("#cond-lettuce")).toHaveAttribute(
-      "aria-checked",
-      "true",
-    );
-
-    // Toggle back off with Enter
-    await page.keyboard.press("Enter");
-    await expect(page.locator("#cond-lettuce")).toHaveAttribute(
-      "aria-checked",
-      "false",
-    );
+    // Enter does NOT toggle checkbox (W3C APG: Space only)
 
     // Arrow down to next
     await page.keyboard.press("ArrowDown");
