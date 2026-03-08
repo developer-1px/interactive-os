@@ -17,14 +17,13 @@ Risks:
 
 ## Now
 
-- [ ] T1: resolveKeyboard combobox nav key relay
-- [ ] T2: roleRegistry combobox inputmap + QuickPick zone options
-- [ ] T3: QuickPick overlay lifecycle → useOverlay
-- [ ] T4: QuickPick handler 제거 (onKeyDown/onClick/getState/querySelector)
-- [ ] T5: CommandPalette isOpen prop 제거
-- [ ] T6: headless test command-palette
+(all tasks complete)
 
 ## Done
+
+- [x] T1: resolveKeyboard combobox nav key relay — tsc 0 | +4 tests | build OK ✅
+- [x] T2-T5: QuickPick OS-native combobox migration — tsc 0 | build OK ✅
+- [x] T6: complete spec decision table — tsc 0 | 9 tests | build OK ✅
 
 ## Unresolved
 
