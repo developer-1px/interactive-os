@@ -63,7 +63,10 @@ export function PointerListener() {
     // ── Local Helpers ──────────────────────────────────────────
 
     /** Dispatch multiple commands within a setDispatching guard. */
-    const dispatchBatch = (commands: BaseCommand[], opts?: any) => {
+    const dispatchBatch = (
+      commands: BaseCommand[],
+      opts?: { meta?: Record<string, unknown> },
+    ) => {
       setDispatching(true);
       for (const cmd of commands) {
         os.dispatch(cmd, opts);

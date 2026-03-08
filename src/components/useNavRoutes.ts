@@ -27,6 +27,16 @@ interface RouteStaticData {
   order?: number;
 }
 
+/** Minimal shape of a TanStack Router route tree node for traversal */
+interface RouteTreeNode {
+  fullPath?: string;
+  id?: string;
+  _id?: string;
+  options?: { staticData?: RouteStaticData };
+  staticData?: RouteStaticData;
+  children?: Record<string, RouteTreeNode>;
+}
+
 /**
  * Find the IconName for a given Lucide component by searching the registry.
  */
@@ -67,8 +77,7 @@ export function useNavRoutes(): {
       return p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
     }
 
-    // biome-ignore lint: any needed for internal route tree traversal
-    function traverse(route: any) {
+    function traverse(route: RouteTreeNode) {
       const staticData = (route.options?.staticData ?? route.staticData) as
         | RouteStaticData
         | undefined;
@@ -119,14 +128,12 @@ export function useNavRoutes(): {
       const children = route.children;
       if (children) {
         for (const child of Object.values(children)) {
-          // biome-ignore lint/suspicious/noExplicitAny: internal route tree traversal
-          traverse(child as any);
+          traverse(child);
         }
       }
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: internal route tree traversal
-    traverse(router.routeTree as any);
+    traverse(router.routeTree as unknown as RouteTreeNode);
 
     // Sort by order
     topItems.sort((a, b) => a.order - b.order);

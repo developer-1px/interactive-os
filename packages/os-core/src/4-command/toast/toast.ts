@@ -11,7 +11,7 @@
  */
 
 import { produce } from "immer";
-import { os } from "../../engine/kernel";
+import { type AppState, os } from "../../engine/kernel";
 import type {
   NotificationEntry,
   NotificationType,
@@ -41,7 +41,7 @@ interface NotifyPayload {
 
 /** Raw handler — exported for test kernel registration */
 export const notifyHandler =
-  (ctx: { readonly state: any }) => (payload: NotifyPayload) => {
+  (ctx: { readonly state: AppState }) => (payload: NotifyPayload) => {
     const type = payload.type ?? "toast";
     const entry: NotificationEntry = {
       id: uid(),
@@ -58,7 +58,7 @@ export const notifyHandler =
     };
 
     return {
-      state: produce(ctx.state, (draft: any) => {
+      state: produce(ctx.state, (draft: AppState) => {
         // Cap at 5 notifications — remove oldest if full
         if (draft.os.notifications.stack.length >= 5) {
           draft.os.notifications.stack.shift();

@@ -20,7 +20,7 @@ import type { AppModule } from "./types";
 
 export interface RouterInstance {
   navigate: (opts: { to: string }) => void;
-  subscribe: (event: string, cb: (state: any) => void) => () => void;
+  subscribe: (event: string, cb: (state: unknown) => void) => () => void;
   history: { back: () => void; forward: () => void };
   state: { location: { pathname: string } };
 }

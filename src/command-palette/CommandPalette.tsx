@@ -105,8 +105,7 @@ export function CommandPalette() {
   // ── Actions ──
   const handleSelect = useCallback(
     (item: PaletteItem) => {
-      // biome-ignore lint/suspicious/noExplicitAny: TanStack Router path type
-      navigate({ to: item.path as any });
+      navigate({ to: item.path });
     },
     [navigate],
   );

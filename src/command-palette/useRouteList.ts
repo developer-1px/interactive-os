@@ -13,9 +13,17 @@ export interface RouteEntry {
   label: string;
 }
 
+/** Minimal shape of a TanStack Router route tree node for traversal */
+interface RouteTreeNode {
+  fullPath?: string;
+  id?: string;
+  children?: Record<string, RouteTreeNode>;
+}
+
 export function useRouteList(): RouteEntry[] {
   let router: ReturnType<typeof useRouter> | null = null;
   try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- useRouter throws when no RouterProvider; safe catch
     router = useRouter();
   } catch {
     // No RouterProvider available (e.g. DocsViewer standalone)
@@ -25,8 +33,7 @@ export function useRouteList(): RouteEntry[] {
     if (!router) return [];
     const entries: RouteEntry[] = [];
 
-    // biome-ignore lint: any needed for internal route tree traversal
-    function traverse(route: any) {
+    function traverse(route: RouteTreeNode) {
       const fullPath: string | undefined = route.fullPath;
 
       // Only include routes with a real path (skip layout-only routes)
@@ -49,14 +56,12 @@ export function useRouteList(): RouteEntry[] {
       const children = route.children;
       if (children) {
         for (const child of Object.values(children)) {
-          // biome-ignore lint/suspicious/noExplicitAny: internal route tree traversal
-          traverse(child as any);
+          traverse(child);
         }
       }
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: internal route tree traversal
-    traverse(router.routeTree as any);
+    traverse(router.routeTree as RouteTreeNode);
 
     // Sort alphabetically
     entries.sort((a, b) => a.path.localeCompare(b.path));

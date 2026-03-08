@@ -40,10 +40,9 @@ export function PopoverPortal({
 
   return (
     <div className={className}>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
       <Zone
         id={overlayId}
-        role={role as any}
+        role={role}
         onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
         onAction={() => OS_OVERLAY_CLOSE({ id: overlayId })}
         aria-label={ariaLabel}

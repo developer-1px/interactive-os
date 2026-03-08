@@ -17,7 +17,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { OS_CHECK } from "@os-sdk/os";
+import { OS_CHECK, type ZoneCursor } from "@os-sdk/os";
 
 // ─── Switch Data ───
 
@@ -51,7 +51,7 @@ export const SwitchApp = defineApp<Record<string, never>>("apg-switch-app", {});
 const switchZone = SwitchApp.createZone("apg-switch");
 const SwitchUI = switchZone.bind({
   role: "switch",
-  onAction: (cursor: any) => OS_CHECK({ targetId: cursor.focusId }),
+  onAction: (cursor: ZoneCursor) => OS_CHECK({ targetId: cursor.focusId }),
 });
 
 // ─── Switch Row ───
