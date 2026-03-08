@@ -147,6 +147,85 @@ export const sidebarScripts: TestScript[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════
+// §3 List Zone — trigger button clicks
+//
+// Trigger buttons (Edit, MoveUp, MoveDown, Delete, Toggle) target the
+// focused item via (focusId) => BaseCommand. These scripts verify that
+// clicking a trigger button produces the expected ARIA state change.
+//
+// Note: "start-edit" trigger is headless-only (editingId is app state,
+// not ARIA-observable). See todo-trigger-click.test.ts for full coverage.
+// ═══════════════════════════════════════════════════════════════════
+
+export const triggerClickScripts: TestScript[] = [
+  {
+    name: "§3a List: toggle-todo trigger toggles checked",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
+
+      await page.locator("#toggle-todo").click();
+
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
+    },
+  },
+  {
+    name: "§3b List: toggle-todo trigger toggles back",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.locator("#toggle-todo").click();
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
+
+      await page.locator("#toggle-todo").click();
+
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
+    },
+  },
+  {
+    name: "§3c List: move-item-down trigger reorders",
+    group: "Todo",
+    async run(page, expect) {
+      // Focus todo_1 (first) and move it down → order becomes [2,1,3,4]
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.locator("#move-item-down").click();
+
+      // Verify: ArrowUp from todo_1 should reach todo_2 (now above)
+      await page.keyboard.press("ArrowUp");
+      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3d List: move-item-up trigger reorders",
+    group: "Todo",
+    async run(page, expect) {
+      // Focus todo_2 (second) and move it up → order becomes [2,1,3,4]
+      await page.locator(`#${LIST_ITEMS[1]!}`).click();
+      await page.locator("#move-item-up").click();
+
+      // Verify: ArrowDown from todo_2 should reach todo_1 (now below)
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3e List: delete-todo trigger removes item",
+    group: "Todo",
+    async run(page, expect) {
+      // Focus todo_1 and delete it
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.locator("#delete-todo").click();
+
+      // After delete: todo_2 is now first. Home from todo_2 stays on todo_2.
+      await page.locator(`#${LIST_ITEMS[1]!}`).click();
+      await page.keyboard.press("Home");
+      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+    },
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
 // Scenarios — auto-runner reads this for vitest auto-registration
 // ═══════════════════════════════════════════════════════════════════
 
@@ -166,7 +245,7 @@ export const scenarios: TestScenario[] = [
       },
       inputmap: { Space: [OS_CHECK()] },
     },
-    scripts: listNavScripts,
+    scripts: [...listNavScripts, ...triggerClickScripts],
   },
   {
     zone: "sidebar",
@@ -189,4 +268,8 @@ export const scenarios: TestScenario[] = [
 // All scripts — for TestBot manifest
 // ═══════════════════════════════════════════════════════════════════
 
-export const allScripts: TestScript[] = [...listNavScripts, ...sidebarScripts];
+export const allScripts: TestScript[] = [
+  ...listNavScripts,
+  ...triggerClickScripts,
+  ...sidebarScripts,
+];
