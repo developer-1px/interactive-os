@@ -16,7 +16,7 @@ import type { FieldMode } from "@os-react/6-project/field/Field";
 import type React from "react";
 import type { ReactNode } from "react";
 
-/** Overlay config for zone.overlay() — subset of CompoundTriggerConfig without id (supplied as first arg) */
+/** Overlay config for zone.overlay() */
 export interface ZoneOverlayConfig {
   confirm?: BaseCommand;
   role?: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip" | "listbox";

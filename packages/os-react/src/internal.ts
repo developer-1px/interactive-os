@@ -8,6 +8,5 @@
  */
 
 export { Item } from "./6-project/Item";
-export { Trigger } from "./6-project/trigger/index";
 // Raw primitives — internal only
 export { Zone } from "./6-project/Zone";
