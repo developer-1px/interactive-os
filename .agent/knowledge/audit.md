@@ -68,6 +68,10 @@
 | OG-006 | drag cursor/userSelect — PointerListener가 document.body.style 직접 조작. OS가 drag 상태에 따라 자동 관리해야 | 🟡 미해결 | 2026-02-26 |
 | OG-007 | zone element lookup — Listener가 `document.querySelector("[data-zone=...]")`로 zone DOM 탐색. ZoneRegistry에 element ref 제공 필요 | 🟡 미해결 | 2026-02-26 |
 | OG-008 | `role="alert"` 자동화 — Alert 프리미티브 부재. 앱이 `role="alert"` 수동 부착 필요. OS에서 live region을 자동 관리하는 메커니즘 없음 | 🟡 미해결 | 2026-02-28 |
+| OG-021 | SDK `OS_OVERLAY_OPEN` re-export 미제공. zone-level trigger binding을 SDK 수준에서 선언 불가 | 🟡 미해결 | 2026-03-08 |
+| OG-022 | Headless hover 시뮬레이션 부재. tooltip `onHover` trigger 테스트 불가 | 🟡 미해결 | 2026-03-08 |
+| OG-023 | AlertDialog Escape 차단 미구현. `role="alertdialog"` overlay에서 Escape가 close 동작 | 🟡 미해결 | 2026-03-08 |
+| OG-024 | 동적 아이템 초기 확장 선언 — `expand.initial`은 정적 아이템만 지원. 동적 getItems 결과의 초기 expand 불가 | 🟡 미해결 | 2026-03-08 |
 
 > **주의**: OG-001 관련 패턴(드롭다운 onClick)은 OS 갭이므로 🔴로 분류하지 않는다.
 > **주의**: OG-003, OG-004 관련 패턴은 OS 갭이므로 🔴로 분류하지 않는다.
@@ -87,6 +91,7 @@
 | `@os-core/*` import in `src/inspector/` | Inspector는 devtool — os-devtool과 동일 패턴. facade 경계는 앱 코드(`src/apps/`)에 적용 | ZiftMonitor, ElementPanel |
 | `document.caretRangeFromPoint` (caret seeding) | 브라우저 caret API 직접 사용 필수 | PointerListener seedCaretFromPoint |
 | sense 함수 내 DOM 읽기 | sense 어댑터의 정당한 책임 — DOM→순수데이터 변환 | `senseMouse.ts` querySelector, getElementById |
+| TanStack Router useEffect/onClick | 라우터 네비게이션은 OS 관할 밖. redirect + navigate 패턴 | APG showcase, Layer showcase index.tsx |
 
 ---
 
@@ -136,9 +141,16 @@
 | Field resetOnSubmit DOM sync | `handleCommit`에서 `FieldRegistry.reset()` 후 DOM innerText 미동기화 | ⚪ OS 내부 수정 → ✅ 해결 | 기존 패턴(innerRef.innerText=value) 재사용. 3줄 추가. 이중 commit 경로(Field handleCommit vs OS_FIELD_COMMIT) 구조적 부채 잔존 | 2026-03-04 |
 | MeterPattern useEffect+dispatch (시뮬레이션) | setInterval로 OS_VALUE_CHANGE dispatch | ⚪ 정당한 예외 | 외부 데이터 시뮬레이션 (CPU/메모리 변동). 초기값은 value.initial로 선언형 완료. 런타임 업데이트는 앱 책임 | 2026-03-05 |
 | resolveRole("button"/"list") throw 실패 | ZoneRole union에 없지만 유효 ARIA role | ⚪ 정당한 예외 → warn 전환 | "button", "list" 등은 ZoneRole에 없지만 실제 사용 중. throw는 과잉 → console.warn + fallback이 적절 | 2026-03-06 |
+| Layer showcase @os-core import 6건 | `OS_OVERLAY_OPEN` 직접 import | 🟡 OS 갭 (OG-021) | SDK가 overlay command를 re-export하지 않음. createTrigger는 React 전용이라 headless 대안 없음 | 2026-03-08 |
+| Layer showcase useEffect redirect | TanStack Router redirect | ⚪ 정당한 예외 | 라우터 네비게이션은 OS 관할 밖. APG showcase 동일 패턴 | 2026-03-08 |
+| Layer showcase sidebar onClick | Router navigate onClick | ⚪ 정당한 예외 | 라우터 네비게이션은 OS 관할 밖. APG showcase 동일 패턴 | 2026-03-08 |
+| Tooltip headless 테스트 4건 todo | hover simulation 부재 | 🟡 OS 갭 (OG-022) | headless page에 pointer-enter 시뮬레이션 없음. 브라우저 TestBot으로만 가능 | 2026-03-08 |
+| AlertDialog Escape 차단 실패 | alertdialog overlay Escape close | 🟡 OS 갭 (OG-023) | escape.ts가 overlay type 미구분. alertdialog는 Escape 차단 필요 | 2026-03-08 |
 | strict-api-guard 전체 (T1-T5) | OS 앱 API 침묵 실패 → hard error/warn 전환 | ✅ 통과 (0건 위반) | throw는 논리적 불가능에만, warn은 의심스러운 사용에. 2-tier 기준 확립 | 2026-03-06 |
 | TestBot ZoneRegistry facade 위반 | `src/apps/testbot/app.ts`에서 `@os-core/engine/registries/zoneRegistry` 직접 import | 🔴 LLM 실수 → ✅ 수정 | `@os-devtool/testing`에 `getZoneItems()` facade helper 추가. `zoneItems.ts` 생성 | 2026-03-06 |
 | TestScript.run items 3rd param | K2 위반 여부 판단 | ⚪ 정당한 예외 | `items` param은 K3(infra layer) — 데이터 주입이지 DOM 인터랙션 아님. K2 scope는 page/expect만 | 2026-03-06 |
+| [data-inspector] 가드 제거 | 이벤트 차단 → scope 필터 전환 | ✅ 해결 | 임시 조치(로그 노이즈)를 과도한 수단(이벤트 전면 차단)으로 구현. 트랜잭션 scope 필터로 대체 | 2026-03-08 |
+| ZiftMonitor useEffect expand-all | 동적 아이템 초기 확장 | 🟡 OS 갭 (OG-024) | expand.initial은 정적 아이템만 지원. 동적 getItems의 초기 expand 선언 메커니즘 부재 | 2026-03-08 |
 
 ---
 

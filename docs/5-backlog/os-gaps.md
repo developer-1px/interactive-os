@@ -24,6 +24,10 @@
 | OG-018 | 2026-03-07 | os-core | Cross-zone headless test | `page.goto()` sets single activeZoneId. Scripts that click items across multiple zones cannot run in headless runScenarios. Focus-showcase 29 scripts blocked. | Browser TestBot only |
 | OG-019 | 2026-03-07 | os-core | ~~Initial selection/expand~~ | ✅ 해결: SelectConfig.initial + ExpandConfig.initial + disallowEmpty auto-select. Zone.tsx + page.ts goto() 양쪽 seeding. 5 APG I1 tests fixed. | — |
 | OG-020 | 2026-03-07 | os-core | ~~aria-controls for select-based visibility~~ | ✅ 해결: computeItem에 contentRoleMap 기반 aria-controls 블록 추가. expand 블록과 중복 방지. APG A5 tests fixed. | — |
+| OG-021 | 2026-03-08 | os-sdk | SDK OS_OVERLAY_OPEN re-export | SDK가 `OS_OVERLAY_OPEN`을 re-export하지 않음. zone-level trigger binding을 SDK 수준에서 선언할 방법 없음. `createTrigger`는 React 전용이라 headless에서 overlay lifecycle 테스트 불가. | `@os-core` 직접 import |
+| OG-022 | 2026-03-08 | os-core | Headless hover simulation | `createHeadlessPage`에 hover/pointer-enter 시뮬레이션 없음. tooltip `onHover` trigger 테스트 불가. | TODO tests |
+| OG-023 | 2026-03-08 | os-core | AlertDialog Escape block | `role="alertdialog"` overlay에서 Escape가 close 동작. alertdialog는 사용자 확인 필수이므로 Escape 차단 필요. | backlog issue 등록 |
+| OG-024 | 2026-03-08 | os-core | Dynamic item initial expand | 동적으로 발견된 아이템의 초기 aria-expanded 상태를 선언적으로 설정하는 메커니즘 없음. `expand.initial`은 정적 아이템만 지원. | `useEffect` + `os.setState` workaround |
 
 ## 해결됨
 
