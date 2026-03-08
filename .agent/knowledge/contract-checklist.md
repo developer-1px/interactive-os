@@ -13,8 +13,8 @@
 
 ```bash
 # 전수 검색 (1회)
-grep -rnE "useState|useEffect|onClick|onMouseDown|onChange|onKeyDown|onPointerDown|document\.|getElementById|querySelector|addEventListener|os\.dispatch|data-drag-handle" \
-  src/ --include="*.ts" --include="*.tsx" | grep -v "/test" | grep -v "__tests__"
+grep -rnE "useState|useEffect|onClick|onMouseDown|onChange|onKeyDown|onPointerDown|document\.|getElementById|querySelector|addEventListener|os\.dispatch|data-drag-handle|os\.useComputed" \
+  src/ --include="*.ts" --include="*.tsx" | grep -v "/test" | grep -v "__tests__" | grep -v "inspector/"
 ```
 
 ```bash
@@ -28,6 +28,7 @@ grep -rn '@os-core/' src/ --include="*.ts" --include="*.tsx" | grep -v __tests__
 | 패턴 | OS API | 잘못된 예 |
 |------|--------|-----------| 
 | 상태 관리 | `BuilderApp.useComputed()`, `os.getState()` | `useState` |
+| OS 상태 읽기 | accessor hook (`useOverlay`, `useFocusedItem`, `useEditingItem` 등) | `os.useComputed(s => s.os.*)` 직접 호출 |
 | 커맨드 dispatch | `os.dispatch(command())` | 직접 state mutate |
 | 목록 포커스/네비게이션 | Zone `bind({ role: "tree"/"grid" })` | `onKeyDown` arrow key |
 | 아이템 선택 | Zone `onAction`, `onActivate` | `onClick` 직접 state 변경 |
@@ -54,6 +55,7 @@ grep -rn '@os-core/' src/ --include="*.ts" --include="*.tsx" | grep -v __tests__
 ### 수정 대응표 (🔴 LLM 실수 시)
 
 - `useState` → OS state / `useSelection` / `useComputed`
+- `os.useComputed(s => s.os.*)` → accessor hook: `useOverlay`, `useFocusedItem`, `useEditingItem`, `useActiveZone`, `useDragState`, `useZoneValue`, `useNotifications`
 - `onClick` → `Trigger onActivate` / OS activate
 - `useEffect` → OS hook / kernel middleware
 - `@os-core/*` import in `src/` → `@os-sdk/os`에서 re-export. facade에 없으면 `os.ts`에 추가 후 import 경로 변경

@@ -15,6 +15,7 @@
 - 같은 문제를 푸는 선택지가 여럿이면, 이 프로젝트에서는 하나만 열려 있다.
 - 새로운 고유 패턴이 필요하다면, 아직 올바른 추상화를 못 찾았다는 신호다. 멈추고 보고한다.
 - `eslint-disable`, `as any`, `document.querySelector` — 구조를 우회하는 코드는 금지다.
+- `src/`에서 `os.useComputed(s => s.os.*)` 직접 호출 금지 — accessor hook (`useOverlay`, `useFocusedItem` 등)을 사용한다. **Pit of Success = 잘못 쓰기 어려운 API.** `os.useComputed`는 LLM의 Redux 습관과 공명하여 환각(hallucination)을 유발한다.
 
 ### 2. 100% Observable — 모든 행동이 검증 가능
 
@@ -86,7 +87,7 @@
 - **28개 APG showcase 패턴** 구현 완료 (accordion ~ window-splitter)
 
 ### React Bindings (`packages/os-react/`)
-- `<Zone>`, `<Item>`, `<Field>`, `<Trigger>` — ZIFT의 React 투영
+- `<Zone>`, `<Item>`, `<Field>` — ZIFT의 React 투영 (Trigger는 prop-getter로 대체됨)
 - Event listeners: keyboard, pointer, focus, clipboard, input
 
 ### App 구조
