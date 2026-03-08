@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-08T15:00
+> Last updated: 2026-03-08T22:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,8 +13,8 @@
 
 ## 🔥 Active Focus
 
-**testbot-zift** — T1~T4 Now (Light, bootstrapping)
-→ `docs/1-project/inspector/testbot-zift/BOARD.md`
+**layer-playground** — T1~T8 Done, Unresolved → backlog 위임 (Light, 개밥먹기)
+→ `docs/1-project/apg/layer-playground/BOARD.md`
 
 ---
 
@@ -54,7 +54,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
-| **testbot-zift** | T1~T4 Now | 03-08 |
+| ~~testbot-zift~~ | ✅ Archived (W10) | 03-08 |
 
 ### apg
 > `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
@@ -63,6 +63,7 @@
 |---------|-------|---------------|
 | apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
 | ~~apg-dt-standard~~ | ✅ Archived (W10) | 03-07 |
+| layer-playground | T1~T8 Done | 03-08 🔥 |
 
 ### nondeterministic-paradigm
 > 탐색적 연구
@@ -84,10 +85,10 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 14 |
+| Active Projects | 13 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (testbot-zift) |
-| Stale (7d+) | 0 |
+| Active Focus | 1 (layer-playground) |
+| Stale (7d+) | 2 (builder-v2, builder-v3) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
