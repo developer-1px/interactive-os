@@ -1,22 +1,20 @@
 /**
- * Todo Trigger Click — Reproduction test
+ * Todo App — Trigger Click Tests (Headless)
  *
- * Issue: Clicking trigger buttons (Edit, MoveUp, MoveDown, Delete)
- * inside todo items has no effect.
+ * Tests trigger buttons via `page.click("trigger-id")`.
+ * Each trigger is created via `zone.trigger(id, (focusId) => command)`:
+ *   - "start-edit"     → startEdit({ id: focusId })
+ *   - "move-item-up"   → moveItemUp({ id: focusId })
+ *   - "move-item-down" → moveItemDown({ id: focusId })
+ *   - "delete-todo"    → deleteTodo({ id: focusId })
+ *   - "toggle-todo"    → toggleTodo({ id: focusId })
  *
- * These triggers are created via `listCollection.trigger(id, factory)`:
- *   - "start-edit"    → startEdit({ id })
- *   - "move-item-up"  → moveItemUp({ id })
- *   - "move-item-down"→ moveItemDown({ id })
- *   - "delete-todo"   → deleteTodo({ id })
- *   - "toggle-todo"   → toggleTodo({ id })
- *
- * Expected: page.click("start-edit") dispatches the trigger's onActivate command.
- * Actual: no-op — trigger callbacks are not registered in headless mode.
+ * Zero Drift: headless `page.click(triggerId)` = browser button click.
  */
 
 import { TodoApp } from "@apps/todo/app";
 import { createHeadlessPage } from "@os-devtool/testing/page";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
@@ -34,71 +32,119 @@ afterEach(() => {
   page.cleanup();
 });
 
-describe("Trigger button click reproduction", () => {
-  it("click 'start-edit' trigger should start editing", () => {
-    // Focus a todo item first
+// ═══════════════════════════════════════════════════════════════════
+// §22 Trigger Click — per-button dispatch
+// ═══════════════════════════════════════════════════════════════════
+
+describe("§22 Trigger click: per-button dispatch", () => {
+  it("start-edit trigger starts editing focused item", () => {
     page.locator("#todo_1").click();
     expect(page.state.ui.editingId).toBeNull();
 
-    // Click the Edit trigger button
     page.click("start-edit");
 
-    // BUG: editingId should be "todo_1" but remains null
     expect(page.state.ui.editingId).toBe("todo_1");
   });
 
-  it("click 'move-item-down' trigger should reorder", () => {
+  it("move-item-down trigger reorders focused item down", () => {
     page.locator("#todo_1").click();
 
-    // Click the MoveDown trigger button
     page.click("move-item-down");
 
-    // BUG: order should change but stays the same
     expect(page.state.data.todoOrder[0]).toBe("todo_2");
     expect(page.state.data.todoOrder[1]).toBe("todo_1");
   });
 
-  it("click 'move-item-up' trigger should reorder", () => {
+  it("move-item-up trigger reorders focused item up", () => {
     page.locator("#todo_2").click();
 
-    // Click the MoveUp trigger button
     page.click("move-item-up");
 
-    // BUG: order should change but stays the same
     expect(page.state.data.todoOrder[0]).toBe("todo_2");
     expect(page.state.data.todoOrder[1]).toBe("todo_1");
   });
 
-  it("click 'delete-todo' trigger should remove item", () => {
+  it("delete-todo trigger removes focused item", () => {
     page.locator("#todo_1").click();
     expect(page.state.data.todoOrder).toContain("todo_1");
 
-    // Click the Delete trigger button (direct delete, not requestDeleteTodo)
     page.click("delete-todo");
 
     expect(page.state.data.todoOrder).not.toContain("todo_1");
     expect(page.state.data.todoOrder.length).toBe(3);
   });
 
-  it("click 'toggle-todo' trigger should toggle completed", () => {
+  it("toggle-todo trigger toggles completed", () => {
     page.locator("#todo_1").click();
     expect(page.state.data.todos.todo_1.completed).toBe(false);
 
-    // Click the Toggle trigger button
     page.click("toggle-todo");
 
-    // BUG: completed should flip but stays false
     expect(page.state.data.todos.todo_1.completed).toBe(true);
   });
+});
 
-  // Contrast: keyboard shortcuts DO work (proving the commands themselves are fine)
-  it("keyboard Delete works (control)", () => {
+// ═══════════════════════════════════════════════════════════════════
+// §23 Trigger click — focusId targeting
+// ═══════════════════════════════════════════════════════════════════
+
+describe("§23 Trigger click: focusId targeting", () => {
+  it("delete-todo targets the focused item, not first/last", () => {
+    page.locator("#todo_3").click();
+
+    page.click("delete-todo");
+
+    expect(page.state.data.todoOrder).not.toContain("todo_3");
+    expect(page.state.data.todoOrder).toContain("todo_1");
+    expect(page.state.data.todoOrder).toContain("todo_2");
+  });
+
+  it("sequential deletes target each focused item", () => {
+    page.locator("#todo_2").click();
+    page.click("delete-todo");
+    expect(page.state.data.todoOrder).not.toContain("todo_2");
+
+    page.locator("#todo_4").click();
+    page.click("delete-todo");
+    expect(page.state.data.todoOrder).not.toContain("todo_4");
+
+    expect(page.state.data.todoOrder.length).toBe(2);
+  });
+
+  it("start-edit targets the focused item specifically", () => {
+    page.locator("#todo_3").click();
+    page.click("start-edit");
+    expect(page.state.ui.editingId).toBe("todo_3");
+  });
+
+  it("onActivate in ZoneRegistry is a function using focusId", () => {
+    const cb = ZoneRegistry.findItemCallback("delete-todo");
+    expect(cb?.onActivate).toBeTruthy();
+
+    const cmd1 = cb!.onActivate!("todo_1");
+    const cmd2 = cb!.onActivate!("todo_3");
+    expect(cmd1).not.toEqual(cmd2);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// §24 Trigger click vs keyboard — parity check
+// ═══════════════════════════════════════════════════════════════════
+
+describe("§24 Trigger click vs keyboard: parity", () => {
+  it("keyboard Delete sets pendingDeleteIds (request flow)", () => {
     page.locator("#todo_1").click();
     page.keyboard.press("Delete");
     expect(page.state.ui.pendingDeleteIds).toEqual(["todo_1"]);
   });
 
-  it("keyboard Meta+ArrowDown works (control)", () => {
+  it("trigger delete-todo removes directly (no confirm dialog)", () => {
+    page.locator("#todo_1").click();
+    page.click("delete-todo");
+    expect(page.state.data.todoOrder).not.toContain("todo_1");
+  });
+
+  it("keyboard Meta+ArrowDown reorders same as trigger", () => {
     page.locator("#todo_1").click();
     page.keyboard.press("Meta+ArrowDown");
     expect(page.state.data.todoOrder[0]).toBe("todo_2");
