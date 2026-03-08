@@ -13,6 +13,17 @@
 import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_EXPAND } from "@os-sdk/os";
+import type { TestCase } from "../index";
+
+export const expandTests: TestCase[] = [
+  { name: "section-a starts expanded (initial config)", status: "fail", gap: "expand.initial not seeded in headless goto()" },
+  { name: "section-b starts collapsed", status: "fail", gap: "expand.initial not seeded" },
+  { name: "section-c starts collapsed", status: "fail", gap: "expand.initial not seeded" },
+  { name: "Enter toggles expanded state", status: "fail", gap: "click bootstrap conflicts with toggle inputmap" },
+  { name: "Space toggles expanded state", status: "fail", gap: "click bootstrap conflicts with toggle inputmap" },
+  { name: "click toggles expanded state (via inputmap)", status: "fail", gap: "click bootstrap conflicts with toggle inputmap" },
+  { name: "multiple items expand independently", status: "fail", gap: "expand.initial not seeded" },
+];
 
 // ─── App Definition ───
 

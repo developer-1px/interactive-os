@@ -13,6 +13,17 @@
 import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
+import type { TestCase } from "../index";
+
+export const crossZoneTests: TestCase[] = [
+  { name: "click activates zone (bootstrap)", status: "pass" },
+  { name: "click item in zone A focuses that item", status: "pass" },
+  { name: "click item in zone B transfers activeZoneId", status: "pass" },
+  { name: "Tab transfers focus to next zone", status: "pass" },
+  { name: "Shift+Tab transfers focus to previous zone", status: "pass" },
+  { name: "Tab from last zone wraps", status: "pass" },
+  { name: "click in zone B while zone A active transfers", status: "pass" },
+];
 
 // ─── App Definition ───
 

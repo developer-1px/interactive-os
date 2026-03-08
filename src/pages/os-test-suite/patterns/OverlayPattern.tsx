@@ -15,6 +15,17 @@
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
 import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
+import type { TestCase } from "../index";
+
+export const overlayTests: TestCase[] = [
+  { name: "click trigger opens dialog", status: "pass" },
+  { name: "focus moves to first dialog item on open", status: "pass" },
+  { name: "ArrowDown navigates within dialog", status: "pass" },
+  { name: "Tab cycles within dialog (focus trap)", status: "pass" },
+  { name: "Escape closes dialog", status: "pass" },
+  { name: "Escape restores focus to trigger", status: "pass" },
+  { name: "open > navigate > close > focus restores to trigger", status: "pass" },
+];
 
 // ─── App Definition ───
 

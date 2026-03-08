@@ -11,6 +11,18 @@
 import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
+import type { TestCase } from "../index";
+
+export const selectionTests: TestCase[] = [
+  { name: "click selects item (single)", status: "pass" },
+  { name: "click another replaces selection (single)", status: "pass" },
+  { name: "Space toggles selection on focused item", status: "pass" },
+  { name: "click selects single item (multi, replace mode)", status: "fail", gap: "multi-select click returns empty" },
+  { name: "Shift+click selects range", status: "fail", gap: "multi-select modifier not applied" },
+  { name: "Meta+click toggles individual items", status: "fail", gap: "multi-select modifier not applied" },
+  { name: "Shift+ArrowDown extends selection", status: "fail", gap: "multi-select keyboard range" },
+  { name: "Meta+A selects all", status: "fail", gap: "multi-select keyboard" },
+];
 
 // ─── App Definition ───
 

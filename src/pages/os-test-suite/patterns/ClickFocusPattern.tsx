@@ -12,6 +12,16 @@
 import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
+import type { TestCase } from "../index";
+
+export const clickFocusTests: TestCase[] = [
+  { name: "click item moves focus to that item", status: "pass" },
+  { name: "click different item updates focus", status: "pass" },
+  { name: "ArrowDown navigates from clicked position", status: "pass" },
+  { name: "ArrowUp navigates backward from clicked position", status: "pass" },
+  { name: "Home moves focus to first item", status: "pass" },
+  { name: "End moves focus to last item", status: "pass" },
+];
 
 // ─── App Definition ───
 
