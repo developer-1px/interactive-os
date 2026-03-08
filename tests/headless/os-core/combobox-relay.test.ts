@@ -4,10 +4,6 @@
  * Tests that resolveKeyboard correctly relays navigation keys
  * to the layer chain when isCombobox=true, instead of returning EMPTY.
  *
- * Why this test should fail: resolveKeyboard.ts:88 currently has
- * `if (input.isCombobox) return EMPTY` which blocks ALL keyboard
- * processing for combobox inputs.
- *
  * @spec docs/1-project/os-core/combobox-relay/spec.md
  */
 
@@ -15,6 +11,10 @@ import {
   type KeyboardInput,
   resolveKeyboard,
 } from "@os-core/1-listen/keyboard/resolveKeyboard";
+import {
+  type ClickInput,
+  resolveClick,
+} from "@os-core/1-listen/mouse/resolveClick";
 import { OS_ACTIVATE } from "@os-core/4-command/activate/activate";
 import { describe, expect, it } from "vitest";
 
@@ -68,6 +68,21 @@ function comboboxInput(overrides: Partial<KeyboardInput> = {}): KeyboardInput {
 
 describe("Feature: combobox keyboard relay", () => {
   describe("navigation keys should relay to layer chain", () => {
+    it("#1 ArrowDown → relayed (not blocked by combobox guard)", () => {
+      const input = comboboxInput({ canonicalKey: "ArrowDown", key: "ArrowDown" });
+      const result = resolveKeyboard(input);
+
+      // ArrowDown passes through combobox guard → layer chain resolves or fallback
+      expect(result.fallback || result.commands.length > 0).toBe(true);
+    });
+
+    it("#2 ArrowUp → relayed (not blocked by combobox guard)", () => {
+      const input = comboboxInput({ canonicalKey: "ArrowUp", key: "ArrowUp" });
+      const result = resolveKeyboard(input);
+
+      expect(result.fallback || result.commands.length > 0).toBe(true);
+    });
+
     it("#3 Enter on combobox input → OS_ACTIVATE from inputmap", () => {
       const input = comboboxInput({ canonicalKey: "Enter", key: "Enter" });
       const result = resolveKeyboard(input);
@@ -80,8 +95,20 @@ describe("Feature: combobox keyboard relay", () => {
       const input = comboboxInput({ canonicalKey: "Escape", key: "Escape" });
       const result = resolveKeyboard(input);
 
-      // Escape should NOT return EMPTY — it should fall through to layers.
-      // Even if no layer claims it, fallback should be true (not blocked).
+      expect(result.fallback || result.commands.length > 0).toBe(true);
+    });
+
+    it("#5 Home → relayed (not blocked by combobox guard)", () => {
+      const input = comboboxInput({ canonicalKey: "Home", key: "Home" });
+      const result = resolveKeyboard(input);
+
+      expect(result.fallback || result.commands.length > 0).toBe(true);
+    });
+
+    it("#6 End → relayed (not blocked by combobox guard)", () => {
+      const input = comboboxInput({ canonicalKey: "End", key: "End" });
+      const result = resolveKeyboard(input);
+
       expect(result.fallback || result.commands.length > 0).toBe(true);
     });
   });
@@ -101,6 +128,21 @@ describe("Feature: combobox keyboard relay", () => {
 
       expect(result.commands).toHaveLength(0);
       expect(result.preventDefault).toBe(false);
+    });
+  });
+
+  describe("click activation via inputmap", () => {
+    it("#9 click on combobox listbox item → OS_ACTIVATE via actionCommands", () => {
+      const clickInput: ClickInput = {
+        activateOnClick: true,
+        clickedItemId: "item-1",
+        focusedItemId: "item-1",
+        actionCommands: [OS_ACTIVATE()],
+      };
+      const result = resolveClick(clickInput);
+
+      expect(result.commands.length).toBeGreaterThan(0);
+      expect(result.commands[0]!.type).toBe("OS_ACTIVATE");
     });
   });
 });
