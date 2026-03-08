@@ -2,11 +2,13 @@
  * TodoToolbar — v5 native (zone.trigger + zone.overlay).
  *
  * Triggers declared top-down in app.ts — imported here for JSX rendering.
+ * ClearDialog uses Dialog widget (OverlayHandle + Dialog compound).
  */
 
-import { TodoApp, TodoToolbar } from "@apps/todo/app";
+import { clearCompleted, TodoApp, TodoToolbar } from "@apps/todo/app";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 
-const { ClearDialog } = TodoToolbar;
+const ClearDialog = TodoToolbar.ClearDialog;
 const { ToggleView, Undo, Redo } = TodoToolbar.triggers;
 
 import {
@@ -73,20 +75,22 @@ export function TodoToolbarView() {
           </button>
         </div>
 
-        {/* ClearDialog — compound trigger with confirmation */}
+        {/* ClearDialog — OverlayHandle + Dialog widget */}
         {completedCount > 0 && (
-          <ClearDialog.Root>
-            <button
-              {...ClearDialog.Trigger()}
-              type="button"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
-              title="Clear Completed Tasks"
-            >
-              <Trash2 size={14} />
-              <span className="hidden sm:inline">Clear {completedCount}</span>
-            </button>
+          <Dialog id={ClearDialog.overlayId} role="alertdialog">
+            <Dialog.Trigger asChild>
+              <button
+                {...ClearDialog.trigger()}
+                type="button"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100"
+                title="Clear Completed Tasks"
+              >
+                <Trash2 size={14} />
+                <span className="hidden sm:inline">Clear {completedCount}</span>
+              </button>
+            </Dialog.Trigger>
 
-            <ClearDialog.Content title="Clear completed tasks?">
+            <Dialog.Content title="Clear completed tasks?">
               <div className="flex items-start gap-3 py-3">
                 <div className="p-2 bg-amber-50 rounded-lg">
                   <AlertTriangle size={20} className="text-amber-500" />
@@ -104,25 +108,21 @@ export function TodoToolbarView() {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <ClearDialog.Dismiss>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </ClearDialog.Dismiss>
-                <ClearDialog.Confirm>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium"
-                  >
-                    Clear All
-                  </button>
-                </ClearDialog.Confirm>
+                <Dialog.Close
+                  className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  Cancel
+                </Dialog.Close>
+                <Dialog.Close
+                  id="confirm"
+                  onActivate={clearCompleted()}
+                  className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium"
+                >
+                  Clear All
+                </Dialog.Close>
               </div>
-            </ClearDialog.Content>
-          </ClearDialog.Root>
+            </Dialog.Content>
+          </Dialog>
         )}
       </div>
     </div>

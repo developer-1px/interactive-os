@@ -4,11 +4,17 @@
  * <TodoList.Zone> with 0 bindings — all from zone.bind declaration.
  */
 
-import { TodoApp, TodoDraft, TodoList, TodoSearch } from "@apps/todo/app";
+import {
+  TodoApp,
+  TodoDraft,
+  TodoList,
+  TodoSearch,
+} from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
 import { Field } from "@os-react/6-project/field/Field";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import {
   AlertTriangle,
   CheckCheck,
@@ -23,7 +29,7 @@ export function ListView() {
   const pendingDeleteIds = TodoApp.useComputed((s) => s.ui.pendingDeleteIds);
   const searchQuery = TodoApp.useComputed((s) => s.ui.searchQuery);
   const selection = useSelection("list");
-  const { DeleteDialog } = TodoList.triggers;
+  const DeleteDialog = TodoList.triggers.DeleteDialog;
   const draft = ""; // Field manages its own value via FieldRegistry
 
   return (
@@ -137,9 +143,9 @@ export function ListView() {
         </div>
       )}
 
-      {/* DeleteDialog — compound trigger with confirmation */}
-      <DeleteDialog.Root>
-        <DeleteDialog.Content title="Delete items?">
+      {/* DeleteDialog — OverlayHandle + Dialog widget (opened programmatically via OS_OVERLAY_OPEN) */}
+      <Dialog id={DeleteDialog.overlayId} role="alertdialog">
+        <Dialog.Content title="Delete items?">
           <div className="flex items-start gap-3 py-3">
             <div className="p-2 bg-red-50 rounded-lg border border-red-100">
               <AlertTriangle size={20} className="text-red-500" />
@@ -157,20 +163,22 @@ export function ListView() {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-            {/* cancelDeleteTodo is dispatched to clear pending IDs, OS_OVERLAY_CLOSE happens via Dialog.Close implicitly if not prevented */}
-            <DeleteDialog.Dismiss
+            <Dialog.Close
               className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer"
               onActivate={TodoList.commands.cancelDeleteTodo()}
             >
               Cancel
-            </DeleteDialog.Dismiss>
-            {/* Confirm uses the command defined in overlay config */}
-            <DeleteDialog.Confirm className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium cursor-pointer">
+            </Dialog.Close>
+            <Dialog.Close
+              id="confirm"
+              onActivate={TodoList.commands.confirmDeleteTodo()}
+              className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium cursor-pointer"
+            >
               Delete
-            </DeleteDialog.Confirm>
+            </Dialog.Close>
           </div>
-        </DeleteDialog.Content>
-      </DeleteDialog.Root>
+        </Dialog.Content>
+      </Dialog>
     </div>
   );
 }
