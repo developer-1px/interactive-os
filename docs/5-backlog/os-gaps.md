@@ -28,6 +28,8 @@
 | OG-022 | 2026-03-08 | os-core | Headless hover simulation | `createHeadlessPage`에 hover/pointer-enter 시뮬레이션 없음. tooltip `onHover` trigger 테스트 불가. | TODO tests |
 | OG-023 | 2026-03-08 | os-core | AlertDialog Escape block | `role="alertdialog"` overlay에서 Escape가 close 동작. alertdialog는 사용자 확인 필수이므로 Escape 차단 필요. | backlog issue 등록 |
 | OG-024 | 2026-03-08 | os-core | Dynamic item initial expand | 동적으로 발견된 아이템의 초기 aria-expanded 상태를 선언적으로 설정하는 메커니즘 없음. `expand.initial`은 정적 아이템만 지원. | `useEffect` + `os.setState` workaround |
+| OG-025 | 2026-03-08 | os-core | Trigger focus drift (Zero Drift) | 브라우저에서 trigger 클릭 시 `<Item>` 래핑으로 trigger 자체가 zone item으로 인식 → focusedItemId가 trigger ID로 변경 → `onActivate(triggerId)` 호출 (의도: 이전 focused data item ID). Headless `simulateClick`은 standalone fast path로 정확한 focusId 전달. | Trigger click = headless only 테스트 |
+| OG-026 | 2026-03-08 | os-core | aria-checked binding | `OS_CHECK` → `toggleTodo` 실행 → `completed` 상태 변경되나, zone의 `aria-checked` ARIA 속성에 반영 안 됨. TestBot §1f 실패. | headless에서 `page.state` 직접 검증 |
 
 ## 해결됨
 
