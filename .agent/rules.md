@@ -57,7 +57,7 @@
 - **Zone** = 상호작용 영역. **27개 role preset**: listbox, menu, menubar, radiogroup, tablist, toolbar, grid, treegrid, tree, dialog, alertdialog, combobox, feed, accordion, disclosure, slider, meter, spinbutton, switch, checkbox, separator, textbox, group, application, builderBlock
 - **Item** = Zone 안의 개별 요소. 포커스·선택·확장 상태를 가짐
 - **Field** = 편집 가능한 속성. **8개 type**: inline, tokens, block, editor, number, boolean, enum, enum[]
-- **Trigger** = 액션 발동기. overlay(dialog/menu/popover/tooltip) 연결
+- **Trigger** = 액션 발동기. `zone.trigger(id, cmd)` + `zone.overlay(id, config)`. AppHandle.createTrigger는 삭제됨
 
 ### OS Commands — 17개 모듈
 `OS_NAVIGATE`, `OS_ACTIVATE`, `OS_CHECK`, `OS_PRESS`, `OS_ESCAPE`, `OS_TAB`,

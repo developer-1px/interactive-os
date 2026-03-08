@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-08T23:55
+> Last updated: 2026-03-09T01:10
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,8 +13,7 @@
 
 ## 🔥 Active Focus
 
-**trigger-unify** — T1~T6 Now (Light, os-core API 리팩토링)
-→ `docs/1-project/os-core/trigger-unify/BOARD.md`
+(없음 — trigger-unify 완료 후 다음 Focus 미선정)
 
 ---
 
@@ -25,7 +24,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| **trigger-unify** | T1~T6 Now | 03-08 🔥 |
+| ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
 | docs-freshness | WP1~WP8 | 03-06 |
 | kernel-docs-sync | — | 03-06 |
 | keyboard-input-isomorphism | — | 03-07 |
@@ -36,6 +35,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
+| os-test-suite | T1~T4 Done | 03-08 |
 | ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
 | lint-zero | T1~T5 Now | 03-06 |
 | test-observability | Scaffold, T1~T4 | 03-05 |
@@ -88,8 +88,8 @@
 | Domains | 6 |
 | Active Projects | 14 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (trigger-unify) |
-| Stale (7d+) | 2 (builder-v2, builder-v3) |
+| Active Focus | 0 |
+| Stale (7d+) | 3 (builder-v2, builder-v3, test-observability) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
