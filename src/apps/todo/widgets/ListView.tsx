@@ -176,7 +176,7 @@ export function ListView() {
             >
               Cancel
             </DeleteDialog.Dismiss>
-            {/* Confirm uses the command defined in createTrigger config */}
+            {/* Confirm uses the command defined in overlay config */}
             <DeleteDialog.Confirm className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium cursor-pointer">
               Delete
             </DeleteDialog.Confirm>

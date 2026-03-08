@@ -221,11 +221,11 @@ export interface ZoneHandle<S> {
 
   createZone(name: string): ZoneHandle<S>;
 
-  /** Declare a simple trigger: id + command or factory. Returns TriggerBinding. */
+  /** Declare a simple trigger: id + command or factory. Returns TriggerBinding & React.FC. */
   trigger(
     id: string,
     commandOrFactory: BaseCommand | CommandFactory<string, unknown>,
-  ): TriggerBinding;
+  ): TriggerBinding & React.FC<{ children: ReactNode }>;
 
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
@@ -365,21 +365,6 @@ export interface AppHandle<S> {
   /** Register a side-effect handler. Commands return `{ effectName: payload }` to trigger it. */
   defineEffect<V>(type: string, handler: (value: V) => void): void;
   createZone(name: string): ZoneHandle<S>;
-  createTrigger<P = void>(
-    factory: CommandFactory<string, P>,
-    options?: { id?: string },
-  ): React.FC<
-    P extends void
-      ? { children: ReactNode; payload?: never }
-      : { children: ReactNode; payload: P }
-  >;
-  createTrigger(
-    command: BaseCommand,
-    options?: { id?: string },
-  ): React.FC<{
-    children: ReactNode;
-  }>;
-  createTrigger(config: CompoundTriggerConfig): CompoundTriggerComponents;
   useComputed<T>(selector: Selector<S, T>): T;
   useComputed<T>(fn: (state: S) => T): T;
   create(

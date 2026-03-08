@@ -4,7 +4,7 @@
  * Issue: Clicking trigger buttons (Edit, MoveUp, MoveDown, Delete)
  * inside todo items has no effect.
  *
- * These triggers are created via `TodoApp.createTrigger(command, { id })`:
+ * These triggers are created via `listCollection.trigger(id, factory)`:
  *   - "start-edit"    → startEdit({ id })
  *   - "move-item-up"  → moveItemUp({ id })
  *   - "move-item-down"→ moveItemDown({ id })

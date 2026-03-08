@@ -37,11 +37,9 @@ import { createBoundComponents } from "./bind";
 import { createTestInstance } from "./testInstance";
 import {
   type CompoundTriggerComponents,
-  type CompoundTriggerConfig,
   createCompoundTrigger,
   createDynamicTrigger,
   createSimpleTrigger,
-  type TriggerOptions,
 } from "./trigger";
 import {
   __conditionBrand,
@@ -285,13 +283,25 @@ export function defineApp<S>(
         commandOrFactory:
           | import("@kernel/core/tokens").BaseCommand
           | import("@kernel/core/tokens").CommandFactory<string, unknown>,
-      ): TriggerBinding {
+      ): TriggerBinding & React.FC<{ children: ReactNode }> {
         // typeof detection: function → factory (cursor auto-bind), object → command as-is
         const onActivate =
           typeof commandOrFactory === "function"
             ? (commandOrFactory as (focusId: string) => import("@kernel/core/tokens").BaseCommand)
             : commandOrFactory;
-        return { id, onActivate };
+
+        // Create React component
+        const Component: React.FC<{ children: ReactNode }> =
+          typeof commandOrFactory === "function"
+            ? createDynamicTrigger(appId, commandOrFactory as CommandFactory<string, unknown>, { id })
+            : createSimpleTrigger(appId, commandOrFactory as BaseCommand, { id });
+
+        // Merge: React.FC + TriggerBinding
+        const result = Component as React.FC<{ children: ReactNode }> & TriggerBinding;
+        Object.defineProperty(result, "id", { value: id, writable: false, enumerable: true });
+        Object.defineProperty(result, "onActivate", { value: onActivate, writable: false, enumerable: true });
+
+        return result;
       },
 
       overlay(
@@ -365,58 +375,6 @@ export function defineApp<S>(
 
     createZone(name: string): ZoneHandle<S> {
       return createZone(name);
-    },
-
-    createTrigger: ((
-      commandOrConfig:
-        | BaseCommand
-        | CompoundTriggerConfig
-        | CommandFactory<string, unknown>,
-      options?: TriggerOptions,
-    ) => {
-      // ── CommandFactory (Dynamic Trigger) ──
-      if (typeof commandOrConfig === "function") {
-        return createDynamicTrigger(
-          appId,
-          commandOrConfig as CommandFactory<string, unknown>,
-          options,
-        );
-      }
-      // ── Simple trigger (BaseCommand has .type) ──
-      if (
-        commandOrConfig &&
-        typeof (commandOrConfig as BaseCommand).type === "string"
-      ) {
-        return createSimpleTrigger(
-          appId,
-          commandOrConfig as BaseCommand,
-          options,
-        );
-      }
-      // ── Compound trigger (Dialog pattern) ──
-      return createCompoundTrigger(
-        appId,
-        commandOrConfig as CompoundTriggerConfig,
-      );
-    }) as {
-      /* Factory Overload: Returns component taking typed payload */
-      <P = void>(
-        factory: CommandFactory<string, P>,
-        options?: TriggerOptions,
-      ): React.FC<
-        P extends void
-          ? { children: ReactNode; payload?: never }
-          : { children: ReactNode; payload: P }
-      >;
-      /* Command Overload: Returns simple component */
-      (
-        command: BaseCommand,
-        options?: TriggerOptions,
-      ): React.FC<{
-        children: ReactNode;
-      }>;
-      /* Config Overload: Returns compound components */
-      (config: CompoundTriggerConfig): CompoundTriggerComponents;
     },
 
     useComputed<T>(selectorOrFn: Selector<S, T> | ((s: S) => T)): T {

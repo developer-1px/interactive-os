@@ -11,9 +11,9 @@
  *   - Escape in menu returns focus to button
  *   - Click on button opens/closes menu
  *
- * ZIFT classification: Trigger (button) + Zone (menu popup via createTrigger)
+ * ZIFT classification: Trigger (button) + Zone (menu popup via zone.overlay)
  *
- * OS pattern: createTrigger({ role: "menu" }) auto-dispatches OS_OVERLAY_OPEN.
+ * OS pattern: zone.overlay({ role: "menu" }) auto-dispatches OS_OVERLAY_OPEN.
  *   Menu.Popover renders a non-modal Zone (role="menu") when overlay is open.
  *   Trigger is wrapped in a toolbar zone for keyboard focus management.
  */
@@ -51,7 +51,7 @@ const ActionsMenu = triggerZone.overlay("apg-menu-button-popup", {
 /**
  * MenuButtonPattern
  *
- * W3C APG Menu Button using defineApp + createTrigger({ role: "menu" }).
+ * W3C APG Menu Button using defineApp + zone.overlay({ role: "menu" }).
  * ActionsMenu.Trigger handles:
  *   - Click → OS_OVERLAY_OPEN (menu opens)
  *   - Enter/Space (via OS_ACTIVATE → onActivate) → menu opens
