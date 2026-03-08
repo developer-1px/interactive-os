@@ -26,7 +26,7 @@
 | OG-020 | 2026-03-07 | os-core | ~~aria-controls for select-based visibility~~ | ✅ 해결: computeItem에 contentRoleMap 기반 aria-controls 블록 추가. expand 블록과 중복 방지. APG A5 tests fixed. | — |
 | OG-021 | 2026-03-08 | os-sdk | SDK OS_OVERLAY_OPEN re-export | SDK가 `OS_OVERLAY_OPEN`을 re-export하지 않음. zone-level trigger binding을 SDK 수준에서 선언할 방법 없음. `createTrigger`는 React 전용이라 headless에서 overlay lifecycle 테스트 불가. | `@os-core` 직접 import |
 | OG-022 | 2026-03-08 | os-core | Headless hover simulation | `createHeadlessPage`에 hover/pointer-enter 시뮬레이션 없음. tooltip `onHover` trigger 테스트 불가. | TODO tests |
-| OG-023 | 2026-03-08 | os-core | AlertDialog Escape block | `role="alertdialog"` overlay에서 Escape가 close 동작. alertdialog는 사용자 확인 필수이므로 Escape 차단 필요. | backlog issue 등록 |
+| OG-023 | 2026-03-08 | os-core | ~~AlertDialog Escape block~~ | ✅ 해결: escape.ts overlay guard에 `topOverlay.type === "alertdialog"` 체크 추가. alertdialog Escape NOOP. | — |
 | OG-024 | 2026-03-08 | os-core | Dynamic item initial expand | 동적으로 발견된 아이템의 초기 aria-expanded 상태를 선언적으로 설정하는 메커니즘 없음. `expand.initial`은 정적 아이템만 지원. | `useEffect` + `os.setState` workaround |
 | OG-025 | 2026-03-08 | os-core | Trigger focus drift (Zero Drift) | 브라우저에서 trigger 클릭 시 `<Item>` 래핑으로 trigger 자체가 zone item으로 인식 → focusedItemId가 trigger ID로 변경 → `onActivate(triggerId)` 호출 (의도: 이전 focused data item ID). Headless `simulateClick`은 standalone fast path로 정확한 focusId 전달. | Trigger click = headless only 테스트 |
 | OG-026 | 2026-03-08 | os-core | aria-checked binding | `OS_CHECK` → `toggleTodo` 실행 → `completed` 상태 변경되나, zone의 `aria-checked` ARIA 속성에 반영 안 됨. TestBot §1f 실패. | headless에서 `page.state` 직접 검증 |
@@ -38,3 +38,4 @@
 | OG-001 | 2026-02-25 | 2026-02-26 | Dropdown Zone | 기존 Trigger+Portal 패턴으로 해결. 새 프리미티브 불필요. outsideClick 런타임 추가. |
 | OG-002 | 2026-02-26 | 2026-02-26 | `onReorder: void` | zone 콜백 명령형 시그니처. 다른 콜백(onAction 등)은 선언형(BaseCommand 리턴). → 선언형으로 수정 완료 |
 | OG-015 | 2026-03-07 | 2026-03-07 | Overlay Escape dismiss | OS_ESCAPE overlay guard + TriggerDismiss onActivate 등록. escape.ts + TriggerDismiss.tsx |
+| OG-023 | 2026-03-08 | 2026-03-09 | AlertDialog Escape block | escape.ts overlay guard에 type 체크. alertdialog → Escape NOOP. roleRegistry preset `dismiss.escape: "none"` |

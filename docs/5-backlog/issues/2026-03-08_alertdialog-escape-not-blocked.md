@@ -1,36 +1,26 @@
-# OS Gap: AlertDialog Escape Not Blocked
+# OS Gap: AlertDialog Escape Not Blocked — [Closed]
 
 ## Summary
 
 `role="alertdialog"` overlay는 Escape으로 닫히면 안 되지만, 현재 OS는 overlay type을 확인하지 않고 모든 overlay를 Escape으로 닫는다.
 
-## Reproduction
+## Resolution
 
-```ts
-// zone config에 dismiss.escape를 설정하지 않아도
-// overlay stack에 있는 alertdialog가 Escape으로 닫힌다
-alertZone.bind({
-  role: "group",
-  options: {
-    tab: { behavior: "trap" },
-    // No dismiss.escape — yet Escape still closes
-  },
-});
-```
+**해결일**: 2026-03-09
 
-## Expected
+`escape.ts`의 overlay guard에서 `topOverlay.type === "alertdialog"` 체크 추가. alertdialog일 때 Escape NOOP 리턴.
 
-- `type: "alertdialog"` overlay → Escape NOOP
-- `type: "dialog"` overlay → Escape closes (current behavior, correct)
+수정 파일:
+- `packages/os-core/src/4-command/dismiss/escape.ts` — overlay type 체크
+- `packages/os-core/src/engine/registries/roleRegistry.ts` — alertdialog preset `dismiss.escape: "close"` → `"none"`
+- `tests/headless/apps/layer-showcase/alertdialog.layer.test.ts` — `it.todo()` → 실제 assertion
+
+증명: Red(1 FAIL) → Green(4/4 PASS) + 회귀 0 (layer-showcase 32 tests all pass)
 
 ## Root Cause
 
-`packages/os-core/src/4-command/dismiss/escape.ts`에서 overlay type을 확인하지 않고 `OS_OVERLAY_CLOSE`를 dispatch하는 것으로 추정.
-
-## Impact
-
-W3C APG alertdialog 스펙 위반. 사용자가 실수로 중요한 확인 다이얼로그를 닫을 수 있음.
+`escape.ts:45`에서 `ctx.state.os.overlays.stack.length > 0`만 확인하고 무조건 `OS_OVERLAY_CLOSE` dispatch. overlay의 `.type` 필드를 확인하지 않음.
 
 ## Discovered
 
-layer-playground T3 (AlertDialog showcase) 개밥먹기 중 발견. `tests/headless/apps/layer-showcase/alertdialog.layer.test.ts` it.todo 참조.
+layer-playground T3 (AlertDialog showcase) 개밥먹기 중 발견.

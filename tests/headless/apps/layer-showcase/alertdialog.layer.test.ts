@@ -53,11 +53,17 @@ describe("Layer AlertDialog: Focus Trap", () => {
 });
 
 describe("Layer AlertDialog: Escape Blocked", () => {
-  // OS GAP: alertdialog should block Escape, but current OS closes all overlays
-  // regardless of type. See docs/5-backlog/ for tracking.
-  it.todo(
-    "Escape does NOT close alertdialog (OS gap: overlay type not checked)",
-  );
+  it("Escape does NOT close alertdialog", () => {
+    const page = createPage();
+    page.click(TRIGGER_ID);
+    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+
+    page.keyboard.press("Escape");
+
+    // alertdialog must remain open — Escape is blocked per W3C APG spec
+    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+    expect(page.focusedItemId()).toBe(ALERTDIALOG_ITEMS[0]);
+  });
 });
 
 describe("Layer AlertDialog: ARIA Projection", () => {

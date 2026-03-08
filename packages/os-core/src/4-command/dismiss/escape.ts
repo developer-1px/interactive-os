@@ -42,7 +42,11 @@ export const OS_ESCAPE = os.defineCommand(
   "OS_ESCAPE",
   (ctx) => (payload: { force?: boolean }) => {
     // Overlay guard: close topmost overlay before any zone dismiss logic.
-    if (ctx.state.os.overlays?.stack?.length && !payload?.force) {
+    // Exception: alertdialog must NOT be closed by Escape (W3C APG spec).
+    const stack = ctx.state.os.overlays?.stack;
+    if (stack?.length && !payload?.force) {
+      const topOverlay = stack[stack.length - 1];
+      if (topOverlay.type === "alertdialog") return;
       return { dispatch: OS_OVERLAY_CLOSE({}) };
     }
 

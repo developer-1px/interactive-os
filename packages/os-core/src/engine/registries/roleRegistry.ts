@@ -322,7 +322,7 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
   alertdialog: {
     navigate: { orientation: "vertical", loop: false },
     tab: { behavior: "trap", restoreFocus: true },
-    dismiss: { escape: "close", outsideClick: "none", restoreFocus: true },
+    dismiss: { escape: "none", outsideClick: "none", restoreFocus: true },
     project: { autoFocus: true },
   },
 

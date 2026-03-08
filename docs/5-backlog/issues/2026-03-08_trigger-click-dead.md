@@ -2,7 +2,7 @@
 
 **Created**: 2026-03-08
 **Priority**: P1 (기능불가 — createTrigger SDK API가 클릭 시 동작하지 않음)
-**Status**: [In Progress]
+**Status**: [Closed — 2026-03-09 자동 해결 확인]
 
 ## Symptom
 
@@ -60,4 +60,4 @@ Shared ID 문제는 per-instance ID 생성으로 해결.
 
 ## Resolution
 
-(TBD)
+**2026-03-09**: Red test 12/12 PASS — 이전 세션의 작업으로 이미 해결됨. `simulateClick` standalone trigger fast path + `page.ts` goto() trigger registration이 정상 동작 확인.
