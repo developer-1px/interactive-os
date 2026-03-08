@@ -183,7 +183,7 @@ const specTable: SpecRow[] = [
     followFocus: D.followFocus,
     tab: "trap",
 
-    dismissEsc: "close",
+    dismissEsc: "none",
     autoFocus: true,
   },
   {
