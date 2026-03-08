@@ -222,7 +222,7 @@ export interface ZoneHandle<S> {
   trigger(
     id: string,
     onActivate: (focusId: string) => BaseCommand,
-  ): TriggerBinding & (<T extends HTMLElement>() => React.HTMLAttributes<T>);
+  ): TriggerBinding & (<T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>);
 
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;

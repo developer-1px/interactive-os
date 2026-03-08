@@ -21,6 +21,7 @@ import type {
   BoundComponents,
   Condition,
   FieldBindings,
+  TriggerBinding,
   ZoneBindings,
 } from "./types";
 
@@ -58,20 +59,6 @@ export function createBoundComponents<S>(
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;
 
-  // ── Eager trigger callback registration ──
-  // Prop-getter triggers have no React component to mount,
-  // so we register onActivate callbacks here at bind() time.
-  const triggers = (config as any).triggers as import("./types").TriggerBinding[] | undefined;
-  if (triggers) {
-    for (const trigger of triggers) {
-      if (trigger.onActivate) {
-        ZoneRegistry.setItemCallback(zoneName, trigger.id, {
-          onActivate: trigger.onActivate,
-        });
-      }
-    }
-  }
-
   // ── Zone component ──
   const ZoneComponent: React.FC<{
     id?: string;
@@ -82,8 +69,7 @@ export function createBoundComponents<S>(
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
     // JSX props (...rest) provide base callbacks; config overrides only when defined.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic zone props from config
-    const zoneProps: any = {
+    const zoneProps: Record<string, unknown> = {
       id: zoneName,
       className,
       role: config.role,
@@ -116,6 +102,26 @@ export function createBoundComponents<S>(
         when: "navigating" as const,
       }));
       return KeybindingsRegistry.registerAll(bindings);
+    }, []);
+
+    // Trigger callbacks registration (must be in useEffect to survive remounts)
+    React.useEffect(() => {
+      const triggers = config.triggers;
+      if (!triggers) return;
+
+      for (const trigger of triggers) {
+        if (trigger.onActivate) {
+          ZoneRegistry.setItemCallback(zoneName, trigger.id, {
+            onActivate: trigger.onActivate,
+          });
+        }
+      }
+
+      return () => {
+        for (const trigger of triggers) {
+          ZoneRegistry.clearItemCallback(zoneName, trigger.id);
+        }
+      };
     }, []);
 
     return React.createElement(
