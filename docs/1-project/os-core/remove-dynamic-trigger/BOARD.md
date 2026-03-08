@@ -11,11 +11,11 @@ Before → After:
 Risks: DocsViewer에 headless 테스트 없음 — payload 제거 후 수동 확인 필요
 
 ## Now
-- [ ] T1: TriggerBase가 함수 onActivate를 직접 ZoneRegistry에 등록
-- [ ] T2: createDynamicTrigger 삭제 + zone.trigger() 재구현
-- [ ] T3: 소비자 payload prop 제거 (TaskItem, Sidebar, DocsViewer)
 
 ## Done
+- [x] T1: TriggerBase가 함수 onActivate를 직접 ZoneRegistry에 등록 — tsc 0 | 142 tests | build OK ✅
+- [x] T2: createDynamicTrigger 삭제 + zone.trigger() 재구현 — tsc 0 | 142 tests | build OK ✅
+- [x] T3: 소비자 payload prop 제거 (TaskItem, Sidebar, DocsViewer) — tsc 0 | 142 tests | build OK ✅
 
 ## Unresolved
 
