@@ -14,7 +14,6 @@ import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { Item, Zone } from "@os-react/internal";
 import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
 import { localeMenu } from "./app";
-import { resolveFieldValue } from "./entities/i18n";
 import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
 
 // 지원 언어 목록
@@ -135,16 +134,3 @@ export function LocaleSwitcher() {
   );
 }
 
-/**
- * useLocalizedField — locale에 따라 필드 값을 resolve하는 hook
- */
-export function useLocalizedField(
-  field: string | Record<string, string>,
-): string {
-  const { currentLocale } = useLocaleState();
-  return resolveFieldValue({
-    field,
-    locale: currentLocale,
-    defaultLocale: "ko",
-  });
-}

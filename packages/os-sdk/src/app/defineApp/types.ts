@@ -152,8 +152,7 @@ export interface AppKeybindingEntry {
 export interface ZoneBindingEntry {
   role: ZoneRole;
   bindings: ZoneBindings;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic keybinding entries
-  keybindings?: KeybindingEntry<any>[];
+  keybindings?: KeybindingEntry<unknown>[];
   field?: FieldBindings;
   triggers?: TriggerBinding[];
 }
@@ -234,8 +233,7 @@ export interface ZoneHandle<S> {
   >(
     config: Omit<ZoneBindings, "triggers"> & {
       field?: FieldBindings;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      keybindings?: { key: string; command: any; when?: unknown }[];
+      keybindings?: { key: string; command: BaseCommand | ZoneCallback; when?: unknown }[];
       /** Triggers: object map {Name: callback} */
       triggers?: TriggerMap;
     },
@@ -254,8 +252,7 @@ export interface ZoneHandle<S> {
 
 export interface TestInstance<S> {
   readonly state: S;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- avoid circular dep with @kernel/core
-  readonly runtime: any;
+  readonly runtime: unknown;
   dispatch(command: BaseCommand): boolean;
   reset(): void;
   evaluate(condition: Condition<S>): boolean;
@@ -306,8 +303,7 @@ export interface AppPage<_S> {
   activeZoneId(): string | null;
 
   /** @internal OS Kernel instance (for OS-level testing only). */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly kernel: any;
+  readonly kernel: unknown;
 
   /** Reset to initial state. */
   reset(): void;

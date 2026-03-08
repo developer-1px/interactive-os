@@ -17,9 +17,10 @@ import { todoScripts } from "@os-devtool/testing/scripts/todo";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, it } from "vitest";
+import type { AppState } from "../../../../src/apps/todo/model/appState";
 import TodoPage from "../../../../src/pages/TodoPage";
 
-type P = AppPageInternal<any>;
+type P = AppPageInternal<AppState>;
 let page: P;
 
 beforeEach(() => {
@@ -36,7 +37,7 @@ afterEach(() => {
 describe("Todo Unified Scripts (Headless)", () => {
   for (const script of todoScripts) {
     it(script.name, async () => {
-      await script.run(page, osExpect);
+      await script.run(page as unknown as import("@os-devtool/testing/types").Page, osExpect);
     });
   }
 });

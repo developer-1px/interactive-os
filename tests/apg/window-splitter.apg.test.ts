@@ -22,27 +22,48 @@
  * Config: separator role, value axis with min/max/step, activate for Enter toggle.
  */
 
-import { createOsPage } from "@os-sdk/app/defineApp/page";
+import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
+import { createHeadlessPage } from "@os-devtool/testing/page";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───
 
 const SPLITTER_ID = "main-splitter";
 
-function splitterFactory(initialValue = 50) {
-  const page = createOsPage();
-  page.setItems([SPLITTER_ID]);
-  page.setRole("splitter-zone", "separator");
-  page.setConfig({
+const SplitterApp = defineApp("window-splitter-test", {});
+const splitterZone = SplitterApp.createZone("splitter-zone");
+splitterZone.bind({
+  role: "separator",
+  getItems: () => [SPLITTER_ID],
+  options: {
     value: {
+      mode: "continuous" as const,
       min: 0,
       max: 100,
       step: 1,
       largeStep: 10,
     },
+  },
+});
+
+function splitterFactory(_initialValue = 50) {
+  const page = createHeadlessPage(SplitterApp) as AppPageInternal<unknown>;
+  page.setupZone("splitter-zone", {
+    role: "separator",
+    items: [SPLITTER_ID],
+    config: {
+      value: {
+        mode: "continuous" as const,
+        min: 0,
+        max: 100,
+        step: 1,
+        largeStep: 10,
+      },
+    },
   });
-  page.setActiveZone("splitter-zone", SPLITTER_ID);
-  page.setValueNow(SPLITTER_ID, initialValue);
+  // Set initial value
+  page.goto("/");
   return page;
 }
 

@@ -17,7 +17,6 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import React from "react";
 import { Icon } from "@/components/Icon";
 
 // ─── Data ───
@@ -147,8 +146,9 @@ const COLUMNS: {
 // ─── Component ───
 
 export function TablePattern() {
-  const state = TableApp.useComputed((s) => s);
-  const sorted = sortStudents(STUDENTS, state.sortColumn, state.sortDirection);
+  const sortColumn = TableApp.useComputed((s) => s.sortColumn);
+  const sortDirection = TableApp.useComputed((s) => s.sortDirection);
+  const sorted = sortStudents(STUDENTS, sortColumn, sortDirection);
 
   return (
     <div className="max-w-2xl">
@@ -185,17 +185,15 @@ export function TablePattern() {
       >
         <thead>
           <TableUI.Zone
-            as="tr"
-            className="bg-gray-50 border-b border-gray-200"
-            aria-label="Sort controls"
+            className="bg-gray-50 border-b border-gray-200 contents"
           >
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
                 scope="col"
                 aria-sort={
-                  col.sortable && state.sortColumn === col.key
-                    ? state.sortDirection
+                  col.sortable && sortColumn === col.key
+                    ? sortDirection
                     : col.sortable
                       ? "none"
                       : undefined
@@ -218,8 +216,8 @@ export function TablePattern() {
                       {col.label}
                       <SortIcon
                         column={col.key}
-                        sortColumn={state.sortColumn}
-                        sortDirection={state.sortDirection}
+                        sortColumn={sortColumn}
+                        sortDirection={sortDirection}
                       />
                     </button>
                   </TableUI.Item>

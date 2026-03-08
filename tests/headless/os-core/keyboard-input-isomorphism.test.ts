@@ -165,7 +165,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("does NOT contain removed dead fields", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown") as Record<
+      const input = buildKeyboardInput(page.kernel, "ArrowDown") as unknown as Record<
         string,
         unknown
       >;

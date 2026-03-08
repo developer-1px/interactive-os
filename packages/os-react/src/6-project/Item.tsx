@@ -18,8 +18,8 @@ import {
   isValidElement,
   type ReactElement,
   type ReactNode,
+  useCallback,
   useLayoutEffect,
-  useMemo,
   useRef,
 } from "react";
 import { useZoneContext } from "./Zone.tsx";
@@ -57,10 +57,6 @@ function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   } else if (ref !== null && ref !== undefined) {
     (ref as React.MutableRefObject<T | null>).current = value;
   }
-}
-
-function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
-  return (node: T | null) => refs.forEach((r) => setRef(r, node));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -151,14 +147,14 @@ const ItemBase = forwardRef<HTMLElement, ItemProps>(function Item(
         (resolved as ReactElement<any>)
       : null;
 
-  const combinedRef = useMemo(
-    () =>
-      composeRefs(
-        ref,
-        internalRef,
-        (mergeEl as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref,
-      ),
-    [ref, mergeEl],
+  const mergeElRef = (mergeEl as ReactElement & { ref?: React.Ref<HTMLElement> })?.ref;
+  const combinedRef = useCallback(
+    (node: HTMLElement | null) => {
+      setRef(ref, node);
+      setRef(internalRef, node);
+      setRef(mergeElRef, node);
+    },
+    [ref, mergeElRef],
   );
 
   if (mergeEl) {

@@ -78,11 +78,10 @@ export function CrossZonePattern() {
           aria-label="Formatting"
           className="flex gap-1 p-2 border border-gray-200 rounded-lg bg-white"
         >
-          {ACTIONS.map(({ id, label, title }) => (
+          {ACTIONS.map(({ id, label }) => (
             <ToolbarUI.Item
               key={id}
               id={id}
-              title={title}
               className="
                 w-10 h-10 flex items-center justify-center
                 font-bold text-sm rounded-md

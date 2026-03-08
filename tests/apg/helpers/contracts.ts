@@ -12,6 +12,7 @@
  *   Assert: attrs() → tabIndex, aria-selected, data-focused (ARIA contract)
  */
 
+import { OS_STACK_POP } from "@os-core/4-command/focus/stack";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { expect, it } from "vitest";
 
@@ -224,7 +225,7 @@ export function assertFocusRestore(
   it("Escape + stack pop: restores focus to invoker", () => {
     const t = factory();
     t.keyboard.press("Escape");
-    t.dispatch(t.OS_STACK_POP());
+    t.dispatch(OS_STACK_POP());
     expect(t.activeZoneId()).toBe(opts.invokerZoneId);
     expect(t.focusedItemId(opts.invokerZoneId)).toBe(opts.invokerItemId);
   });
