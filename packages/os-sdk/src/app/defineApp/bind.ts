@@ -7,6 +7,7 @@
 
 import { Keybindings as KeybindingsRegistry } from "@os-core/2-resolve/keybindings";
 import { os } from "@os-core/engine/kernel";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import {
   getContentRole,
   getContentVisibilitySource,
@@ -56,6 +57,20 @@ export function createBoundComponents<S>(
   },
 ): BoundComponents<S> {
   const { appId, zoneName, useComputed } = bindConfig;
+
+  // ── Eager trigger callback registration ──
+  // Prop-getter triggers have no React component to mount,
+  // so we register onActivate callbacks here at bind() time.
+  const triggers = (config as any).triggers as import("./types").TriggerBinding[] | undefined;
+  if (triggers) {
+    for (const trigger of triggers) {
+      if (trigger.onActivate) {
+        ZoneRegistry.setItemCallback(zoneName, trigger.id, {
+          onActivate: trigger.onActivate,
+        });
+      }
+    }
+  }
 
   // ── Zone component ──
   const ZoneComponent: React.FC<{
