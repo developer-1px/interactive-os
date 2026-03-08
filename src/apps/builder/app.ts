@@ -196,6 +196,11 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   },
 });
 
+// Locale menu overlay handle (prop-getter for LocaleSwitcher trigger)
+export const localeMenu = sidebarCollection.overlay("locale-menu", {
+  role: "menu",
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // Panel Zone — Accordion tree (properties form keyboard navigation)
 // ═══════════════════════════════════════════════════════════════════

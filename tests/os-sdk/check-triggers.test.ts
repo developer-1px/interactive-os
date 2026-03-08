@@ -1,6 +1,6 @@
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { TodoList } from "@apps/todo/app";
-import { test, expect } from "vitest";
+import { test } from "vitest";
 
 test("check if triggers are registered", () => {
     // Accessing TodoList to trigger module evaluation

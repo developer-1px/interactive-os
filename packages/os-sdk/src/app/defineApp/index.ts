@@ -35,10 +35,7 @@ import type React from "react";
 import type { AppModule } from "../modules/types";
 import { createBoundComponents } from "./bind";
 import { createTestInstance } from "./testInstance";
-import {
-  type CompoundTriggerComponents,
-  createCompoundTrigger,
-} from "./trigger";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import {
   __conditionBrand,
   __selectorBrand,
@@ -280,8 +277,26 @@ export function defineApp<S>(
       overlay(
         id: string,
         config: import("@os-sdk/app/defineApp/types").ZoneOverlayConfig,
-      ): CompoundTriggerComponents {
-        return createCompoundTrigger(appId, { ...config, id });
+      ): import("@os-sdk/app/defineApp/types").OverlayHandle {
+        const triggerId = `${id}-trigger`;
+        const role = config.role ?? "dialog";
+
+        // Register trigger→overlay relationship for headless ARIA
+        TriggerOverlayRegistry.set(triggerId, id, role);
+
+        return {
+          overlayId: id,
+          trigger: <T extends HTMLElement>(payload?: string) => ({
+            "data-trigger-id": triggerId,
+            "aria-haspopup": role === "menu" ? "true" : (role as string),
+            "aria-controls": id,
+            ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
+          }) as React.HTMLAttributes<T> & {
+            "data-trigger-id": string;
+            "aria-haspopup"?: string;
+            "aria-controls"?: string;
+          },
+        };
       },
 
       bind<
@@ -308,10 +323,10 @@ export function defineApp<S>(
           const map = config.triggers;
           for (const [key, onActivate] of Object.entries(map)) {
             triggerBindings.push({ id: key, onActivate: onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand });
-            triggerGetters[key] = <T extends HTMLElement>(payload?: string): React.HTMLAttributes<T> => ({
+            triggerGetters[key] = <T extends HTMLElement>(payload?: string) => ({
               "data-trigger-id": key,
               ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
-            });
+            }) as React.HTMLAttributes<T> & { "data-trigger-id": string };
           }
         }
 

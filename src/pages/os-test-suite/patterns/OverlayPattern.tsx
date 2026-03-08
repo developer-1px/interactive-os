@@ -13,7 +13,8 @@
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { Item, Zone } from "@os-react/internal";
+import { Item } from "@os-react/internal";
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import type { TestCase } from "../index";
 
@@ -55,7 +56,7 @@ dialogZone.bind({
   },
 });
 
-const DialogTrigger = triggerZone.overlay("test-dialog", {
+const dialog = triggerZone.overlay("test-dialog", {
   role: "dialog",
 });
 
@@ -71,61 +72,59 @@ export function OverlayPattern() {
         closes and restores focus.
       </p>
 
-      <DialogTrigger.Root>
-        <button
-          {...DialogTrigger.Trigger()}
-          type="button"
-          className="
-            px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg
-            hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:outline-none
-          "
-        >
-          Open Dialog
-        </button>
+      <button
+        {...dialog.trigger()}
+        type="button"
+        className="
+          px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg
+          hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:outline-none
+        "
+      >
+        Open Dialog
+      </button>
 
-        <DialogTrigger.Dialog
-          aria-label="Test Dialog"
-          className="
-            fixed inset-0 z-50 flex items-center justify-center bg-black/50
-          "
-        >
-          <div className="bg-white rounded-xl shadow-xl p-6 w-80 space-y-4">
-            <h4 className="font-semibold text-gray-800">Test Dialog</h4>
-            <div className="space-y-2">
-              <Item
-                id="dialog-a"
-                as="button"
-                className="
-                  w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
-                  data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
-                "
-              >
-                Action A
-              </Item>
-              <Item
-                id="dialog-b"
-                as="button"
-                className="
-                  w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
-                  data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
-                "
-              >
-                Action B
-              </Item>
-              <Item
-                id="dialog-c"
-                as="button"
-                className="
-                  w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
-                  data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
-                "
-              >
-                Close
-              </Item>
-            </div>
+      <ModalPortal
+        overlayId="test-dialog"
+        role="dialog"
+        title="Test Dialog"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      >
+        <div className="bg-white rounded-xl shadow-xl p-6 w-80 space-y-4">
+          <h4 className="font-semibold text-gray-800">Test Dialog</h4>
+          <div className="space-y-2">
+            <Item
+              id="dialog-a"
+              as="button"
+              className="
+                w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
+                data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
+              "
+            >
+              Action A
+            </Item>
+            <Item
+              id="dialog-b"
+              as="button"
+              className="
+                w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
+                data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
+              "
+            >
+              Action B
+            </Item>
+            <Item
+              id="dialog-c"
+              as="button"
+              className="
+                w-full px-3 py-2 text-sm text-left rounded-md border border-gray-200
+                data-[focused=true]:ring-2 data-[focused=true]:ring-emerald-300
+              "
+            >
+              Close
+            </Item>
           </div>
-        </DialogTrigger.Dialog>
-      </DialogTrigger.Root>
+        </div>
+      </ModalPortal>
     </div>
   );
 }

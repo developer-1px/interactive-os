@@ -86,7 +86,7 @@ export function createCompoundTrigger(
   const TriggerComponent = <T extends HTMLElement>(): React.HTMLAttributes<T> & { "data-trigger-id": string; "aria-haspopup"?: string; "aria-expanded"?: boolean; "aria-controls"?: string } => {
     return {
       "data-trigger-id": `${overlayId}-trigger`,
-      "aria-haspopup": role === "menu" ? "true" : role,
+      "aria-haspopup": (role === "menu" ? "true" : role) as "true" | "dialog",
       "aria-controls": overlayId,
     };
   };

@@ -130,3 +130,5 @@
 모르면 묻는다. 잘못된 방향으로 100줄 쓰는 것보다 질문 하나가 낫다.
 
 > **정확성**: 수치를 보고하기 전에 반드시 `view_file`이나 `grep`으로 직접 확인한다.
+>
+> **tsc 체크**: `npx tsc --noEmit` 금지. project references 구조라 아무것도 안 본다. **`npm run typecheck`** (`tsc -b`) 사용.

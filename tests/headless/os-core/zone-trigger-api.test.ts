@@ -1,10 +1,11 @@
 /**
- * Zone Trigger API — T1 tests (updated for single-signature API)
+ * Zone Trigger API — T1 tests (updated for OverlayHandle API)
  *
- * @spec docs/1-project/os-core/trigger-unify/notes/2026-0308-[plan]-trigger-unify.md
+ * @spec docs/1-project/os-core/action-centric-trigger/notes/2026-0309-0100-[plan]-wrapper-elimination.md
  *
  * Verifies bind({ triggers }) and zone.overlay() — the trigger declaration API.
  * Triggers are declared as object maps in bind(): { Name: (focusId: string) => BaseCommand }.
+ * Overlay triggers return OverlayHandle { overlayId, trigger }.
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
@@ -67,12 +68,12 @@ describe("Feature: bind() with triggers object map", () => {
     const props = UI.triggers.ActivateItem("item-1");
     expect(props).toHaveProperty("data-trigger-id", "ActivateItem");
     expect(props).toHaveProperty("data-trigger-payload");
-    expect(props["data-trigger-payload"]).toBe("item-1");
+    expect((props as unknown as Record<string, unknown>)["data-trigger-payload"]).toBe("item-1");
   });
 });
 
-describe("Feature: zone.overlay() API", () => {
-  it("zone.overlay(id, config) returns CompoundTriggerComponents", () => {
+describe("Feature: zone.overlay() → OverlayHandle", () => {
+  it("zone.overlay(id, config) returns OverlayHandle with overlayId and trigger", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
 
@@ -80,16 +81,16 @@ describe("Feature: zone.overlay() API", () => {
       role: "dialog",
     });
 
-    expect(dialog).toHaveProperty("Root");
-    expect(dialog).toHaveProperty("Trigger");
-    expect(dialog).toHaveProperty("Portal");
-    expect(dialog).toHaveProperty("Popover");
-    expect(dialog).toHaveProperty("Content");
-    expect(dialog).toHaveProperty("Dismiss");
-    expect(dialog).toHaveProperty("Confirm");
+    expect(dialog.overlayId).toBe("confirm-dialog");
+    expect(typeof dialog.trigger).toBe("function");
+
+    const attrs = dialog.trigger();
+    expect(attrs["data-trigger-id"]).toBe("confirm-dialog-trigger");
+    expect(attrs["aria-haspopup"]).toBe("dialog");
+    expect(attrs["aria-controls"]).toBe("confirm-dialog");
   });
 
-  it("zone.overlay(id, config) with confirm command", () => {
+  it("zone.overlay(id, config) for alertdialog role", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const confirmDelete = zone.command("CONFIRM_DELETE", (ctx) => ({
@@ -101,11 +102,12 @@ describe("Feature: zone.overlay() API", () => {
       confirm: confirmDelete(),
     });
 
-    expect(dialog).toHaveProperty("Root");
-    expect(dialog).toHaveProperty("Confirm");
+    expect(dialog.overlayId).toBe("delete-dialog");
+    const attrs = dialog.trigger();
+    expect(attrs["aria-haspopup"]).toBe("alertdialog");
   });
 
-  it("zone.overlay(id, config) for menu role", () => {
+  it("zone.overlay(id, config) for menu role returns aria-haspopup=true", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
 
@@ -113,9 +115,10 @@ describe("Feature: zone.overlay() API", () => {
       role: "menu",
     });
 
-    expect(menu).toHaveProperty("Root");
-    expect(menu).toHaveProperty("Trigger");
-    expect(menu).toHaveProperty("Popover");
+    expect(menu.overlayId).toBe("action-menu");
+    const attrs = menu.trigger();
+    expect(attrs["data-trigger-id"]).toBe("action-menu-trigger");
+    expect(attrs["aria-haspopup"]).toBe("true");
+    expect(attrs["aria-controls"]).toBe("action-menu");
   });
 });
-

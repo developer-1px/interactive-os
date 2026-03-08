@@ -13,7 +13,6 @@ import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldMode } from "@os-react/6-project/field/Field";
-import type { CompoundTriggerComponents } from "@os-sdk/app/defineApp/trigger";
 import type React from "react";
 import type { ReactNode } from "react";
 
@@ -21,6 +20,16 @@ import type { ReactNode } from "react";
 export interface ZoneOverlayConfig {
   confirm?: BaseCommand;
   role?: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip" | "listbox";
+}
+
+/** OverlayHandle — L1 contract for overlay triggers. No React components. */
+export interface OverlayHandle {
+  overlayId: string;
+  trigger: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> & {
+    "data-trigger-id": string;
+    "aria-haspopup"?: string;
+    "aria-controls"?: string;
+  };
 }
 import type { ZodSchema } from "zod";
 
@@ -211,8 +220,8 @@ export interface ZoneHandle<S> {
 
   createZone(name: string): ZoneHandle<S>;
 
-  /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
-  overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
+  /** Declare an overlay trigger: id + config. Returns OverlayHandle (L1 contract). */
+  overlay(id: string, config: ZoneOverlayConfig): OverlayHandle;
 
   bind<
     TriggerMap extends Record<string, (focusId: string) => BaseCommand> = Record<string, never>,

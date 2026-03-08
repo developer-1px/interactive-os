@@ -10,6 +10,7 @@
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
 import { Item } from "@os-react/internal";
+import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
@@ -46,9 +47,7 @@ const OPTIONS = [
   { id: "opt-yellow", label: "Yellow", color: "bg-yellow-400" },
 ];
 
-const listboxTriggerZone = ListboxDropdownShowcaseApp.createZone("listbox-trigger-zone");
-
-const ListboxTrigger = listboxTriggerZone.overlay("layer-listbox", {
+const listbox = triggerZone.overlay("layer-listbox", {
   role: "listbox",
 });
 
@@ -62,49 +61,48 @@ export function ListboxDropdownPattern() {
         <kbd>Escape</kbd> closes.
       </p>
 
-      <ListboxTrigger.Root>
-        <div className="relative inline-block">
-          <button
-            {...ListboxTrigger.Trigger()}
-            type="button"
-            className="
-              inline-flex items-center gap-2 px-4 py-2
-              border border-gray-300 bg-white text-sm rounded-lg
-              hover:bg-gray-50 transition-colors
-              focus:ring-2 focus:ring-violet-400 focus:outline-none
-            "
-          >
-            <Icon name="palette" size={14} />
-            Choose Color
-            <Icon name="chevron-down" size={14} className="text-gray-400" />
-          </button>
+      <div className="relative inline-block">
+        <button
+          {...listbox.trigger()}
+          type="button"
+          className="
+            inline-flex items-center gap-2 px-4 py-2
+            border border-gray-300 bg-white text-sm rounded-lg
+            hover:bg-gray-50 transition-colors
+            focus:ring-2 focus:ring-violet-400 focus:outline-none
+          "
+        >
+          <Icon name="layers" size={14} />
+          Choose Color
+          <Icon name="chevron-down" size={14} className="text-gray-400" />
+        </button>
 
-          <ListboxTrigger.Popover
-            zoneRole="listbox"
-            aria-label="Color options"
-            className="
-              absolute top-full left-0 mt-1 w-48 z-50
-              bg-white border border-gray-200 rounded-lg shadow-lg py-1
-            "
-          >
-            {OPTIONS.map((opt) => (
-              <Item
-                key={opt.id}
-                id={opt.id}
-                role="option"
-                className="
-                  flex items-center gap-3 px-3 py-2 text-sm text-gray-700
-                  cursor-pointer select-none
-                  data-[focused=true]:bg-violet-50 data-[focused=true]:text-violet-700
-                "
-              >
-                <span className={`w-3 h-3 rounded-full ${opt.color}`} />
-                {opt.label}
-              </Item>
-            ))}
-          </ListboxTrigger.Popover>
-        </div>
-      </ListboxTrigger.Root>
+        <PopoverPortal
+          overlayId="layer-listbox"
+          role="listbox"
+          aria-label="Color options"
+          className="
+            absolute top-full left-0 mt-1 w-48 z-50
+            bg-white border border-gray-200 rounded-lg shadow-lg py-1
+          "
+        >
+          {OPTIONS.map((opt) => (
+            <Item
+              key={opt.id}
+              id={opt.id}
+              role="option"
+              className="
+                flex items-center gap-3 px-3 py-2 text-sm text-gray-700
+                cursor-pointer select-none
+                data-[focused=true]:bg-violet-50 data-[focused=true]:text-violet-700
+              "
+            >
+              <span className={`w-3 h-3 rounded-full ${opt.color}`} />
+              {opt.label}
+            </Item>
+          ))}
+        </PopoverPortal>
+      </div>
     </div>
   );
 }

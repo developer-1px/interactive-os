@@ -11,7 +11,7 @@
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { Item, Zone } from "@os-react/internal";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Icon } from "@/components/Icon";
@@ -22,7 +22,7 @@ export const DialogShowcaseApp = defineApp("layer-dialog-showcase", {});
 
 // Trigger zone: toolbar with a button that opens dialog
 const triggerZone = DialogShowcaseApp.createZone("dialog-trigger-zone");
-const TriggerUI = triggerZone.bind({
+triggerZone.bind({
   role: "toolbar",
   getItems: () => ["OpenDialog"],
   triggers: {

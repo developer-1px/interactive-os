@@ -10,6 +10,7 @@
  * This showcase exists to identify and document the gap.
  */
 
+import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
@@ -19,7 +20,7 @@ export const TooltipShowcaseApp = defineApp("layer-tooltip-showcase", {});
 
 const tooltipZone = TooltipShowcaseApp.createZone("tooltip-zone");
 
-const TooltipTrigger = tooltipZone.overlay("layer-tooltip", {
+const tooltip = tooltipZone.overlay("layer-tooltip", {
   role: "tooltip",
 });
 
@@ -38,32 +39,31 @@ export function TooltipPattern() {
         Note: Hover trigger is not yet supported in headless testing (OS gap).
       </p>
 
-      <TooltipTrigger.Root>
-        <button
-          {...TooltipTrigger.Trigger()}
-          type="button"
-          className="
-            inline-flex items-center gap-2 px-4 py-2
-            border border-gray-300 bg-white text-sm rounded-lg
-            hover:bg-gray-50 transition-colors
-            focus:ring-2 focus:ring-violet-400 focus:outline-none
-          "
-        >
-          <Icon name="help-circle" size={14} />
-          Hover me
-        </button>
+      <button
+        {...tooltip.trigger()}
+        type="button"
+        className="
+          inline-flex items-center gap-2 px-4 py-2
+          border border-gray-300 bg-white text-sm rounded-lg
+          hover:bg-gray-50 transition-colors
+          focus:ring-2 focus:ring-violet-400 focus:outline-none
+        "
+      >
+        <Icon name="help" size={14} />
+        Hover me
+      </button>
 
-        <TooltipTrigger.Popover
-          aria-label="Help information"
-          className="
-            absolute top-full left-0 mt-2 z-50
-            bg-gray-900 text-white text-xs rounded-md px-3 py-2 shadow-lg
-            max-w-xs
-          "
-        >
-          This is a tooltip with helpful information about the button.
-        </TooltipTrigger.Popover>
-      </TooltipTrigger.Root>
+      <PopoverPortal
+        overlayId="layer-tooltip"
+        aria-label="Help information"
+        className="
+          absolute top-full left-0 mt-2 z-50
+          bg-gray-900 text-white text-xs rounded-md px-3 py-2 shadow-lg
+          max-w-xs
+        "
+      >
+        This is a tooltip with helpful information about the button.
+      </PopoverPortal>
     </div>
   );
 }

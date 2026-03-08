@@ -21,7 +21,6 @@ import type {
   BoundComponents,
   Condition,
   FieldBindings,
-  TriggerBinding,
   ZoneBindings,
 } from "./types";
 

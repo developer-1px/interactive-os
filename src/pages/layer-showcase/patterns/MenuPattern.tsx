@@ -10,6 +10,7 @@
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
 import { Item } from "@os-react/internal";
+import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
@@ -40,13 +41,13 @@ menuZone.bind({
 // ─── React Component ───
 
 const MENU_ITEMS = [
-  { id: "menu-cut", label: "Cut", icon: "scissors" as const },
+  { id: "menu-cut", label: "Cut", icon: "x" as const },
   { id: "menu-copy", label: "Copy", icon: "copy" as const },
   { id: "menu-paste", label: "Paste", icon: "clipboard" as const },
   { id: "menu-delete", label: "Delete", icon: "trash" as const },
 ];
 
-const MenuTrigger = triggerZone.overlay("layer-menu", {
+const menu = triggerZone.overlay("layer-menu", {
   role: "menu",
 });
 
@@ -59,55 +60,54 @@ export function MenuPattern() {
         navigate. <kbd>Enter</kbd> activates. <kbd>Escape</kbd> closes.
       </p>
 
-      <MenuTrigger.Root>
-        <div className="relative inline-block">
-          <button
-            {...MenuTrigger.Trigger()}
-            type="button"
-            className="
-              group inline-flex items-center gap-2 px-4 py-2
-              bg-violet-600 text-white text-sm font-medium rounded-lg
-              hover:bg-violet-700 transition-colors
-              focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
-            "
-          >
-            Edit Actions
-            <Icon
-              name="chevron-down"
-              size={14}
-              className="transition-transform group-aria-expanded:rotate-180"
-            />
-          </button>
+      <div className="relative inline-block">
+        <button
+          {...menu.trigger()}
+          type="button"
+          className="
+            group inline-flex items-center gap-2 px-4 py-2
+            bg-violet-600 text-white text-sm font-medium rounded-lg
+            hover:bg-violet-700 transition-colors
+            focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
+          "
+        >
+          Edit Actions
+          <Icon
+            name="chevron-down"
+            size={14}
+            className="transition-transform group-aria-expanded:rotate-180"
+          />
+        </button>
 
-          <MenuTrigger.Popover
-            aria-label="Edit Actions"
-            className="
-              absolute top-full left-0 mt-1 w-48 z-50
-              bg-white border border-gray-200 rounded-lg shadow-lg py-1
-            "
-          >
-            {MENU_ITEMS.map((item) => (
-              <Item
-                key={item.id}
-                id={item.id}
-                className="
-                  group flex items-center gap-3 px-3 py-2 text-sm text-gray-700
-                  cursor-pointer select-none
-                  hover:bg-gray-50
-                  data-[focused=true]:bg-violet-50 data-[focused=true]:text-violet-700
-                "
-              >
-                <Icon
-                  name={item.icon}
-                  size={14}
-                  className="text-gray-400 group-data-[focused=true]:text-violet-500"
-                />
-                {item.label}
-              </Item>
-            ))}
-          </MenuTrigger.Popover>
-        </div>
-      </MenuTrigger.Root>
+        <PopoverPortal
+          overlayId="layer-menu"
+          aria-label="Edit Actions"
+          className="
+            absolute top-full left-0 mt-1 w-48 z-50
+            bg-white border border-gray-200 rounded-lg shadow-lg py-1
+          "
+        >
+          {MENU_ITEMS.map((item) => (
+            <Item
+              key={item.id}
+              id={item.id}
+              className="
+                group flex items-center gap-3 px-3 py-2 text-sm text-gray-700
+                cursor-pointer select-none
+                hover:bg-gray-50
+                data-[focused=true]:bg-violet-50 data-[focused=true]:text-violet-700
+              "
+            >
+              <Icon
+                name={item.icon}
+                size={14}
+                className="text-gray-400 group-data-[focused=true]:text-violet-500"
+              />
+              {item.label}
+            </Item>
+          ))}
+        </PopoverPortal>
+      </div>
     </div>
   );
 }

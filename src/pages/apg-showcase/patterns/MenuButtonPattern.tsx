@@ -13,12 +13,13 @@
  *
  * ZIFT classification: Trigger (button) + Zone (menu popup via zone.overlay)
  *
- * OS pattern: zone.overlay({ role: "menu" }) auto-dispatches OS_OVERLAY_OPEN.
- *   Menu.Popover renders a non-modal Zone (role="menu") when overlay is open.
+ * OS pattern: zone.overlay({ role: "menu" }) returns OverlayHandle with trigger prop-getter.
+ *   PopoverPortal renders a non-modal Zone (role="menu") when overlay is open.
  *   Trigger is wrapped in a toolbar zone for keyboard focus management.
  */
 
 import { Item } from "@os-react/internal";
+import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
@@ -43,8 +44,8 @@ export const MenuButtonApp = defineApp<Record<string, never>>(
 const triggerZone = MenuButtonApp.createZone("mb-trigger-zone");
 const TriggerUI = triggerZone.bind({ role: "toolbar" });
 
-// Menu trigger: zone.overlay with role="menu" — pure projection + Popover
-const ActionsMenu = triggerZone.overlay("apg-menu-button-popup", {
+// Menu trigger: zone.overlay with role="menu" — pure prop-getter
+const actionsMenu = triggerZone.overlay("apg-menu-button-popup", {
   role: "menu",
 });
 
@@ -52,15 +53,8 @@ const ActionsMenu = triggerZone.overlay("apg-menu-button-popup", {
  * MenuButtonPattern
  *
  * W3C APG Menu Button using defineApp + zone.overlay({ role: "menu" }).
- * ActionsMenu.Trigger handles:
- *   - Click → OS_OVERLAY_OPEN (menu opens)
- *   - Enter/Space (via OS_ACTIVATE → onActivate) → menu opens
- *   - aria-haspopup, aria-expanded managed by the <button>
- *
- * ActionsMenu.Popover handles:
- *   - Conditional rendering (no <dialog>)
- *   - Zone with role="menu" (vertical nav, loop, escape dismiss)
- *   - Outside click → close
+ * actionsMenu.trigger() returns data-trigger-id + ARIA attrs.
+ * PopoverPortal renders non-modal Zone when overlay is open.
  */
 export function MenuButtonPattern() {
   return (
@@ -90,57 +84,56 @@ export function MenuButtonPattern() {
       </p>
 
       <TriggerUI.Zone aria-label="Actions Menu">
-        <ActionsMenu.Root>
-          <div className="relative inline-block">
-            <button
-              {...ActionsMenu.Trigger()}
-              type="button"
-              className="
-                group inline-flex items-center gap-2 px-4 py-2
-                bg-indigo-600 text-white text-sm font-medium rounded-lg
-                hover:bg-indigo-700 transition-colors
-                focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none
-              "
-            >
-              Actions
-              <Icon
-                name="chevron-down"
-                size={14}
-                className="transition-transform group-aria-expanded:rotate-180"
-              />
-            </button>
+        <div className="relative inline-block">
+          <button
+            {...actionsMenu.trigger()}
+            type="button"
+            className="
+              group inline-flex items-center gap-2 px-4 py-2
+              bg-indigo-600 text-white text-sm font-medium rounded-lg
+              hover:bg-indigo-700 transition-colors
+              focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none
+            "
+          >
+            Actions
+            <Icon
+              name="chevron-down"
+              size={14}
+              className="transition-transform group-aria-expanded:rotate-180"
+            />
+          </button>
 
-            <ActionsMenu.Popover
-              aria-labelledby="apg-menu-button-popup-trigger"
-              className="
-                absolute top-full left-0 mt-1 w-48 z-50
-                bg-white border border-gray-200 rounded-lg shadow-lg py-1
-                animate-in fade-in slide-in-from-top-1 duration-150
-              "
-            >
-              {MENU_ITEMS.map((item) => (
-                <Item
-                  key={item.id}
-                  id={item.id}
-                  className="
-                    group flex items-center gap-3 px-3 py-2 text-sm text-gray-700
-                    cursor-pointer select-none
-                    hover:bg-gray-50
-                    data-[focused=true]:bg-indigo-50 data-[focused=true]:text-indigo-700
-                    data-[focused=true]:outline-none
-                  "
-                >
-                  <Icon
-                    name={item.icon}
-                    size={14}
-                    className="text-gray-400 group-data-[focused=true]:text-indigo-500"
-                  />
-                  {item.label}
-                </Item>
-              ))}
-            </ActionsMenu.Popover>
-          </div>
-        </ActionsMenu.Root>
+          <PopoverPortal
+            overlayId="apg-menu-button-popup"
+            aria-labelledby="apg-menu-button-popup-trigger"
+            className="
+              absolute top-full left-0 mt-1 w-48 z-50
+              bg-white border border-gray-200 rounded-lg shadow-lg py-1
+              animate-in fade-in slide-in-from-top-1 duration-150
+            "
+          >
+            {MENU_ITEMS.map((item) => (
+              <Item
+                key={item.id}
+                id={item.id}
+                className="
+                  group flex items-center gap-3 px-3 py-2 text-sm text-gray-700
+                  cursor-pointer select-none
+                  hover:bg-gray-50
+                  data-[focused=true]:bg-indigo-50 data-[focused=true]:text-indigo-700
+                  data-[focused=true]:outline-none
+                "
+              >
+                <Icon
+                  name={item.icon}
+                  size={14}
+                  className="text-gray-400 group-data-[focused=true]:text-indigo-500"
+                />
+                {item.label}
+              </Item>
+            ))}
+          </PopoverPortal>
+        </div>
       </TriggerUI.Zone>
     </div>
   );
