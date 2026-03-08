@@ -10,7 +10,8 @@
  * Known gap: OG-014 — cross-zone editingItemId not transferred.
  */
 
-import { Item, Zone, Field } from "@os-react/internal";
+import { Item, Zone } from "@os-react/internal";
+import { Field } from "@os-react/6-project/field/Field";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 
