@@ -19,7 +19,6 @@ import type { ItemAttrs } from "@os-core/3-inject/headless.types";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, initialAppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
-import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { ensureZone } from "@os-core/schema/state/utils";
 import {
@@ -314,18 +313,19 @@ export function createAppPage<S>(
       config,
       element: null,
       parentId: null,
-      ...(bindings.onAction ? { onAction: bindings.onAction } : {}),
-      ...(bindings.onCheck ? { onCheck: bindings.onCheck } : {}),
-      ...(bindings.onDelete ? { onDelete: bindings.onDelete } : {}),
-      ...(bindings.onCopy ? { onCopy: bindings.onCopy } : {}),
-      ...(bindings.onCut ? { onCut: bindings.onCut } : {}),
-      ...(bindings.onPaste ? { onPaste: bindings.onPaste } : {}),
-      ...(bindings.onMoveUp ? { onMoveUp: bindings.onMoveUp } : {}),
-      ...(bindings.onMoveDown ? { onMoveDown: bindings.onMoveDown } : {}),
-      ...(bindings.onUndo ? { onUndo: bindings.onUndo } : {}),
-      ...(bindings.onRedo ? { onRedo: bindings.onRedo } : {}),
-      ...(bindings.onSelect ? { onSelect: bindings.onSelect } : {}),
-      ...(bindings.itemFilter ? { itemFilter: bindings.itemFilter } : {}),
+      // ZoneEntry allows undefined for all callbacks
+      onAction: bindings.onAction,
+      onCheck: bindings.onCheck,
+      onDelete: bindings.onDelete,
+      onCopy: bindings.onCopy,
+      onCut: bindings.onCut,
+      onPaste: bindings.onPaste,
+      onMoveUp: bindings.onMoveUp,
+      onMoveDown: bindings.onMoveDown,
+      onUndo: bindings.onUndo,
+      onRedo: bindings.onRedo,
+      onSelect: bindings.onSelect,
+      itemFilter: bindings.itemFilter,
       ...(itemsOverride
         ? { getItems: () => itemsOverride }
         : bindings.getItems
@@ -348,13 +348,6 @@ export function createAppPage<S>(
         ZoneRegistry.setItemCallback(zoneName, trigger.id, {
           onActivate: trigger.onActivate,
         });
-        if (trigger.overlay) {
-          TriggerOverlayRegistry.set(
-            trigger.id,
-            trigger.overlay.id,
-            trigger.overlay.type,
-          );
-        }
       }
     }
 

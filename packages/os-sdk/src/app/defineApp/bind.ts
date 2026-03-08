@@ -69,6 +69,7 @@ export function createBoundComponents<S>(
   }> = ({ className, children, ...rest }) => {
     // Zone ID is always auto-injected from bind() — not developer-specified
     // JSX props (...rest) provide base callbacks; config overrides only when defined.
+    // Zone.tsx destructures all callbacks — undefined is safe (ZoneCallbacks allows it)
     const zoneProps: Record<string, unknown> = {
       id: zoneName,
       className,
@@ -79,18 +80,18 @@ export function createBoundComponents<S>(
       getExpandableItems: config.getExpandableItems,
       getTreeLevels: config.getTreeLevels,
       onReorder: config.onReorder,
+      onCheck: config.onCheck,
+      onAction: config.onAction,
+      onSelect: config.onSelect,
+      onDelete: config.onDelete,
+      onCopy: config.onCopy,
+      onCut: config.onCut,
+      onPaste: config.onPaste,
+      onMoveUp: config.onMoveUp,
+      onMoveDown: config.onMoveDown,
+      onUndo: config.onUndo,
+      onRedo: config.onRedo,
       ...rest,
-      ...(config.onCheck ? { onCheck: config.onCheck } : {}),
-      ...(config.onAction ? { onAction: config.onAction } : {}),
-      ...(config.onSelect ? { onSelect: config.onSelect } : {}),
-      ...(config.onDelete ? { onDelete: config.onDelete } : {}),
-      ...(config.onCopy ? { onCopy: config.onCopy } : {}),
-      ...(config.onCut ? { onCut: config.onCut } : {}),
-      ...(config.onPaste ? { onPaste: config.onPaste } : {}),
-      ...(config.onMoveUp ? { onMoveUp: config.onMoveUp } : {}),
-      ...(config.onMoveDown ? { onMoveDown: config.onMoveDown } : {}),
-      ...(config.onUndo ? { onUndo: config.onUndo } : {}),
-      ...(config.onRedo ? { onRedo: config.onRedo } : {}),
     };
 
     // Keybindings registration
@@ -234,15 +235,14 @@ export function createBoundComponents<S>(
   }> = (props) => {
     const fieldConfig = config.field;
 
+    // Field component handles undefined props safely
     return React.createElement(Field, {
       ...props,
-      ...(fieldConfig?.onCommit ? { onCommit: fieldConfig.onCommit } : {}),
-      ...(fieldConfig?.trigger ? { trigger: fieldConfig.trigger } : {}),
-      ...(fieldConfig?.schema ? { schema: fieldConfig.schema } : {}),
-      ...(fieldConfig?.resetOnSubmit
-        ? { resetOnSubmit: fieldConfig.resetOnSubmit }
-        : {}),
-      ...(fieldConfig?.onCancel ? { onCancel: fieldConfig.onCancel } : {}),
+      onCommit: fieldConfig?.onCommit,
+      trigger: fieldConfig?.trigger,
+      schema: fieldConfig?.schema,
+      resetOnSubmit: fieldConfig?.resetOnSubmit,
+      onCancel: fieldConfig?.onCancel,
     } as React.ComponentProps<typeof Field>);
   };
   FieldComponent.displayName = `${appId}.${zoneName}.Field`;
