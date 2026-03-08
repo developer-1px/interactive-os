@@ -227,13 +227,19 @@ export interface ZoneHandle<S> {
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
 
-  bind(
-    config: ZoneBindings & {
+  bind<
+    TriggerMap extends Record<string, (focusId: string) => BaseCommand> = Record<string, never>,
+  >(
+    config: Omit<ZoneBindings, "triggers"> & {
       field?: FieldBindings;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       keybindings?: { key: string; command: any; when?: unknown }[];
+      /** Triggers: object map {Name: callback} (preferred) or legacy TriggerBinding[] */
+      triggers?: TriggerMap | TriggerBinding[];
     },
-  ): BoundComponents<S>;
+  ): BoundComponents<S> & {
+    triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════

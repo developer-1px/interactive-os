@@ -297,30 +297,68 @@ export function defineApp<S>(
         return createCompoundTrigger(appId, { ...config, id });
       },
 
-      bind(
-        config: ZoneBindings & {
+      bind<
+        TriggerMap extends Record<string, (focusId: string) => import("@kernel/core/tokens").BaseCommand> = Record<string, never>,
+      >(
+        config: Omit<ZoneBindings, "triggers"> & {
           field?: FieldBindings;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           keybindings?: { key: string; command: any; when?: unknown }[];
           options?: import("@os-react/6-project/Zone").ZoneOptions;
           itemFilter?: (items: string[]) => string[];
+          /** Triggers: object map {Name: callback} (preferred) or legacy TriggerBinding[] */
+          triggers?: TriggerMap | TriggerBinding[];
         },
-      ): BoundComponents<S> {
+      ): BoundComponents<S> & {
+        triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
+      } {
+        // Normalize triggers: object map → TriggerBinding[] + prop-getter map
+        let triggerBindings: TriggerBinding[] | undefined;
+        const triggerGetters: Record<string, <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>> = {};
+
+        if (config.triggers && !Array.isArray(config.triggers)) {
+          // New object map form: { PrintPage: (focusId) => CMD() }
+          const map = config.triggers as TriggerMap;
+          triggerBindings = [];
+          for (const [key, onActivate] of Object.entries(map)) {
+            const trigger = createFunctionTrigger(appId, onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand, { id: key });
+            triggerBindings.push({ id: key, onActivate: onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand });
+            triggerGetters[key] = trigger;
+          }
+        } else if (Array.isArray(config.triggers)) {
+          // Legacy array form — pass through
+          triggerBindings = config.triggers as TriggerBinding[];
+        }
+
+        // Build normalized config for createBoundComponents
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { triggers: _rawTriggers, ...restConfig } = config;
+        const normalizedConfig = {
+          ...restConfig,
+          ...(triggerBindings ? { triggers: triggerBindings } : {}),
+        };
+
         // Track zone bindings for AppPage
         zoneBindingEntries.set(zoneName, {
           role: config.role,
-          bindings: config,
+          bindings: normalizedConfig,
           keybindings: config.keybindings ?? [],
           ...(config.field !== undefined ? { field: config.field } : {}),
-          ...(config.triggers !== undefined
-            ? { triggers: config.triggers }
+          ...(triggerBindings !== undefined
+            ? { triggers: triggerBindings }
             : {}),
         });
 
-        return createBoundComponents(
+        const components = createBoundComponents(
           { appId, zoneName, useComputed: slice.useComputed },
-          config,
+          normalizedConfig,
         );
+
+        // Return components + trigger prop-getters
+        return {
+          ...components,
+          triggers: triggerGetters as { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> },
+        };
       },
     };
 

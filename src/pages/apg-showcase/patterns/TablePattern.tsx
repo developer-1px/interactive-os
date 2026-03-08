@@ -3,30 +3,22 @@
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/table/examples/table/
  *
  * W3C APG Table:
- *   - role="table" on container (or native <table>)
- *   - role="row" on each row
- *   - role="rowgroup" on thead/tbody equivalents (optional)
- *   - role="columnheader" on column header cells
- *   - role="rowheader" on row header cells (optional)
- *   - role="cell" on data cells
- *   - aria-label or aria-labelledby on table
+ *   - Native HTML <table> provides implicit ARIA roles
  *   - aria-sort on sortable column headers ("ascending" | "descending" | "none")
- *   - No keyboard interaction (table is a static structure, not a widget)
- *   - For interactive tables, use the Grid pattern instead
+ *   - Table is a static structure — not a widget
  *
  * ZIFT Classification:
- *   Table is a static semantic structure. Sorting controls use a toolbar Zone
- *   with prop-getter triggers for each sortable column header.
+ *   Sorting controls use a toolbar Zone with triggers declared in bind().
  *
  * OS Pattern:
  *   - defineApp manages sort state via commands (no useState)
- *   - Prop-getter triggers on sortable column header buttons (no onClick)
+ *   - Trigger prop-getters on sortable column header buttons (no onClick)
  *   - CSS reads aria-sort for visual indicators
- *   - Native HTML <table> provides implicit ARIA roles
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
+import React from "react";
 
 // ─── Data ───
 
@@ -38,36 +30,16 @@ interface Student {
 }
 
 const STUDENTS: Student[] = [
-  {
-    firstName: "Fred",
-    lastName: "Jackson",
-    company: "Canary, Inc.",
-    address: "123 Broad St.",
-  },
-  {
-    firstName: "Sara",
-    lastName: "James",
-    company: "Cardinal, Inc.",
-    address: "457 First St.",
-  },
-  {
-    firstName: "Ralph",
-    lastName: "Jefferson",
-    company: "Robin, Inc.",
-    address: "456 Main St.",
-  },
-  {
-    firstName: "Nancy",
-    lastName: "Jensen",
-    company: "Eagle, Inc.",
-    address: "2203 Logan Dr.",
-  },
+  { firstName: "Fred", lastName: "Jackson", company: "Canary, Inc.", address: "123 Broad St." },
+  { firstName: "Sara", lastName: "James", company: "Cardinal, Inc.", address: "457 First St." },
+  { firstName: "Ralph", lastName: "Jefferson", company: "Robin, Inc.", address: "456 Main St." },
+  { firstName: "Nancy", lastName: "Jensen", company: "Eagle, Inc.", address: "2203 Logan Dr." },
 ];
 
 type SortColumn = "firstName" | "lastName" | "company" | "address";
 type SortDirection = "ascending" | "descending";
 
-// ─── App + Commands (defineApp pattern, no useState) ───
+// ─── App + Commands ───
 
 interface TableState {
   sortColumn: SortColumn;
@@ -81,13 +53,6 @@ export const TableApp = defineApp<TableState>("apg-table-app", {
 
 const tableZone = TableApp.createZone("table-sort");
 
-export const RESET_TABLE = tableZone.command("RESET_TABLE", () => ({
-  state: {
-    sortColumn: "lastName" as SortColumn,
-    sortDirection: "ascending" as SortDirection,
-  },
-}));
-
 export const SORT_BY_COLUMN = tableZone.command(
   "SORT_BY_COLUMN",
   (ctx, payload: { column: SortColumn }) => {
@@ -98,71 +63,44 @@ export const SORT_BY_COLUMN = tableZone.command(
         ? "descending"
         : "ascending";
     return {
-      state: {
-        ...ctx.state,
-        sortColumn: column,
-        sortDirection: newDirection,
-      },
+      state: { ...ctx.state, sortColumn: column, sortDirection: newDirection },
     };
   },
 );
 
-// ─── Triggers (prop-getter per sortable column) ───
-
-const tableTriggers = {
-  SortFirstName: tableZone.trigger("sort-firstName", () =>
-    SORT_BY_COLUMN({ column: "firstName" }),
-  ),
-  SortLastName: tableZone.trigger("sort-lastName", () =>
-    SORT_BY_COLUMN({ column: "lastName" }),
-  ),
-  SortCompany: tableZone.trigger("sort-company", () =>
-    SORT_BY_COLUMN({ column: "company" }),
-  ),
-};
-
-// ─── Bind ───
+// ─── Bind (triggers declared here — one per sortable column) ───
 
 const TableUI = tableZone.bind({
   role: "toolbar",
-  options: {
-    navigate: { orientation: "horizontal" },
+  options: { navigate: { orientation: "horizontal" } },
+  triggers: {
+    SortFirstName: () => SORT_BY_COLUMN({ column: "firstName" }),
+    SortLastName: () => SORT_BY_COLUMN({ column: "lastName" }),
+    SortCompany: () => SORT_BY_COLUMN({ column: "company" }),
   },
-  triggers: Object.values(tableTriggers),
 });
 
 // ─── Sort Logic ───
 
-function sortStudents(
-  students: Student[],
-  column: SortColumn,
-  direction: SortDirection,
-): Student[] {
+function sortStudents(students: Student[], column: SortColumn, direction: SortDirection): Student[] {
   return [...students].sort((a, b) => {
-    const aVal = a[column].toLowerCase();
-    const bVal = b[column].toLowerCase();
-    const cmp = aVal.localeCompare(bVal);
+    const cmp = a[column].toLowerCase().localeCompare(b[column].toLowerCase());
     return direction === "ascending" ? cmp : -cmp;
   });
 }
 
 // ─── Column Definitions ───
 
-const COLUMNS: {
-  key: SortColumn;
-  label: string;
-  sortable: boolean;
-  trigger?: <T extends HTMLElement>() => React.HTMLAttributes<T>;
-}[] = [
-    { key: "firstName", label: "First Name", sortable: true, trigger: tableTriggers.SortFirstName },
-    { key: "lastName", label: "Last Name", sortable: true, trigger: tableTriggers.SortLastName },
-    { key: "company", label: "Company", sortable: true, trigger: tableTriggers.SortCompany },
-    { key: "address", label: "Address", sortable: false },
-  ];
+type TriggerKey = "SortFirstName" | "SortLastName" | "SortCompany";
+
+const COLUMNS: { key: SortColumn; label: string; sortable: boolean; triggerKey?: TriggerKey }[] = [
+  { key: "firstName", label: "First Name", sortable: true, triggerKey: "SortFirstName" },
+  { key: "lastName", label: "Last Name", sortable: true, triggerKey: "SortLastName" },
+  { key: "company", label: "Company", sortable: true, triggerKey: "SortCompany" },
+  { key: "address", label: "Address", sortable: false },
+];
 
 // ─── Component ───
-
-import React from "react";
 
 export function TablePattern() {
   const state = TableApp.useComputed((s) => s);
@@ -172,10 +110,7 @@ export function TablePattern() {
     <div className="max-w-2xl">
       <h3 className="text-lg font-semibold mb-3">Table</h3>
       <p className="text-sm text-gray-500 mb-4">
-        W3C APG Table Pattern: Semantic data table with sortable columns. The
-        table is a static structure (not a widget). Sortable column headers use{" "}
-        <code className="text-xs bg-gray-100 px-1 rounded">aria-sort</code> to
-        indicate current sort state.{" "}
+        W3C APG Table Pattern: Semantic data table with sortable columns.{" "}
         <a
           href="https://www.w3.org/WAI/ARIA/apg/patterns/table/"
           target="_blank"
@@ -195,12 +130,10 @@ export function TablePattern() {
         </a>
       </p>
 
-      {/* Caption provides aria-describedby for the table */}
       <p id="table-caption" className="text-sm text-gray-600 mb-3">
         Students currently enrolled in WAI-ARIA 101 for the coming semester.
       </p>
 
-      {/* Native HTML table provides implicit ARIA roles */}
       <table
         aria-label="Students"
         aria-describedby="table-caption"
@@ -215,32 +148,25 @@ export function TablePattern() {
                 aria-sort={
                   col.sortable && state.sortColumn === col.key
                     ? state.sortDirection
-                    : col.sortable
-                      ? "none"
-                      : undefined
+                    : col.sortable ? "none" : undefined
                 }
                 className="px-4 py-3 text-left font-semibold text-gray-700"
               >
-                {col.sortable && col.trigger ? (
+                {col.sortable && col.triggerKey ? (
                   <TableUI.Item id={`sort-${col.key}`}>
                     <button
                       type="button"
-                      {...col.trigger()}
+                      {...TableUI.triggers[col.triggerKey]()}
                       className="
                         inline-flex items-center gap-1.5 w-full
                         text-left font-semibold text-gray-700
                         hover:text-indigo-700 focus:outline-none
                         focus-visible:ring-2 focus-visible:ring-indigo-400
-                        focus-visible:ring-offset-1 rounded-sm
-                        cursor-pointer
+                        focus-visible:ring-offset-1 rounded-sm cursor-pointer
                       "
                     >
                       {col.label}
-                      <SortIcon
-                        column={col.key}
-                        sortColumn={state.sortColumn}
-                        sortDirection={state.sortDirection}
-                      />
+                      <SortIcon column={col.key} sortColumn={state.sortColumn} sortDirection={state.sortDirection} />
                     </button>
                   </TableUI.Item>
                 ) : (
@@ -254,10 +180,7 @@ export function TablePattern() {
           {sorted.map((student, idx) => (
             <tr
               key={`${student.firstName}-${student.lastName}`}
-              className={`
-                border-b border-gray-100 last:border-b-0
-                ${idx % 2 === 1 ? "bg-gray-50/50" : "bg-white"}
-              `}
+              className={`border-b border-gray-100 last:border-b-0 ${idx % 2 === 1 ? "bg-gray-50/50" : "bg-white"}`}
             >
               <td className="px-4 py-3 text-gray-900">{student.firstName}</td>
               <td className="px-4 py-3 text-gray-900">{student.lastName}</td>
@@ -273,28 +196,14 @@ export function TablePattern() {
 
 // ─── Sort Icon ───
 
-function SortIcon({
-  column,
-  sortColumn,
-  sortDirection,
-}: {
+function SortIcon({ column, sortColumn, sortDirection }: {
   column: SortColumn;
   sortColumn: SortColumn;
   sortDirection: SortDirection;
 }) {
   if (sortColumn !== column) {
-    // Unsorted: neutral indicator (W3C APG uses diamond character)
-    return (
-      <span
-        aria-hidden="true"
-        className="text-gray-300 flex-shrink-0 text-xs leading-none"
-      >
-        &#9670;
-      </span>
-    );
+    return <span aria-hidden="true" className="text-gray-300 flex-shrink-0 text-xs leading-none">&#9670;</span>;
   }
-
-  // Active sort column
   return (
     <Icon
       name={sortDirection === "ascending" ? "chevron-up" : "chevron-down"}

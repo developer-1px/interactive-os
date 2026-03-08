@@ -13,7 +13,7 @@
  *   - Toggle Button = Field (boolean) mapped to aria-pressed via check axis
  *
  * OS pattern:
- *   Action buttons: prop-getter trigger on Zone Item — data-trigger-id.
+ *   Action buttons: triggers declared in bind(), prop-getter from result.
  *   Toggle buttons: Zone+Item with role="toolbar" (child role=button),
  *     check.mode="check" for toggle. OS computes aria-pressed (not aria-checked)
  *     for button-role items. CSS reads aria-pressed. No useState, no onClick.
@@ -23,7 +23,7 @@ import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_PRESS } from "@os-sdk/os";
 
 // ═══════════════════════════════════════════════════════════════════
-// Section 1: Action Buttons (Zone + Trigger prop-getter)
+// Section 1: Action Buttons (triggers declared in bind)
 // ═══════════════════════════════════════════════════════════════════
 
 export const ActionButtonApp = defineApp<{ actionCount: number }>(
@@ -45,21 +45,17 @@ export const PERFORM_ACTION = actionZone.command(
   }),
 );
 
-// ─── Triggers (prop-getter) ───
-
-const actionTriggers = {
-  PrintPage: actionZone.trigger("print-page", () => PERFORM_ACTION()),
-  SaveDraft: actionZone.trigger("save-draft", () => PERFORM_ACTION()),
-};
-
-// ─── Bind ───
+// ─── Bind (triggers declared here — single declaration point) ───
 
 const ActionUI = actionZone.bind({
   role: "toolbar",
   options: {
     navigate: { orientation: "horizontal" },
   },
-  triggers: Object.values(actionTriggers),
+  triggers: {
+    PrintPage: () => PERFORM_ACTION(),
+    SaveDraft: () => PERFORM_ACTION(),
+  },
 });
 
 function ActionButtonSection() {
@@ -82,7 +78,7 @@ function ActionButtonSection() {
         <ActionUI.Item id="btn-print">
           <button
             type="button"
-            {...actionTriggers.PrintPage()}
+            {...ActionUI.triggers.PrintPage()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               bg-indigo-600 text-white
@@ -98,7 +94,7 @@ function ActionButtonSection() {
         <ActionUI.Item id="btn-save">
           <button
             type="button"
-            {...actionTriggers.SaveDraft()}
+            {...ActionUI.triggers.SaveDraft()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               border border-gray-300 text-gray-700 bg-white

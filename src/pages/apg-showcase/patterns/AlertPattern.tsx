@@ -11,7 +11,7 @@
  * OS pattern:
  *   Alerts are inline components. We use `defineApp` state to control
  *   visibility via OS commands, instead of `useState` or `onClick`.
- *   Trigger uses prop-getter pattern (data-trigger-id).
+ *   Triggers declared in bind() — single declaration point.
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
@@ -37,17 +37,13 @@ export const RESET_ALERTS = alertZone.command("RESET_ALERTS", () => ({
   state: { alerts: [] },
 }));
 
-// ─── Triggers (prop-getter) ───
-
-const alertTriggers = {
-  ShowAlert: alertZone.trigger("show-alert", () => SHOW_ALERT()),
-};
-
-// ─── Bind ───
+// ─── Bind (triggers declared here) ───
 
 const AlertUI = alertZone.bind({
   role: "toolbar",
-  triggers: Object.values(alertTriggers),
+  triggers: {
+    ShowAlert: () => SHOW_ALERT(),
+  },
 });
 
 // ─── Component ───
@@ -64,12 +60,11 @@ function AlertPattern() {
         focus.
       </p>
 
-      {/* Prop-getter trigger → OS command dispatch. No onClick, no useState */}
       <AlertUI.Zone className="flex gap-3 mb-4" aria-label="Alert actions">
         <AlertUI.Item id="alert-trigger">
           <button
             type="button"
-            {...alertTriggers.ShowAlert()}
+            {...AlertUI.triggers.ShowAlert()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               bg-indigo-600 text-white

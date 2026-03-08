@@ -32,7 +32,6 @@ import {
   setScrollState,
   toggleGroup,
 } from "../app";
-import { InspectorScroll } from "../app";
 import { inferSignal } from "../utils/inferSignal";
 import { copyAllToClipboard } from "../utils/inspectorFormatters";
 import { CollapsibleSection } from "./components/CollapsibleSection";
@@ -251,8 +250,8 @@ export function UnifiedInspector({
                       type="button"
                       onClick={() => handleToggleGroup(group)}
                       className={`px-1.5 py-px rounded text-[8px] font-semibold cursor-pointer border transition-colors whitespace-nowrap ${active
-                          ? "bg-[#1e293b] text-white border-[#1e293b]"
-                          : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
+                        ? "bg-[#1e293b] text-white border-[#1e293b]"
+                        : "bg-white text-[#b0b0b0] border-[#e0e0e0] line-through"
                         }`}
                     >
                       {group}
@@ -353,10 +352,10 @@ export function UnifiedInspector({
         {/* Jump to latest */}
         {isUserScrolled && (
           <InspectorScrollUI.Zone>
-            <InspectorScrollUI.Item id="scrollToBottomBtn">
+            <InspectorScrollUI.Item id="ScrollToBottom">
               <button
                 type="button"
-                {...InspectorScroll.triggers.ScrollToBottom()}
+                {...InspectorScrollUI.triggers.ScrollToBottom()}
                 className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#334155] text-white text-[9px] font-semibold hover:bg-[#1e293b] cursor-pointer border-none"
               >
                 <ChevronDown size={10} />

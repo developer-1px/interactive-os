@@ -55,7 +55,9 @@ export const InspectorSearchUI = searchZone.bind({
     trigger: "change",
   },
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: [searchZone.trigger("clearBtn", () => clearSearchQuery())],
+  triggers: {
+    clearBtn: () => clearSearchQuery(),
+  },
 });
 
 export const InspectorSearch = {
@@ -81,9 +83,9 @@ export const toggleGroup = filtersZone.command(
 export const InspectorFiltersUI = filtersZone.bind({
   role: "toolbar",
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: [
-    filtersZone.trigger("groupBtn-kernel", () => toggleGroup({ group: "kernel" })),
-  ],
+  triggers: {
+    "groupBtn-kernel": () => toggleGroup({ group: "kernel" }),
+  },
 });
 
 export const InspectorFilters = {
@@ -120,19 +122,16 @@ export const InspectorZiftUI = ziftZone.bind({
   getItems: () => [...ZoneRegistry.keys()],
 });
 
-const scrollTriggers = {
-  ScrollToBottom: scrollZone.trigger("scrollToBottomBtn", () => INSPECTOR_SCROLL_TO_BOTTOM()),
-};
-
 export const InspectorScrollUI = scrollZone.bind({
-  role: "toolbar", // using a generic role
+  role: "toolbar",
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: Object.values(scrollTriggers),
+  triggers: {
+    ScrollToBottom: () => INSPECTOR_SCROLL_TO_BOTTOM(),
+  },
 });
 
 export const InspectorScroll = {
   ...InspectorScrollUI,
-  triggers: scrollTriggers,
 };
 
 export function safeDisabledGroups(

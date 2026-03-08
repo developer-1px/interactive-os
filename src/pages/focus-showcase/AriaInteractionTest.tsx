@@ -14,13 +14,11 @@ const TEST_ACTION = triggerZone.command("TEST_ACTION", (ctx) => ({
   state: ctx.state,
 }));
 
-const triggerProps = {
-  TestButton: triggerZone.trigger("test-trigger-btn", () => TEST_ACTION()),
-};
-
 const TriggerUI = triggerZone.bind({
   role: "toolbar",
-  triggers: Object.values(triggerProps),
+  triggers: {
+    TestButton: () => TEST_ACTION(),
+  },
 });
 
 export function AriaInteractionTest() {
@@ -48,7 +46,7 @@ export function AriaInteractionTest() {
   return (
     <TestBox title="ARIA Interactions" spec="§9" description={description}>
       <div className="flex flex-col gap-4">
-        {/* 1. Trigger Section (prop-getter) */}
+        {/* 1. Trigger Section (prop-getter in bind) */}
         <div className="border p-2 rounded bg-gray-50">
           <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">
             Trigger (Button)
@@ -57,7 +55,7 @@ export function AriaInteractionTest() {
             <TriggerUI.Item id="test-trigger-btn">
               <button
                 type="button"
-                {...triggerProps.TestButton()}
+                {...TriggerUI.triggers.TestButton()}
                 className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
               >
                 Click Me ({actionCount})

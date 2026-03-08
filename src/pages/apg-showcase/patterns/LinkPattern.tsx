@@ -14,8 +14,8 @@
  *
  * OS pattern:
  *   Native <a> links need no OS machinery — browsers handle Enter natively.
- *   Custom link (span role="link") uses prop-getter trigger
- *   to dispatch a navigation command on Enter/click.
+ *   Custom link (span role="link") uses trigger declared in bind()
+ *   to dispatch a navigation command on click.
  *   defineApp state tracks the last navigated URL for testability.
  */
 
@@ -38,25 +38,17 @@ export const NAVIGATE_LINK = linkZone.command(
   }),
 );
 
-// ─── Triggers (prop-getter per custom link) ───
-
-const linkTriggers = {
-  NavSettings: linkZone.trigger("nav-settings", () =>
-    NAVIGATE_LINK({ url: "/settings" }),
-  ),
-  NavProfile: linkZone.trigger("nav-profile", () =>
-    NAVIGATE_LINK({ url: "/profile" }),
-  ),
-};
-
-// ─── Bind ───
+// ─── Bind (triggers declared here) ───
 
 const LinkUI = linkZone.bind({
   role: "toolbar",
   options: {
     navigate: { orientation: "vertical" },
   },
-  triggers: Object.values(linkTriggers),
+  triggers: {
+    NavSettings: () => NAVIGATE_LINK({ url: "/settings" }),
+    NavProfile: () => NAVIGATE_LINK({ url: "/profile" }),
+  },
 });
 
 // ─── Link Data ───
@@ -84,7 +76,7 @@ const NATIVE_LINKS: LinkDef[] = [
 ];
 
 interface CustomLinkDef extends LinkDef {
-  trigger: <T extends HTMLElement>() => React.HTMLAttributes<T>;
+  triggerKey: "NavSettings" | "NavProfile";
 }
 
 const CUSTOM_LINKS: CustomLinkDef[] = [
@@ -94,7 +86,7 @@ const CUSTOM_LINKS: CustomLinkDef[] = [
     url: "/settings",
     description:
       'A span element with role="link" — demonstrates ARIA link on non-anchor.',
-    trigger: linkTriggers.NavSettings,
+    triggerKey: "NavSettings",
   },
   {
     id: "link-custom-profile",
@@ -102,13 +94,11 @@ const CUSTOM_LINKS: CustomLinkDef[] = [
     url: "/profile",
     description:
       "Another custom link — OS Trigger dispatches a command on activation.",
-    trigger: linkTriggers.NavProfile,
+    triggerKey: "NavProfile",
   },
 ];
 
 // ─── Component ───
-
-import React from "react";
 
 function LinkPattern() {
   const lastUrl = LinkApp.useComputed((s) => s.lastNavigatedUrl);
@@ -168,7 +158,7 @@ function LinkPattern() {
         </div>
       </div>
 
-      {/* Section 2: Custom role="link" — prop-getter trigger dispatches command */}
+      {/* Section 2: Custom role="link" — trigger prop-getter dispatches command */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-gray-700 mb-2">
           Custom Links (role=&quot;link&quot;)
@@ -183,7 +173,7 @@ function LinkPattern() {
                 <span
                   role="link"
                   tabIndex={0}
-                  {...link.trigger()}
+                  {...LinkUI.triggers[link.triggerKey]()}
                   className="
                     text-sm font-medium text-indigo-600 hover:text-indigo-800
                     underline decoration-indigo-300 underline-offset-2
