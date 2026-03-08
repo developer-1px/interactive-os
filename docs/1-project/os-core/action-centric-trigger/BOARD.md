@@ -15,9 +15,11 @@ Before → After:
 - After: `<button {...deleteTodo(todoId)} />` (payload가 `data-trigger-payload`로 DOM에 바인딩)
 
 ## Now
-- [ ] T2: `senseMouse.ts`의 `senseClickTarget`에서 `data-trigger-payload` 읽기 추가
+- [ ] T2: `senseMouse.ts`의 `senseClickTarget`에서 `data-trigger-payload` 읽기 추가 → ClickTarget 타입에 `payload?: string`
 - [ ] T3: `PointerListener.tsx`의 `simple-trigger` 경로에서 payload → handler 전달 (focusId fallback 유지)
 - [ ] T5: 기존 앱 코드(Todo, DocsViewer 등)에서 trigger 호출에 payload 추가
+
+> ⚠️ T2+T3 테스트: headless page.click()은 DOM이 없어 payload 전달 불가. senseClickTarget은 DOM API(target.closest)를 사용하므로 DOM mock 또는 브라우저 검증 필요.
 
 ## Done
 - [x] T1: `createFunctionTrigger` — prop-getter가 `data-trigger-payload` 반환 — +3 tests ✅

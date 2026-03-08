@@ -255,13 +255,13 @@ export function getDropPosition(
 
 export type ClickTarget =
   | {
-      type: "trigger";
-      triggerId: string;
-      overlayId: string;
-      overlayType: string;
-      isOpen: boolean;
-    }
-  | { type: "simple-trigger"; triggerId: string }
+    type: "trigger";
+    triggerId: string;
+    overlayId: string;
+    overlayType: string;
+    isOpen: boolean;
+  }
+  | { type: "simple-trigger"; triggerId: string; payload: string | null }
   | { type: "expand"; itemId: string; zoneId: string }
   | { type: "check"; itemId: string; zoneId: string }
   | { type: "item"; itemId: string | null; isCurrentPage: boolean }
@@ -298,7 +298,8 @@ export function senseClickTarget(target: HTMLElement): ClickTarget {
       // Non-overlay trigger with registered callback
       const itemCb = ZoneRegistry.findItemCallback(triggerId);
       if (itemCb?.onActivate) {
-        return { type: "simple-trigger", triggerId };
+        const payload = triggerEl.getAttribute("data-trigger-payload");
+        return { type: "simple-trigger", triggerId, payload };
       }
     }
   }
