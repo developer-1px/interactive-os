@@ -44,7 +44,7 @@
 | **Zone** | **영역**. 포커스 관리의 최소 독립 영역. "이 영역은 리스트처럼 행동한다" | `Zone` 컴포넌트, `ZoneState` | ZIFT의 Z |
 | **Item** | **데이터**. Zone 안에서 포커스를 받을 수 있는 개별 요소 | `Item` 컴포넌트, `data-item` | ZIFT의 I |
 | **Field** | **prop 편집**. 값을 편집하는 Item (boolean, number, string, enum) | `FieldBindings` | ZIFT의 F |
-| **Trigger** | **액션**. 포인터(클릭)로 커맨드를 dispatch하는 선언. prop-getter `(payload?: string) => data-attributes` 형태. Focus와 독립. Overlay와 분리. | `zone.trigger(id, handler)` | ZIFT의 T |
+| **Trigger** | **액션**. 포인터(클릭)로 커맨드를 dispatch하는 선언. prop-getter `(payload?: string) => data-attributes` 형태. Focus와 독립. Overlay와 분리. | `bind({ triggers: { Name: handler } })` | ZIFT의 T |
 | **Focus** | 현재 어떤 아이템에 커서가 있는가 | `focusedItemId` | `activeZoneId` + `focusedItemId` |
 | **Active Zone** | 현재 포커스를 소유하고 있는 Zone | `activeZoneId` | |
 | **Focus Stack** | 오버레이 열릴 때 현재 포커스를 저장하고, 닫힐 때 복원하는 스택 | `FocusStackEntry[]` | dialog/modal 복원에 사용 |

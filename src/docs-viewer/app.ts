@@ -280,8 +280,8 @@ export const DocsReaderUI = readerZone.bind({
     inputmap: { click: [OS_ACTIVATE()] },
   },
   triggers: {
-    SelectDoc: (fid) => selectDoc({ id: fid }),
-    PrevDoc: (fid) => selectDoc({ id: fid }),
-    NextDoc: (fid) => selectDoc({ id: fid }),
+    SelectDoc: (fid: string) => selectDoc({ id: fid }),
+    PrevDoc: (fid: string) => selectDoc({ id: fid }),
+    NextDoc: (fid: string) => selectDoc({ id: fid }),
   },
 });

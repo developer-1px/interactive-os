@@ -81,13 +81,6 @@ export interface TriggerBinding {
   id: string;
   /** Cursor-based factory to dispatch on activation (Enter key or click) */
   onActivate: (focusId: string) => BaseCommand;
-  /** Overlay metadata — when set, trigger manages an overlay lifecycle */
-  overlay?: {
-    /** Overlay ID (must match the overlay Zone id) */
-    id: string;
-    /** Overlay type — determines ARIA projection (aria-haspopup value) */
-    type: "dialog" | "alertdialog" | "menu" | "popover" | "tooltip";
-  };
 }
 
 export interface ZoneBindings {
@@ -218,12 +211,6 @@ export interface ZoneHandle<S> {
 
   createZone(name: string): ZoneHandle<S>;
 
-  /** Declare a trigger: id + activation function. Returns property getter. */
-  trigger(
-    id: string,
-    onActivate: (focusId: string) => BaseCommand,
-  ): TriggerBinding & (<T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>);
-
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
 
@@ -234,8 +221,8 @@ export interface ZoneHandle<S> {
       field?: FieldBindings;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       keybindings?: { key: string; command: any; when?: unknown }[];
-      /** Triggers: object map {Name: callback} (preferred) or legacy TriggerBinding[] */
-      triggers?: TriggerMap | TriggerBinding[];
+      /** Triggers: object map {Name: callback} */
+      triggers?: TriggerMap;
     },
   ): BoundComponents<S> & {
     triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };

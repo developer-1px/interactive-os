@@ -104,7 +104,7 @@ export const listNavScripts: TestScript[] = [
 // ═══════════════════════════════════════════════════════════════════
 // §3 Trigger Click — per-button dispatch via page.locator("#trigger-id").click()
 //
-// Requires full app context (triggers registered via zone.trigger()).
+// Requires full app context (triggers registered via bind({ triggers })).
 // Runs in: browser TestBot ✓, createHeadlessPage(TodoApp) ✓
 // Does NOT run via runScenarios (no app triggers in generic scenarios).
 // ═══════════════════════════════════════════════════════════════════

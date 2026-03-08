@@ -31,7 +31,7 @@ import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
 import type React from "react";
-import type { ReactNode } from "react";
+
 import type { AppModule } from "../modules/types";
 import { createBoundComponents } from "./bind";
 import { createTestInstance } from "./testInstance";
@@ -277,18 +277,6 @@ export function defineApp<S>(
         return createZone(`${zoneName}:${childName}`, zoneGroup);
       },
 
-      trigger(
-        id: string,
-        onActivate: (focusId: string) => import("@kernel/core/tokens").BaseCommand,
-      ): TriggerBinding & (<T extends HTMLElement>() => React.HTMLAttributes<T>) {
-        const Component = createFunctionTrigger(appId, onActivate, { id });
-
-        // Merge: getter + TriggerBinding
-        const result = Component as (<T extends HTMLElement>() => React.HTMLAttributes<T>) & TriggerBinding;
-        Object.defineProperty(result, "id", { value: id, writable: false, enumerable: true });
-        Object.defineProperty(result, "onActivate", { value: onActivate, writable: false, enumerable: true });
-        return result;
-      },
 
       overlay(
         id: string,
@@ -306,28 +294,23 @@ export function defineApp<S>(
           keybindings?: { key: string; command: any; when?: unknown }[];
           options?: import("@os-react/6-project/Zone").ZoneOptions;
           itemFilter?: (items: string[]) => string[];
-          /** Triggers: object map {Name: callback} (preferred) or legacy TriggerBinding[] */
-          triggers?: TriggerMap | TriggerBinding[];
+          /** Triggers: object map {Name: callback} */
+          triggers?: TriggerMap;
         },
       ): BoundComponents<S> & {
         triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
       } {
         // Normalize triggers: object map → TriggerBinding[] + prop-getter map
-        let triggerBindings: TriggerBinding[] | undefined;
+        const triggerBindings: TriggerBinding[] = [];
         const triggerGetters: Record<string, <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>> = {};
 
-        if (config.triggers && !Array.isArray(config.triggers)) {
-          // New object map form: { PrintPage: (focusId) => CMD() }
-          const map = config.triggers as TriggerMap;
-          triggerBindings = [];
+        if (config.triggers) {
+          const map = config.triggers;
           for (const [key, onActivate] of Object.entries(map)) {
-            const trigger = createFunctionTrigger(appId, onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand, { id: key });
+            const trigger = createFunctionTrigger(key);
             triggerBindings.push({ id: key, onActivate: onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand });
             triggerGetters[key] = trigger;
           }
-        } else if (Array.isArray(config.triggers)) {
-          // Legacy array form — pass through
-          triggerBindings = config.triggers as TriggerBinding[];
         }
 
         // Build normalized config for createBoundComponents

@@ -11,23 +11,17 @@ import { Trigger } from "@os-react/6-project/Trigger";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import React, { type ReactNode, useEffect } from "react";
 
-export interface TriggerOptions {
-  id?: string;
-}
-
 /**
  * createFunctionTrigger — returns a prop getter.
  * Returns only data attributes, zero React event handlers.
  * Payload (optional string ID) is bound at render time via data-trigger-payload.
  */
 export function createFunctionTrigger(
-  _appId: string,
-  _onActivate: (payload: string) => BaseCommand,
-  options: TriggerOptions & { id: string },
+  id: string,
 ): <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> {
   const getProps = <T extends HTMLElement>(payload?: string): React.HTMLAttributes<T> & { "data-trigger-id": string } => {
     return {
-      "data-trigger-id": options.id,
+      "data-trigger-id": id,
       ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
     } as React.HTMLAttributes<T> & { "data-trigger-id": string };
   };

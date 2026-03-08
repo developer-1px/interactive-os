@@ -3,8 +3,8 @@
  *
  * @spec docs/1-project/os-core/trigger-unify/notes/2026-0308-[plan]-trigger-unify.md
  *
- * Verifies zone.trigger() and zone.overlay() — the unified trigger declaration API.
- * zone.trigger(id, fn) always takes (focusId: string) => BaseCommand.
+ * Verifies bind({ triggers }) and zone.overlay() — the trigger declaration API.
+ * Triggers are declared as object maps in bind(): { Name: (focusId: string) => BaseCommand }.
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
@@ -19,22 +19,33 @@ interface TestState {
 
 const INITIAL: TestState = { count: 0, activeItem: null };
 
-describe("Feature: zone.trigger() API — single signature", () => {
-  it("zone.trigger(id, fn) returns TriggerBinding shape", () => {
+describe("Feature: bind() with triggers object map", () => {
+  it("bind() accepts triggers object and returns property getters", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const increment = zone.command("INCREMENT", (ctx) => ({
       state: { ...ctx.state, count: ctx.state.count + 1 },
     }));
 
-    const trigger = zone.trigger("do-increment", () => increment());
+    const UI = zone.bind({
+      role: "toolbar",
+      triggers: {
+        DoIncrement: () => increment(),
+      },
+    });
 
-    expect(trigger).toHaveProperty("id", "do-increment");
-    expect(trigger).toHaveProperty("onActivate");
-    expect(typeof trigger.onActivate).toBe("function");
+    expect(UI).toHaveProperty("Zone");
+    expect(UI).toHaveProperty("Item");
+    expect(UI).toHaveProperty("triggers");
+    expect(UI.triggers).toHaveProperty("DoIncrement");
+    expect(typeof UI.triggers.DoIncrement).toBe("function");
+
+    // The property getter should return the DOM attributes mapping
+    const props = UI.triggers.DoIncrement();
+    expect(props).toHaveProperty("data-trigger-id", "DoIncrement");
   });
 
-  it("zone.trigger(id, fn) — cursor-dependent: wraps factory with focusId mapping", () => {
+  it("cursor-dependent triggers map focusId correctly via bind()", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const activate = zone.command<"ACTIVATE", { id: string }>(
@@ -44,29 +55,19 @@ describe("Feature: zone.trigger() API — single signature", () => {
       }),
     );
 
-    const trigger = zone.trigger("activate-item", (fid) => activate({ id: fid }));
+    const UI = zone.bind({
+      role: "listbox",
+      triggers: {
+        ActivateItem: (fid: string) => activate({ id: fid }),
+      },
+    });
 
-    expect(trigger).toHaveProperty("id", "activate-item");
-    expect(typeof trigger.onActivate).toBe("function");
-    // Call the onActivate function to verify payload mapping
-    const cmd = trigger.onActivate("item-1");
-    expect(cmd).toHaveProperty("type", "ACTIVATE");
-  });
-
-  it("zone.trigger(id, fn) — static command: uses () => cmd pattern", () => {
-    const App = defineApp<TestState>("trigger-test", INITIAL);
-    const zone = App.createZone("main");
-    const increment = zone.command("INCREMENT", (ctx) => ({
-      state: { ...ctx.state, count: ctx.state.count + 1 },
-    }));
-
-    const cmd = increment();
-    const trigger = zone.trigger("inc-btn", () => cmd);
-
-    expect(trigger.id).toBe("inc-btn");
-    // onActivate is always a function under the new API
-    expect(typeof trigger.onActivate).toBe("function");
-    expect(trigger.onActivate("")).toEqual(cmd);
+    // The internal TriggerBinding in ZoneRegistry gets correctly configured.
+    // Testing the UI.triggers getter logic:
+    const props = UI.triggers.ActivateItem("item-1");
+    expect(props).toHaveProperty("data-trigger-id", "ActivateItem");
+    expect(props).toHaveProperty("data-trigger-payload");
+    expect(props["data-trigger-payload"]).toBe("item-1");
   });
 });
 
@@ -118,22 +119,3 @@ describe("Feature: zone.overlay() API", () => {
   });
 });
 
-describe("Feature: bind() with triggers array", () => {
-  it("bind() accepts triggers array with TriggerBinding entries", () => {
-    const App = defineApp<TestState>("trigger-test", INITIAL);
-    const zone = App.createZone("main");
-    const increment = zone.command("INCREMENT", (ctx) => ({
-      state: { ...ctx.state, count: ctx.state.count + 1 },
-    }));
-
-    const incTrigger = zone.trigger("inc-btn", () => increment());
-
-    const bound = zone.bind({
-      role: "toolbar",
-      triggers: [incTrigger],
-    });
-
-    expect(bound).toHaveProperty("Zone");
-    expect(bound).toHaveProperty("Item");
-  });
-});

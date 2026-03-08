@@ -281,11 +281,11 @@ export const TodoListUI = listCollection.bind({
     os.dispatch(reorderTodo(info));
   },
   triggers: {
-    StartEdit: (fid) => startEdit({ id: fid }),
-    MoveItemUp: (fid) => moveItemUp({ id: fid }),
-    MoveItemDown: (fid) => moveItemDown({ id: fid }),
-    DeleteTodo: (fid) => deleteTodo({ id: fid }),
-    ToggleTodo: (fid) => toggleTodo({ id: fid }),
+    StartEdit: (fid: string) => startEdit({ id: fid }),
+    MoveItemUp: (fid: string) => moveItemUp({ id: fid }),
+    MoveItemDown: (fid: string) => moveItemDown({ id: fid }),
+    DeleteTodo: (fid: string) => deleteTodo({ id: fid }),
+    ToggleTodo: (fid: string) => toggleTodo({ id: fid }),
     BulkDelete: () => {
       const selected = getSelectedIds("list");
       return requestDeleteTodo({ ids: selected.length > 0 ? selected : [] });
@@ -334,7 +334,7 @@ export const TodoSidebarUI = sidebarCollection.bind({
     select: { followFocus: true },
   },
   triggers: {
-    SelectCategory: (fid) => selectCategory({ id: fid }),
+    SelectCategory: (fid: string) => selectCategory({ id: fid }),
   },
 });
 
