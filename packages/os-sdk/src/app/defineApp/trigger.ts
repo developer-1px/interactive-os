@@ -51,7 +51,7 @@ export function createSimpleTrigger(
 /** Props for dynamic trigger — payload required when P is not void */
 type DynamicTriggerProps<P> = P extends void
   ? { children: ReactNode; payload?: never }
-  : { children: ReactNode; payload: P };
+  : { children: ReactNode; payload?: P };
 
 export function createDynamicTrigger<P>(
   appId: string,
@@ -69,7 +69,7 @@ export function createDynamicTrigger<P>(
     ...rest
   }) => {
     const cmd = (factory as unknown as (p: P) => ReturnType<typeof factory>)(
-      payload as P,
+      (payload ?? "") as P,
     );
     return React.createElement(Trigger, {
       ...(options?.id ? { id: options.id } : {}),

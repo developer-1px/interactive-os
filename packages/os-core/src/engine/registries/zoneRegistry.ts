@@ -127,7 +127,7 @@ function notifyListeners() {
 
 /** Per-item callbacks — registered by FocusItem, read by OS commands */
 export interface ItemCallbacks {
-  onActivate?: BaseCommand | ((focusId: string) => BaseCommand);
+  onActivate?: (focusId: string) => BaseCommand;
 }
 
 export const ZoneRegistry = {

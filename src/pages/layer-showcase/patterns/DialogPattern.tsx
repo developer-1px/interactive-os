@@ -28,7 +28,7 @@ const TriggerUI = triggerZone.bind({
   triggers: [
     {
       id: "open-dialog-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "layer-dialog",
         type: "dialog",
         entry: "first",

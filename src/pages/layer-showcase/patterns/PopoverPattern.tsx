@@ -24,7 +24,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-popover-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "layer-popover",
         type: "popover",
         entry: "first",

@@ -38,7 +38,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "test-dialog",
         type: "dialog",
         entry: "first",

@@ -55,7 +55,7 @@ export const InspectorSearchUI = searchZone.bind({
     trigger: "change",
   },
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: [searchZone.trigger("clearBtn", clearSearchQuery())],
+  triggers: [searchZone.trigger("clearBtn", () => clearSearchQuery())],
 });
 
 export const InspectorSearch = {
@@ -82,7 +82,7 @@ export const InspectorFiltersUI = filtersZone.bind({
   role: "toolbar",
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
-    filtersZone.trigger("groupBtn-kernel", toggleGroup({ group: "kernel" })),
+    filtersZone.trigger("groupBtn-kernel", () => toggleGroup({ group: "kernel" })),
   ],
 });
 
@@ -124,7 +124,7 @@ export const InspectorScrollUI = scrollZone.bind({
   role: "toolbar", // using a generic role
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: [
-    scrollZone.trigger("scrollToBottomBtn", INSPECTOR_SCROLL_TO_BOTTOM()),
+    scrollZone.trigger("scrollToBottomBtn", () => INSPECTOR_SCROLL_TO_BOTTOM()),
   ],
 });
 

@@ -139,7 +139,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
               </div>
             ) : (
               <>
-                <TodoList.triggers.StartEdit payload={{ id: todo.id }}>
+                <TodoList.triggers.StartEdit payload={todo.id}>
                   <button
                     type="button"
                     className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
@@ -151,7 +151,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
 
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
-                <TodoList.triggers.MoveItemUp payload={{ id: todo.id }}>
+                <TodoList.triggers.MoveItemUp payload={todo.id}>
                   <button
                     type="button"
                     className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -160,7 +160,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
                     <ArrowUp size={14} />
                   </button>
                 </TodoList.triggers.MoveItemUp>
-                <TodoList.triggers.MoveItemDown payload={{ id: todo.id }}>
+                <TodoList.triggers.MoveItemDown payload={todo.id}>
                   <button
                     type="button"
                     className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
@@ -172,7 +172,7 @@ export function TaskItem({ todoId }: TaskItemProps) {
 
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
-                <TodoList.triggers.DeleteTodo payload={{ id: todo.id }}>
+                <TodoList.triggers.DeleteTodo payload={todo.id}>
                   <button
                     type="button"
                     className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"

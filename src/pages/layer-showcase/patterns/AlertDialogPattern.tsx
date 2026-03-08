@@ -26,7 +26,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-alertdialog-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "layer-alertdialog",
         type: "alertdialog",
         entry: "first",

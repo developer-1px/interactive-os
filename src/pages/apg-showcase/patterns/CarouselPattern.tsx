@@ -116,10 +116,10 @@ const CarouselUI = carouselZone.bind({
   options: { select: { followFocus: true } },
 });
 
-const ToggleRotation = carouselZone.trigger("toggle-rotation", TOGGLE_ROTATION);
+const ToggleRotation = carouselZone.trigger("toggle-rotation", () => TOGGLE_ROTATION());
 const StopRotation = carouselZone.trigger(
   "stop-rotation",
-  SET_ROTATING({ value: false }),
+  () => SET_ROTATING({ value: false }),
 );
 
 // --- Slide Panel Content ---

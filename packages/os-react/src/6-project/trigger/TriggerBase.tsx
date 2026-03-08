@@ -132,7 +132,7 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     useEffect(() => {
       if (!id || !onActivate || overlayRole) return;
       const targetZoneId = zoneId ?? "__standalone__";
-      ZoneRegistry.setItemCallback(targetZoneId, id, { onActivate });
+      ZoneRegistry.setItemCallback(targetZoneId, id, { onActivate: () => onActivate });
       return () => ZoneRegistry.clearItemCallback(targetZoneId, id);
     }, [id, onActivate, overlayRole, zoneId]);
 

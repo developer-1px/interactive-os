@@ -26,7 +26,7 @@
  */
 
 import { defineScope } from "@kernel";
-import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type { CommandFactory } from "@kernel/core/tokens";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
@@ -39,7 +39,6 @@ import {
   type CompoundTriggerComponents,
   createCompoundTrigger,
   createDynamicTrigger,
-  createSimpleTrigger,
 } from "./trigger";
 import {
   __conditionBrand,
@@ -280,24 +279,13 @@ export function defineApp<S>(
 
       trigger(
         id: string,
-        commandOrFactory:
-          | import("@kernel/core/tokens").BaseCommand
-          | import("@kernel/core/tokens").CommandFactory<string, unknown>,
-      ): TriggerBinding & React.FC<{ children: ReactNode }> {
-        // typeof detection: function → factory (cursor auto-bind), object → command as-is
-        const onActivate =
-          typeof commandOrFactory === "function"
-            ? (commandOrFactory as (focusId: string) => import("@kernel/core/tokens").BaseCommand)
-            : commandOrFactory;
-
-        // Create React component
-        const Component: React.FC<{ children: ReactNode }> =
-          typeof commandOrFactory === "function"
-            ? createDynamicTrigger(appId, commandOrFactory as CommandFactory<string, unknown>, { id })
-            : createSimpleTrigger(appId, commandOrFactory as BaseCommand, { id });
+        onActivate: (focusId: string) => import("@kernel/core/tokens").BaseCommand,
+      ): TriggerBinding & React.FC<{ children: ReactNode; payload?: string }> {
+        // Always dynamic: function receives focusId at dispatch time
+        const Component = createDynamicTrigger(appId, onActivate as CommandFactory<string, unknown>, { id });
 
         // Merge: React.FC + TriggerBinding
-        const result = Component as React.FC<{ children: ReactNode }> & TriggerBinding;
+        const result = Component as React.FC<{ children: ReactNode; payload?: string }> & TriggerBinding;
         Object.defineProperty(result, "id", { value: id, writable: false, enumerable: true });
         Object.defineProperty(result, "onActivate", { value: onActivate, writable: false, enumerable: true });
 

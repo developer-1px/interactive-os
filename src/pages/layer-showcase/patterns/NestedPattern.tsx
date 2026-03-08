@@ -27,7 +27,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-nested-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "nested-dialog-1",
         type: "dialog",
         entry: "first",
@@ -49,7 +49,7 @@ dialog1Zone.bind({
   triggers: [
     {
       id: "d1-open-nested",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "nested-dialog-2",
         type: "dialog",
         entry: "first",

@@ -13,10 +13,7 @@ import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldMode } from "@os-react/6-project/field/Field";
-import type {
-  CompoundTriggerComponents,
-  CompoundTriggerConfig,
-} from "@os-sdk/app/defineApp/trigger";
+import type { CompoundTriggerComponents } from "@os-sdk/app/defineApp/trigger";
 import type React from "react";
 import type { ReactNode } from "react";
 
@@ -82,8 +79,8 @@ export type FlatHandler<S, P> = (
 export interface TriggerBinding {
   /** Item ID (must match FocusItem/Trigger id prop) */
   id: string;
-  /** Command or cursor-based factory to dispatch on activation (Enter key or click) */
-  onActivate: BaseCommand | ((focusId: string) => BaseCommand);
+  /** Cursor-based factory to dispatch on activation (Enter key or click) */
+  onActivate: (focusId: string) => BaseCommand;
   /** Overlay metadata — when set, trigger manages an overlay lifecycle */
   overlay?: {
     /** Overlay ID (must match the overlay Zone id) */
@@ -221,11 +218,11 @@ export interface ZoneHandle<S> {
 
   createZone(name: string): ZoneHandle<S>;
 
-  /** Declare a simple trigger: id + command or factory. Returns TriggerBinding & React.FC. */
+  /** Declare a trigger: id + activation function. Always a function (focusId) => BaseCommand. */
   trigger(
     id: string,
-    commandOrFactory: BaseCommand | CommandFactory<string, unknown>,
-  ): TriggerBinding & React.FC<{ children: ReactNode }>;
+    onActivate: (focusId: string) => BaseCommand,
+  ): TriggerBinding & React.FC<{ children: ReactNode; payload?: string }>;
 
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;

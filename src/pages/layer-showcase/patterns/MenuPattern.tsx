@@ -24,7 +24,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-menu-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "layer-menu",
         type: "menu",
         entry: "first",

@@ -1,12 +1,10 @@
 /**
- * Zone Trigger API — T1 Red tests
+ * Zone Trigger API — T1 tests (updated for single-signature API)
  *
  * @spec docs/1-project/os-core/trigger-unify/notes/2026-0308-[plan]-trigger-unify.md
  *
- * Verifies zone.trigger() and zone.overlay() — the new unified trigger declaration API.
- * Architecture/refactoring task → Given-When-Then unit tests (no Decision Table).
- *
- * These tests should FAIL because the methods don't exist yet.
+ * Verifies zone.trigger() and zone.overlay() — the unified trigger declaration API.
+ * zone.trigger(id, fn) always takes (focusId: string) => BaseCommand.
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
@@ -21,24 +19,22 @@ interface TestState {
 
 const INITIAL: TestState = { count: 0, activeItem: null };
 
-describe("Feature: zone.trigger() API — Plan #1, #4", () => {
-  it("zone.trigger(id, command) returns TriggerBinding shape", () => {
+describe("Feature: zone.trigger() API — single signature", () => {
+  it("zone.trigger(id, fn) returns TriggerBinding shape", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const increment = zone.command("INCREMENT", (ctx) => ({
       state: { ...ctx.state, count: ctx.state.count + 1 },
     }));
 
-    // zone.trigger() is the new API — should exist on ZoneHandle
-    const trigger = zone.trigger("do-increment", increment());
+    const trigger = zone.trigger("do-increment", () => increment());
 
-    // Must have TriggerBinding shape
     expect(trigger).toHaveProperty("id", "do-increment");
     expect(trigger).toHaveProperty("onActivate");
-    expect(trigger.onActivate).toEqual(increment());
+    expect(typeof trigger.onActivate).toBe("function");
   });
 
-  it("zone.trigger(id, factory) detects function → cursor auto-bind", () => {
+  it("zone.trigger(id, fn) — cursor-dependent: wraps factory with focusId mapping", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const activate = zone.command<"ACTIVATE", { id: string }>(
@@ -48,33 +44,33 @@ describe("Feature: zone.trigger() API — Plan #1, #4", () => {
       }),
     );
 
-    // Factory (function) → OS detects typeof, wraps with cursor auto-bind
-    const trigger = zone.trigger("activate-item", activate);
+    const trigger = zone.trigger("activate-item", (fid) => activate({ id: fid }));
 
     expect(trigger).toHaveProperty("id", "activate-item");
-    // onActivate should be a function (factory), not a plain command object
     expect(typeof trigger.onActivate).toBe("function");
+    // Call the onActivate function to verify payload mapping
+    const cmd = trigger.onActivate("item-1");
+    expect(cmd).toHaveProperty("type", "ACTIVATE");
   });
 
-  it("zone.trigger(id, command) — object command dispatched as-is", () => {
+  it("zone.trigger(id, fn) — static command: uses () => cmd pattern", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const increment = zone.command("INCREMENT", (ctx) => ({
       state: { ...ctx.state, count: ctx.state.count + 1 },
     }));
 
-    // Complete command (object with .type) → dispatch as-is, not wrapped
     const cmd = increment();
-    const trigger = zone.trigger("inc-btn", cmd);
+    const trigger = zone.trigger("inc-btn", () => cmd);
 
     expect(trigger.id).toBe("inc-btn");
-    // onActivate is the command object itself (not a function)
-    expect(typeof trigger.onActivate).not.toBe("function");
-    expect(trigger.onActivate).toEqual(cmd);
+    // onActivate is always a function under the new API
+    expect(typeof trigger.onActivate).toBe("function");
+    expect(trigger.onActivate("")).toEqual(cmd);
   });
 });
 
-describe("Feature: zone.overlay() API — Plan #2, #5", () => {
+describe("Feature: zone.overlay() API", () => {
   it("zone.overlay(id, config) returns CompoundTriggerComponents", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
@@ -83,7 +79,6 @@ describe("Feature: zone.overlay() API — Plan #2, #5", () => {
       role: "dialog",
     });
 
-    // Must return CompoundTriggerComponents shape
     expect(dialog).toHaveProperty("Root");
     expect(dialog).toHaveProperty("Trigger");
     expect(dialog).toHaveProperty("Portal");
@@ -109,7 +104,7 @@ describe("Feature: zone.overlay() API — Plan #2, #5", () => {
     expect(dialog).toHaveProperty("Confirm");
   });
 
-  it("zone.overlay(id, config) for popover role", () => {
+  it("zone.overlay(id, config) for menu role", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
 
@@ -123,22 +118,19 @@ describe("Feature: zone.overlay() API — Plan #2, #5", () => {
   });
 });
 
-describe("Feature: bind() with triggers Record — Plan #3", () => {
-  it("bind() accepts triggers as Record<string, TriggerBinding>", () => {
+describe("Feature: bind() with triggers array", () => {
+  it("bind() accepts triggers array with TriggerBinding entries", () => {
     const App = defineApp<TestState>("trigger-test", INITIAL);
     const zone = App.createZone("main");
     const increment = zone.command("INCREMENT", (ctx) => ({
       state: { ...ctx.state, count: ctx.state.count + 1 },
     }));
 
-    const incTrigger = zone.trigger("inc-btn", increment());
+    const incTrigger = zone.trigger("inc-btn", () => increment());
 
-    // bind() should accept triggers as Record (not just array)
     const bound = zone.bind({
       role: "toolbar",
-      triggers: {
-        "inc-btn": incTrigger,
-      } as any, // Record form — currently typed as TriggerBinding[]
+      triggers: [incTrigger],
     });
 
     expect(bound).toHaveProperty("Zone");

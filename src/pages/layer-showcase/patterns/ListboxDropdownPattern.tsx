@@ -24,7 +24,7 @@ triggerZone.bind({
   triggers: [
     {
       id: "open-listbox-btn",
-      onActivate: OS_OVERLAY_OPEN({
+      onActivate: () => OS_OVERLAY_OPEN({
         id: "layer-listbox",
         type: "menu",
         entry: "first",

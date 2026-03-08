@@ -194,7 +194,7 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   triggers: [
     sidebarCollection.trigger(
       "locale-switcher-trigger",
-      OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
+      () => OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
     ),
   ],
 });

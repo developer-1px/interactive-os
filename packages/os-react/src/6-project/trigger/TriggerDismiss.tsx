@@ -37,7 +37,7 @@ export function TriggerDismiss({
   useEffect(() => {
     if (!onActivate) return;
     const targetZoneId = zoneId ?? overlayCtx?.overlayId ?? "__standalone__";
-    ZoneRegistry.setItemCallback(targetZoneId, itemId, { onActivate });
+    ZoneRegistry.setItemCallback(targetZoneId, itemId, { onActivate: () => onActivate });
     return () => ZoneRegistry.clearItemCallback(targetZoneId, itemId);
   }, [itemId, onActivate, zoneId, overlayCtx?.overlayId]);
 

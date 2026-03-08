@@ -444,7 +444,7 @@ export function DocsViewer() {
                   <p className="text-xl font-medium text-slate-400">{error}</p>
                   {/* Return home — error recovery */}
                   {allFiles[0] && (
-                    <SelectDocTrigger payload={{ id: allFiles[0]!.path }}>
+                    <SelectDocTrigger payload={allFiles[0]!.path}>
                       <button
                         type="button"
                         className="mt-8 px-6 py-2 bg-slate-100 text-slate-600 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors shadow-sm"
@@ -511,7 +511,7 @@ export function DocsViewer() {
                       aria-label="Document pagination"
                     >
                       {prevFile ? (
-                        <PrevDocTrigger payload={{ id: prevFile.path }}>
+                        <PrevDocTrigger payload={prevFile.path}>
                           <span className="group flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
                             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
                               <ChevronLeft size={12} strokeWidth={3} />
@@ -527,7 +527,7 @@ export function DocsViewer() {
                       )}
 
                       {nextFile ? (
-                        <NextDocTrigger payload={{ id: nextFile.path }}>
+                        <NextDocTrigger payload={nextFile.path}>
                           <span className="group flex flex-col items-end gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
                             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1 group-hover:text-indigo-500 transition-colors">
                               Next
