@@ -119,9 +119,9 @@ function FavoritesSection({
   activePath: string | undefined;
   favVersion: number;
 }) {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: favVersion is intentional cache-busting trigger for localStorage changes
   const favoriteFiles = useMemo(
     () => getFavoriteFiles(allFiles),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- favVersion is an intentional cache-busting trigger for localStorage changes
     [allFiles, favVersion],
   );
 
