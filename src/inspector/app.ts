@@ -120,13 +120,20 @@ export const InspectorZiftUI = ziftZone.bind({
   getItems: () => [...ZoneRegistry.keys()],
 });
 
+const scrollTriggers = {
+  ScrollToBottom: scrollZone.trigger("scrollToBottomBtn", () => INSPECTOR_SCROLL_TO_BOTTOM()),
+};
+
 export const InspectorScrollUI = scrollZone.bind({
   role: "toolbar", // using a generic role
   options: { inputmap: { click: [OS_ACTIVATE()] } },
-  triggers: [
-    scrollZone.trigger("scrollToBottomBtn", () => INSPECTOR_SCROLL_TO_BOTTOM()),
-  ],
+  triggers: Object.values(scrollTriggers),
 });
+
+export const InspectorScroll = {
+  ...InspectorScrollUI,
+  triggers: scrollTriggers,
+};
 
 export function safeDisabledGroups(
   s: InspectorState | undefined,

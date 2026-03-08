@@ -1,4 +1,4 @@
-import { Item, Trigger, Zone } from "@os-react/internal";
+import { Item, Zone } from "@os-react/internal";
 
 import {
   FileCode,
@@ -135,12 +135,12 @@ export default function BuilderListPage() {
         </div>
 
         {/* Filter Trigger */}
-        <Trigger
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-            activeFilter !== "all"
-              ? "bg-blue-50 border-blue-200 text-blue-600"
-              : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-          }`}
+        <button
+          type="button"
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${activeFilter !== "all"
+            ? "bg-blue-50 border-blue-200 text-blue-600"
+            : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+            }`}
           onClick={() => {
             // Cycle filters for demo: All -> Published -> Draft -> Archived -> All
             const next =
@@ -160,7 +160,7 @@ export default function BuilderListPage() {
               ? "Filter"
               : activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)}
           </span>
-        </Trigger>
+        </button>
       </div>
 
       {/* Content */}
@@ -228,7 +228,7 @@ export default function BuilderListPage() {
                       }).format(
                         -Math.round(
                           (Date.now() - page.updatedAt.getTime()) /
-                            (1000 * 60 * 60),
+                          (1000 * 60 * 60),
                         ),
                         "hour",
                       )}

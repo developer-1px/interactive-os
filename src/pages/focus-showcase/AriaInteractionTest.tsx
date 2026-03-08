@@ -1,9 +1,27 @@
 import { Field } from "@os-react/6-project/field/Field.tsx";
 import { Item } from "@os-react/6-project/Item.tsx";
-import { Trigger } from "@os-react/6-project/Trigger.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
+import { defineApp } from "@os-sdk/app/defineApp";
 import { useState } from "react";
 import { TestBox } from "../shared/TestLayout";
+
+// ─── Minimal app for trigger demonstration ───
+
+const TestApp = defineApp<Record<string, never>>("aria-interaction-test", {});
+const triggerZone = TestApp.createZone("trigger-section");
+
+const TEST_ACTION = triggerZone.command("TEST_ACTION", (ctx) => ({
+  state: ctx.state,
+}));
+
+const triggerProps = {
+  TestButton: triggerZone.trigger("test-trigger-btn", () => TEST_ACTION()),
+};
+
+const TriggerUI = triggerZone.bind({
+  role: "toolbar",
+  triggers: Object.values(triggerProps),
+});
 
 export function AriaInteractionTest() {
   const [actionCount] = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -13,7 +31,8 @@ export function AriaInteractionTest() {
       <p>Verifies interaction primitives:</p>
       <ul className="list-disc list-inside space-y-1 text-gray-500">
         <li>
-          <strong>Trigger</strong>: Dispatches commands on click/Enter.
+          <strong>Trigger</strong>: Dispatches commands on click/Enter
+          (prop-getter).
         </li>
         <li>
           <strong>Selection</strong>: <code>aria-selected</code> via Zone
@@ -26,27 +45,25 @@ export function AriaInteractionTest() {
     </div>
   );
 
-  // Mock Command for Trigger
-  const mockCommand = {
-    type: "TEST_ACTION",
-    payload: { id: "test-trigger" },
-  };
-
   return (
     <TestBox title="ARIA Interactions" spec="§9" description={description}>
       <div className="flex flex-col gap-4">
-        {/* 1. Trigger Section */}
+        {/* 1. Trigger Section (prop-getter) */}
         <div className="border p-2 rounded bg-gray-50">
           <div className="text-[10px] font-mono text-gray-500 mb-2 uppercase">
             Trigger (Button)
           </div>
-          <Trigger
-            id="test-trigger-btn"
-            onActivate={mockCommand}
-            className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
-          >
-            Click Me ({actionCount})
-          </Trigger>
+          <TriggerUI.Zone aria-label="Test triggers">
+            <TriggerUI.Item id="test-trigger-btn">
+              <button
+                type="button"
+                {...triggerProps.TestButton()}
+                className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
+              >
+                Click Me ({actionCount})
+              </button>
+            </TriggerUI.Item>
+          </TriggerUI.Zone>
         </div>
 
         {/* 2. Selection Section */}
