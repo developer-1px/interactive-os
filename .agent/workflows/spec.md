@@ -46,6 +46,12 @@ description: 기능 명세서. BDD Scenarios + Decision Table을 하나의 spec.
 - BOARD.md (Now 태스크 + 선택된 스토리 ID)
 - stories.md (해당 스토리의 AC 참조, 있는 경우)
 - Discussion 결론 (있는 경우)
+- **기존 코드** (이관/개밥먹기 프로젝트인 경우)
+
+> **⛔ 이관 프로젝트 게이트**: Before→After가 BOARD에 명시되어 있고 Before 코드가 존재하면,
+> 해당 코드를 읽고 **행동 목록을 전수 추출**한다. onClick, onAction, dispatch, useCallback 등을 grep하여
+> 사용자가 수행할 수 있는 모든 행동을 나열한다. 이 목록이 Step 2의 입력이 된다.
+> 행동 목록 없이 BDD를 쓰면 role 기본 동작만 나열하게 된다.
 
 ### Step 2: BDD Scenarios 작성
 
@@ -88,15 +94,17 @@ Scenario: [시나리오명]
 - [하지 않는 것]
 ```
 
-### Step 3: Decision Table 참조 (인터랙션 태스크만)
+### Step 3: Decision Table (인터랙션 태스크 필수)
 
-> **⛔ DT를 여기서 새로 작성하지 않는다.**
-> DT는 `/stories`에서 이미 작성되어 `6-products/[product]/stories.md`에 저장된 Product 자산이다.
-> `/spec`은 그 DT를 **참조**하여 BDD Scenario로 번역하는 것만이 책임이다.
+> **Zone이 있는 인터랙션 태스크에서 DT는 필수다. 스킵 불가.**
+> DT가 spec 완전성의 구조적 보장이다. 상태×입력 매트릭스의 빈 셀 = 누락된 시나리오.
 
-1. `6-products/[product]/stories.md`의 해당 US DT를 읽는다.
+**DT 소스 판정:**
+1. `6-products/[product]/stories.md`에 해당 US의 DT가 있는가?
+   - **있다** → 참조하여 BDD Scenario로 번역한다.
+   - **없다** → **여기서 DT를 직접 작성한다.** (stories 부재가 DT 스킵 사유가 되지 않는다)
 2. DT의 각 행 → Scenario 작성 (Given/When/Then).
-3. **아키텍처/리팩토링 태스크는 Step 3 스킵.** BDD Scenarios만 작성.
+3. **아키텍처/리팩토링 태스크(Zone 없음)만 Step 3 스킵.** 그 외 전부 DT 필수.
 
 | DT 행 | Scenario 번역 |
 |-------|-------------|
@@ -114,8 +122,10 @@ Scenario: [시나리오명]
    - [ ] 모든 기능에 Story + Scenarios가 있는가?
    - [ ] Given 전제 조건이 빠짐없이 명시되었는가?
    - [ ] 대안 흐름(에러, 빈 상태, 경계)이 커버되었는가?
+   - [ ] **⛔ Zone이 있는 태스크에 DT가 존재하는가?** (없으면 Step 3으로 돌아간다)
    - [ ] 인터랙션 태스크: Decision Table이 MECE인가?
    - [ ] Out of Scope가 명시되었는가?
+   - [ ] **앱 고유 리트머스**: 시나리오에서 앱 이름을 지우고 다른 앱으로 바꿔도 통과하면, 그건 OS 기본 동작이지 앱 고유 시나리오가 아니다. 앱 고유 시나리오가 0개면 spec이 부실하다.
 
 ### Step 5: 사용자 승인
 
