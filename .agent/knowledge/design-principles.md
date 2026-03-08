@@ -37,6 +37,8 @@
 
 13. **학습 비용을 0으로 만든다.** 이미 아는 것으로 새것을 표현한다. 이전 앱에서 배운 패턴이 다음 앱에서도 동일하게 동작해야 한다. — Principle of Least Astonishment (POLA)
 
+13-1. **LLM 실수율 ≈ API 자유도 × 작성 빈도.** (Added: 2026-03-09) Pit of Success 투자는 고자유도·고빈도 API에 집중한다. 자유도가 높아도 작성 빈도가 낮으면(Item.ExpandTrigger: 기존 패턴 재사용) 실수가 드물다. 자유도가 높고 매번 새로 작성하는 API(옛 Trigger Wrapper)가 실수 다발 지점. 판단 기준: "이 API를 LLM이 얼마나 자주, 얼마나 많은 결정을 내리며 사용하는가?"
+
 ## 상태 배치 원칙
 
 14. **상태는 변경 주체에 따라 배치한다.** 유저 액션으로 바뀌는 상호작용 상태(focus, selection, expanded) → kernel state. 앱 로직으로 결정되는 선언 상태(disabled, role, config) → ZoneRegistry. "누가 바꾸는가"가 배치 기준이다.
