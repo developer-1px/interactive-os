@@ -5,11 +5,14 @@
  * UX Flow:
  *   [🌐 KO ▾] 클릭 → 드롭다운 → 언어 선택 → 전체 필드 전환
  *
- * OS 패턴: Trigger(role:"menu") + Trigger.Portal + Zone + FocusItem.
+ * OS 패턴: zone.overlay({ role: "menu" }) → OverlayHandle.trigger() prop-getter.
+ * Zone renders inline (no PopoverPortal) so onAction can dispatch per-item commands.
  * open/close, keyboard, backdrop 전부 OS가 관리 (OG-001).
  */
 
-import { Item, Trigger } from "@os-react/internal";
+import { localeMenu } from "./app";
+import { Item, Zone } from "@os-react/internal";
+import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 import { resolveFieldValue } from "./entities/i18n";
 import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
 
@@ -21,18 +24,39 @@ const SUPPORTED_LOCALES = [
   { code: "zh", label: "中文" },
 ];
 
+/**
+ * Resolve per-item activation command based on focused item ID.
+ * locale-option-* → setLocale, locale-add-* → addLocale.
+ */
+function resolveLocaleAction(focusId: string) {
+  if (focusId.startsWith("locale-option-")) {
+    const code = focusId.replace("locale-option-", "");
+    return [setLocaleCommand({ locale: code }), OS_OVERLAY_CLOSE({ id: "locale-menu" })];
+  }
+  if (focusId.startsWith("locale-add-")) {
+    const code = focusId.replace("locale-add-", "");
+    return [addLocaleCommand({ locale: code }), OS_OVERLAY_CLOSE({ id: "locale-menu" })];
+  }
+  return OS_OVERLAY_CLOSE({ id: "locale-menu" });
+}
+
 export function LocaleSwitcher() {
   const { currentLocale, availableLocales } = useLocaleState();
+
+  const isOpen = os.useComputed((s) =>
+    s.os.overlays.stack.some((e) => e.id === "locale-menu"),
+  );
 
   const unaddedLocales = SUPPORTED_LOCALES.filter(
     (l) => !availableLocales.includes(l.code),
   );
 
   return (
-    <Trigger id="locale-switcher-trigger" role="menu" overlayId="locale-menu">
-      {/* Trigger button */}
+    <div className="relative">
+      {/* Trigger button — prop-getter from OverlayHandle */}
       <button
-        aria-haspopup="true"
+        {...localeMenu.trigger()}
+        type="button"
         style={{
           display: "flex",
           alignItems: "center",
@@ -50,85 +74,59 @@ export function LocaleSwitcher() {
         🌐 {currentLocale.toUpperCase()} ▾
       </button>
 
-      {/* Dropdown menu — OS manages open/close, focus, keyboard, backdrop */}
-      <Trigger.Portal>
-        <div
-          role="listbox"
-          aria-label="언어 선택"
-          style={{
-            minWidth: 160,
-            padding: "4px 0",
-            margin: 0,
-          }}
-        >
-          {/* 등록된 언어 */}
-          {availableLocales.map((code) => {
-            const label =
-              SUPPORTED_LOCALES.find((l) => l.code === code)?.label ?? code;
-            const isActive = code === currentLocale;
-            return (
-              <Item key={code} id={`locale-option-${code}`} asChild>
-                <Trigger.Dismiss
+      {/* Dropdown menu — Zone renders when overlay is open */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] py-1 bg-white border border-slate-200 rounded-lg shadow-lg">
+          <Zone
+            id="locale-menu"
+            role="menu"
+            onAction={(cursor) => resolveLocaleAction(cursor.focusId)}
+            onDismiss={OS_OVERLAY_CLOSE({ id: "locale-menu" })}
+            aria-label="언어 선택"
+          >
+            {/* 등록된 언어 */}
+            {availableLocales.map((code) => {
+              const label =
+                SUPPORTED_LOCALES.find((l) => l.code === code)?.label ?? code;
+              const isActive = code === currentLocale;
+              return (
+                <Item
+                  key={code}
                   id={`locale-option-${code}`}
-                  {...(!isActive
-                    ? { onActivate: setLocaleCommand({ locale: code }) }
-                    : {})}
+                  className="flex items-center justify-between px-3.5 py-1.5 text-[13px] cursor-pointer select-none data-[focused=true]:bg-slate-100"
+                  style={{
+                    color: isActive ? "#6366f1" : "#334155",
+                    fontWeight: isActive ? 600 : 400,
+                    background: isActive ? "#f1f5f9" : undefined,
+                  }}
                 >
-                  <div
-                    role="option"
-                    aria-selected={isActive}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "6px 14px",
-                      cursor: isActive ? "default" : "pointer",
-                      background: isActive ? "#f1f5f9" : "transparent",
-                      color: isActive ? "#6366f1" : "#334155",
-                      fontWeight: isActive ? 600 : 400,
-                      fontSize: 13,
-                    }}
-                  >
-                    {label}
-                    {isActive && <span style={{ fontSize: 11 }}>✓</span>}
-                  </div>
-                </Trigger.Dismiss>
-              </Item>
-            );
-          })}
-
-          {/* 구분선 + 언어 추가 */}
-          {unaddedLocales.length > 0 && (
-            <>
-              <div
-                style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }}
-              />
-              {unaddedLocales.map((l) => (
-                <Item key={l.code} id={`locale-add-${l.code}`} asChild>
-                  <Trigger.Dismiss
-                    id={`locale-add-${l.code}`}
-                    onActivate={addLocaleCommand({ locale: l.code })}
-                  >
-                    <div
-                      role="option"
-                      aria-selected={false}
-                      style={{
-                        padding: "6px 14px",
-                        cursor: "pointer",
-                        color: "#64748b",
-                        fontSize: 13,
-                      }}
-                    >
-                      + {l.label} 추가
-                    </div>
-                  </Trigger.Dismiss>
+                  {label}
+                  {isActive && <span style={{ fontSize: 11 }}>✓</span>}
                 </Item>
-              ))}
-            </>
-          )}
+              );
+            })}
+
+            {/* 구분선 + 언어 추가 */}
+            {unaddedLocales.length > 0 && (
+              <>
+                <div
+                  style={{ borderTop: "1px solid #e2e8f0", margin: "4px 0" }}
+                />
+                {unaddedLocales.map((l) => (
+                  <Item
+                    key={l.code}
+                    id={`locale-add-${l.code}`}
+                    className="px-3.5 py-1.5 text-[13px] cursor-pointer select-none text-slate-500 data-[focused=true]:bg-slate-100"
+                  >
+                    + {l.label} 추가
+                  </Item>
+                ))}
+              </>
+            )}
+          </Zone>
         </div>
-      </Trigger.Portal>
-    </Trigger>
+      )}
+    </div>
   );
 }
 
