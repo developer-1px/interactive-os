@@ -4,15 +4,23 @@ import { useEffect } from "react";
 import { Icon } from "@/components/Icon";
 import { ClickFocusPattern } from "./patterns/ClickFocusPattern";
 import { CrossZonePattern } from "./patterns/CrossZonePattern";
+import { ExpandPattern } from "./patterns/ExpandPattern";
 import { FieldLifecyclePattern } from "./patterns/FieldLifecyclePattern";
+import { OverlayPattern } from "./patterns/OverlayPattern";
+import { SelectionPattern } from "./patterns/SelectionPattern";
+import { ValuePattern } from "./patterns/ValuePattern";
 
 const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   "click-focus": { name: "Click → Focus", component: ClickFocusPattern },
   "cross-zone": { name: "Cross-Zone", component: CrossZonePattern },
+  selection: { name: "Selection", component: SelectionPattern },
+  expand: { name: "Expand / Collapse", component: ExpandPattern },
   "field-lifecycle": {
     name: "Field Lifecycle",
     component: FieldLifecyclePattern,
   },
+  overlay: { name: "Overlay Lifecycle", component: OverlayPattern },
+  value: { name: "Value Controls", component: ValuePattern },
 };
 
 const DEFAULT_PATTERN = "click-focus";
