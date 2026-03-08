@@ -10,6 +10,7 @@
 import { defineApp } from "@os-sdk/app/defineApp";
 import React from "react";
 import { TestBotPanel } from "./panels/TestBotPanel";
+import { TestBotPanelV2 } from "./panels/TestBotPanelV2";
 import { InspectorRegistry } from "./stores/InspectorRegistry";
 import { InspectorStore } from "./stores/InspectorStore";
 
@@ -36,4 +37,10 @@ InspectorRegistry.register(
   "TESTBOT",
   "TestBot",
   React.createElement(TestBotPanel),
+);
+
+InspectorRegistry.register(
+  "TESTBOT_V2",
+  "TestBot v2",
+  React.createElement(TestBotPanelV2),
 );

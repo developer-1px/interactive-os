@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-07T22:00
+> Last updated: 2026-03-08T15:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,8 +13,8 @@
 
 ## 🔥 Active Focus
 
-**apg-suite** — WP1-WP2 Backlog
-→ `docs/1-project/apg/apg-suite/BOARD.md`
+**testbot-zift** — T1~T4 Now (Light, bootstrapping)
+→ `docs/1-project/inspector/testbot-zift/BOARD.md`
 
 ---
 
@@ -54,6 +54,7 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
+| **testbot-zift** | T1~T4 Now | 03-08 |
 
 ### apg
 > `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
@@ -83,9 +84,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 13 |
+| Active Projects | 14 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (apg-suite) |
+| Active Focus | 1 (testbot-zift) |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
