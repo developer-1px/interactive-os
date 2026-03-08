@@ -10,8 +10,8 @@
  */
 
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
+import { useDragState } from "@os-react/6-project/accessors/useDragState";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
-import { os } from "@os-sdk/os";
 import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
@@ -81,8 +81,8 @@ function SidebarContent() {
   const focusedCanvasId = useFocusedItem(CANVAS_ZONE_ID);
 
   // Drag state — subscribe to OS drag for visual feedback
-  const dragState = os.useComputed((s) => s.os.drag);
-  const isDragging = dragState.isDragging && dragState.zoneId === "sidebar";
+  const dragState = useDragState("sidebar");
+  const isDragging = dragState.isDragging && dragState.isActiveZone;
   const dragItemId = isDragging ? dragState.dragItemId : null;
   const overItemId = isDragging ? dragState.overItemId : null;
   const overPosition = isDragging ? dragState.overPosition : null;

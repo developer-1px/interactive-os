@@ -12,6 +12,7 @@
 
 import { localeMenu } from "./app";
 import { Item, Zone } from "@os-react/internal";
+import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 import { resolveFieldValue } from "./entities/i18n";
 import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
@@ -43,9 +44,7 @@ function resolveLocaleAction(focusId: string) {
 export function LocaleSwitcher() {
   const { currentLocale, availableLocales } = useLocaleState();
 
-  const isOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((e) => e.id === "locale-menu"),
-  );
+  const isOpen = useOverlay("locale-menu");
 
   const unaddedLocales = SUPPORTED_LOCALES.filter(
     (l) => !availableLocales.includes(l.code),

@@ -16,7 +16,10 @@
  * Uses useElementRect for position tracking.
  */
 
-import { findItemElement, os } from "@os-sdk/os";
+import { useActiveZone } from "@os-react/6-project/accessors/useActiveZone";
+import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
+import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
+import { findItemElement } from "@os-sdk/os";
 import { useContext, useRef } from "react";
 import { useElementRect } from "@/hooks/useElementRect";
 import { HighlightContext } from "@/pages/builder/PropertiesPanel";
@@ -35,15 +38,9 @@ export function BuilderCursor() {
   const animatingUntilRef = useRef<number>(0);
 
   // ── Focus state from OS ──
-  const { itemId, isActive, editing } = os.useComputed((s) => {
-    const zoneId = "canvas";
-    const zoneState = s.os.focus.zones[zoneId];
-    return {
-      itemId: zoneState?.focusedItemId ?? null,
-      isActive: s.os.focus.activeZoneId === zoneId,
-      editing: (zoneState?.editingItemId ?? null) !== null,
-    };
-  });
+  const itemId = useFocusedItem("canvas");
+  const isActive = useActiveZone("canvas");
+  const editing = useEditingItem("canvas") !== null;
 
   // ── Panel highlight from context ──
   const { highlightedItemId } = useContext(HighlightContext);

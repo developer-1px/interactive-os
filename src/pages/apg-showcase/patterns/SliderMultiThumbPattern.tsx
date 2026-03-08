@@ -16,7 +16,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { os } from "@os-sdk/os";
+import { useZoneValue } from "@os-react/6-project/accessors/useZoneValue";
 import clsx from "clsx";
 import type React from "react";
 
@@ -192,13 +192,9 @@ function RangeDisplay({
 
 export function SliderMultiThumbPattern() {
   // Read values from OS kernel
-  const values = os.useComputed((s) => {
-    const z = s.os.focus.zones[ZONE_ID];
-    return {
-      min: z?.valueNow?.["thumb-min-price"] ?? INITIAL_MIN,
-      max: z?.valueNow?.["thumb-max-price"] ?? INITIAL_MAX,
-    };
-  });
+  const minValue = useZoneValue(ZONE_ID, "thumb-min-price") ?? INITIAL_MIN;
+  const maxValue = useZoneValue(ZONE_ID, "thumb-max-price") ?? INITIAL_MAX;
+  const values = { min: minValue, max: maxValue };
 
   return (
     <div className="max-w-md">

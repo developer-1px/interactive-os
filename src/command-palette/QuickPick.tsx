@@ -34,6 +34,7 @@
  */
 
 import { Kbd } from "@inspector/shell/components/Kbd";
+import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { Item } from "@os-react/6-project/Item";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Zone } from "@os-react/6-project/Zone";
@@ -199,9 +200,7 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   }, [isOpen, id]);
 
   // Detect external close (Esc via DialogZone) → sync back to parent
-  const isOverlayOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((o) => o.id === id),
-  );
+  const isOverlayOpen = useOverlay(id);
 
   useEffect(() => {
     if (isOpen && !isOverlayOpen && onClose) {

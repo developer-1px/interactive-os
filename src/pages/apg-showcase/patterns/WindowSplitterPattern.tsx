@@ -20,7 +20,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { os } from "@os-sdk/os";
+import { useZoneValue } from "@os-react/6-project/accessors/useZoneValue";
 import clsx from "clsx";
 
 // --- App + Zone (defineApp pattern) ---
@@ -87,10 +87,7 @@ function SecondaryPane() {
 // --- Splitter Handle ---
 
 function SplitterHandle() {
-  const value = os.useComputed((s) => {
-    const z = s.os.focus.zones["apg-splitter-zone"];
-    return z?.valueNow?.[SPLITTER_ID] ?? INITIAL_VALUE;
-  });
+  const value = useZoneValue("apg-splitter-zone", SPLITTER_ID) ?? INITIAL_VALUE;
 
   return (
     <SplitterUI.Item
@@ -122,10 +119,7 @@ function SplitterHandle() {
 // --- Main Component ---
 
 export function WindowSplitterPattern() {
-  const value = os.useComputed((s) => {
-    const z = s.os.focus.zones["apg-splitter-zone"];
-    return z?.valueNow?.[SPLITTER_ID] ?? INITIAL_VALUE;
-  });
+  const value = useZoneValue("apg-splitter-zone", SPLITTER_ID) ?? INITIAL_VALUE;
 
   return (
     <div className="max-w-2xl">

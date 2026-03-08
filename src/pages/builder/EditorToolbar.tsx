@@ -1,4 +1,5 @@
-import { os } from "@os-sdk/os";
+import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
+import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import {
   Eye,
   Hand,
@@ -104,12 +105,8 @@ export function EditorToolbar({
 
 // ── Mode Indicator ──
 function ModeIndicator() {
-  const editingItemId = os.useComputed(
-    (s) => s.os.focus.zones["canvas"]?.editingItemId ?? null,
-  );
-  const focusedItemId = os.useComputed(
-    (s) => s.os.focus.zones["canvas"]?.focusedItemId ?? null,
-  );
+  const editingItemId = useEditingItem("canvas");
+  const focusedItemId = useFocusedItem("canvas");
 
   const isEditing = editingItemId !== null;
   const isSelected = !isEditing && focusedItemId !== null;

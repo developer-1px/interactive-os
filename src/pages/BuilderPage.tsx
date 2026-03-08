@@ -1,4 +1,4 @@
-import { os } from "@os-sdk/os";
+import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
 import { useState } from "react";
 import {
   BuilderApp,
@@ -31,9 +31,7 @@ export default function BuilderPage() {
     null,
   );
 
-  const editingItemId = os.useComputed(
-    (s) => s.os.focus.zones["canvas"]?.editingItemId ?? null,
-  );
+  const editingItemId = useEditingItem("canvas");
   const canvasMode = editingItemId ? "edit" : "select";
 
   const getViewportStyle = () => {
