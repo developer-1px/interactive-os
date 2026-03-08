@@ -35,8 +35,6 @@ export function FocusListener() {
     // FocusIn → OS_SYNC_FOCUS
     const senseFocusIn = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.closest("[data-inspector]")) return;
-
       // Re-entrance guard: prevents focusin from kernel's el.focus() effect
       if (isDispatching()) return;
 

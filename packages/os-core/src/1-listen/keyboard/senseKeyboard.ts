@@ -75,7 +75,6 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       : false,
     isComposing: e.isComposing || e.keyCode === 229,
     isDefaultPrevented: e.defaultPrevented,
-    isInspector: !!target.closest("[data-inspector]"),
     isCombobox:
       target instanceof HTMLInputElement &&
       target.getAttribute("role") === "combobox",

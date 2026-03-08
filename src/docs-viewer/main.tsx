@@ -25,7 +25,7 @@ function DocsRoot() {
 
         {/* Inspector (⌘I) */}
         {isInspectorOpen && (
-          <aside className="h-full shrink-0 sticky top-0 z-50" data-inspector>
+          <aside className="h-full shrink-0 sticky top-0 z-50">
             <InspectorShell />
           </aside>
         )}

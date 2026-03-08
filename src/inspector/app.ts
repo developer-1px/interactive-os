@@ -136,12 +136,19 @@ export function safeDisabledGroups(
     : new Set<string>();
 }
 
+/** Inspector scope prefix — inspector's own transactions are excluded from app logs by default. */
+const INSPECTOR_SCOPE_PREFIX = "inspector";
+
 export function selectFilteredTransactions(
   state: InspectorState | undefined,
   transactions: Transaction[],
 ): Transaction[] {
   if (!state) return transactions;
-  let result = transactions;
+
+  // Always exclude inspector's own transactions from the app log
+  let result = transactions.filter(
+    (tx) => !tx.handlerScope.startsWith(INSPECTOR_SCOPE_PREFIX),
+  );
 
   const disabledGroups = safeDisabledGroups(state);
   if (disabledGroups.size > 0) {

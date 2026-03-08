@@ -83,7 +83,7 @@ function resolveClipboardShim(key: string): BaseCommand | null {
  * buildKeyboardInput reads OS state only → KeyboardInput.
  *
  * These two functions must produce identical values for all OS-derived fields.
- * DOM-only fields (isComposing, isDefaultPrevented, isInspector, isCombobox)
+ * DOM-only fields (isComposing, isDefaultPrevented, isCombobox)
  * are hardcoded to safe defaults since they have no headless equivalent.
  *
  * @see senseKeyboard.ts — browser ground truth
@@ -127,7 +127,6 @@ export function buildKeyboardInput(
       : false,
     isComposing: false,
     isDefaultPrevented: false,
-    isInspector: false,
     isCombobox: false,
     editingFieldId,
     activeFieldType,

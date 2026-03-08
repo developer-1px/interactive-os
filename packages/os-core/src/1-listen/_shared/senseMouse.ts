@@ -18,7 +18,6 @@ import type { MouseInput } from "../mouse/resolveMouse";
 // ═══════════════════════════════════════════════════════════════════
 
 export interface MouseDownSense {
-  isInspector: boolean;
   // Label path
   isLabel: boolean;
   labelTargetItemId: string | null;
@@ -47,9 +46,6 @@ export interface MouseDownSense {
 // ═══════════════════════════════════════════════════════════════════
 
 export function extractMouseInput(input: MouseDownSense): MouseInput | null {
-  // Guard: inspector
-  if (input.isInspector) return null;
-
   // Non-overlay trigger: skip focus handling, pointerup will dispatch onActivate
   if (input.triggerId && !input.triggerOverlayId) return null;
 
@@ -118,9 +114,6 @@ export function senseMouseDown(
 ): MouseInput | null {
   if (!target) return null;
 
-  // Read DOM → build MouseDownSense
-  const isInspector = !!target.closest("[data-inspector]");
-
   // Label detection (DOM reading)
   const label = target.closest("[data-label]") as HTMLElement | null;
   let isLabel = false;
@@ -187,7 +180,6 @@ export function senseMouseDown(
   }
 
   return extractMouseInput({
-    isInspector,
     isLabel,
     labelTargetItemId,
     labelTargetGroupId,
@@ -262,7 +254,6 @@ export function getDropPosition(
 // ═══════════════════════════════════════════════════════════════════
 
 export type ClickTarget =
-  | { type: "inspector" }
   | {
       type: "trigger";
       triggerId: string;
@@ -285,9 +276,6 @@ export type ClickTarget =
  * Pipeline: PointerEvent target → senseClickTarget → resolveClick/resolveTriggerClick → dispatch
  */
 export function senseClickTarget(target: HTMLElement): ClickTarget {
-  // Inspector: skip entirely
-  if (target.closest("[data-inspector]")) return { type: "inspector" };
-
   // Trigger: overlay toggle or simple (non-overlay) trigger
   const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
   if (triggerEl) {

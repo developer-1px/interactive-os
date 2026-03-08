@@ -314,7 +314,7 @@ function ZoneCardDetail({ card }: { card: ZoneCard }) {
 function ZoneCardView({ card }: { card: ZoneCard }) {
   return (
     <section className="border-b border-[#e8e8e8]">
-      {/* Zone Header — OS accordion Item (click toggles aria-expanded) */}
+      {/* Zone Header — OS disclosure Item (click toggles aria-expanded via PointerListener) */}
       <InspectorZiftUI.Item
         id={card.id}
         className={`group w-full flex items-center justify-between px-3 py-1.5 transition-colors cursor-pointer

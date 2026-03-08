@@ -16,6 +16,7 @@ export { OS_ACTIVATE } from "@os-core/4-command/activate/activate";
 export { OS_CHECK } from "@os-core/4-command/activate/check";
 export { OS_PRESS } from "@os-core/4-command/activate/press";
 export { OS_ESCAPE } from "@os-core/4-command/dismiss/escape";
+export { OS_EXPAND } from "@os-core/4-command/expand";
 export { OS_FIELD_START_EDIT } from "@os-core/4-command/field/field";
 export { OS_FOCUS } from "@os-core/4-command/focus/focus";
 export { OS_NAVIGATE } from "@os-core/4-command/navigate";

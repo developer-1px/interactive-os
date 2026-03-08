@@ -39,7 +39,6 @@ export interface KeyboardInput {
   isFieldActive: boolean;
   isComposing: boolean;
   isDefaultPrevented: boolean;
-  isInspector: boolean;
   isCombobox: boolean;
 
   // ─── Field layer ───
@@ -86,7 +85,7 @@ type Layer = (key: string) => LayerResult | null;
 
 export function resolveKeyboard(input: KeyboardInput): ResolveResult {
   if (input.isDefaultPrevented || input.isComposing) return EMPTY;
-  if (input.isInspector || input.isCombobox) return EMPTY;
+  if (input.isCombobox) return EMPTY;
 
   const meta: InputMeta = {
     type: "KEYBOARD",

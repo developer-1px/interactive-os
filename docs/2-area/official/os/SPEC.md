@@ -338,8 +338,7 @@
 | Step | Action |
 |------|--------|
 | 1 | `e.defaultPrevented \|\| e.isComposing \|\| e.keyCode === 229` → 무시 (IME 가드: Chrome 한글 IME 첫 keydown 누출 방지) |
-| 2 | Inspector 내부 (`[data-inspector]`) → 무시 |
-| 3 | Combobox input (`role="combobox"`) → 무시 (자체 keydown 처리) |
+| 2 | Combobox input (`role="combobox"`) → 무시 (자체 keydown 처리) |
 | 4 | `getCanonicalKey(e)` → 정규화된 키 문자열 |
 | 5 | `isEditing` + `isFieldActive` 판단 (Key Ownership Model) |
 | 6 | `zone.inputmap[key]` 있음 → inputmap commands dispatch (APG table 우선) |

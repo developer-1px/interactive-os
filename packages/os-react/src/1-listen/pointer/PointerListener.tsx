@@ -301,9 +301,6 @@ export function PointerListener() {
           const clickTarget = senseClickTarget(target);
 
           switch (clickTarget.type) {
-            case "inspector":
-              break;
-
             case "trigger": {
               const triggerCmd = resolveTriggerClick({
                 triggerId: clickTarget.triggerId,

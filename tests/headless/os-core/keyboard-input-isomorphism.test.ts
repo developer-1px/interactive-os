@@ -83,7 +83,6 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
 
             expect(input.isComposing).toBe(false);
             expect(input.isDefaultPrevented).toBe(false);
-            expect(input.isInspector).toBe(false);
             expect(input.isCombobox).toBe(false);
         });
 
@@ -153,14 +152,14 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     // ─── Interface shape ───
 
     describe("interface shape", () => {
-        it("KeyboardInput has exactly 19 fields (dead fields removed)", () => {
+        it("KeyboardInput has exactly 18 fields (dead fields removed)", () => {
             setupListFocus();
 
             const input = buildKeyboardInput(page.kernel, "ArrowDown");
             const keys = Object.keys(input);
 
-            // 21 original - 2 dead (focusedItemRole, focusedItemExpanded) = 19
-            expect(keys).toHaveLength(19);
+            // 21 original - 3 dead (focusedItemRole, focusedItemExpanded, isInspector) = 18
+            expect(keys).toHaveLength(18);
         });
 
         it("does NOT contain removed dead fields", () => {
