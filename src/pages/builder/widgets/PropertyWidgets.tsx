@@ -9,10 +9,8 @@
  */
 
 import type { PropertyDef } from "@apps/builder/model/blockSchemas";
-import type { PrimitiveType } from "@apps/builder/model/primitives";
 import { decode } from "@apps/builder/model/primitives";
 import { Image, Palette, Type } from "lucide-react";
-import type React from "react";
 
 // ═══════════════════════════════════════════════════════════════════
 // Widget Interface
@@ -314,4 +312,3 @@ export function NumberWidget({
     />
   );
 }
-
