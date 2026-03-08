@@ -315,29 +315,3 @@ export function NumberWidget({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Widget Registry — OCP: new type = new entry, nothing else changes
-// ═══════════════════════════════════════════════════════════════════
-
-const widgetRegistry: Record<PrimitiveType, React.FC<WidgetProps>> = {
-  text: TextWidget,
-  multiline: MultilineWidget,
-  button: ButtonWidget,
-  link: LinkWidget,
-  image: ImageWidget,
-  icon: IconWidget,
-  color: ColorWidget,
-  badge: BadgeWidget,
-  date: DateWidget,
-  select: SelectWidget,
-  toggle: ToggleWidget,
-  number: NumberWidget,
-};
-
-/**
- * Get the widget component for a primitive type.
- * Falls back to TextWidget for unknown types.
- */
-export function getWidget(type: PrimitiveType): React.FC<WidgetProps> {
-  return widgetRegistry[type] ?? TextWidget;
-}

@@ -15,7 +15,6 @@ import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { type IconName, icons } from "./iconRegistry";
 
 export type { IconName };
-export { iconNames, icons } from "./iconRegistry";
 
 export interface IconProps
   extends Omit<ComponentPropsWithoutRef<"svg">, "ref"> {
