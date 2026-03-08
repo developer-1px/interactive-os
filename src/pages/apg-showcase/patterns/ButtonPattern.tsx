@@ -13,17 +13,17 @@
  *   - Toggle Button = Field (boolean) mapped to aria-pressed via check axis
  *
  * OS pattern:
- *   Action buttons: <Trigger onActivate={CMD()}> — no Zone/Item needed.
+ *   Action buttons: prop-getter trigger on Zone Item — data-trigger-id.
  *   Toggle buttons: Zone+Item with role="toolbar" (child role=button),
  *     check.mode="check" for toggle. OS computes aria-pressed (not aria-checked)
  *     for button-role items. CSS reads aria-pressed. No useState, no onClick.
  */
 
-import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_PRESS } from "@os-sdk/os";
 
 // ═══════════════════════════════════════════════════════════════════
-// Section 1: Action Buttons (Trigger-only — no Zone/Item)
+// Section 1: Action Buttons (Zone + Trigger prop-getter)
 // ═══════════════════════════════════════════════════════════════════
 
 export const ActionButtonApp = defineApp<{ actionCount: number }>(
@@ -31,17 +31,36 @@ export const ActionButtonApp = defineApp<{ actionCount: number }>(
   { actionCount: 0 },
 );
 
+const actionZone = ActionButtonApp.createZone("action-buttons");
+
 const actionCounter = ActionButtonApp.selector(
   "actionCount",
   (s) => s.actionCount,
 );
 
-export const PERFORM_ACTION = ActionButtonApp.command(
+export const PERFORM_ACTION = actionZone.command(
   "PERFORM_ACTION",
   (ctx) => ({
     state: { actionCount: ctx.state.actionCount + 1 },
   }),
 );
+
+// ─── Triggers (prop-getter) ───
+
+const actionTriggers = {
+  PrintPage: actionZone.trigger("print-page", () => PERFORM_ACTION()),
+  SaveDraft: actionZone.trigger("save-draft", () => PERFORM_ACTION()),
+};
+
+// ─── Bind ───
+
+const ActionUI = actionZone.bind({
+  role: "toolbar",
+  options: {
+    navigate: { orientation: "horizontal" },
+  },
+  triggers: Object.values(actionTriggers),
+});
 
 function ActionButtonSection() {
   const count = ActionButtonApp.useComputed(actionCounter);
@@ -53,13 +72,17 @@ function ActionButtonSection() {
       </h4>
       <p className="text-xs text-gray-500">
         Activates on <kbd>Enter</kbd>, <kbd>Space</kbd>, or click. Pure Trigger
-        pattern.
+        pattern (prop-getter).
       </p>
 
-      <div className="flex gap-3 items-center">
-        <Trigger onActivate={PERFORM_ACTION()}>
+      <ActionUI.Zone
+        className="flex gap-3 items-center"
+        aria-label="Action buttons"
+      >
+        <ActionUI.Item id="btn-print">
           <button
             type="button"
+            {...actionTriggers.PrintPage()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               bg-indigo-600 text-white
@@ -70,11 +93,12 @@ function ActionButtonSection() {
           >
             Print Page
           </button>
-        </Trigger>
+        </ActionUI.Item>
 
-        <Trigger onActivate={PERFORM_ACTION()}>
+        <ActionUI.Item id="btn-save">
           <button
             type="button"
+            {...actionTriggers.SaveDraft()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               border border-gray-300 text-gray-700 bg-white
@@ -85,12 +109,12 @@ function ActionButtonSection() {
           >
             Save Draft
           </button>
-        </Trigger>
+        </ActionUI.Item>
 
         <span className="text-xs text-gray-400 ml-2">
           Actions fired: {count}
         </span>
-      </div>
+      </ActionUI.Zone>
     </div>
   );
 }
@@ -110,8 +134,6 @@ const TOGGLES: ToggleDef[] = [
   { id: "toggle-italic", label: "Italic", icon: "I" },
   { id: "toggle-underline", label: "Underline", icon: "U" },
 ];
-
-import { OS_PRESS } from "@os-sdk/os";
 
 export const ToggleApp = defineApp<Record<string, never>>(
   "apg-toggle-button-app",

@@ -15,8 +15,10 @@ Before → After:
 - After: `<button {...deleteTodo(todoId)} />` (payload가 `data-trigger-payload`로 DOM에 바인딩)
 
 ## Now
-(없음 — 모든 태스크 완료)
-
+**Phase 1: Simple Trigger Migration**
+- [x] T6: `apg-showcase/` (Alert, Button, Link, Table) — Trigger→prop-getter 전환 — tsc 0 | 391 tests PASS ✅
+- [ ] T7: `inspector/UnifiedInspector.tsx` 마이그레이션
+- [ ] T8: 고립된 앱 (`AriaInteractionTest.tsx`, `BuilderListPage.tsx`) 마이그레이션
 ## Done
 - [x] T1: `createFunctionTrigger` — prop-getter가 `data-trigger-payload` 반환 — +3 tests ✅
 - [x] T4: Red 테스트 — payload 기반 trigger dispatch 검증 — 5/5 PASS ✅

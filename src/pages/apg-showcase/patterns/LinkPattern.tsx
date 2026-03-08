@@ -9,17 +9,16 @@
  *   - For non-anchor elements: role="link" + tabindex="0" + Enter activates
  *
  * ZIFT classification: Trigger (action)
- *   - No Zone/Item needed — a link executes an action (navigation)
- *   - No arrow key navigation — not a composite widget
+ *   - Custom links use Zone + Trigger prop-getter for Enter/click activation.
+ *   - Native <a> links need no OS machinery — browsers handle Enter natively.
  *
  * OS pattern:
  *   Native <a> links need no OS machinery — browsers handle Enter natively.
- *   Custom link (span role="link") uses <Trigger onActivate={CMD()}>
+ *   Custom link (span role="link") uses prop-getter trigger
  *   to dispatch a navigation command on Enter/click.
  *   defineApp state tracks the last navigated URL for testability.
  */
 
-import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── App State ───
@@ -30,12 +29,35 @@ export const LinkApp = defineApp<{
   lastNavigatedUrl: null,
 });
 
-export const NAVIGATE_LINK = LinkApp.command(
+const linkZone = LinkApp.createZone("custom-links");
+
+export const NAVIGATE_LINK = linkZone.command(
   "NAVIGATE_LINK",
   (_ctx, payload: { url: string }) => ({
     state: { lastNavigatedUrl: payload.url },
   }),
 );
+
+// ─── Triggers (prop-getter per custom link) ───
+
+const linkTriggers = {
+  NavSettings: linkZone.trigger("nav-settings", () =>
+    NAVIGATE_LINK({ url: "/settings" }),
+  ),
+  NavProfile: linkZone.trigger("nav-profile", () =>
+    NAVIGATE_LINK({ url: "/profile" }),
+  ),
+};
+
+// ─── Bind ───
+
+const LinkUI = linkZone.bind({
+  role: "toolbar",
+  options: {
+    navigate: { orientation: "vertical" },
+  },
+  triggers: Object.values(linkTriggers),
+});
 
 // ─── Link Data ───
 
@@ -61,13 +83,18 @@ const NATIVE_LINKS: LinkDef[] = [
   },
 ];
 
-const CUSTOM_LINKS: LinkDef[] = [
+interface CustomLinkDef extends LinkDef {
+  trigger: <T extends HTMLElement>() => React.HTMLAttributes<T>;
+}
+
+const CUSTOM_LINKS: CustomLinkDef[] = [
   {
     id: "link-custom-settings",
     label: "Settings",
     url: "/settings",
     description:
       'A span element with role="link" — demonstrates ARIA link on non-anchor.',
+    trigger: linkTriggers.NavSettings,
   },
   {
     id: "link-custom-profile",
@@ -75,10 +102,13 @@ const CUSTOM_LINKS: LinkDef[] = [
     url: "/profile",
     description:
       "Another custom link — OS Trigger dispatches a command on activation.",
+    trigger: linkTriggers.NavProfile,
   },
 ];
 
 // ─── Component ───
+
+import React from "react";
 
 function LinkPattern() {
   const lastUrl = LinkApp.useComputed((s) => s.lastNavigatedUrl);
@@ -138,19 +168,22 @@ function LinkPattern() {
         </div>
       </div>
 
-      {/* Section 2: Custom role="link" — Trigger dispatches command */}
+      {/* Section 2: Custom role="link" — prop-getter trigger dispatches command */}
       <div className="mb-6">
         <h4 className="text-sm font-semibold text-gray-700 mb-2">
           Custom Links (role=&quot;link&quot;)
         </h4>
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 shadow-sm">
+        <LinkUI.Zone
+          className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 shadow-sm"
+          aria-label="Custom navigation links"
+        >
           {CUSTOM_LINKS.map((link) => (
             <div key={link.id} className="px-4 py-3">
-              <Trigger onActivate={NAVIGATE_LINK({ url: link.url })}>
+              <LinkUI.Item id={link.id}>
                 <span
-                  id={link.id}
                   role="link"
                   tabIndex={0}
+                  {...link.trigger()}
                   className="
                     text-sm font-medium text-indigo-600 hover:text-indigo-800
                     underline decoration-indigo-300 underline-offset-2
@@ -160,11 +193,11 @@ function LinkPattern() {
                 >
                   {link.label}
                 </span>
-              </Trigger>
+              </LinkUI.Item>
               <p className="text-xs text-gray-500 mt-1">{link.description}</p>
             </div>
           ))}
-        </div>
+        </LinkUI.Zone>
       </div>
 
       {/* Debug: last navigated URL */}

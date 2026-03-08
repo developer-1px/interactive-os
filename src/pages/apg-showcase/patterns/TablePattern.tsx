@@ -14,19 +14,17 @@
  *   - No keyboard interaction (table is a static structure, not a widget)
  *   - For interactive tables, use the Grid pattern instead
  *
- * ZIFT Classification: NONE
- *   Table is a static semantic structure. It does not navigate items (Zone),
- *   edit values (Field), or trigger actions (Trigger). No createZone, no bind.
- *   If data is dynamic, use defineApp + commands for state management.
+ * ZIFT Classification:
+ *   Table is a static semantic structure. Sorting controls use a toolbar Zone
+ *   with prop-getter triggers for each sortable column header.
  *
  * OS Pattern:
  *   - defineApp manages sort state via commands (no useState)
- *   - Trigger wraps sortable column header buttons (no onClick)
+ *   - Prop-getter triggers on sortable column header buttons (no onClick)
  *   - CSS reads aria-sort for visual indicators
  *   - Native HTML <table> provides implicit ARIA roles
  */
 
-import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { Icon } from "@/components/Icon";
 
@@ -81,14 +79,16 @@ export const TableApp = defineApp<TableState>("apg-table-app", {
   sortDirection: "ascending",
 });
 
-export const RESET_TABLE = TableApp.command("RESET_TABLE", () => ({
+const tableZone = TableApp.createZone("table-sort");
+
+export const RESET_TABLE = tableZone.command("RESET_TABLE", () => ({
   state: {
     sortColumn: "lastName" as SortColumn,
     sortDirection: "ascending" as SortDirection,
   },
 }));
 
-export const SORT_BY_COLUMN = TableApp.command(
+export const SORT_BY_COLUMN = tableZone.command(
   "SORT_BY_COLUMN",
   (ctx, payload: { column: SortColumn }) => {
     const { column } = payload;
@@ -107,6 +107,30 @@ export const SORT_BY_COLUMN = TableApp.command(
   },
 );
 
+// ─── Triggers (prop-getter per sortable column) ───
+
+const tableTriggers = {
+  SortFirstName: tableZone.trigger("sort-firstName", () =>
+    SORT_BY_COLUMN({ column: "firstName" }),
+  ),
+  SortLastName: tableZone.trigger("sort-lastName", () =>
+    SORT_BY_COLUMN({ column: "lastName" }),
+  ),
+  SortCompany: tableZone.trigger("sort-company", () =>
+    SORT_BY_COLUMN({ column: "company" }),
+  ),
+};
+
+// ─── Bind ───
+
+const TableUI = tableZone.bind({
+  role: "toolbar",
+  options: {
+    navigate: { orientation: "horizontal" },
+  },
+  triggers: Object.values(tableTriggers),
+});
+
 // ─── Sort Logic ───
 
 function sortStudents(
@@ -124,14 +148,21 @@ function sortStudents(
 
 // ─── Column Definitions ───
 
-const COLUMNS: { key: SortColumn; label: string; sortable: boolean }[] = [
-  { key: "firstName", label: "First Name", sortable: true },
-  { key: "lastName", label: "Last Name", sortable: true },
-  { key: "company", label: "Company", sortable: true },
-  { key: "address", label: "Address", sortable: false },
-];
+const COLUMNS: {
+  key: SortColumn;
+  label: string;
+  sortable: boolean;
+  trigger?: <T extends HTMLElement>() => React.HTMLAttributes<T>;
+}[] = [
+    { key: "firstName", label: "First Name", sortable: true, trigger: tableTriggers.SortFirstName },
+    { key: "lastName", label: "Last Name", sortable: true, trigger: tableTriggers.SortLastName },
+    { key: "company", label: "Company", sortable: true, trigger: tableTriggers.SortCompany },
+    { key: "address", label: "Address", sortable: false },
+  ];
 
 // ─── Component ───
+
+import React from "react";
 
 export function TablePattern() {
   const state = TableApp.useComputed((s) => s);
@@ -176,7 +207,7 @@ export function TablePattern() {
         className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm text-sm"
       >
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <TableUI.Zone as="tr" className="bg-gray-50 border-b border-gray-200" aria-label="Sort controls">
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
@@ -190,10 +221,11 @@ export function TablePattern() {
                 }
                 className="px-4 py-3 text-left font-semibold text-gray-700"
               >
-                {col.sortable ? (
-                  <Trigger onActivate={SORT_BY_COLUMN({ column: col.key })}>
+                {col.sortable && col.trigger ? (
+                  <TableUI.Item id={`sort-${col.key}`}>
                     <button
                       type="button"
+                      {...col.trigger()}
                       className="
                         inline-flex items-center gap-1.5 w-full
                         text-left font-semibold text-gray-700
@@ -210,13 +242,13 @@ export function TablePattern() {
                         sortDirection={state.sortDirection}
                       />
                     </button>
-                  </Trigger>
+                  </TableUI.Item>
                 ) : (
                   col.label
                 )}
               </th>
             ))}
-          </tr>
+          </TableUI.Zone>
         </thead>
         <tbody>
           {sorted.map((student, idx) => (

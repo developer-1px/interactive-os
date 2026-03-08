@@ -11,9 +11,9 @@
  * OS pattern:
  *   Alerts are inline components. We use `defineApp` state to control
  *   visibility via OS commands, instead of `useState` or `onClick`.
+ *   Trigger uses prop-getter pattern (data-trigger-id).
  */
 
-import { Trigger } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 
 // ─── App State ───
@@ -22,7 +22,9 @@ export const AlertApp = defineApp<{ alerts: { id: string }[] }>("apg-alert", {
   alerts: [],
 });
 
-export const SHOW_ALERT = AlertApp.command("SHOW_ALERT", (ctx) => ({
+const alertZone = AlertApp.createZone("alert-actions");
+
+export const SHOW_ALERT = alertZone.command("SHOW_ALERT", (ctx) => ({
   state: {
     alerts: [
       ...ctx.state.alerts,
@@ -31,9 +33,22 @@ export const SHOW_ALERT = AlertApp.command("SHOW_ALERT", (ctx) => ({
   },
 }));
 
-export const RESET_ALERTS = AlertApp.command("RESET_ALERTS", () => ({
+export const RESET_ALERTS = alertZone.command("RESET_ALERTS", () => ({
   state: { alerts: [] },
 }));
+
+// ─── Triggers (prop-getter) ───
+
+const alertTriggers = {
+  ShowAlert: alertZone.trigger("show-alert", () => SHOW_ALERT()),
+};
+
+// ─── Bind ───
+
+const AlertUI = alertZone.bind({
+  role: "toolbar",
+  triggers: Object.values(alertTriggers),
+});
 
 // ─── Component ───
 
@@ -49,12 +64,12 @@ function AlertPattern() {
         focus.
       </p>
 
-      {/* Trigger → OS command dispatch. No onClick, no useState */}
-      <div className="flex gap-3 mb-4">
-        <Trigger onActivate={SHOW_ALERT()}>
+      {/* Prop-getter trigger → OS command dispatch. No onClick, no useState */}
+      <AlertUI.Zone className="flex gap-3 mb-4" aria-label="Alert actions">
+        <AlertUI.Item id="alert-trigger">
           <button
-            id="alert-trigger"
             type="button"
+            {...alertTriggers.ShowAlert()}
             className="
               px-4 py-2 text-sm font-medium rounded-lg
               bg-indigo-600 text-white
@@ -65,8 +80,8 @@ function AlertPattern() {
           >
             Trigger Alert
           </button>
-        </Trigger>
-      </div>
+        </AlertUI.Item>
+      </AlertUI.Zone>
 
       {/* Inline Alert Box(es) */}
       <div className="flex flex-col gap-2">
