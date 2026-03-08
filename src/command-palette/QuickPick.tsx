@@ -41,7 +41,7 @@ import {
 import { Item } from "@os-react/6-project/Item";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Zone } from "@os-react/6-project/Zone";
-import type { ZoneCursor } from "@os-core/engine/registries/zoneRegistry";
+import type { ZoneCursor } from "@os-sdk/os";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 
