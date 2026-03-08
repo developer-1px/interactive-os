@@ -49,8 +49,9 @@ const OPTIONS = [
   { id: "opt-yellow", label: "Yellow", color: "bg-yellow-400" },
 ];
 
-const ListboxTrigger = ListboxDropdownShowcaseApp.createTrigger({
-  id: "layer-listbox",
+const listboxTriggerZone = ListboxDropdownShowcaseApp.createZone("listbox-trigger-zone");
+
+const ListboxTrigger = listboxTriggerZone.overlay("layer-listbox", {
   role: "listbox",
 });
 

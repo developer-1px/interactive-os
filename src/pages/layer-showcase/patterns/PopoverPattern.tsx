@@ -45,8 +45,7 @@ popoverZone.bind({
 
 // ─── React Component ───
 
-const PopoverTrigger = PopoverShowcaseApp.createTrigger({
-  id: "layer-popover",
+const PopoverTrigger = triggerZone.overlay("layer-popover", {
   role: "popover",
 });
 

@@ -285,12 +285,6 @@ export const DocsReaderUI = readerZone.bind({
 // Triggers — standalone actions (no Zone needed)
 // ═══════════════════════════════════════════════════════════════════
 
-export const SelectDocTrigger = DocsApp.createTrigger(selectDoc, {
-  id: "docs-select",
-});
-export const PrevDocTrigger = DocsApp.createTrigger(selectDoc, {
-  id: "docs-prev",
-});
-export const NextDocTrigger = DocsApp.createTrigger(selectDoc, {
-  id: "docs-next",
-});
+export const SelectDocTrigger = readerZone.trigger("docs-select", selectDoc);
+export const PrevDocTrigger = readerZone.trigger("docs-prev", selectDoc);
+export const NextDocTrigger = readerZone.trigger("docs-next", selectDoc);

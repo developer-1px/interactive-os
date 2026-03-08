@@ -49,8 +49,7 @@ const MENU_ITEMS = [
   { id: "menu-delete", label: "Delete", icon: "trash" as const },
 ];
 
-const MenuTrigger = MenuShowcaseApp.createTrigger({
-  id: "layer-menu",
+const MenuTrigger = triggerZone.overlay("layer-menu", {
   role: "menu",
 });
 

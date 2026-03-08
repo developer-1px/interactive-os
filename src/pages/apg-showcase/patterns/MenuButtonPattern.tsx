@@ -43,9 +43,8 @@ export const MenuButtonApp = defineApp<Record<string, never>>(
 const triggerZone = MenuButtonApp.createZone("mb-trigger-zone");
 const TriggerUI = triggerZone.bind({ role: "toolbar" });
 
-// Menu trigger: createTrigger with role="menu" — pure projection + Popover
-const ActionsMenu = MenuButtonApp.createTrigger({
-  id: "apg-menu-button-popup",
+// Menu trigger: zone.overlay with role="menu" — pure projection + Popover
+const ActionsMenu = triggerZone.overlay("apg-menu-button-popup", {
   role: "menu",
 });
 

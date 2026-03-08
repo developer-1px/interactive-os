@@ -58,8 +58,7 @@ dialogZone.bind({
   },
 });
 
-const DialogTrigger = OverlayApp.createTrigger({
-  id: "test-dialog",
+const DialogTrigger = triggerZone.overlay("test-dialog", {
   role: "dialog",
 });
 

@@ -17,9 +17,9 @@ import { Icon } from "@/components/Icon";
 
 export const TooltipShowcaseApp = defineApp("layer-tooltip-showcase", {});
 
-// Tooltip trigger uses createTrigger with role="tooltip"
-const TooltipTrigger = TooltipShowcaseApp.createTrigger({
-  id: "layer-tooltip",
+const tooltipZone = TooltipShowcaseApp.createZone("tooltip-zone");
+
+const TooltipTrigger = tooltipZone.overlay("layer-tooltip", {
   role: "tooltip",
 });
 
