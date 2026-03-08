@@ -279,12 +279,9 @@ export const DocsReaderUI = readerZone.bind({
   options: {
     inputmap: { click: [OS_ACTIVATE()] },
   },
+  triggers: {
+    SelectDoc: (fid) => selectDoc({ id: fid }),
+    PrevDoc: (fid) => selectDoc({ id: fid }),
+    NextDoc: (fid) => selectDoc({ id: fid }),
+  },
 });
-
-// ═══════════════════════════════════════════════════════════════════
-// Triggers — standalone actions (no Zone needed)
-// ═══════════════════════════════════════════════════════════════════
-
-export const SelectDocTrigger = readerZone.trigger("docs-select", (fid) => selectDoc({ id: fid }));
-export const PrevDocTrigger = readerZone.trigger("docs-prev", (fid) => selectDoc({ id: fid }));
-export const NextDocTrigger = readerZone.trigger("docs-next", (fid) => selectDoc({ id: fid }));

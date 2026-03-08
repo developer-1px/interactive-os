@@ -2,12 +2,12 @@
  * Todo App — Trigger Click Tests (Headless)
  *
  * Tests trigger buttons via `page.click("trigger-id")`.
- * Each trigger is created via `zone.trigger(id, (focusId) => command)`:
- *   - "start-edit"     → startEdit({ id: focusId })
- *   - "move-item-up"   → moveItemUp({ id: focusId })
- *   - "move-item-down" → moveItemDown({ id: focusId })
- *   - "delete-todo"    → deleteTodo({ id: focusId })
- *   - "toggle-todo"    → toggleTodo({ id: focusId })
+ * Each trigger is declared in bind({ triggers: { Name: callback } }):
+ *   - "StartEdit"     → startEdit({ id: focusId })
+ *   - "MoveItemUp"    → moveItemUp({ id: focusId })
+ *   - "MoveItemDown"  → moveItemDown({ id: focusId })
+ *   - "DeleteTodo"    → deleteTodo({ id: focusId })
+ *   - "ToggleTodo"    → toggleTodo({ id: focusId })
  *
  * Zero Drift: headless `page.click(triggerId)` = browser button click.
  */
@@ -41,7 +41,7 @@ describe("§22 Trigger click: per-button dispatch", () => {
     page.locator("#todo_1").click();
     expect(page.state.ui.editingId).toBeNull();
 
-    page.click("start-edit");
+    page.click("StartEdit");
 
     expect(page.state.ui.editingId).toBe("todo_1");
   });
@@ -49,7 +49,7 @@ describe("§22 Trigger click: per-button dispatch", () => {
   it("move-item-down trigger reorders focused item down", () => {
     page.locator("#todo_1").click();
 
-    page.click("move-item-down");
+    page.click("MoveItemDown");
 
     expect(page.state.data.todoOrder[0]).toBe("todo_2");
     expect(page.state.data.todoOrder[1]).toBe("todo_1");
@@ -58,7 +58,7 @@ describe("§22 Trigger click: per-button dispatch", () => {
   it("move-item-up trigger reorders focused item up", () => {
     page.locator("#todo_2").click();
 
-    page.click("move-item-up");
+    page.click("MoveItemUp");
 
     expect(page.state.data.todoOrder[0]).toBe("todo_2");
     expect(page.state.data.todoOrder[1]).toBe("todo_1");
@@ -68,7 +68,7 @@ describe("§22 Trigger click: per-button dispatch", () => {
     page.locator("#todo_1").click();
     expect(page.state.data.todoOrder).toContain("todo_1");
 
-    page.click("delete-todo");
+    page.click("DeleteTodo");
 
     expect(page.state.data.todoOrder).not.toContain("todo_1");
     expect(page.state.data.todoOrder.length).toBe(3);
@@ -78,7 +78,7 @@ describe("§22 Trigger click: per-button dispatch", () => {
     page.locator("#todo_1").click();
     expect(page.state.data.todos.todo_1.completed).toBe(false);
 
-    page.click("toggle-todo");
+    page.click("ToggleTodo");
 
     expect(page.state.data.todos.todo_1.completed).toBe(true);
   });
@@ -92,7 +92,7 @@ describe("§23 Trigger click: focusId targeting", () => {
   it("delete-todo targets the focused item, not first/last", () => {
     page.locator("#todo_3").click();
 
-    page.click("delete-todo");
+    page.click("DeleteTodo");
 
     expect(page.state.data.todoOrder).not.toContain("todo_3");
     expect(page.state.data.todoOrder).toContain("todo_1");
@@ -101,11 +101,11 @@ describe("§23 Trigger click: focusId targeting", () => {
 
   it("sequential deletes target each focused item", () => {
     page.locator("#todo_2").click();
-    page.click("delete-todo");
+    page.click("DeleteTodo");
     expect(page.state.data.todoOrder).not.toContain("todo_2");
 
     page.locator("#todo_4").click();
-    page.click("delete-todo");
+    page.click("DeleteTodo");
     expect(page.state.data.todoOrder).not.toContain("todo_4");
 
     expect(page.state.data.todoOrder.length).toBe(2);
@@ -113,12 +113,12 @@ describe("§23 Trigger click: focusId targeting", () => {
 
   it("start-edit targets the focused item specifically", () => {
     page.locator("#todo_3").click();
-    page.click("start-edit");
+    page.click("StartEdit");
     expect(page.state.ui.editingId).toBe("todo_3");
   });
 
   it("onActivate in ZoneRegistry is a function using focusId", () => {
-    const cb = ZoneRegistry.findItemCallback("delete-todo");
+    const cb = ZoneRegistry.findItemCallback("DeleteTodo");
     expect(cb?.onActivate).toBeTruthy();
 
     const cmd1 = cb!.onActivate!("todo_1");
@@ -140,7 +140,7 @@ describe("§24 Trigger click vs keyboard: parity", () => {
 
   it("trigger delete-todo removes directly (no confirm dialog)", () => {
     page.locator("#todo_1").click();
-    page.click("delete-todo");
+    page.click("DeleteTodo");
     expect(page.state.data.todoOrder).not.toContain("todo_1");
   });
 

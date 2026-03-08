@@ -2,7 +2,6 @@ import { Field } from "@os-react/6-project/field/Field.tsx";
 import { Item } from "@os-react/6-project/Item.tsx";
 import { Zone } from "@os-react/6-project/Zone.tsx";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { useState } from "react";
 import { TestBox } from "../shared/TestLayout";
 
 // ─── Minimal app for trigger demonstration ───
@@ -22,7 +21,6 @@ const TriggerUI = triggerZone.bind({
 });
 
 export function AriaInteractionTest() {
-  const [actionCount] = useState(0); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const description = (
     <div className="space-y-2">
@@ -58,7 +56,7 @@ export function AriaInteractionTest() {
                 {...TriggerUI.triggers.TestButton()}
                 className="px-3 py-1 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-100 active:bg-gray-200 text-sm"
               >
-                Click Me ({actionCount})
+                Click Me
               </button>
             </TriggerUI.Item>
           </TriggerUI.Zone>

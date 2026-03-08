@@ -191,12 +191,9 @@ export const BuilderSidebarUI = sidebarCollection.bind({
     navigate: { orientation: "vertical" },
     tab: { behavior: "flow" },
   },
-  triggers: [
-    sidebarCollection.trigger(
-      "locale-switcher-trigger",
-      () => OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
-    ),
-  ],
+  triggers: {
+    LocaleSwitcherTrigger: () => OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════

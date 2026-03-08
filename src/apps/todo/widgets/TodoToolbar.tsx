@@ -7,7 +7,7 @@
 import { TodoApp, TodoToolbar } from "@apps/todo/app";
 
 const { ClearDialog } = TodoToolbar;
-const { ToggleViewButton, UndoButton, RedoButton } = TodoToolbar.triggers;
+const { ToggleView, Undo, Redo } = TodoToolbar.triggers;
 
 import {
   AlertTriangle,
@@ -33,7 +33,7 @@ export function TodoToolbarView() {
       {/* Left: View Toggle */}
       <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
         <button
-          {...ToggleViewButton()}
+          {...ToggleView()}
           type="button"
           className={`p-1.5 rounded-md transition-all flex items-center justify-center ${!isBoard ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
           title="List View"
@@ -41,7 +41,7 @@ export function TodoToolbarView() {
           <List size={16} />
         </button>
         <button
-          {...ToggleViewButton()}
+          {...ToggleView()}
           type="button"
           className={`p-1.5 rounded-md transition-all flex items-center justify-center ${isBoard ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
           title="Board View"
@@ -54,7 +54,7 @@ export function TodoToolbarView() {
       <div className="flex items-center gap-3">
         <div className="flex items-center bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
           <button
-            {...UndoButton()}
+            {...Undo()}
             type="button"
             disabled={!hasHistoryPast}
             className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors border-r border-slate-100"
@@ -63,7 +63,7 @@ export function TodoToolbarView() {
             <RotateCcw size={14} />
           </button>
           <button
-            {...RedoButton()}
+            {...Redo()}
             type="button"
             disabled={!hasHistoryFuture}
             className="px-3 py-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"

@@ -261,22 +261,6 @@ function getSelectedIds(zoneId: string): string[] {
     : [];
 }
 
-const listTriggers = {
-  StartEdit: listCollection.trigger("start-edit", (fid) => startEdit({ id: fid })),
-  MoveItemUp: listCollection.trigger("move-item-up", (fid) => moveItemUp({ id: fid })),
-  MoveItemDown: listCollection.trigger("move-item-down", (fid) => moveItemDown({ id: fid })),
-  DeleteTodo: listCollection.trigger("delete-todo", (fid) => deleteTodo({ id: fid })),
-  ToggleTodo: listCollection.trigger("toggle-todo", (fid) => toggleTodo({ id: fid })),
-  BulkDelete: listCollection.trigger("bulk-delete", () => {
-    const selected = getSelectedIds("list");
-    return requestDeleteTodo({ ids: selected.length > 0 ? selected : [] });
-  }),
-  BulkToggle: listCollection.trigger("bulk-toggle", () => {
-    const selected = getSelectedIds("list");
-    return bulkToggleCompleted({ ids: selected });
-  }),
-};
-
 export const TodoListUI = listCollection.bind({
   role: "listbox",
   options: {
@@ -296,7 +280,21 @@ export const TodoListUI = listCollection.bind({
   onReorder: (info) => {
     os.dispatch(reorderTodo(info));
   },
-  triggers: Object.values(listTriggers),
+  triggers: {
+    StartEdit: (fid) => startEdit({ id: fid }),
+    MoveItemUp: (fid) => moveItemUp({ id: fid }),
+    MoveItemDown: (fid) => moveItemDown({ id: fid }),
+    DeleteTodo: (fid) => deleteTodo({ id: fid }),
+    ToggleTodo: (fid) => toggleTodo({ id: fid }),
+    BulkDelete: () => {
+      const selected = getSelectedIds("list");
+      return requestDeleteTodo({ ids: selected.length > 0 ? selected : [] });
+    },
+    BulkToggle: () => {
+      const selected = getSelectedIds("list");
+      return bulkToggleCompleted({ ids: selected });
+    },
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -325,9 +323,6 @@ export const selectCategory = sidebarCollection.command(
 );
 
 const sidebarBindings = sidebarCollection.collectionBindings();
-const sidebarTriggers = {
-  SelectCategory: sidebarCollection.trigger("select-category", (fid) => selectCategory({ id: fid })),
-};
 export const TodoSidebarUI = sidebarCollection.bind({
   role: "listbox",
   onAction: (cursor) => selectCategory({ id: cursor.focusId }),
@@ -338,7 +333,9 @@ export const TodoSidebarUI = sidebarCollection.bind({
   options: {
     select: { followFocus: true },
   },
-  triggers: Object.values(sidebarTriggers),
+  triggers: {
+    SelectCategory: (fid) => selectCategory({ id: fid }),
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -428,10 +425,6 @@ export const clearSearch = searchZone.command("clearSearch", (ctx) => ({
   }),
 }));
 
-const searchTriggers = {
-  ClearSearch: searchZone.trigger("clear-search", () => clearSearch()),
-};
-
 export const TodoSearchUI = searchZone.bind({
   role: "textbox",
   field: {
@@ -440,7 +433,9 @@ export const TodoSearchUI = searchZone.bind({
     trigger: "change",
     onCancel: clearSearch(),
   },
-  triggers: Object.values(searchTriggers),
+  triggers: {
+    ClearSearch: () => clearSearch(),
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -482,6 +477,11 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
 
 export const TodoToolbarUI = toolbarZone.bind({
   role: "toolbar",
+  triggers: {
+    ToggleView: () => toggleView(),
+    Undo: () => undoCommand(),
+    Redo: () => redoCommand(),
+  },
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -509,7 +509,7 @@ export const TodoList = {
     redoCommand,
   },
   triggers: {
-    ...listTriggers,
+    ...TodoListUI.triggers,
     DeleteDialog: listCollection.overlay("todo-delete-dialog", {
       confirm: confirmDeleteTodo(),
       role: "alertdialog",
@@ -524,7 +524,7 @@ export const TodoSidebar = {
     moveCategoryUp: sidebarCollection.moveUp,
     moveCategoryDown: sidebarCollection.moveDown,
   },
-  triggers: sidebarTriggers,
+  triggers: TodoSidebarUI.triggers,
 };
 
 export const TodoDraft = {
@@ -548,13 +548,8 @@ export const TodoSearch = {
     setSearchQuery,
     clearSearch,
   },
-  triggers: searchTriggers,
+  triggers: TodoSearchUI.triggers,
 };
-
-// Toolbar triggers — declared top-down in app.ts (moved from TodoToolbar.tsx)
-const ToggleViewButton = toolbarZone.trigger("toggle-view", () => toggleView());
-const UndoButton = toolbarZone.trigger("undo", () => undoCommand());
-const RedoButton = toolbarZone.trigger("redo", () => redoCommand());
 
 export const TodoToolbar = {
   ...TodoToolbarUI,
@@ -562,11 +557,7 @@ export const TodoToolbar = {
     toggleView,
     clearCompleted,
   },
-  triggers: {
-    ToggleViewButton,
-    UndoButton,
-    RedoButton,
-  },
+  triggers: TodoToolbarUI.triggers,
   ClearDialog: toolbarZone.overlay("todo-clear-dialog", {
     confirm: clearCompleted(),
     role: "alertdialog",

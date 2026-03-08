@@ -114,13 +114,11 @@ const carouselZone = CarouselApp.createZone("carousel-tabs");
 const CarouselUI = carouselZone.bind({
   role: "tablist",
   options: { select: { followFocus: true } },
+  triggers: {
+    ToggleRotation: () => TOGGLE_ROTATION(),
+    StopRotation: () => SET_ROTATING({ value: false }),
+  },
 });
-
-const ToggleRotation = carouselZone.trigger("toggle-rotation", () => TOGGLE_ROTATION());
-const StopRotation = carouselZone.trigger(
-  "stop-rotation",
-  () => SET_ROTATING({ value: false }),
-);
 
 // --- Slide Panel Content ---
 
@@ -143,7 +141,7 @@ function RotationControl() {
   const rotating = CarouselApp.useComputed(isRotating);
   return (
     <button
-      {...ToggleRotation()}
+      {...CarouselUI.triggers.ToggleRotation()}
       type="button"
       aria-label={
         rotating ? "Stop automatic slide show" : "Start automatic slide show"
@@ -168,7 +166,7 @@ function PrevNextControls() {
   return (
     <div className="flex items-center gap-1">
       <button
-        {...StopRotation()}
+        {...CarouselUI.triggers.StopRotation()}
         type="button"
         aria-label="Previous slide"
         aria-controls="carousel-slides"
@@ -181,7 +179,7 @@ function PrevNextControls() {
         <Icon name="chevron-left" size={16} />
       </button>
       <button
-        {...StopRotation()}
+        {...CarouselUI.triggers.StopRotation()}
         type="button"
         aria-label="Next slide"
         aria-controls="carousel-slides"
