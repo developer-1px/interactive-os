@@ -102,6 +102,68 @@ export const listNavScripts: TestScript[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════
+// §3 Trigger Click — per-button dispatch via page.click("#trigger-id")
+//
+// Requires full app context (triggers registered via zone.trigger()).
+// Runs in: browser TestBot ✓, createHeadlessPage(TodoApp) ✓
+// Does NOT run via runScenarios (no app triggers in generic scenarios).
+// ═══════════════════════════════════════════════════════════════════
+
+export const triggerClickScripts: TestScript[] = [
+  {
+    name: "§3a Trigger: start-edit preserves focus",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.click("#start-edit");
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3b Trigger: move-item-down reorders",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.click("#move-item-down");
+      // After moving todo_1 down, todo_2 is now first → Home lands on todo_2
+      await page.keyboard.press("Home");
+      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3c Trigger: move-item-up reorders",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[1]!}`).click();
+      await page.click("#move-item-up");
+      // After moving todo_2 up, todo_2 is now first → Home lands on todo_2
+      await page.keyboard.press("Home");
+      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3d Trigger: delete-todo removes focused item",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await page.click("#delete-todo");
+      // After delete, focus should move to next item
+      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+    },
+  },
+  {
+    name: "§3e Trigger: toggle-todo checks item",
+    group: "Todo",
+    async run(page, expect) {
+      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
+      await page.click("#toggle-todo");
+      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
+    },
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
 // §2 Sidebar Zone — category navigation + selection
 // ═══════════════════════════════════════════════════════════════════
 
@@ -189,4 +251,8 @@ export const scenarios: TestScenario[] = [
 // All scripts — for TestBot manifest
 // ═══════════════════════════════════════════════════════════════════
 
-export const allScripts: TestScript[] = [...listNavScripts, ...sidebarScripts];
+export const allScripts: TestScript[] = [
+  ...listNavScripts,
+  ...triggerClickScripts,
+  ...sidebarScripts,
+];

@@ -59,6 +59,9 @@ export interface Page {
   /** Create a locator for an element. Uses item ID (headless/browser) or CSS selector (Playwright). */
   locator(selector: string): Locator;
 
+  /** Click an element by selector. @see https://playwright.dev/docs/api/class-page#page-click */
+  click(selector: string): Promise<void>;
+
   /** Keyboard actions. @see https://playwright.dev/docs/api/class-keyboard */
   keyboard: {
     /** Press a key. @see https://playwright.dev/docs/api/class-keyboard#keyboard-press */

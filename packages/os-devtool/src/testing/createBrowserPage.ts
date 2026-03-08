@@ -643,6 +643,11 @@ export function createBrowserPage(
       return createBrowserLocator(id);
     },
 
+    async click(selector: string) {
+      const id = selector.startsWith("#") ? selector.slice(1) : selector;
+      await createBrowserLocator(id).click();
+    },
+
     keyboard: {
       async type(text: string) {
         for (const ch of text) {
