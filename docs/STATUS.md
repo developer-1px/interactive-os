@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T01:10
+> Last updated: 2026-03-08T23:50
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,7 +13,11 @@
 
 ## 🔥 Active Focus
 
-(없음 — trigger-unify 완료 후 다음 Focus 미선정)
+| Domain | Project | Phase |
+|--------|---------|-------|
+| apg | **layer-playground** | T1~T8 Done |
+| inspector | **inspector-dogfooding** | T5 Next |
+| testing | **os-test-suite** | T1~T4 Done |
 
 ---
 
@@ -24,6 +28,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| ~~trigger-click-fix~~ | ✅ Archived (W10) | 03-08 |
 | ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
 | docs-freshness | WP1~WP8 | 03-06 |
 | kernel-docs-sync | — | 03-06 |
@@ -88,8 +93,8 @@
 | Domains | 6 |
 | Active Projects | 14 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 0 |
-| Stale (7d+) | 3 (builder-v2, builder-v3, test-observability) |
+| Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
+| Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
