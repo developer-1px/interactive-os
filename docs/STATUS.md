@@ -46,6 +46,7 @@
 | os-test-suite | T1~T4 Done | 03-08 |
 | ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
 | ~~lint-zero~~ | ✅ Archived (W11) | 03-09 |
+| ~~ban-dispatch-tsx~~ | ✅ Archived (W11) | 03-09 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
