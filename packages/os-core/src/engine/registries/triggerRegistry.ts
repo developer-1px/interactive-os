@@ -11,7 +11,7 @@
  */
 
 import type { Keymap } from "@os-core/2-resolve/chainResolver";
-import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-core/4-command";
+import { OS_OVERLAY_OPEN } from "@os-core/4-command";
 import type { OverlayEntry } from "@os-core/schema/state/OSState";
 import {
   DEFAULT_TRIGGER_CONFIG,
@@ -178,35 +178,6 @@ export function buildTriggerKeymap(
   }
 
   return keymap;
-}
-
-/**
- * Build a click Keymap from TriggerConfig.
- * Uses [CLOSE, OPEN] chain for toggle semantics.
- *
- * @see design-principles.md #25
- */
-export function buildTriggerClickKeymap(
-  config: TriggerConfig,
-  ctx: TriggerKeymapContext,
-): Keymap {
-  if (!config.open.onClick) return {};
-
-  const clickBase: {
-    id: string;
-    type: OverlayEntry["type"];
-    triggerId?: string;
-  } = {
-    id: ctx.overlayId,
-    type: ctx.triggerRole as OverlayEntry["type"],
-  };
-  if (ctx.triggerId !== undefined) clickBase.triggerId = ctx.triggerId;
-  return {
-    Click: [
-      OS_OVERLAY_CLOSE({ id: ctx.overlayId }),
-      OS_OVERLAY_OPEN(clickBase),
-    ],
-  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
