@@ -93,3 +93,5 @@
 35. **OS의 런타임 상태는 인스턴스에 귀속. 모듈 스코프 싱글톤 금지.** (Added: 2026-03-06) 커널은 `createKernel()` 팩토리로 설계되어 테스트마다 fresh instance 생성 가능. 키바인딩 맵 등 런타임 레지스트리도 동일하게 팩토리 패턴(`createKeybindingRegistry()`)이어야 한다. 모듈 스코프 싱글톤은 테스트 간 상태 누수의 구조적 원인. 판단 기준: "이 Map을 테스트마다 fresh로 만들 수 있는가?". 만들 수 없으면 설계 결함.
 
 ~~36.~~ (원칙 22와 중복 — 삭제)
+
+37. **Zone-level inputmap은 per-item-role 분기를 표현할 수 없다.** (Added: 2026-03-09) menu role의 inputmap에 OS_OVERLAY_CLOSE를 넣으면 menuitemcheckbox/menuitemradio까지 닫힘. 해결: OS-level inputmap은 공통 동작(OS_ACTIVATE)만, item-role별 분기는 앱의 onAction 콜백이 담당. 장기: per-item-role inputmap 지원 검토.

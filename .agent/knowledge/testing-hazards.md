@@ -40,6 +40,9 @@
 | **accordion click = expand** | accordion/disclosure의 inputmap에 `click: [OS_EXPAND({action:"toggle"})]`이 있어 click()이 expand를 toggle함 → 테스트에서 click 후 Enter 시 expand 방향이 반대 | /red 작성 전 해당 role의 inputmap(특히 click 바인딩)을 확인 | Red |
 | **Inspector panel goto** | Inspector 내부 panel은 URL route가 없어 `page.goto("zone-name")` 불가 → `page.goto("/")` 사용 | Inspector panel 테스트는 `page.goto("/")` (전체 zone 등록) 후 locator로 접근 | Red |
 | **컴포넌트 교체 시 ...rest 누락** | 기존 컴포넌트가 `...rest` spread로 부모 asChild props를 전달하는데, 대체 컴포넌트에서 누락 → 프로젝션에서 id 미전파 → locator 실패 | 컴포넌트 교체 시 기존의 `...rest` spread 유무를 반드시 확인 | Green |
+| **value.mode="continuous" ≠ slider** | spinbutton/meter/separator도 `value.mode="continuous"` — role 체크 없이 slider로 판정하면 click 시 포인터 좌표가 value로 변환되어 값 점프 발생 (예: 9→50) | `value.mode` 분기 시 반드시 `role === "slider"` 추가 체크 | Green |
+| **trigger() prop-getter id 누락** | overlay trigger()가 HTML `id` attribute를 반환하지 않으면 브라우저 TestBot의 `aria-haspopup` 등 attribute assertion 실패 — headless는 OS state로 통과하지만 browser는 DOM 검증 | trigger() 반환 객체에 `id: triggerId` 포함 확인 | Green |
+| **meter = 읽기전용 role** | meter는 value display 전용 — focus navigation, toggle, activate 모두 불가. toBeFocused/ArrowDown 등 focus nav 테스트는 browser에서 실패 | meter 테스트는 value attribute(aria-valuemin/max/now) 검증으로 작성 | Red |
 
 ## Precedents
 
