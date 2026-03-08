@@ -17,8 +17,9 @@ import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { createHeadlessPage } from "@os-devtool/testing/page";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { AppState } from "../../../../src/apps/todo/model/appState";
 
-type P = AppPageInternal<any>;
+type P = AppPageInternal<AppState>;
 let page: P;
 
 import TodoPage from "../../../../src/pages/TodoPage";
@@ -76,11 +77,11 @@ describe("§22 Trigger click: per-button dispatch", () => {
 
   it("toggle-todo trigger toggles completed", () => {
     page.locator("#todo_1").click();
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
 
     page.click("ToggleTodo");
 
-    expect(page.state.data.todos.todo_1.completed).toBe(true);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
   });
 });
 

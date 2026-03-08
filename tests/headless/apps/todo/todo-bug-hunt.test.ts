@@ -25,9 +25,10 @@ import { createHeadlessPage } from "@os-devtool/testing/page";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { AppState } from "../../../../src/apps/todo/model/appState";
 import TodoPage from "../../../../src/pages/TodoPage";
 
-type P = AppPageInternal<any>;
+type P = AppPageInternal<AppState>;
 let page: P;
 
 beforeEach(() => {
@@ -62,26 +63,26 @@ describe("§10 Edit: start, save, cancel", () => {
     page.dispatch(startEdit({ id: "todo_1" }));
     page.dispatch(updateTodoText({ text: "Updated task" }));
 
-    expect(page.state.data.todos.todo_1.text).toBe("Updated task");
+    expect(page.state.data.todos['todo_1']!.text).toBe("Updated task");
     expect(page.state.ui.editingId).toBeNull();
   });
 
   it("cancelEdit clears editingId without changing text", () => {
-    const originalText = page.state.data.todos.todo_1.text;
+    const originalText = page.state.data.todos['todo_1']!.text;
     page.dispatch(startEdit({ id: "todo_1" }));
     page.dispatch(cancelEdit());
 
-    expect(page.state.data.todos.todo_1.text).toBe(originalText);
+    expect(page.state.data.todos['todo_1']!.text).toBe(originalText);
     expect(page.state.ui.editingId).toBeNull();
   });
 
   it("updateTodoText with empty string preserves original text", () => {
-    const originalText = page.state.data.todos.todo_1.text;
+    const originalText = page.state.data.todos['todo_1']!.text;
     page.dispatch(startEdit({ id: "todo_1" }));
     page.dispatch(updateTodoText({ text: "" }));
 
     // Empty text should not overwrite — but editingId should be cleared
-    expect(page.state.data.todos.todo_1.text).toBe(originalText);
+    expect(page.state.data.todos['todo_1']!.text).toBe(originalText);
     expect(page.state.ui.editingId).toBeNull();
   });
 
@@ -218,11 +219,11 @@ describe("§13 Toolbar: view + clear", () => {
   it("clearCompleted removes completed todos", () => {
     // Mark todo_1 as completed
     page.dispatch(toggleTodo({ id: "todo_1" }));
-    expect(page.state.data.todos.todo_1.completed).toBe(true);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
 
     page.dispatch(clearCompleted());
 
-    expect(page.state.data.todos.todo_1).toBeUndefined();
+    expect(page.state.data.todos['todo_1']).toBeUndefined();
     expect(page.state.data.todoOrder).not.toContain("todo_1");
     expect(page.state.data.todoOrder).toHaveLength(3);
   });
@@ -257,7 +258,7 @@ describe("§13 Toolbar: view + clear", () => {
     // Both should be cleared
     expect(page.state.data.todoOrder.length).toBe(totalBefore - 2);
     expect(page.state.data.todos[workTodoId]).toBeUndefined();
-    expect(page.state.data.todos.todo_1).toBeUndefined();
+    expect(page.state.data.todos['todo_1']).toBeUndefined();
   });
 });
 
@@ -278,15 +279,15 @@ describe("§14 Delete: full flow", () => {
 
     expect(page.state.ui.pendingDeleteIds).toEqual([]);
     // Todo still exists
-    expect(page.state.data.todos.todo_1).toBeDefined();
+    expect(page.state.data.todos['todo_1']).toBeDefined();
   });
 
   it("confirmDeleteTodo removes all pending items", () => {
     page.dispatch(requestDeleteTodo({ ids: ["todo_1", "todo_2"] }));
     page.dispatch(confirmDeleteTodo());
 
-    expect(page.state.data.todos.todo_1).toBeUndefined();
-    expect(page.state.data.todos.todo_2).toBeUndefined();
+    expect(page.state.data.todos['todo_1']).toBeUndefined();
+    expect(page.state.data.todos['todo_2']).toBeUndefined();
     expect(page.state.data.todoOrder).toHaveLength(2);
     expect(page.state.ui.pendingDeleteIds).toEqual([]);
   });
@@ -322,7 +323,7 @@ describe("§14 Delete: full flow", () => {
 describe("§14b Delete dialog: overlay interaction flow", () => {
   const overlayStack = () => page.kernel.getState().os.overlays?.stack ?? [];
   const focusedInList = () =>
-    page.kernel.getState().os.focus.zones.list?.focusedItemId;
+    page.kernel.getState().os.focus.zones['list']?.focusedItemId;
 
   /** Focus todo_1 and press Delete to open the delete dialog */
   function openDeleteDialog() {
@@ -346,7 +347,7 @@ describe("§14b Delete dialog: overlay interaction flow", () => {
     page.keyboard.press("Escape");
 
     expect(overlayStack()).toHaveLength(0);
-    expect(page.state.data.todos.todo_1).toBeDefined();
+    expect(page.state.data.todos['todo_1']).toBeDefined();
   });
 
   it("after dialog opens, keyboard input on list zone is blocked by overlay trap", () => {
@@ -371,7 +372,7 @@ describe("§14b Delete dialog: overlay interaction flow", () => {
     openDeleteDialog();
     page.dispatch(confirmDeleteTodo());
 
-    expect(page.state.data.todos.todo_1).toBeUndefined();
+    expect(page.state.data.todos['todo_1']).toBeUndefined();
     expect(overlayStack()).toHaveLength(0);
   });
 
@@ -410,7 +411,7 @@ describe("§15 Draft: edge cases", () => {
     page.dispatch(addTodo({ text: "  Trimmed task  " }));
 
     const newTodo = Object.values(page.state.data.todos).find(
-      (t: any) => t.text === "Trimmed task",
+      (t) => t.text === "Trimmed task",
     );
     expect(newTodo).toBeDefined();
   });
@@ -420,9 +421,9 @@ describe("§15 Draft: edge cases", () => {
     page.dispatch(addTodo({ text: "Work item" }));
 
     const newTodo = Object.values(page.state.data.todos).find(
-      (t: any) => t.text === "Work item",
+      (t) => t.text === "Work item",
     );
-    expect((newTodo as any)?.categoryId).toBe("cat_work");
+    expect(newTodo?.categoryId).toBe("cat_work");
   });
 });
 
@@ -432,12 +433,12 @@ describe("§15 Draft: edge cases", () => {
 
 describe("§16 Check: edge cases", () => {
   it("toggling twice returns to original state", () => {
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
 
     page.dispatch(toggleTodo({ id: "todo_1" }));
     page.dispatch(toggleTodo({ id: "todo_1" }));
 
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
   });
 
   it("toggling non-existent id does nothing", () => {
@@ -457,10 +458,10 @@ describe("§17 Undo/Redo: with active zone", () => {
   it("undo toggleTodo restores completed state", () => {
     page.locator("#todo_1").click();
     page.keyboard.press("Space"); // toggle
-    expect(page.state.data.todos.todo_1.completed).toBe(true);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
 
     page.keyboard.press("Meta+z"); // undo
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
   });
 
   it("undo addTodo removes the added item (list zone active)", () => {
@@ -487,16 +488,16 @@ describe("§17 Undo/Redo: with active zone", () => {
 
   it("undo updateTodoText via direct dispatch (list zone active)", () => {
     page.locator("#todo_1").click();
-    const originalText = page.state.data.todos.todo_1.text;
+    const originalText = page.state.data.todos['todo_1']!.text;
 
     page.dispatch(startEdit({ id: "todo_1" }));
     page.dispatch(updateTodoText({ text: "Changed text" }));
-    expect(page.state.data.todos.todo_1.text).toBe("Changed text");
+    expect(page.state.data.todos['todo_1']!.text).toBe("Changed text");
     expect(page.state.history.past.length).toBeGreaterThan(0);
 
     // Direct dispatch bypasses keybinding — always works with correct zone
     page.dispatch(undoCommand());
-    expect(page.state.data.todos.todo_1.text).toBe(originalText);
+    expect(page.state.data.todos['todo_1']!.text).toBe(originalText);
   });
 });
 
@@ -515,7 +516,7 @@ describe("§17b Undo: user flow — draft zone undo gap", () => {
     page.dispatch({
       type: "OS_FOCUS",
       payload: { zoneId: "draft", itemId: null },
-    } as any);
+    });
     page.keyboard.type("New task via draft");
     page.keyboard.press("Enter");
 
@@ -549,7 +550,7 @@ describe("§18 Clipboard: cross-category paste", () => {
       (id: string) => page.state.data.todos[id]?.categoryId === "cat_work",
     );
     expect(workTodos.length).toBeGreaterThan(0);
-    expect(page.state.data.todos[workTodos[0]].text).toBe(
+    expect(page.state.data.todos[workTodos[0]!]!.text).toBe(
       "Complete Interaction OS docs",
     );
   });
@@ -593,12 +594,12 @@ describe("§20 Edit: keyboard-driven flow", () => {
     // Simulate typing in the edit field
     page.dispatch(updateTodoText({ text: "Keyboard edited" }));
 
-    expect(page.state.data.todos.todo_1.text).toBe("Keyboard edited");
+    expect(page.state.data.todos['todo_1']!.text).toBe("Keyboard edited");
     expect(page.state.ui.editingId).toBeNull();
   });
 
   it("Enter on focused item → Escape cancels edit", () => {
-    const originalText = page.state.data.todos.todo_1.text;
+    const originalText = page.state.data.todos['todo_1']!.text;
 
     page.locator("#todo_1").click();
     page.keyboard.press("Enter"); // start edit
@@ -607,7 +608,7 @@ describe("§20 Edit: keyboard-driven flow", () => {
 
     page.dispatch(cancelEdit());
 
-    expect(page.state.data.todos.todo_1.text).toBe(originalText);
+    expect(page.state.data.todos['todo_1']!.text).toBe(originalText);
     expect(page.state.ui.editingId).toBeNull();
   });
 
@@ -618,8 +619,8 @@ describe("§20 Edit: keyboard-driven flow", () => {
     page.dispatch(startEdit({ id: "todo_2" }));
     page.dispatch(updateTodoText({ text: "Second edit" }));
 
-    expect(page.state.data.todos.todo_1.text).toBe("First edit");
-    expect(page.state.data.todos.todo_2.text).toBe("Second edit");
+    expect(page.state.data.todos['todo_1']!.text).toBe("First edit");
+    expect(page.state.data.todos['todo_2']!.text).toBe("Second edit");
     expect(page.state.ui.editingId).toBeNull();
   });
 });
@@ -640,7 +641,7 @@ describe("§21 Compound: complex sequences", () => {
 
     // Toggle it completed
     page.dispatch(toggleTodo({ id: newId }));
-    expect(page.state.data.todos[newId].completed).toBe(true);
+    expect(page.state.data.todos[newId]!.completed).toBe(true);
 
     // Delete it
     page.dispatch(requestDeleteTodo({ ids: [newId] }));
@@ -659,7 +660,7 @@ describe("§21 Compound: complex sequences", () => {
     page.dispatch(selectCategory({ id: "cat_work" }));
     page.dispatch(selectCategory({ id: "cat_inbox" }));
 
-    expect(page.state.data.todos.todo_1.text).toBe("Edited before switch");
+    expect(page.state.data.todos['todo_1']!.text).toBe("Edited before switch");
   });
 
   it("search + delete: delete while search is active", () => {
@@ -669,7 +670,7 @@ describe("§21 Compound: complex sequences", () => {
     page.dispatch(requestDeleteTodo({ ids: ["todo_4"] }));
     page.dispatch(confirmDeleteTodo());
 
-    expect(page.state.data.todos.todo_4).toBeUndefined();
+    expect(page.state.data.todos['todo_4']).toBeUndefined();
 
     // Clear search — remaining items should be intact
     page.dispatch(setSearchQuery({ text: "" }));

@@ -10,8 +10,9 @@ import { createHeadlessPage } from "@os-devtool/testing/page";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { AppState } from "../../../../src/apps/todo/model/appState";
 
-type P = AppPageInternal<any>;
+type P = AppPageInternal<AppState>;
 let page: P;
 
 import TodoPage from "../../../../src/pages/TodoPage";
@@ -131,13 +132,13 @@ describe("§2 List: selection", () => {
 describe("§3 List: check", () => {
   it("Space toggles completed state", () => {
     page.locator("#todo_1").click();
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
 
     page.keyboard.press("Space");
-    expect(page.state.data.todos.todo_1.completed).toBe(true);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
 
     page.keyboard.press("Space");
-    expect(page.state.data.todos.todo_1.completed).toBe(false);
+    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
   });
 });
 
@@ -285,12 +286,12 @@ describe("§9 Draft: add todo", () => {
     page.dispatch({
       type: "OS_FOCUS",
       payload: { zoneId: "draft", itemId: null },
-    } as any);
+    });
     page.keyboard.type("New headless task");
     page.keyboard.press("Enter");
 
     const todos = Object.values(page.state.data.todos);
-    expect(todos.some((t: any) => t.text === "New headless task")).toBe(true);
+    expect(todos.some((t) => t.text === "New headless task")).toBe(true);
     expect(page.state.data.todoOrder.length).toBe(5);
   });
 });
