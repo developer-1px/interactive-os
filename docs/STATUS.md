@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-08T22:00
+> Last updated: 2026-03-08T23:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -53,7 +53,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| inspector-dogfooding | T1~T4 ✅, T5 | 03-05 |
+| inspector-dogfooding | T1~T4,T6~T9 ✅, T5 Next | 03-08 |
 | ~~testbot-zift~~ | ✅ Archived (W10) | 03-08 |
 
 ### apg
