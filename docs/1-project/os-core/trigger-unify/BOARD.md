@@ -15,14 +15,16 @@ Risks:
 
 ## Now
 
-- [ ] T1: zone.trigger() + zone.overlay() API 신설 (types.ts + index.ts) — Plan #1-5
-- [ ] T2: Todo app 마이그레이션 — Plan #6-11
-- [ ] T3: Inspector + Builder 마이그레이션 — Plan #12-13
-- [ ] T4: Showcase + APG + DocsViewer 마이그레이션 — Plan #14-21
-- [ ] T5: 구 API 삭제 (createSimple/Dynamic/CompoundTrigger + AppHandle.createTrigger) — Plan #22-26
-- [ ] T6: 테스트 검증 (todo-trigger-click green + regression 0) — Plan #27-28
+(all done)
 
 ## Done
+
+- [x] T1: zone.trigger() + zone.overlay() API 신설 — tsc 0 | +7 tests | 7/7 pass ✅
+- [x] T2: Todo app 마이그레이션 — tsc 0 | 79 tests pass | 5 pre-existing fail unchanged ✅
+- [x] T3: Inspector + Builder 마이그레이션 — tsc 0 ✅
+- [x] T4: Showcase + APG + DocsViewer 마이그레이션 (8 files) — tsc 0 ✅
+- [x] T5: 구 API 삭제 (AppHandle.createTrigger 3 overloads) — tsc 0 ✅
+- [x] T6: 테스트 검증 — 665 pass | 27 pre-existing fail | 0 new regression ✅
 
 ## Unresolved
 
