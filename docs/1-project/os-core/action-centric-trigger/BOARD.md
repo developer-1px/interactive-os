@@ -30,5 +30,5 @@ Before → After:
 - [x] T1~T8: prop-getter API 도입 + payload 지원 + 전 소비자 마이그레이션 완료
 
 ## Unresolved
-- `<Item>`, `<Field>`도 prop-getter 방식으로 전환할 것인가 (추후 논의)
+(없음 — Item/Field prop-getter 전환 문제는 `docs/5-backlog/os-gaps.md`로 이관)
 
