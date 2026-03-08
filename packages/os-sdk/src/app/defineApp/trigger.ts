@@ -12,41 +12,12 @@ import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import React, { type ReactNode, useEffect } from "react";
 
 // ═══════════════════════════════════════════════════════════════════
-// Simple Trigger
+// Dynamic Trigger (CommandFactory bound at render time)
 // ═══════════════════════════════════════════════════════════════════
 
 export interface TriggerOptions {
   id?: string;
 }
-
-export function createSimpleTrigger(
-  appId: string,
-  command: BaseCommand,
-  options?: TriggerOptions,
-): React.FC<{ children: ReactNode }> {
-  if (!options?.id) {
-    throw new Error(
-      '[Trigger] onActivate requires an id. Use createTrigger(command, { id: "my-id" })',
-    );
-  }
-  const SimpleTrigger: React.FC<{ children: ReactNode }> = ({
-    children,
-    ...rest
-  }) => {
-    return React.createElement(Trigger, {
-      ...(options?.id ? { id: options.id } : {}),
-      onActivate: command,
-      children,
-      ...rest,
-    });
-  };
-  SimpleTrigger.displayName = `${appId}.Trigger`;
-  return SimpleTrigger;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Dynamic Trigger (CommandFactory bound at render time)
-// ═══════════════════════════════════════════════════════════════════
 
 /** Props for dynamic trigger — payload required when P is not void */
 type DynamicTriggerProps<P> = P extends void
