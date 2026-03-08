@@ -9,19 +9,18 @@ Before → After: 25건 os.dispatch in .tsx → 11건 즉시 수정 + lint rule 
 Risks: trigger 교체 시 기존 동작 깨질 수 있음. builder Zone 구조 복잡.
 
 ## Now
-- [ ] T1: lint rule `no-dispatch-in-tsx` — eslint-plugin-pipeline에 추가
-- [ ] T2: EditorToolbar.tsx — undo/redo dispatch → trigger prop-getter
-- [ ] T3: SectionSidebar.tsx — addBlock dispatch → trigger prop-getter
-- [ ] T4: BuilderPage.tsx — loadPagePreset dispatch → trigger prop-getter
-- [ ] T5: ToastContainer.tsx — dismiss/action dispatch → trigger prop-getter
-- [ ] T6: MeterPattern.tsx — setInterval dispatch → 비-React 코드로 이동
-- [ ] T9: backlog 등록 — command-palette 7건 + docs-viewer 7건 + PropertiesPanel 2건
+
+(없음)
 
 ## Done
+- [x] T1: lint rule `no-dispatch-in-tsx` — eslint-plugin-pipeline + eslint.config.js ✅
+- [x] T9: backlog 등록 — 19건 → `docs/5-backlog/dispatch-tsx-violations.md` ✅
 
 ## Unresolved
-- PropertiesPanel useEffect OS_EXPAND: Zone auto-expand 지원 여부 미확인
-- PropertiesPanel onChange dispatch: builder-v2 프로젝트 소속 여부
+- builder 5건: pre-existing tsc errors (os not in scope) → builder-v2 소속
+- command-palette 6건: 전체 앱 Zone 마이그레이션 필요 → 별도 프로젝트
+- docs-viewer 7건: 전체 앱 Zone 마이그레이션 필요 → 별도 프로젝트
+- MeterPattern 1건: setInterval simulation → apg-showcase 수정
 
 ## Ideas
 - command-palette → combobox Zone 전환 (별도 프로젝트)

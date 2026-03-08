@@ -42,6 +42,7 @@ export default defineConfig([
       "pipeline/no-direct-commit": "error",
       "pipeline/no-dom-in-commands": "error",
       "pipeline/no-full-state-useComputed": "error",
+      "pipeline/no-dispatch-in-tsx": "error",
     },
     languageOptions: {
       ecmaVersion: 2020,
@@ -70,6 +71,25 @@ export default defineConfig([
               group: ["@os-core/*"],
               message:
                 "src/ 에서 @os-core/* 직접 import 금지. @os-sdk/os facade를 사용하세요 (rules.md §1).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/**/*.tsx"],
+    ignores: ["src/inspector/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@os-sdk/os",
+              importNames: ["os"],
+              message:
+                "React(.tsx)에서 os 객체 직접 사용 금지. accessor hook / Zone callback / Trigger를 사용하세요 (rules.md §1).",
             },
           ],
         },

@@ -438,6 +438,42 @@ const noFullStateUseComputed = {
   },
 };
 
+/** @type {import('eslint').Rule.RuleModule} */
+const noDispatchInTsx = {
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Disallow os.dispatch() calls in .tsx files. React = L2 pure projection; use Trigger prop-getter or Zone callback instead.",
+      recommended: true,
+    },
+    messages: {
+      noDispatch:
+        "os.dispatch() in .tsx violates L2 pure projection. Use bind({ triggers }) prop-getter or Zone onAction callback.",
+    },
+    schema: [],
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename();
+    if (!filename.endsWith(".tsx")) return {};
+
+    return {
+      CallExpression(node) {
+        const callee = node.callee;
+        if (
+          callee.type === "MemberExpression" &&
+          callee.object.type === "Identifier" &&
+          callee.object.name === "os" &&
+          callee.property.type === "Identifier" &&
+          callee.property.name === "dispatch"
+        ) {
+          context.report({ node, messageId: "noDispatch" });
+        }
+      },
+    };
+  },
+};
+
 export default {
   rules: {
     "no-pipeline-bypass": noPipelineBypass,
@@ -446,5 +482,6 @@ export default {
     "no-imperative-handler": noImperativeHandler,
     "no-dom-in-commands": noDomInCommands,
     "no-full-state-useComputed": noFullStateUseComputed,
+    "no-dispatch-in-tsx": noDispatchInTsx,
   },
 };
