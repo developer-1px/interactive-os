@@ -1,37 +1,27 @@
-import { useEffect, useState } from "react";
-
 export type OS = "mac" | "windows" | "linux" | "other";
 
+function detectOS(): OS {
+  if (typeof window === "undefined") return "other";
+  const userAgent = window.navigator.userAgent;
+  const nav = window.navigator as Navigator & {
+    userAgentData?: { platform?: string };
+  };
+  const platform = nav.userAgentData?.platform || window.navigator.platform;
+
+  if (/Mac|iPhone|iPod|iPad/i.test(platform)) return "mac";
+  if (/Win/i.test(platform)) return "windows";
+  if (/Linux/i.test(platform)) return "linux";
+
+  // Fallback for newer userAgent strings if platform is ambiguous
+  if (/Mac/i.test(userAgent)) return "mac";
+  if (/Win/i.test(userAgent)) return "windows";
+  if (/Linux/i.test(userAgent)) return "linux";
+
+  return "other";
+}
+
+const detectedOS = detectOS();
+
 export function useOS(): OS {
-  const [os, setOS] = useState<OS>("other");
-
-  useEffect(() => {
-    const userAgent = window.navigator.userAgent;
-    const platform =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- userAgentData not in Navigator type yet
-      (window.navigator as any)?.userAgentData?.platform ||
-      window.navigator.platform;
-    const macos = /Mac|iPhone|iPod|iPad/i.test(platform);
-    const windows = /Win/i.test(platform);
-    const linux = /Linux/i.test(platform);
-
-    if (macos) {
-      setOS("mac");
-    } else if (windows) {
-      setOS("windows");
-    } else if (linux) {
-      setOS("linux");
-    } else {
-      // Fallback for newer userAgent strings if platform is ambiguous
-      if (/Mac/i.test(userAgent)) {
-        setOS("mac");
-      } else if (/Win/i.test(userAgent)) {
-        setOS("windows");
-      } else if (/Linux/i.test(userAgent)) {
-        setOS("linux");
-      }
-    }
-  }, []);
-
-  return os;
+  return detectedOS;
 }

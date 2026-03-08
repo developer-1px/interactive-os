@@ -2,6 +2,7 @@
  * Headless Types — shared across compute and simulate modules.
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
 import type { AppState } from "@os-core/engine/kernel";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -11,7 +12,10 @@ import type { AppState } from "@os-core/engine/kernel";
 /** Minimal kernel interface needed by headless functions */
 export interface HeadlessKernel {
   getState(): AppState;
-  dispatch(cmd: any, opts?: any): void;
+  dispatch(
+    cmd: BaseCommand,
+    opts?: { scope?: unknown[]; meta?: Record<string, unknown> },
+  ): void;
 }
 
 // ═══════════════════════════════════════════════════════════════════

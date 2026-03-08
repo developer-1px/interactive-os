@@ -52,7 +52,11 @@ afterEach(() => {
 });
 
 function attrs(itemId: string) {
-  return (page as any).attrs(itemId, ZIFT_ZONE);
+  return (
+    page as unknown as {
+      attrs: (itemId: string, zoneId: string) => Record<string, unknown>;
+    }
+  ).attrs(itemId, ZIFT_ZONE);
 }
 
 describe("InspectorZiftUI Disclosure", () => {

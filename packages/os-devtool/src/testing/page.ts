@@ -68,7 +68,11 @@ interface LocatorResult {
   toBeDisabled(): boolean;
   inputValue(): string;
   _toBeFocused(negated?: boolean): void;
-  _toHaveAttribute(name: string, value: string | RegExp, negated?: boolean): void;
+  _toHaveAttribute(
+    name: string,
+    value: string | RegExp,
+    negated?: boolean,
+  ): void;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -343,11 +347,12 @@ export function createAppPage<S>(
     if (itemsOverride) entry.getItems = () => itemsOverride;
     else if (bindings.getItems) entry.getItems = bindings.getItems;
     if (expandableOverride) entry.getExpandableItems = () => expandableOverride;
-    else if (bindings.getExpandableItems) entry.getExpandableItems = bindings.getExpandableItems;
+    else if (bindings.getExpandableItems)
+      entry.getExpandableItems = bindings.getExpandableItems;
     if (treeLevelsOverride) entry.getTreeLevels = () => treeLevelsOverride;
-    else if (bindings.getTreeLevels) entry.getTreeLevels = bindings.getTreeLevels;
+    else if (bindings.getTreeLevels)
+      entry.getTreeLevels = bindings.getTreeLevels;
     ZoneRegistry.register(zoneName, entry);
-
 
     if (bindingEntry.triggers) {
       for (const trigger of bindingEntry.triggers) {

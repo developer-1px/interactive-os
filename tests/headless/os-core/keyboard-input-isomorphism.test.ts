@@ -18,8 +18,7 @@ import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import TodoPage from "../../../src/pages/TodoPage";
 
-type P = AppPageInternal<any>;
-let page: P;
+let page: AppPageInternal<unknown>;
 
 beforeEach(() => {
   page = createHeadlessPage(TodoApp, TodoPage);
@@ -165,10 +164,10 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("does NOT contain removed dead fields", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown") as unknown as Record<
-        string,
-        unknown
-      >;
+      const input = buildKeyboardInput(
+        page.kernel,
+        "ArrowDown",
+      ) as unknown as Record<string, unknown>;
 
       expect(input).not.toHaveProperty("focusedItemRole");
       expect(input).not.toHaveProperty("focusedItemExpanded");

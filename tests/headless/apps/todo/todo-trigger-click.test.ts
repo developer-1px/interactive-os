@@ -77,11 +77,11 @@ describe("§22 Trigger click: per-button dispatch", () => {
 
   it("toggle-todo trigger toggles completed", () => {
     page.locator("#todo_1").click();
-    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
+    expect(page.state.data.todos["todo_1"]!.completed).toBe(false);
 
     page.click("ToggleTodo");
 
-    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
+    expect(page.state.data.todos["todo_1"]!.completed).toBe(true);
   });
 });
 

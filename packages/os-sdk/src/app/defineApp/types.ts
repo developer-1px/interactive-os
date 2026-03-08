@@ -233,7 +233,11 @@ export interface ZoneHandle<S> {
   >(
     config: Omit<ZoneBindings, "triggers"> & {
       field?: FieldBindings;
-      keybindings?: { key: string; command: BaseCommand | ZoneCallback; when?: unknown }[];
+      keybindings?: {
+        key: string;
+        command: BaseCommand | ZoneCallback;
+        when?: unknown;
+      }[];
       /** Triggers: object map {Name: callback} */
       triggers?: TriggerMap;
     },

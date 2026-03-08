@@ -33,7 +33,7 @@ const ToolbarUI = toolbarZone.bind({
   role: "toolbar",
   getItems: () => ["btn-bold", "btn-italic", "btn-underline"],
   options: {
-inputmap: { click: [OS_ACTIVATE()] },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -42,7 +42,7 @@ const ListUI = listZone.bind({
   role: "listbox",
   getItems: () => ["file-1", "file-2", "file-3"],
   options: {
-inputmap: { click: [OS_ACTIVATE()] },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 

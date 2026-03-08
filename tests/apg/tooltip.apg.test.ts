@@ -52,12 +52,12 @@ function tooltipFactory(focusedItem = "btn-cut") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Navigation (toolbar context)", () => {
-  assertHorizontalNav(tooltipFactory as any);
-  assertHomeEnd(tooltipFactory as any, {
+  assertHorizontalNav(tooltipFactory);
+  assertHomeEnd(tooltipFactory, {
     firstId: "btn-cut",
     lastId: "btn-italic",
   });
-  assertNoSelection(tooltipFactory as any);
+  assertNoSelection(tooltipFactory);
 });
 
 // ═══════════════════════════════════════════════════

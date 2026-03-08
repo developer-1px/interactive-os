@@ -22,7 +22,7 @@ import { assertTabTrap } from "./helpers/contracts";
 
 const DIALOG_ITEMS = ["close-btn", "input-name", "input-email", "save-btn"];
 
-function createDialogApp(entry: "first" | "last" = "first") {
+function createDialogApp(entry = "first") {
   const app = defineApp("test-dialog", {});
 
   const toolbar = app.createZone("toolbar");
@@ -34,7 +34,7 @@ function createDialogApp(entry: "first" | "last" = "first") {
         OS_OVERLAY_OPEN({
           id: "dialog",
           type: "dialog",
-          entry,
+          entry: entry as "first" | "last",
         }),
     },
   });
@@ -60,11 +60,11 @@ function createDialogApp(entry: "first" | "last" = "first") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Trap", () => {
-  assertTabTrap(createDialogApp as any, {
+  assertTabTrap(() => createDialogApp(), {
     firstId: "close-btn",
     lastId: "save-btn",
-    factoryAtFirst: (() => createDialogApp("first")) as any,
-    factoryAtLast: (() => createDialogApp("last")) as any,
+    factoryAtFirst: () => createDialogApp("first"),
+    factoryAtLast: () => createDialogApp("last"),
   });
 
   it("Tab cycles through all elements without escaping", () => {

@@ -77,17 +77,17 @@ function singleTreeFactory(focusedItem = "section-1") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tree: Navigation", () => {
-  assertVerticalNav(treeFactory as any);
-  assertBoundaryClamp(treeFactory as any, {
+  assertVerticalNav(treeFactory);
+  assertBoundaryClamp(treeFactory, {
     firstId: "section-1",
     lastId: "leaf-1",
     axis: "vertical",
   });
-  assertHomeEnd(treeFactory as any, {
+  assertHomeEnd(treeFactory, {
     firstId: "section-1",
     lastId: "leaf-1",
   });
-  assertNoSelection(treeFactory as any);
+  assertNoSelection(treeFactory);
 });
 
 // ═══════════════════════════════════════════════════

@@ -71,9 +71,6 @@ function createMenu(focusedItem = "cmd-new") {
   menu.bind({
     role: "menu",
     getItems: () => MENU_ITEMS,
-    options: {
-      check: { mode: "check" },
-    } as any,
   });
   const page = createHeadlessPage(app);
   // Setup invoker (menubar parent)
@@ -90,8 +87,8 @@ function createMenu(focusedItem = "cmd-new") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Menubar: Navigation (horizontal, loop)", () => {
-  assertHorizontalNav(createMenubar as any);
-  assertNoSelection(createMenubar as any);
+  assertHorizontalNav(createMenubar);
+  assertNoSelection(createMenubar);
 
   it("N1: Right Arrow at last item wraps to first (loop)", () => {
     const t = createMenubar("mb-view");
@@ -111,12 +108,12 @@ describe("APG Menubar: Navigation (horizontal, loop)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Menu: Navigation (vertical, loop)", () => {
-  assertVerticalNav(createMenu as any);
-  assertHomeEnd(createMenu as any, {
+  assertVerticalNav(createMenu);
+  assertHomeEnd(createMenu, {
     firstId: "cmd-new",
     lastId: "radio-right",
   });
-  assertNoSelection(createMenu as any);
+  assertNoSelection(createMenu);
 
   it("N3: Down Arrow at last item wraps to first (loop)", () => {
     const t = createMenu("radio-right");
@@ -136,7 +133,7 @@ describe("APG Menu: Navigation (vertical, loop)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Menu: Dismiss", () => {
-  assertEscapeClose(createMenu as any);
+  assertEscapeClose(createMenu);
 
   it("Escape + stack pop: restores focus to invoker", () => {
     const t = createMenu();

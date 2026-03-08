@@ -97,7 +97,11 @@ export function DialogPattern() {
                   data-[focused=true]:ring-2 data-[focused=true]:ring-violet-400
                 "
               >
-                <input type="text" placeholder="Enter name" className="w-full outline-none text-sm bg-transparent" />
+                <input
+                  type="text"
+                  placeholder="Enter name"
+                  className="w-full outline-none text-sm bg-transparent"
+                />
               </Item>
             </div>
             <div>
@@ -112,7 +116,11 @@ export function DialogPattern() {
                   data-[focused=true]:ring-2 data-[focused=true]:ring-violet-400
                 "
               >
-                <input type="email" placeholder="Enter email" className="w-full outline-none text-sm bg-transparent" />
+                <input
+                  type="email"
+                  placeholder="Enter email"
+                  className="w-full outline-none text-sm bg-transparent"
+                />
               </Item>
             </div>
             <div className="flex justify-end gap-2 pt-2">

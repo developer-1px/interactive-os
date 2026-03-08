@@ -16,8 +16,7 @@ import { OS_STACK_POP } from "@os-core/4-command/focus/stack";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { expect, it } from "vitest";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- test helper: accepts any page factory (with or without optional params)
-type Factory = (...args: any[]) => AppPageInternal<any>;
+type Factory = (...args: string[]) => AppPageInternal<unknown>;
 
 // ─── Axis: Linear Navigation ───
 

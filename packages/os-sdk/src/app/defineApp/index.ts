@@ -27,11 +27,11 @@
 
 import { defineScope } from "@kernel";
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
-import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
+import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type React from "react";
 import type { AppModule } from "../modules/types";
 import { createBoundComponents } from "./bind";
@@ -120,7 +120,11 @@ export function defineApp<S>(
     {
       role: import("@os-core/engine/registries/roleRegistry").ZoneRole;
       bindings: ZoneBindings;
-      keybindings?: { key: string; command: BaseCommand | ZoneCallback; when?: unknown }[];
+      keybindings?: {
+        key: string;
+        command: BaseCommand | ZoneCallback;
+        when?: unknown;
+      }[];
       field?: import("./types").FieldBindings;
       triggers?: import("./types").TriggerBinding[];
     }
@@ -309,7 +313,11 @@ export function defineApp<S>(
       >(
         config: Omit<ZoneBindings, "triggers"> & {
           field?: FieldBindings;
-          keybindings?: { key: string; command: BaseCommand | ZoneCallback; when?: unknown }[];
+          keybindings?: {
+            key: string;
+            command: BaseCommand | ZoneCallback;
+            when?: unknown;
+          }[];
           options?: import("@os-react/6-project/Zone").ZoneOptions;
           itemFilter?: (items: string[]) => string[];
           /** Triggers: object map {Name: callback} */
@@ -446,7 +454,10 @@ export function defineApp<S>(
 
     // ── Internal (for OS-level createPage) ──
     __appId: appId,
-    __zoneBindings: zoneBindingEntries as unknown as Map<string, ZoneBindingEntry>,
+    __zoneBindings: zoneBindingEntries as unknown as Map<
+      string,
+      ZoneBindingEntry
+    >,
     __appKeybindings: commandKeybindingEntries,
   };
 }

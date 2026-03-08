@@ -54,17 +54,17 @@ function feedFactory(focusedItem = "article-1") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Feed: Navigation (Arrow Keys)", () => {
-  assertVerticalNav(feedFactory as any);
-  assertBoundaryClamp(feedFactory as any, {
+  assertVerticalNav(feedFactory);
+  assertBoundaryClamp(feedFactory, {
     firstId: "article-1",
     lastId: "article-5",
     axis: "vertical",
   });
-  assertHomeEnd(feedFactory as any, {
+  assertHomeEnd(feedFactory, {
     firstId: "article-1",
     lastId: "article-5",
   });
-  assertNoSelection(feedFactory as any);
+  assertNoSelection(feedFactory);
 });
 
 // ═══════════════════════════════════════════════════

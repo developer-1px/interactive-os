@@ -39,13 +39,11 @@ function TaskItemEditor({ todoId }: { todoId: string }) {
 export function TaskItem({ todoId }: TaskItemProps) {
   const todo = TodoApp.useComputed((s) => s.data.todos[todoId]);
   const isEditing = TodoApp.useComputed((s) => s.ui.editingId === todoId);
+  const dragState = useDragState("list");
 
   if (!todo) return null;
 
   const isCompleted = todo.completed;
-
-  // DnD visual state
-  const dragState = useDragState("list");
   const isDragging = dragState.isDragging && dragState.dragItemId === todoId;
   const isDropTarget =
     dragState.isDragging &&

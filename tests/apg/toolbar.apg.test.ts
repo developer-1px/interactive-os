@@ -64,20 +64,20 @@ function createToolbar(focusedItem = "bold-btn") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Navigation", () => {
-  assertHorizontalNav(createToolbar as any);
+  assertHorizontalNav(createToolbar);
   assertLoop({
     firstId: "bold-btn",
     lastId: "link-btn",
     axis: "horizontal",
-    factoryAtFirst: (() => createToolbar("bold-btn")) as any,
-    factoryAtLast: (() => createToolbar("link-btn")) as any,
+    factoryAtFirst: () => createToolbar("bold-btn"),
+    factoryAtLast: () => createToolbar("link-btn"),
   });
-  assertHomeEnd(createToolbar as any, {
+  assertHomeEnd(createToolbar, {
     firstId: "bold-btn",
     lastId: "link-btn",
   });
-  assertOrthogonalIgnored(createToolbar as any, "horizontal");
-  assertNoSelection(createToolbar as any);
+  assertOrthogonalIgnored(createToolbar, "horizontal");
+  assertNoSelection(createToolbar);
 });
 
 // ═══════════════════════════════════════════════════

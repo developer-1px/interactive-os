@@ -14,6 +14,7 @@ import {
 } from "@os-core/engine/registries/fieldRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand.ts";
 import { useFieldFocus } from "@os-react/6-project/field/useField.ts";
+import type { ItemProps } from "@os-react/6-project/Item.tsx";
 import { Item } from "@os-react/6-project/Item.tsx";
 import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import type { HTMLAttributes } from "react";
@@ -443,9 +444,13 @@ const FieldBase = forwardRef<HTMLElement, EditableProps>(
         (ref as React.MutableRefObject<HTMLElement | null>).current = node;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- baseProps spread
     return (
-      <Item id={fieldId} as={tag} ref={setInnerRef} {...(baseProps as any)} />
+      <Item
+        id={fieldId}
+        as={tag}
+        ref={setInnerRef}
+        {...(baseProps as Omit<ItemProps, "id" | "as">)}
+      />
     );
   },
 );

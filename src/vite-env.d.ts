@@ -10,7 +10,7 @@ interface ImportMeta {
 }
 
 declare module "*.spec.ts" {
-  const content: any;
+  const content: unknown;
   export default content;
 }
 

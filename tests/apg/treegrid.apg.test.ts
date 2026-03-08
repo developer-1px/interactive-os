@@ -70,17 +70,17 @@ function treegridFactory(focusedItem = "msg-1") {
 // ===============================================
 
 describe("APG Treegrid: Vertical Navigation (N1-N2)", () => {
-  assertVerticalNav(treegridFactory as any);
-  assertBoundaryClamp(treegridFactory as any, {
+  assertVerticalNav(treegridFactory);
+  assertBoundaryClamp(treegridFactory, {
     firstId: "msg-1",
     lastId: "msg-3",
     axis: "vertical",
   });
-  assertHomeEnd(treegridFactory as any, {
+  assertHomeEnd(treegridFactory, {
     firstId: "msg-1",
     lastId: "msg-3",
   });
-  assertNoSelection(treegridFactory as any);
+  assertNoSelection(treegridFactory);
 });
 
 // ===============================================

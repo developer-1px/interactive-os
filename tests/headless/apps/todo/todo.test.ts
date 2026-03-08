@@ -132,13 +132,13 @@ describe("§2 List: selection", () => {
 describe("§3 List: check", () => {
   it("Space toggles completed state", () => {
     page.locator("#todo_1").click();
-    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
+    expect(page.state.data.todos["todo_1"]!.completed).toBe(false);
 
     page.keyboard.press("Space");
-    expect(page.state.data.todos['todo_1']!.completed).toBe(true);
+    expect(page.state.data.todos["todo_1"]!.completed).toBe(true);
 
     page.keyboard.press("Space");
-    expect(page.state.data.todos['todo_1']!.completed).toBe(false);
+    expect(page.state.data.todos["todo_1"]!.completed).toBe(false);
   });
 });
 

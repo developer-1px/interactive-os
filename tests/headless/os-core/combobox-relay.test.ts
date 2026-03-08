@@ -69,7 +69,10 @@ function comboboxInput(overrides: Partial<KeyboardInput> = {}): KeyboardInput {
 describe("Feature: combobox keyboard relay", () => {
   describe("navigation keys should relay to layer chain", () => {
     it("#1 ArrowDown → relayed (not blocked by combobox guard)", () => {
-      const input = comboboxInput({ canonicalKey: "ArrowDown", key: "ArrowDown" });
+      const input = comboboxInput({
+        canonicalKey: "ArrowDown",
+        key: "ArrowDown",
+      });
       const result = resolveKeyboard(input);
 
       // ArrowDown passes through combobox guard → layer chain resolves or fallback

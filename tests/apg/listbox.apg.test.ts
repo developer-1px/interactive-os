@@ -86,13 +86,13 @@ function multiSelect(focusedItem = "apple") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Listbox: Navigation", () => {
-  assertVerticalNav(singleSelect as any);
-  assertBoundaryClamp(singleSelect as any, {
+  assertVerticalNav(singleSelect);
+  assertBoundaryClamp(singleSelect, {
     firstId: "apple",
     lastId: "elderberry",
     axis: "vertical",
   });
-  assertHomeEnd(singleSelect as any, {
+  assertHomeEnd(singleSelect, {
     firstId: "apple",
     lastId: "elderberry",
   });
@@ -103,7 +103,7 @@ describe("APG Listbox: Navigation", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Listbox: Single-Select", () => {
-  assertFollowFocus(singleSelect as any);
+  assertFollowFocus(singleSelect);
 
   it("selection follows focus on Home (aria-selected)", () => {
     const t = singleSelect("cherry");
@@ -426,7 +426,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
     expect(t.attrs("banana").tabIndex).toBe(0);
   });
 
-  assertOrthogonalIgnored(horizontal as any, "horizontal");
+  assertOrthogonalIgnored(horizontal, "horizontal");
 });
 
 // ═══════════════════════════════════════════════════

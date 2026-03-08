@@ -33,7 +33,7 @@ describe("T1: FieldType 확장", () => {
   it("number FieldType 등록 가능", () => {
     FieldRegistry.register("volume", {
       name: "volume",
-      fieldType: "number" as any, // 🔴 현재 타입에 "number"가 없어서 as any
+      fieldType: "number",
     });
     const entry = FieldRegistry.get().fields.get("volume");
     expect(entry).toBeDefined();
@@ -61,7 +61,7 @@ describe("T2: resolveFieldKey — number keymap", () => {
     }
     FieldRegistry.register("volume", {
       name: "volume",
-      fieldType: "number" as any,
+      fieldType: "number",
     });
   });
 
@@ -124,22 +124,22 @@ describe("T2: resolveFieldKey — number keymap", () => {
 
 describe("T5: fieldKeyOwnership — number passthrough", () => {
   it("number Field: Escape → Zone passthrough", () => {
-    const delegated = isKeyDelegatedToOS("Escape", "number" as any);
+    const delegated = isKeyDelegatedToOS("Escape", "number");
     expect(delegated).toBe(true);
   });
 
   it("number Field: Tab → Zone passthrough", () => {
-    const delegated = isKeyDelegatedToOS("Tab", "number" as any);
+    const delegated = isKeyDelegatedToOS("Tab", "number");
     expect(delegated).toBe(true);
   });
 
   it("number Field: ArrowRight → Field 소유 (값 조정)", () => {
-    const delegated = isKeyDelegatedToOS("ArrowRight", "number" as any);
+    const delegated = isKeyDelegatedToOS("ArrowRight", "number");
     expect(delegated).toBe(false);
   });
 
   it("number Field: Home → Field 소유 (setMin)", () => {
-    const delegated = isKeyDelegatedToOS("Home", "number" as any);
+    const delegated = isKeyDelegatedToOS("Home", "number");
     expect(delegated).toBe(false);
   });
 });

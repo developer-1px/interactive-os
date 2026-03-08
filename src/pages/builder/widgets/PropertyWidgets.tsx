@@ -38,7 +38,7 @@ const INPUT_BASE =
 // Individual Widgets
 // ═══════════════════════════════════════════════════════════════════
 
-function TextWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function TextWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   return (
     <input
       type="text"
@@ -51,7 +51,12 @@ function TextWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function MultilineWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function MultilineWidget({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+}: WidgetProps) {
   return (
     <textarea
       className={`${INPUT_BASE} min-h-[56px] resize-y leading-relaxed`}
@@ -63,7 +68,12 @@ function MultilineWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function ButtonWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function ButtonWidget({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+}: WidgetProps) {
   const decoded = decode("button", value);
   const text = decoded.type === "button" ? decoded.text : value;
 
@@ -104,7 +114,7 @@ function ButtonWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function LinkWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function LinkWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   const decoded = decode("link", value);
   const text = decoded.type === "link" ? decoded.text : value;
   const href = decoded.type === "link" ? decoded.href : "";
@@ -137,7 +147,7 @@ function LinkWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function IconWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function IconWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="flex items-center justify-center w-8 h-8 rounded-md bg-slate-100 text-slate-500">
@@ -155,7 +165,7 @@ function IconWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function ImageWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function ImageWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-center h-16 rounded-md border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400">
@@ -186,7 +196,7 @@ const COLOR_MAP: Record<string, string> = {
   pink: "#ec4899",
 };
 
-function ColorWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function ColorWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   const bg =
     Object.entries(COLOR_MAP).find(([k]) => value.includes(k))?.[1] ??
     "#94a3b8";
@@ -211,7 +221,7 @@ function ColorWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function BadgeWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function BadgeWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   return (
     <div className="flex items-center gap-2">
       {value && (
@@ -232,7 +242,7 @@ function BadgeWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function DateWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function DateWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   return (
     <input
       type="text"
@@ -246,7 +256,13 @@ function DateWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
   );
 }
 
-function SelectWidget({ value, onChange, onFocus, onBlur, def }: WidgetProps) {
+export function SelectWidget({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  def,
+}: WidgetProps) {
   const options = def.options ?? [];
   return (
     <select
@@ -266,7 +282,7 @@ function SelectWidget({ value, onChange, onFocus, onBlur, def }: WidgetProps) {
   );
 }
 
-function ToggleWidget({ value, onChange }: WidgetProps) {
+export function ToggleWidget({ value, onChange }: WidgetProps) {
   const checked = value === "true";
   return (
     <button
@@ -281,7 +297,12 @@ function ToggleWidget({ value, onChange }: WidgetProps) {
   );
 }
 
-function NumberWidget({ value, onChange, onFocus, onBlur }: WidgetProps) {
+export function NumberWidget({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+}: WidgetProps) {
   return (
     <input
       type="number"

@@ -72,21 +72,21 @@ function createComboboxPopup(focusedItem = "apple") {
 // ═══════════════════════════════════════════════════
 
 describe("APG Combobox: Popup Navigation", () => {
-  assertVerticalNav(createComboboxPopup as any);
-  assertBoundaryClamp(createComboboxPopup as any, {
+  assertVerticalNav(createComboboxPopup);
+  assertBoundaryClamp(createComboboxPopup, {
     firstId: "apple",
     lastId: "elderberry",
     axis: "vertical",
   });
-  assertHomeEnd(createComboboxPopup as any, {
+  assertHomeEnd(createComboboxPopup, {
     firstId: "apple",
     lastId: "elderberry",
   });
-  assertFollowFocus(createComboboxPopup as any);
+  assertFollowFocus(createComboboxPopup);
 });
 
 describe("APG Combobox: Dismiss", () => {
-  assertEscapeClose(createComboboxPopup as any);
+  assertEscapeClose(createComboboxPopup);
 
   it("Escape + stack pop: restores focus to invoker", () => {
     const t = createComboboxPopup();

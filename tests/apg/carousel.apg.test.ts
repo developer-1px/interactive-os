@@ -72,20 +72,20 @@ function carouselFactoryAtFirst() {
 // ===================================================
 
 describe("APG Carousel: Navigation (tablist)", () => {
-  assertHorizontalNav(carouselFactory as any);
+  assertHorizontalNav(carouselFactory);
   assertLoop({
     firstId: "slide-1",
     lastId: "slide-6",
     axis: "horizontal",
-    factoryAtLast: carouselFactoryAtLast as any,
-    factoryAtFirst: carouselFactoryAtFirst as any,
+    factoryAtLast: carouselFactoryAtLast,
+    factoryAtFirst: carouselFactoryAtFirst,
   });
-  assertHomeEnd(carouselFactory as any, {
+  assertHomeEnd(carouselFactory, {
     firstId: "slide-1",
     lastId: "slide-6",
   });
   // W3C APG: only horizontal arrow keys apply to tablist
-  assertOrthogonalIgnored(carouselFactory as any, "horizontal");
+  assertOrthogonalIgnored(carouselFactory, "horizontal");
 });
 
 // ===================================================

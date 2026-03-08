@@ -49,7 +49,7 @@ const SingleUI = singleZone.bind({
   getItems: () => ["s-alpha", "s-bravo", "s-charlie", "s-delta"],
   options: {
     select: { mode: "single", followFocus: false },
-inputmap: { click: [OS_ACTIVATE()] },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -59,7 +59,7 @@ const MultiUI = multiZone.bind({
   getItems: () => ["m-alpha", "m-bravo", "m-charlie", "m-delta", "m-echo"],
   options: {
     select: { mode: "multiple" },
-inputmap: { click: [OS_ACTIVATE()] },
+    inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 

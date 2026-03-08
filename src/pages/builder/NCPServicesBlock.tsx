@@ -34,7 +34,10 @@ export function NCPServicesBlock({ id }: { id: string }) {
   );
   const cards: Block[] = block?.children || [];
 
-  const iconMap: Record<string, React.FC<any>> = {
+  const iconMap: Record<
+    string,
+    React.FC<{ size?: number; className?: string }>
+  > = {
     Server,
     Database,
     Brain,

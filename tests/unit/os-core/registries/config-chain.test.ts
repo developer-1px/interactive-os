@@ -15,28 +15,28 @@ import { describe, expect, it } from "vitest";
 describe("T1: NavigateConfig chain fields", () => {
   it("tree has onRight = ['expand', 'enterChild']", () => {
     const config = resolveRole("tree");
-    expect((config.navigate as any).onRight).toEqual(["expand", "enterChild"]);
+    expect(config.navigate.onRight).toEqual(["expand", "enterChild"]);
   });
 
   it("tree has onLeft = ['collapse', 'goParent']", () => {
     const config = resolveRole("tree");
-    expect((config.navigate as any).onLeft).toEqual(["collapse", "goParent"]);
+    expect(config.navigate.onLeft).toEqual(["collapse", "goParent"]);
   });
 
   it("menu has onCrossAxis = ['expandSubmenu']", () => {
     const config = resolveRole("menu");
-    expect((config.navigate as any).onCrossAxis).toEqual(["expandSubmenu"]);
+    expect(config.navigate.onCrossAxis).toEqual(["expandSubmenu"]);
   });
 
   it("menubar has onDown = ['expandSubmenu']", () => {
     const config = resolveRole("menubar");
-    expect((config.navigate as any).onDown).toEqual(["expandSubmenu"]);
+    expect(config.navigate.onDown).toEqual(["expandSubmenu"]);
   });
 
   it("listbox has no chain fields (defaults)", () => {
     const config = resolveRole("listbox");
-    expect((config.navigate as any).onRight).toBeUndefined();
-    expect((config.navigate as any).onLeft).toBeUndefined();
+    expect(config.navigate.onRight).toBeUndefined();
+    expect(config.navigate.onLeft).toBeUndefined();
   });
 });
 
@@ -66,7 +66,7 @@ describe("T1: SelectConfig aria field + inputmap", () => {
 
   it("listbox has select.aria = 'selected' (default)", () => {
     const config = resolveRole("listbox");
-    expect((config.select as any).aria).toBe("selected");
+    expect(config.select.aria).toBe("selected");
   });
 });
 
@@ -94,11 +94,11 @@ describe("T1: inputmap replaces action.commands", () => {
 describe("T1: DismissConfig restoreFocus field", () => {
   it("dialog has dismiss.restoreFocus = true", () => {
     const config = resolveRole("dialog");
-    expect((config.dismiss as any).restoreFocus).toBe(true);
+    expect(config.dismiss.restoreFocus).toBe(true);
   });
 
   it("alertdialog has dismiss.restoreFocus = true", () => {
     const config = resolveRole("alertdialog");
-    expect((config.dismiss as any).restoreFocus).toBe(true);
+    expect(config.dismiss.restoreFocus).toBe(true);
   });
 });

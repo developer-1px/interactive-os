@@ -151,9 +151,9 @@ export function Zone({
     const existing = ZoneRegistry.get(zoneId);
     ZoneRegistry.register(
       zoneId,
-      buildZoneEntry(config, role, null, callbacks, existing),
+      buildZoneEntry(config, role, null, cbRef.current, existing),
     );
-  }, [zoneId, config, role, callbacks]);
+  }, [zoneId, config, role]);
 
   // ─── Lifecycle: commit-phase (dispatch + DOM binding) ───
   const containerRef = useRef<HTMLElement | null>(null);

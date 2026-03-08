@@ -22,9 +22,9 @@
  * Config: separator role, value axis with min/max/step, activate for Enter toggle.
  */
 
-import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { createHeadlessPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
+import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { describe, expect, it } from "vitest";
 
 // ─── Test Setup ───

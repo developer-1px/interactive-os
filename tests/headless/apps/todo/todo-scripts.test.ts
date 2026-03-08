@@ -37,7 +37,10 @@ afterEach(() => {
 describe("Todo Unified Scripts (Headless)", () => {
   for (const script of todoScripts) {
     it(script.name, async () => {
-      await script.run(page as unknown as import("@os-devtool/testing/types").Page, osExpect);
+      await script.run(
+        page as unknown as import("@os-devtool/testing/types").Page,
+        osExpect,
+      );
     });
   }
 });

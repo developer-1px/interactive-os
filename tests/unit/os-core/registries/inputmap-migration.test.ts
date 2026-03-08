@@ -160,7 +160,7 @@ describe("T10: Role presets produce correct inputmap", () => {
 describe("T10: inputmap override merging", () => {
   it("user can override inputmap entries on top of role preset", () => {
     const config = resolveRole("checkbox", {
-      inputmap: { Enter: [{ type: "OS_CHECK" } as any] },
+      inputmap: { Enter: [{ type: "OS_CHECK" }] },
     });
     // Space should still be from preset
     expect(config.inputmap["Space"]).toEqual(
@@ -175,7 +175,7 @@ describe("T10: inputmap override merging", () => {
   it("user can add custom entries not in preset", () => {
     const config = resolveRole("listbox", {
       inputmap: {
-        Space: [{ type: "OS_SELECT", payload: { mode: "toggle" } } as any],
+        Space: [{ type: "OS_SELECT", payload: { mode: "toggle" } }],
       },
     });
     expect(config.inputmap["Space"]).toEqual(

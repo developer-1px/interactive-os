@@ -66,7 +66,7 @@ function actionButtonFactory() {
         Enter: [{ type: "OS_ACTIVATE", payload: {} }],
         click: [{ type: "OS_ACTIVATE", payload: {} }],
       },
-    } as any,
+    },
   });
   const page = createHeadlessPage(app);
   page.setupZone("action-zone", { focusedItemId: ACTION_BUTTON_ID });

@@ -184,9 +184,7 @@ export function TablePattern() {
         className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm text-sm"
       >
         <thead>
-          <TableUI.Zone
-            className="bg-gray-50 border-b border-gray-200 contents"
-          >
+          <TableUI.Zone className="bg-gray-50 border-b border-gray-200 contents">
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
