@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
 
-// @spec docs/1-project/os-core/action-centric-trigger/spec.md
+// @spec docs/1-project/os-core/action-centric-trigger/notes/2026-0308-1935-[plan]-payload-trigger.md
 
 describe("action-centric-trigger", () => {
     it("zone.trigger(id, onActivate) returns an object with data-trigger-id, not a React component", () => {
@@ -19,10 +19,11 @@ describe("action-centric-trigger", () => {
         // 1. Must return data-trigger-id
         expect(result["data-trigger-id"]).toBe("my-trigger");
 
+
         // 2. Must not inject onClick or any React event handler
-        expect(result.onClick).toBeUndefined();
-        expect(result.onPointerDown).toBeUndefined();
-        expect(result.onKeyDown).toBeUndefined();
+        expect((result as any).onClick).toBeUndefined();
+        expect((result as any).onPointerDown).toBeUndefined();
+        expect((result as any).onKeyDown).toBeUndefined();
 
         // 3. Keep original binding info
         expect(trigger.id).toBe("my-trigger");
@@ -43,6 +44,53 @@ describe("action-centric-trigger", () => {
         expect(result["aria-haspopup"]).toBe("true");
 
         // No event handlers
-        expect(result.onClick).toBeUndefined();
+        expect((result as any).onClick).toBeUndefined();
+    });
+
+    it("trigger(payload) returns data-trigger-payload attribute", () => {
+        const TestApp = defineApp("test", {});
+        const zone = TestApp.createZone("myZone");
+
+        const deleteTodo = zone.trigger("delete-todo", (todoId: string) =>
+            ({ type: "DELETE_TODO", payload: { todoId } } as unknown as import("@kernel/core/tokens").BaseCommand)
+        );
+
+        // Call prop-getter WITH payload
+        const result = (deleteTodo as unknown as (payload?: string) => Record<string, unknown>)("abc-123");
+
+        expect(result["data-trigger-id"]).toBe("delete-todo");
+        expect(result["data-trigger-payload"]).toBe("abc-123");
+    });
+
+    it("trigger() without payload omits data-trigger-payload", () => {
+        const TestApp = defineApp("test", {});
+        const zone = TestApp.createZone("myZone");
+
+        const undoButton = zone.trigger("undo", () =>
+            ({ type: "UNDO", payload: undefined } as unknown as import("@kernel/core/tokens").BaseCommand)
+        );
+
+        // Call prop-getter WITHOUT payload
+        const result = (undoButton as unknown as (payload?: string) => Record<string, unknown>)();
+
+        expect(result["data-trigger-id"]).toBe("undo");
+        expect(result["data-trigger-payload"]).toBeUndefined();
+    });
+
+    it("onActivate handler signature uses payload, not focusId", () => {
+        const TestApp = defineApp("test", {});
+        const zone = TestApp.createZone("myZone");
+
+        let receivedPayload: string | undefined;
+        const moveUp = zone.trigger("move-up", (payload: string) => {
+            receivedPayload = payload;
+            return { type: "MOVE_UP", payload: { itemId: payload } } as unknown as import("@kernel/core/tokens").BaseCommand;
+        });
+
+        // Verify the registered onActivate function receives payload correctly
+        const handler = moveUp.onActivate;
+        handler("item-42");
+        expect(receivedPayload).toBe("item-42");
     });
 });
+

@@ -16,29 +16,22 @@ export interface TriggerOptions {
 }
 
 /**
- * createFunctionTrigger — simple FC that passes (focusId) => BaseCommand
- * directly to <Trigger onActivate={fn}>. No payload, no thunk wrapping.
+ * createFunctionTrigger — returns a prop getter.
+ * Returns only data attributes, zero React event handlers.
+ * Payload (optional string ID) is bound at render time via data-trigger-payload.
  */
 export function createFunctionTrigger(
-  appId: string,
-  onActivate: (focusId: string) => BaseCommand,
+  _appId: string,
+  _onActivate: (payload: string) => BaseCommand,
   options: TriggerOptions & { id: string },
-): React.FC<{ children: ReactNode }> {
-  const FnTrigger: React.FC<{ children: ReactNode }> = ({
-    children,
-    ...rest
-  }) => {
-    // Spread rest AFTER id so outer Item asChild can override id
-    // (e.g. <Item id="cat_inbox" asChild><SelectCategory> passes id through)
-    return React.createElement(Trigger, {
-      id: options.id,
-      onActivate,
-      children,
-      ...rest,
-    });
+): <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> {
+  const getProps = <T extends HTMLElement>(payload?: string): React.HTMLAttributes<T> & { "data-trigger-id": string } => {
+    return {
+      "data-trigger-id": options.id,
+      ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
+    } as React.HTMLAttributes<T> & { "data-trigger-id": string };
   };
-  FnTrigger.displayName = `${appId}.Trigger(${options.id})`;
-  return FnTrigger;
+  return getProps;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -53,11 +46,7 @@ export interface CompoundTriggerConfig {
 
 export interface CompoundTriggerComponents {
   Root: React.FC<{ children: ReactNode }>;
-  Trigger: React.FC<{
-    children: ReactNode;
-    className?: string;
-    asChild?: boolean;
-  }>;
+  Trigger: <T extends HTMLElement>() => React.HTMLAttributes<T> & { "data-trigger-id": string; "aria-haspopup"?: string; "aria-expanded"?: boolean; "aria-controls"?: string };
   Portal: React.FC<{
     children: ReactNode;
     title?: string;
@@ -118,28 +107,13 @@ export function createCompoundTrigger(
   };
   RootComponent.displayName = `${appId}.${isPopoverRole ? "Menu" : "Dialog"}`;
 
-  const TriggerComponent: React.FC<{
-    children: ReactNode;
-    className?: string;
-    asChild?: boolean;
-  }> = ({ children, className, asChild }) => {
-    if (isPopoverRole) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay role union mismatch
-      return React.createElement(Trigger, {
-        id: `${overlayId}-trigger`,
-        role: role as any,
-        overlayId,
-        children,
-        ...(className !== undefined ? { className } : {}),
-      });
-    }
-    return React.createElement(Dialog.Trigger, {
-      ...(className !== undefined ? { className } : {}),
-      ...(asChild !== undefined ? { asChild } : {}),
-      children,
-    });
+  const TriggerComponent = <T extends HTMLElement>(): React.HTMLAttributes<T> & { "data-trigger-id": string; "aria-haspopup"?: string; "aria-expanded"?: boolean; "aria-controls"?: string } => {
+    return {
+      "data-trigger-id": `${overlayId}-trigger`,
+      "aria-haspopup": (role === "menu" ? "true" : role) as any,
+      "aria-controls": overlayId,
+    };
   };
-  TriggerComponent.displayName = `${appId}.${isPopoverRole ? "Menu" : "Dialog"}.Trigger`;
 
   // PopoverComponent: non-modal overlay for menus/listboxes
   const PopoverComponent: React.FC<{
@@ -148,12 +122,12 @@ export function createCompoundTrigger(
     "aria-label"?: string;
     "aria-labelledby"?: string;
   }> = (props) =>
-    React.createElement(Trigger.Popover, {
-      ...props,
-      _overlayId: overlayId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay type union
-      _overlayType: role as any,
-    });
+      React.createElement(Trigger.Popover, {
+        ...props,
+        _overlayId: overlayId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ZIFT overlay type union
+        _overlayType: role as any,
+      });
   PopoverComponent.displayName = `${appId}.Menu.Popover`;
 
   // Dialog.Content must be used directly — DialogRoot identifies children by
@@ -176,11 +150,11 @@ export function createCompoundTrigger(
     onActivate?: BaseCommand;
   }> = ({ children, className, onActivate }) => {
     const props: import("@os-react/6-project/widgets/radix/Dialog").DialogCloseProps =
-      {
-        children,
-        ...(className !== undefined ? { className } : {}),
-        ...(onActivate !== undefined ? { onActivate } : {}),
-      };
+    {
+      children,
+      ...(className !== undefined ? { className } : {}),
+      ...(onActivate !== undefined ? { onActivate } : {}),
+    };
     return React.createElement(Dialog.Close, props);
   };
   DismissComponent.displayName = `${appId}.Dialog.Dismiss`;
@@ -191,12 +165,12 @@ export function createCompoundTrigger(
   }> = ({ children, className }) => {
     const confirmCmd = config.confirm;
     const props: import("@os-react/6-project/widgets/radix/Dialog").DialogCloseProps =
-      {
-        children,
-        ...(className !== undefined ? { className } : {}),
-        ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
-        id: `${overlayId}-confirm`,
-      };
+    {
+      children,
+      ...(className !== undefined ? { className } : {}),
+      ...(confirmCmd !== undefined ? { onActivate: confirmCmd } : {}),
+      id: `${overlayId}-confirm`,
+    };
     return React.createElement(Dialog.Close, props);
   };
   ConfirmComponent.displayName = `${appId}.Dialog.Confirm`;
