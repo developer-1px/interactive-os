@@ -500,9 +500,7 @@ export function createAppPage<S>(
       },
     },
 
-    click(selector: string, opts?) {
-      // Strip # prefix (Playwright uses "#id", we use bare id)
-      const itemId = selector.startsWith("#") ? selector.slice(1) : selector;
+    click(itemId: string, opts?) {
       simulateClick(os, itemId, opts);
       invalidateCache();
     },

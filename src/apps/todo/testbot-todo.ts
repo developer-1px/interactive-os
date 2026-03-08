@@ -102,7 +102,7 @@ export const listNavScripts: TestScript[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════
-// §3 Trigger Click — per-button dispatch via page.click("#trigger-id")
+// §3 Trigger Click — per-button dispatch via page.locator("#trigger-id").click()
 //
 // Requires full app context (triggers registered via zone.trigger()).
 // Runs in: browser TestBot ✓, createHeadlessPage(TodoApp) ✓
@@ -115,7 +115,7 @@ export const triggerClickScripts: TestScript[] = [
     group: "Todo",
     async run(page, expect) {
       await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await page.click("#start-edit");
+      await page.locator("#start-edit").click();
       await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
     },
   },
@@ -124,7 +124,7 @@ export const triggerClickScripts: TestScript[] = [
     group: "Todo",
     async run(page, expect) {
       await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await page.click("#move-item-down");
+      await page.locator("#move-item-down").click();
       // After moving todo_1 down, todo_2 is now first → Home lands on todo_2
       await page.keyboard.press("Home");
       await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
@@ -135,7 +135,7 @@ export const triggerClickScripts: TestScript[] = [
     group: "Todo",
     async run(page, expect) {
       await page.locator(`#${LIST_ITEMS[1]!}`).click();
-      await page.click("#move-item-up");
+      await page.locator("#move-item-up").click();
       // After moving todo_2 up, todo_2 is now first → Home lands on todo_2
       await page.keyboard.press("Home");
       await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
@@ -146,7 +146,7 @@ export const triggerClickScripts: TestScript[] = [
     group: "Todo",
     async run(page, expect) {
       await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await page.click("#delete-todo");
+      await page.locator("#delete-todo").click();
       // After delete, focus should move to next item
       await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
     },
@@ -157,7 +157,7 @@ export const triggerClickScripts: TestScript[] = [
     async run(page, expect) {
       await page.locator(`#${LIST_ITEMS[0]!}`).click();
       await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
-      await page.click("#toggle-todo");
+      await page.locator("#toggle-todo").click();
       await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
     },
   },
