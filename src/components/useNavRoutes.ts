@@ -134,6 +134,7 @@ export function useNavRoutes(): {
       }
     }
 
+    // TanStack Router's RootRouteChildren lacks index signature, double-cast needed
     traverse(router.routeTree as unknown as RouteTreeNode);
 
     // Sort by order
