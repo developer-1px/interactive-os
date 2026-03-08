@@ -216,7 +216,9 @@ function createVisualEffects(
     for (const entry of trackedStamps) {
       try {
         entry.stampDiv.hidePopover();
-      } catch {}
+      } catch {
+        // noop
+      }
       entry.stampDiv.remove();
     }
     trackedStamps.length = 0;
@@ -318,7 +320,9 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           badge.hidePopover();
-        } catch {}
+        } catch {
+          // noop
+        }
         badge.remove();
       }, STEP_DELAY * 1.5);
 
@@ -372,7 +376,9 @@ function createVisualEffects(
       setTimeout(() => {
         try {
           cursorEl.hidePopover();
-        } catch {}
+        } catch {
+          // noop
+        }
         cursorEl.remove();
       }, 300);
     },

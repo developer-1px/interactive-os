@@ -186,8 +186,7 @@ export function createHistoryMiddleware(
       // ── Capture data-level patches ────────────────────────────
       // Generate patches that transform prevAppState.data → effectsState.data
       // These are stored in HistoryEntry for patch-based undo/redo.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { history: _, ...prevWithoutHistory } = prevAppState;
+      const { history: _history, ...prevWithoutHistory } = prevAppState;
       const newData = effectsState["data"];
 
       let dataPatches: Patch[] = [];

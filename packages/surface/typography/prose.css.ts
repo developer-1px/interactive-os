@@ -138,7 +138,7 @@ globalStyle(`${prose} p`, {
 // Link
 const { selectors: linkSelectors, ...linkBase } = typography.link;
 globalStyle(`${prose} a`, linkBase);
-// @ts-expect-error
+// @ts-expect-error — vanilla-extract selectors type does not expose pseudo-class keys
 globalStyle(`${prose} a:hover`, linkSelectors["&:hover"]);
 
 // Code

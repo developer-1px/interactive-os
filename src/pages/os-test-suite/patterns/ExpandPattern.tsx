@@ -10,7 +10,6 @@
  * Known gap: OG-024 — dynamic item initial expand not declarative.
  */
 
-import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_EXPAND } from "@os-sdk/os";
 import type { TestCase } from "../index";
@@ -63,7 +62,7 @@ const DisclosureUI = disclosureZone.bind({
   getItems: () => ["section-a", "section-b", "section-c"],
   options: {
     expand: { mode: "all", initial: ["section-a"] },
-    inputmap: { click: [OS_EXPAND({ toggle: true })] },
+    inputmap: { click: [OS_EXPAND({ action: "toggle" })] },
   },
 });
 
@@ -117,11 +116,11 @@ export function ExpandPattern() {
             >
               {title}
             </div>
-            <Item.Region>
+            <DisclosureUI.Item.Content for={id}>
               <div className="px-4 py-2 text-sm text-gray-600 bg-gray-50">
                 {content}
               </div>
-            </Item.Region>
+            </DisclosureUI.Item.Content>
           </DisclosureUI.Item>
         ))}
       </DisclosureUI.Zone>

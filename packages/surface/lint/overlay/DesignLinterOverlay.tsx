@@ -19,7 +19,7 @@ export function DesignLinterOverlay({
     const results = runDesignLint({ root });
 
     // Expose to window for AI Agent Verification
-    // @ts-expect-error
+    // @ts-expect-error — custom window property for AI Agent verification
     window.__DESIGN_LINT_VIOLATIONS__ = results;
 
     // Log to console for debugging
@@ -42,11 +42,11 @@ export function DesignLinterOverlay({
 
   useEffect(() => {
     if (!isEnabled) {
-      setViolations([]);
+      setViolations((prev) => (prev.length > 0 ? [] : prev));
       return;
     }
 
-    let timeoutId: any = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const runCheck = () => {
       if (timeoutId) clearTimeout(timeoutId);

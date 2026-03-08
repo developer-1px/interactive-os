@@ -8,7 +8,6 @@
  *   4. Select all (Meta+A)
  */
 
-import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
 import type { TestCase } from "../index";
@@ -50,8 +49,7 @@ const SingleUI = singleZone.bind({
   getItems: () => ["s-alpha", "s-bravo", "s-charlie", "s-delta"],
   options: {
     select: { mode: "single", followFocus: false },
-    activate: { onClick: true },
-    inputmap: { click: [OS_ACTIVATE()] },
+inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -61,8 +59,7 @@ const MultiUI = multiZone.bind({
   getItems: () => ["m-alpha", "m-bravo", "m-charlie", "m-delta", "m-echo"],
   options: {
     select: { mode: "multiple" },
-    activate: { onClick: true },
-    inputmap: { click: [OS_ACTIVATE()] },
+inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 

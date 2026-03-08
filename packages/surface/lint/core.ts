@@ -28,7 +28,7 @@ function getDebugSource(el: HTMLElement | null): string | undefined {
   }
   if (!key) return undefined;
 
-  // @ts-expect-error
+  // @ts-expect-error — accessing React fiber internals via dynamic key
   let fiber = el[key];
   while (fiber) {
     const source = fiber._debugSource || fiber._debugInfo;

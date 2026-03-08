@@ -1,3 +1,4 @@
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
 import { useState } from "react";
 import {
@@ -110,6 +111,7 @@ function SectionRenderer() {
 
 /** Shown when canvas is empty — lets user pick a page preset to start from. */
 function PagePresetPicker() {
+  const dispatch = useDispatch();
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-8">
       <div className="max-w-xl w-full">
@@ -131,7 +133,7 @@ function PagePresetPicker() {
               type="button"
               key={preset.id}
               onClick={() =>
-                os.dispatch(loadPagePreset({ blocks: preset.blocks }))
+                dispatch(loadPagePreset({ blocks: preset.blocks }))
               }
               className="group flex flex-col items-center gap-3 p-6 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/50 hover:-translate-y-1 transition-all duration-300 text-center cursor-pointer"
             >

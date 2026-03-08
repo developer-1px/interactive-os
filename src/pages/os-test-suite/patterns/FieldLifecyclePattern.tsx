@@ -11,7 +11,6 @@
  */
 
 import { Field } from "@os-react/6-project/field/Field";
-import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 import type { TestCase } from "../index";
@@ -117,6 +116,8 @@ export function FieldLifecyclePattern() {
           className="border border-gray-200 rounded-lg bg-white"
         >
           <Field.Editable
+            name="enterField"
+            value=""
             className="
               w-full px-4 py-3 text-sm outline-none
               focus:ring-2 focus:ring-inset focus:ring-emerald-300 rounded-lg
@@ -141,6 +142,8 @@ export function FieldLifecyclePattern() {
           className="border border-gray-200 rounded-lg bg-white"
         >
           <Field.Editable
+            name="changeField"
+            value=""
             className="
               w-full px-4 py-3 text-sm outline-none
               focus:ring-2 focus:ring-inset focus:ring-emerald-300 rounded-lg

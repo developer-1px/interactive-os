@@ -8,7 +8,6 @@
  *   4. aria-valuenow projection
  */
 
-import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import type { TestCase } from "../index";
 

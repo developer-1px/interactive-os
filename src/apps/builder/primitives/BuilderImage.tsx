@@ -35,7 +35,7 @@ export const BuilderImage = forwardRef<HTMLImageElement, BuilderImageProps>(
       src,
       alt,
       objectFit = "cover",
-      onChangeSrc,
+      onChangeSrc: _onChangeSrc,
       className,
       style,
       ...rest

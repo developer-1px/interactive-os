@@ -10,7 +10,6 @@
  * Known gap: OG-018 — headless page.goto() sets single activeZoneId.
  */
 
-import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE } from "@os-sdk/os";
 import type { TestCase } from "../index";
@@ -34,8 +33,7 @@ const ToolbarUI = toolbarZone.bind({
   role: "toolbar",
   getItems: () => ["btn-bold", "btn-italic", "btn-underline"],
   options: {
-    activate: { onClick: true },
-    inputmap: { click: [OS_ACTIVATE()] },
+inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -44,8 +42,7 @@ const ListUI = listZone.bind({
   role: "listbox",
   getItems: () => ["file-1", "file-2", "file-3"],
   options: {
-    activate: { onClick: true },
-    inputmap: { click: [OS_ACTIVATE()] },
+inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
@@ -85,7 +82,6 @@ export function CrossZonePattern() {
             <ToolbarUI.Item
               key={id}
               id={id}
-              as="button"
               title={title}
               className="
                 w-10 h-10 flex items-center justify-center
