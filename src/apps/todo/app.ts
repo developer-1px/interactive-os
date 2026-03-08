@@ -156,10 +156,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-          // Close first to clear any stale overlay from HMR or interrupted flow
-          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-        ]
+        // Close first to clear any stale overlay from HMR or interrupted flow
+        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+      ]
       : undefined,
   }),
 );
@@ -277,6 +277,20 @@ export const TodoListUI = listCollection.bind({
     listCollection.trigger("move-item-down", (fid) => moveItemDown({ id: fid })),
     listCollection.trigger("delete-todo", (fid) => deleteTodo({ id: fid })),
     listCollection.trigger("toggle-todo", (fid) => toggleTodo({ id: fid })),
+    listCollection.trigger("bulk-delete", () => {
+      const items = os.getState().os.focus.zones["list"]?.items;
+      const selected = items
+        ? Object.keys(items).filter((id) => items[id]?.["aria-selected"])
+        : [];
+      return requestDeleteTodo({ ids: selected.length > 0 ? selected : [] });
+    }),
+    listCollection.trigger("bulk-toggle", () => {
+      const items = os.getState().os.focus.zones["list"]?.items;
+      const selected = items
+        ? Object.keys(items).filter((id) => items[id]?.["aria-selected"])
+        : [];
+      return bulkToggleCompleted({ ids: selected });
+    }),
   ],
 });
 
@@ -413,6 +427,9 @@ export const TodoSearchUI = searchZone.bind({
     trigger: "change",
     onCancel: clearSearch(),
   },
+  triggers: [
+    searchZone.trigger("clear-search", () => clearSearch()),
+  ],
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -490,6 +507,20 @@ export const TodoList = {
     StartEdit: listCollection.trigger("start-edit", (fid) => startEdit({ id: fid })),
     MoveItemUp: listCollection.trigger("move-item-up", (fid) => moveItemUp({ id: fid })),
     MoveItemDown: listCollection.trigger("move-item-down", (fid) => moveItemDown({ id: fid })),
+    BulkDelete: listCollection.trigger("bulk-delete", () => {
+      const items = os.getState().os.focus.zones["list"]?.items;
+      const selected = items
+        ? Object.keys(items).filter((id) => items[id]?.["aria-selected"])
+        : [];
+      return requestDeleteTodo({ ids: selected.length > 0 ? selected : [] });
+    }),
+    BulkToggle: listCollection.trigger("bulk-toggle", () => {
+      const items = os.getState().os.focus.zones["list"]?.items;
+      const selected = items
+        ? Object.keys(items).filter((id) => items[id]?.["aria-selected"])
+        : [];
+      return bulkToggleCompleted({ ids: selected });
+    }),
   },
 };
 
@@ -525,6 +556,9 @@ export const TodoSearch = {
   commands: {
     setSearchQuery,
     clearSearch,
+  },
+  triggers: {
+    ClearSearch: searchZone.trigger("clear-search", () => clearSearch()),
   },
 };
 

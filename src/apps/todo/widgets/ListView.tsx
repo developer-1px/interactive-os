@@ -9,7 +9,6 @@ import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
 import { Field } from "@os-react/6-project/field/Field";
-import { Trigger } from "@os-react/internal";
 import {
   AlertTriangle,
   CheckCheck,
@@ -55,14 +54,13 @@ export function ListView() {
               placeholder="Search tasks... (Cmd+F)"
             />
             {searchQuery && (
-              <Trigger onActivate={TodoSearch.commands.clearSearch()}>
-                <button
-                  type="button"
-                  className="p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </Trigger>
+              <button
+                {...TodoSearch.triggers.ClearSearch()}
+                type="button"
+                className="p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <X size={14} />
+              </button>
             )}
           </Field.Label>
 
@@ -120,32 +118,22 @@ export function ListView() {
             {selection.length} selected
           </span>
           <div className="w-px h-5 bg-slate-700" />
-          <Trigger
-            onActivate={TodoList.commands.requestDeleteTodo({
-              ids: [...selection],
-            })}
+          <button
+            {...TodoList.triggers.BulkDelete()}
+            type="button"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors"
           >
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors"
-            >
-              <Trash2 size={13} />
-              Delete
-            </button>
-          </Trigger>
-          <Trigger
-            onActivate={TodoList.commands.bulkToggleCompleted({
-              ids: [...selection],
-            })}
+            <Trash2 size={13} />
+            Delete
+          </button>
+          <button
+            {...TodoList.triggers.BulkToggle()}
+            type="button"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-300 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-colors"
           >
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-300 hover:text-white hover:bg-emerald-500/20 rounded-lg transition-colors"
-            >
-              <CheckCheck size={13} />
-              Complete
-            </button>
-          </Trigger>
+            <CheckCheck size={13} />
+            Complete
+          </button>
         </div>
       )}
 
@@ -186,3 +174,4 @@ export function ListView() {
     </div>
   );
 }
+
