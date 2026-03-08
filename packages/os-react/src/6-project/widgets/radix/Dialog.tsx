@@ -74,26 +74,30 @@ function DialogRoot({ children, id, role = "dialog" }: DialogProps) {
     }
   });
 
+  if (!contentProps) {
+    return <>{triggerElements}</>;
+  }
+
+  const { title, description, className: contentClass, contentClassName, children: contentChildren } = contentProps;
+
   return (
     <>
       {triggerElements}
-      {contentProps && (
-        <ModalPortal
-          overlayId={overlayId}
-          role={role}
-          {...((contentProps as DialogContentProps).title !== undefined ? { title: (contentProps as DialogContentProps).title } : {})}
-          {...((contentProps as DialogContentProps).description !== undefined ? { description: (contentProps as DialogContentProps).description } : {})}
-          {...((contentProps as DialogContentProps).className !== undefined ? { className: (contentProps as DialogContentProps).className } : {})}
-          {...((contentProps as DialogContentProps).contentClassName !== undefined ? { contentClassName: (contentProps as DialogContentProps).contentClassName } : {})}
-        >
-          {(contentProps as DialogContentProps).title && (
-            <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
-              {(contentProps as DialogContentProps).title}
-            </div>
-          )}
-          {(contentProps as DialogContentProps).children}
-        </ModalPortal>
-      )}
+      <ModalPortal
+        overlayId={overlayId}
+        role={role}
+        {...(title !== undefined ? { title } : {})}
+        {...(description !== undefined ? { description } : {})}
+        {...(contentClass !== undefined ? { className: contentClass } : {})}
+        {...(contentClassName !== undefined ? { contentClassName } : {})}
+      >
+        {title && (
+          <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+            {title}
+          </div>
+        )}
+        {contentChildren}
+      </ModalPortal>
     </>
   );
 }

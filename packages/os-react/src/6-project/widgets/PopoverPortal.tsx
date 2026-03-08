@@ -7,7 +7,7 @@
  */
 
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
-import { os } from "@os-core/engine/kernel.ts";
+import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { Zone } from "@os-react/6-project/Zone";
 import type { ReactNode } from "react";
 
@@ -34,10 +34,7 @@ export function PopoverPortal({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
 }: PopoverPortalProps) {
-  // Subscribe to overlay open state from kernel
-  const isOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((e) => e.id === overlayId),
-  );
+  const isOpen = useOverlay(overlayId);
 
   if (!isOpen) return null;
 

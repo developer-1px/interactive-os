@@ -8,7 +8,7 @@
 
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel.ts";
-import type { OverlayEntry } from "@os-core/schema/state/OSState.ts";
+import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { Zone } from "@os-react/6-project/Zone";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
@@ -16,8 +16,8 @@ import { useEffect, useRef } from "react";
 export interface ModalPortalProps {
   /** Overlay ID — must match the overlay stack entry */
   overlayId: string;
-  /** Overlay role — determines Zone preset */
-  role?: OverlayEntry["type"];
+  /** Overlay role — determines Zone preset (modal overlays only) */
+  role?: "dialog" | "alertdialog";
   /** Accessibility title for the overlay (aria-label) */
   title?: string;
   /** Accessibility description for the overlay (aria-describedby) */
@@ -41,10 +41,7 @@ export function ModalPortal({
 }: ModalPortalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  // Subscribe to overlay open state from kernel
-  const isOpen = os.useComputed((s) =>
-    s.os.overlays.stack.some((e) => e.id === overlayId),
-  );
+  const isOpen = useOverlay(overlayId);
 
   // Sync open state with native <dialog>
   useEffect(() => {
@@ -89,10 +86,9 @@ export function ModalPortal({
       aria-label={title}
       aria-describedby={description ? `${overlayId}-desc` : undefined}
     >
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- zone role union mismatch */}
       <Zone
         id={overlayId}
-        role={role as any}
+        role={role}
         onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
       >
         <div
