@@ -15,15 +15,17 @@ Before → After:
 - After: `<button {...deleteTodo(todoId)} />` (payload가 `data-trigger-payload`로 DOM에 바인딩)
 
 ## Now
-**Phase 2: Wrapper 전면 무효화** (plan: `notes/2026-0309-0100-[plan]-wrapper-elimination.md`)
-- [ ] P1: `zone.overlay()` API 변경 — CompoundTriggerComponents → OverlayHandle { overlayId, trigger }
-- [ ] P2: TriggerPortal → ModalPortal 독립 분리 (Trigger 의존 제거)
-- [ ] P3: TriggerPopover → PopoverPortal 독립 분리 (Trigger 의존 제거)
-- [ ] P4: TriggerDismiss 삭제 — dismiss를 bind({ triggers }) prop-getter로 대체
-- [ ] P5: 소비자 마이그레이션 — layer-showcase (7파일) + todo + apg + builder
-- [ ] P6: TriggerBase + OverlayContext + trigger/index.ts 삭제 + trigger test 갱신
+(비어있음 — 모든 Now Done)
 
 ## Done
+**Phase 2: Wrapper 전면 무효화** ✅
+- [x] P1: `zone.overlay()` API 변경 — OverlayHandle { overlayId, trigger } — tsc 0 | +5 tests ✅
+- [x] P2: TriggerPortal → ModalPortal 독립 분리 — tsc 0 ✅
+- [x] P3: TriggerPopover → PopoverPortal 독립 분리 — tsc 0 ✅
+- [x] P4: TriggerDismiss 삭제 — Dialog.Close가 ZoneRegistry + useZoneContext로 대체 ✅
+- [x] P5: 소비자 마이그레이션 — layer-showcase + todo + apg + builder 전체 완료 ✅
+- [x] P6: TriggerBase + OverlayContext + trigger/index.ts + trigger.ts 삭제 — -667 lines ✅
+
 **Phase 1: Simple Trigger Migration** ✅
 - [x] T1~T8: prop-getter API 도입 + payload 지원 + 전 소비자 마이그레이션 완료
 
