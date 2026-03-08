@@ -43,6 +43,7 @@ grep -rn '@os-core/' src/ --include="*.ts" --include="*.tsx" | grep -v __tests__
 | Listener 격리 | 하나의 물리 제스처 → 하나의 Listener | 같은 pointerdown을 Mouse+Drag 각각 처리 |
 | DOM convention 자동화 | OS가 `data-*` 속성 자동 주입 | 앱이 `data-drag-handle` 수동 부착 |
 | **Facade 경계** | `src/`에서 `@os-sdk/os`, `@os-react/*`만 import | `src/`에서 `@os-core/*` 직접 import |
+| **React = L2 순수 투영** | Zone callback에서 `return BaseCommand` (선언형) | `.tsx`에서 `os.dispatch()` 직접 호출 (명령형) |
 
 ### 분류 기준
 
@@ -59,6 +60,7 @@ grep -rn '@os-core/' src/ --include="*.ts" --include="*.tsx" | grep -v __tests__
 - `onClick` → `Trigger onActivate` / OS activate
 - `useEffect` → OS hook / kernel middleware
 - `@os-core/*` import in `src/` → `@os-sdk/os`에서 re-export. facade에 없으면 `os.ts`에 추가 후 import 경로 변경
+- `os.dispatch()` in `.tsx` → Zone callback `return BaseCommand` / Trigger prop-getter / keybinding으로 전환. 대안 없으면 OS gap 등록
 
 ---
 
