@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { describe, expect, it } from "vitest";
 
 /**
  * Overlay Trigger attribute tests (updated for OverlayHandle API).
@@ -22,7 +22,9 @@ describe("overlay trigger attributes", () => {
     expect(result["aria-haspopup"]).toBe("true");
 
     // Must not inject React event handlers — pure data attributes only
-    expect((result as unknown as Record<string, unknown>)["onClick"]).toBeUndefined();
+    expect(
+      (result as unknown as Record<string, unknown>)["onClick"],
+    ).toBeUndefined();
   });
 
   it("overlay trigger() for dialog role returns aria-haspopup=dialog", () => {

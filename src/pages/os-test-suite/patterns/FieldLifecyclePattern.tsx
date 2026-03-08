@@ -10,8 +10,8 @@
  * Known gap: OG-014 — cross-zone editingItemId not transferred.
  */
 
-import { Item, Zone } from "@os-react/internal";
 import { Field } from "@os-react/6-project/field/Field";
+import { Item, Zone } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { produce } from "immer";
 import type { TestCase } from "../index";
@@ -19,10 +19,18 @@ import type { TestCase } from "../index";
 export const fieldLifecycleTests: TestCase[] = [
   { name: "type() sets field text", status: "pass" },
   { name: "field cancel (Escape) clears text", status: "pass" },
-  { name: "type + Enter commits via onCommit", status: "fail", gap: "Enter routes to OS_ACTIVATE not OS_FIELD_COMMIT" },
+  {
+    name: "type + Enter commits via onCommit",
+    status: "fail",
+    gap: "Enter routes to OS_ACTIVATE not OS_FIELD_COMMIT",
+  },
   { name: "field text persists across type calls", status: "pass" },
   { name: "keyboard.press works in field zone", status: "pass" },
-  { name: "trigger:change auto-commits on type", status: "fail", gap: "OG-013 trigger:change headless" },
+  {
+    name: "trigger:change auto-commits on type",
+    status: "fail",
+    gap: "OG-013 trigger:change headless",
+  },
   { name: "Tab to second field zone", status: "pass" },
 ];
 

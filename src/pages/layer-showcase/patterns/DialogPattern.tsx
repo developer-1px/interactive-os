@@ -10,10 +10,10 @@
  * Exported app is headless-testable.
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
@@ -39,7 +39,12 @@ triggerZone.bind({
 const dialogZone = DialogShowcaseApp.createZone("layer-dialog");
 dialogZone.bind({
   role: "group",
-  getItems: () => ["dialog-close", "dialog-name", "dialog-email", "dialog-save"],
+  getItems: () => [
+    "dialog-close",
+    "dialog-name",
+    "dialog-email",
+    "dialog-save",
+  ],
   options: {
     tab: { behavior: "trap" as const },
     dismiss: { escape: "close" as const },
@@ -54,8 +59,8 @@ export function DialogPattern() {
       <h3 className="text-lg font-semibold mb-3">Dialog (Modal)</h3>
       <p className="text-sm text-gray-500 mb-4">
         Click the button to open a modal dialog. <kbd>Tab</kbd> is trapped
-        within the dialog. <kbd>Escape</kbd> closes it and restores focus to
-        the trigger.
+        within the dialog. <kbd>Escape</kbd> closes it and restores focus to the
+        trigger.
       </p>
 
       <Dialog id="layer-dialog" role="dialog">

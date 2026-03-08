@@ -59,7 +59,6 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
     ? (ROLE_FIELD_TYPE_MAP[itemRole] ?? null)
     : null;
 
-
   // Overlay stack for trigger open/close detection
   const overlayStack = os.getState().os?.overlays?.stack ?? [];
   const isTriggerOverlayOpen = triggerMeta
@@ -96,18 +95,18 @@ export function senseKeyboard(e: KeyboardEvent): KeyboardInput | null {
       undefined,
     cursor: zone?.focusedItemId
       ? {
-        focusId: zone.focusedItemId,
-        selection: Object.entries(zone.items ?? {})
-          .filter(([, s]) => s?.["aria-selected"])
-          .map(([id]) => id),
-        anchor: zone.selectionAnchor ?? null,
-        isExpandable: isFocusedExpandable,
-        isDisabled:
-          focusedItemId && activeZoneId
-            ? ZoneRegistry.isDisabled(activeZoneId, focusedItemId)
-            : false,
-        treeLevel: undefined,
-      }
+          focusId: zone.focusedItemId,
+          selection: Object.entries(zone.items ?? {})
+            .filter(([, s]) => s?.["aria-selected"])
+            .map(([id]) => id),
+          anchor: zone.selectionAnchor ?? null,
+          isExpandable: isFocusedExpandable,
+          isDisabled:
+            focusedItemId && activeZoneId
+              ? ZoneRegistry.isDisabled(activeZoneId, focusedItemId)
+              : false,
+          treeLevel: undefined,
+        }
       : null,
   };
 }

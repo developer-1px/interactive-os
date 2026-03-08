@@ -7,8 +7,8 @@
  * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
 import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createHeadlessPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   TabsApp,
@@ -210,10 +210,7 @@ describe("APG Tabs Auto: Click", () => {
 describe("APG Tabs Auto: ARIA Attributes", () => {
   it("tab role on items", async () => {
     // A2
-    await expect(page.locator("#tab-ahlefeldt")).toHaveAttribute(
-      "role",
-      "tab",
-    );
+    await expect(page.locator("#tab-ahlefeldt")).toHaveAttribute("role", "tab");
     await expect(page.locator("#tab-andersen")).toHaveAttribute("role", "tab");
   });
 

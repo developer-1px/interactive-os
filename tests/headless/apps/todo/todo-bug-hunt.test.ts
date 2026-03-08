@@ -6,19 +6,19 @@
  */
 
 import {
-  TodoApp,
   addTodo,
   cancelDeleteTodo,
   cancelEdit,
   clearCompleted,
   confirmDeleteTodo,
-  undoCommand,
   requestDeleteTodo,
   selectCategory,
   setSearchQuery,
   startEdit,
+  TodoApp,
   toggleTodo,
   toggleView,
+  undoCommand,
   updateTodoText,
 } from "@apps/todo/app";
 import { createHeadlessPage } from "@os-devtool/testing/page";
@@ -332,12 +332,16 @@ describe("§14b Delete dialog: overlay interaction flow", () => {
 
   it("Delete key opens overlay and overlay stack has dialog entry", () => {
     openDeleteDialog();
-    expect(overlayStack().some((e) => e.id === "todo-delete-dialog")).toBe(true);
+    expect(overlayStack().some((e) => e.id === "todo-delete-dialog")).toBe(
+      true,
+    );
   });
 
   it("after dialog opens, Escape should close it", () => {
     openDeleteDialog();
-    expect(overlayStack().some((e) => e.id === "todo-delete-dialog")).toBe(true);
+    expect(overlayStack().some((e) => e.id === "todo-delete-dialog")).toBe(
+      true,
+    );
 
     page.keyboard.press("Escape");
 
@@ -545,9 +549,9 @@ describe("§18 Clipboard: cross-category paste", () => {
       (id: string) => page.state.data.todos[id]?.categoryId === "cat_work",
     );
     expect(workTodos.length).toBeGreaterThan(0);
-    expect(
-      page.state.data.todos[workTodos[0]].text,
-    ).toBe("Complete Interaction OS docs");
+    expect(page.state.data.todos[workTodos[0]].text).toBe(
+      "Complete Interaction OS docs",
+    );
   });
 });
 

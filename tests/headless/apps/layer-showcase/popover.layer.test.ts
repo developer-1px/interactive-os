@@ -11,8 +11,8 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { PopoverShowcaseApp } from "@/pages/layer-showcase/patterns/PopoverPattern";
 import { describe, expect, it } from "vitest";
+import { PopoverShowcaseApp } from "@/pages/layer-showcase/patterns/PopoverPattern";
 
 const POPOVER_ZONE_ID = "layer-popover";
 const TRIGGER_ID = "OpenPopoverBtn";

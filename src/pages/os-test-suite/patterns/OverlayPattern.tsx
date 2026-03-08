@@ -12,10 +12,10 @@
  *   OG-023 — AlertDialog Escape should be blocked
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
-import { Item } from "@os-react/internal";
 import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import type { TestCase } from "../index";
 
 export const overlayTests: TestCase[] = [
@@ -25,7 +25,10 @@ export const overlayTests: TestCase[] = [
   { name: "Tab cycles within dialog (focus trap)", status: "pass" },
   { name: "Escape closes dialog", status: "pass" },
   { name: "Escape restores focus to trigger", status: "pass" },
-  { name: "open > navigate > close > focus restores to trigger", status: "pass" },
+  {
+    name: "open > navigate > close > focus restores to trigger",
+    status: "pass",
+  },
 ];
 
 // ─── App Definition ───
@@ -67,8 +70,10 @@ export function OverlayPattern() {
     <div className="max-w-sm">
       <h3 className="text-lg font-semibold mb-3">Overlay Lifecycle</h3>
       <p className="text-sm text-gray-500 mb-4">
-        Click button to open dialog. <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Tab</kbd>{" "}
-        should cycle within dialog. <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Escape</kbd>{" "}
+        Click button to open dialog.{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Tab</kbd>{" "}
+        should cycle within dialog.{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Escape</kbd>{" "}
         closes and restores focus.
       </p>
 

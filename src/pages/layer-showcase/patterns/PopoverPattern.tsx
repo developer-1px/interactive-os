@@ -8,10 +8,10 @@
  *   - Outside click dismisses
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
-import { Item } from "@os-react/internal";
 import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───

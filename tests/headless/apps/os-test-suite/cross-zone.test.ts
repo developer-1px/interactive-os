@@ -8,7 +8,7 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { CrossZoneApp } from "@/pages/os-test-suite/patterns/CrossZonePattern";
 
 function createPage() {

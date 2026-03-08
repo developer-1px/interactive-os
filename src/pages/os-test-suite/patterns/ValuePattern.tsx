@@ -14,20 +14,56 @@ import type { TestCase } from "../index";
 
 export const valueTests: TestCase[] = [
   // Spinbutton
-  { name: "spinbutton initial value is 50", status: "fail", gap: "value.initial not seeded into valueNow" },
-  { name: "ArrowUp increments by step (1)", status: "fail", gap: "starts from 0, not initial" },
-  { name: "ArrowDown decrements by step (1)", status: "fail", gap: "starts from 0, not initial" },
-  { name: "PageUp increments by largeStep (10)", status: "fail", gap: "starts from 0" },
-  { name: "PageDown decrements by largeStep (10)", status: "fail", gap: "starts from 0" },
+  {
+    name: "spinbutton initial value is 50",
+    status: "fail",
+    gap: "value.initial not seeded into valueNow",
+  },
+  {
+    name: "ArrowUp increments by step (1)",
+    status: "fail",
+    gap: "starts from 0, not initial",
+  },
+  {
+    name: "ArrowDown decrements by step (1)",
+    status: "fail",
+    gap: "starts from 0, not initial",
+  },
+  {
+    name: "PageUp increments by largeStep (10)",
+    status: "fail",
+    gap: "starts from 0",
+  },
+  {
+    name: "PageDown decrements by largeStep (10)",
+    status: "fail",
+    gap: "starts from 0",
+  },
   { name: "Home sets to min (0)", status: "pass" },
   { name: "End sets to max (100)", status: "pass" },
   { name: "value clamps at max (no overflow)", status: "pass" },
   { name: "value clamps at min (no underflow)", status: "pass" },
   // Slider
-  { name: "slider initial value is 25", status: "fail", gap: "value.initial not seeded" },
-  { name: "slider ArrowUp increments by step (5)", status: "fail", gap: "starts from 0" },
-  { name: "slider ArrowDown decrements by step (5)", status: "fail", gap: "starts from 0" },
-  { name: "slider PageUp increments by largeStep (20)", status: "fail", gap: "starts from 0" },
+  {
+    name: "slider initial value is 25",
+    status: "fail",
+    gap: "value.initial not seeded",
+  },
+  {
+    name: "slider ArrowUp increments by step (5)",
+    status: "fail",
+    gap: "starts from 0",
+  },
+  {
+    name: "slider ArrowDown decrements by step (5)",
+    status: "fail",
+    gap: "starts from 0",
+  },
+  {
+    name: "slider PageUp increments by largeStep (20)",
+    status: "fail",
+    gap: "starts from 0",
+  },
   { name: "slider Home sets to min (0)", status: "pass" },
   { name: "slider End sets to max (100)", status: "pass" },
 ];
@@ -76,7 +112,9 @@ export function ValuePattern() {
       <h3 className="text-lg font-semibold">Value Controls</h3>
       <p className="text-sm text-gray-500">
         Use arrow keys to adjust values.{" "}
-        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">PageUp/Down</kbd>{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+          PageUp/Down
+        </kbd>{" "}
         for large steps.{" "}
         <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Home/End</kbd>{" "}
         for min/max.

@@ -108,9 +108,7 @@ export function TodoToolbarView() {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <Dialog.Close
-                  className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-                >
+                <Dialog.Close className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
                   Cancel
                 </Dialog.Close>
                 <Dialog.Close

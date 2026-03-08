@@ -10,10 +10,10 @@
  * open/close, keyboard, backdrop 전부 OS가 관리 (OG-001).
  */
 
-import { localeMenu } from "./app";
-import { Item, Zone } from "@os-react/internal";
 import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
+import { Item, Zone } from "@os-react/internal";
 import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
+import { localeMenu } from "./app";
 import { resolveFieldValue } from "./entities/i18n";
 import { addLocaleCommand, setLocaleCommand, useLocaleState } from "./locale";
 
@@ -32,11 +32,17 @@ const SUPPORTED_LOCALES = [
 function resolveLocaleAction(focusId: string) {
   if (focusId.startsWith("locale-option-")) {
     const code = focusId.replace("locale-option-", "");
-    return [setLocaleCommand({ locale: code }), OS_OVERLAY_CLOSE({ id: "locale-menu" })];
+    return [
+      setLocaleCommand({ locale: code }),
+      OS_OVERLAY_CLOSE({ id: "locale-menu" }),
+    ];
   }
   if (focusId.startsWith("locale-add-")) {
     const code = focusId.replace("locale-add-", "");
-    return [addLocaleCommand({ locale: code }), OS_OVERLAY_CLOSE({ id: "locale-menu" })];
+    return [
+      addLocaleCommand({ locale: code }),
+      OS_OVERLAY_CLOSE({ id: "locale-menu" }),
+    ];
   }
   return OS_OVERLAY_CLOSE({ id: "locale-menu" });
 }

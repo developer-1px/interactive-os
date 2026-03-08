@@ -6,10 +6,10 @@
  * are cross-zone (zone-a is an item OF inspector-zift zone).
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { InspectorApp, InspectorZiftUI } from "@inspector/app";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
+import { createHeadlessPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const FAKE_ZONES = ["zone-a", "zone-b", "zone-c"];
 const ZIFT_ZONE = "inspector-zift";

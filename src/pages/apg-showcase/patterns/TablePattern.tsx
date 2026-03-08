@@ -17,8 +17,8 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { Icon } from "@/components/Icon";
 import React from "react";
+import { Icon } from "@/components/Icon";
 
 // ─── Data ───
 
@@ -30,10 +30,30 @@ interface Student {
 }
 
 const STUDENTS: Student[] = [
-  { firstName: "Fred", lastName: "Jackson", company: "Canary, Inc.", address: "123 Broad St." },
-  { firstName: "Sara", lastName: "James", company: "Cardinal, Inc.", address: "457 First St." },
-  { firstName: "Ralph", lastName: "Jefferson", company: "Robin, Inc.", address: "456 Main St." },
-  { firstName: "Nancy", lastName: "Jensen", company: "Eagle, Inc.", address: "2203 Logan Dr." },
+  {
+    firstName: "Fred",
+    lastName: "Jackson",
+    company: "Canary, Inc.",
+    address: "123 Broad St.",
+  },
+  {
+    firstName: "Sara",
+    lastName: "James",
+    company: "Cardinal, Inc.",
+    address: "457 First St.",
+  },
+  {
+    firstName: "Ralph",
+    lastName: "Jefferson",
+    company: "Robin, Inc.",
+    address: "456 Main St.",
+  },
+  {
+    firstName: "Nancy",
+    lastName: "Jensen",
+    company: "Eagle, Inc.",
+    address: "2203 Logan Dr.",
+  },
 ];
 
 type SortColumn = "firstName" | "lastName" | "company" | "address";
@@ -82,7 +102,11 @@ const TableUI = tableZone.bind({
 
 // ─── Sort Logic ───
 
-function sortStudents(students: Student[], column: SortColumn, direction: SortDirection): Student[] {
+function sortStudents(
+  students: Student[],
+  column: SortColumn,
+  direction: SortDirection,
+): Student[] {
   return [...students].sort((a, b) => {
     const cmp = a[column].toLowerCase().localeCompare(b[column].toLowerCase());
     return direction === "ascending" ? cmp : -cmp;
@@ -93,10 +117,30 @@ function sortStudents(students: Student[], column: SortColumn, direction: SortDi
 
 type TriggerKey = "SortFirstName" | "SortLastName" | "SortCompany";
 
-const COLUMNS: { key: SortColumn; label: string; sortable: boolean; triggerKey?: TriggerKey }[] = [
-  { key: "firstName", label: "First Name", sortable: true, triggerKey: "SortFirstName" },
-  { key: "lastName", label: "Last Name", sortable: true, triggerKey: "SortLastName" },
-  { key: "company", label: "Company", sortable: true, triggerKey: "SortCompany" },
+const COLUMNS: {
+  key: SortColumn;
+  label: string;
+  sortable: boolean;
+  triggerKey?: TriggerKey;
+}[] = [
+  {
+    key: "firstName",
+    label: "First Name",
+    sortable: true,
+    triggerKey: "SortFirstName",
+  },
+  {
+    key: "lastName",
+    label: "Last Name",
+    sortable: true,
+    triggerKey: "SortLastName",
+  },
+  {
+    key: "company",
+    label: "Company",
+    sortable: true,
+    triggerKey: "SortCompany",
+  },
   { key: "address", label: "Address", sortable: false },
 ];
 
@@ -140,7 +184,11 @@ export function TablePattern() {
         className="w-full border-collapse bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm text-sm"
       >
         <thead>
-          <TableUI.Zone as="tr" className="bg-gray-50 border-b border-gray-200" aria-label="Sort controls">
+          <TableUI.Zone
+            as="tr"
+            className="bg-gray-50 border-b border-gray-200"
+            aria-label="Sort controls"
+          >
             {COLUMNS.map((col) => (
               <th
                 key={col.key}
@@ -148,7 +196,9 @@ export function TablePattern() {
                 aria-sort={
                   col.sortable && state.sortColumn === col.key
                     ? state.sortDirection
-                    : col.sortable ? "none" : undefined
+                    : col.sortable
+                      ? "none"
+                      : undefined
                 }
                 className="px-4 py-3 text-left font-semibold text-gray-700"
               >
@@ -166,7 +216,11 @@ export function TablePattern() {
                       "
                     >
                       {col.label}
-                      <SortIcon column={col.key} sortColumn={state.sortColumn} sortDirection={state.sortDirection} />
+                      <SortIcon
+                        column={col.key}
+                        sortColumn={state.sortColumn}
+                        sortDirection={state.sortDirection}
+                      />
                     </button>
                   </TableUI.Item>
                 ) : (
@@ -196,13 +250,24 @@ export function TablePattern() {
 
 // ─── Sort Icon ───
 
-function SortIcon({ column, sortColumn, sortDirection }: {
+function SortIcon({
+  column,
+  sortColumn,
+  sortDirection,
+}: {
   column: SortColumn;
   sortColumn: SortColumn;
   sortDirection: SortDirection;
 }) {
   if (sortColumn !== column) {
-    return <span aria-hidden="true" className="text-gray-300 flex-shrink-0 text-xs leading-none">&#9670;</span>;
+    return (
+      <span
+        aria-hidden="true"
+        className="text-gray-300 flex-shrink-0 text-xs leading-none"
+      >
+        &#9670;
+      </span>
+    );
   }
   return (
     <Icon

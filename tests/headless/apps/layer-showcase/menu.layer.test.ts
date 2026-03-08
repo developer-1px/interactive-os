@@ -12,8 +12,8 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { MenuShowcaseApp } from "@/pages/layer-showcase/patterns/MenuPattern";
 import { describe, expect, it } from "vitest";
+import { MenuShowcaseApp } from "@/pages/layer-showcase/patterns/MenuPattern";
 
 const MENU_ZONE_ID = "layer-menu";
 const TRIGGER_ID = "OpenMenuBtn";

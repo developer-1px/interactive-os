@@ -17,10 +17,26 @@ export const selectionTests: TestCase[] = [
   { name: "click selects item (single)", status: "pass" },
   { name: "click another replaces selection (single)", status: "pass" },
   { name: "Space toggles selection on focused item", status: "pass" },
-  { name: "click selects single item (multi, replace mode)", status: "fail", gap: "multi-select click returns empty" },
-  { name: "Shift+click selects range", status: "fail", gap: "multi-select modifier not applied" },
-  { name: "Meta+click toggles individual items", status: "fail", gap: "multi-select modifier not applied" },
-  { name: "Shift+ArrowDown extends selection", status: "fail", gap: "multi-select keyboard range" },
+  {
+    name: "click selects single item (multi, replace mode)",
+    status: "fail",
+    gap: "multi-select click returns empty",
+  },
+  {
+    name: "Shift+click selects range",
+    status: "fail",
+    gap: "multi-select modifier not applied",
+  },
+  {
+    name: "Meta+click toggles individual items",
+    status: "fail",
+    gap: "multi-select modifier not applied",
+  },
+  {
+    name: "Shift+ArrowDown extends selection",
+    status: "fail",
+    gap: "multi-select keyboard range",
+  },
   { name: "Meta+A selects all", status: "fail", gap: "multi-select keyboard" },
 ];
 
@@ -73,9 +89,13 @@ export function SelectionPattern() {
       <h3 className="text-lg font-semibold">Selection Modes</h3>
       <p className="text-sm text-gray-500">
         Single-select (top) and multi-select (bottom). Try{" "}
-        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Shift+Click</kbd>{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+          Shift+Click
+        </kbd>{" "}
         for range and{" "}
-        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl+Click</kbd>{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+          Ctrl+Click
+        </kbd>{" "}
         for toggle.
       </p>
 

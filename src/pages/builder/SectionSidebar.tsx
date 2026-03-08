@@ -9,8 +9,8 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
-import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useDragState } from "@os-react/6-project/accessors/useDragState";
+import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";

@@ -7,11 +7,11 @@
 
 import { Keybindings as KeybindingsRegistry } from "@os-core/2-resolve/keybindings";
 import { os } from "@os-core/engine/kernel";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import {
   getContentRole,
   getContentVisibilitySource,
 } from "@os-core/engine/registries/roleRegistry";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { Field } from "@os-react/6-project/field/Field";
 import { Item, type ItemState } from "@os-react/6-project/Item";
 import type { ZoneOptions } from "@os-react/6-project/Zone";

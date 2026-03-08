@@ -255,12 +255,12 @@ export function getDropPosition(
 
 export type ClickTarget =
   | {
-    type: "trigger";
-    triggerId: string;
-    overlayId: string;
-    overlayType: string;
-    isOpen: boolean;
-  }
+      type: "trigger";
+      triggerId: string;
+      overlayId: string;
+      overlayType: string;
+      isOpen: boolean;
+    }
   | { type: "simple-trigger"; triggerId: string; payload: string | null }
   | { type: "expand"; itemId: string; zoneId: string }
   | { type: "check"; itemId: string; zoneId: string }

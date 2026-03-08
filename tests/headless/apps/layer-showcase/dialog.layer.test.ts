@@ -17,13 +17,18 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { DialogShowcaseApp } from "@/pages/layer-showcase/patterns/DialogPattern";
 import { describe, expect, it } from "vitest";
+import { DialogShowcaseApp } from "@/pages/layer-showcase/patterns/DialogPattern";
 
 const TRIGGER_ZONE_ID = "dialog-trigger-zone";
 const DIALOG_ZONE_ID = "layer-dialog";
 const TRIGGER_ID = "OpenDialog";
-const DIALOG_ITEMS = ["dialog-close", "dialog-name", "dialog-email", "dialog-save"];
+const DIALOG_ITEMS = [
+  "dialog-close",
+  "dialog-name",
+  "dialog-email",
+  "dialog-save",
+];
 
 function createPage() {
   const page = createHeadlessPage(DialogShowcaseApp);

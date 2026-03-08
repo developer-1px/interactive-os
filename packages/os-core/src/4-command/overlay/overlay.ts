@@ -57,9 +57,7 @@ export const OS_OVERLAY_OPEN = os.defineCommand(
           const items = overlayEntry.getItems?.() ?? [];
           if (items.length > 0) {
             const targetItem =
-              payload.entry === "last"
-                ? items[items.length - 1]!
-                : items[0]!;
+              payload.entry === "last" ? items[items.length - 1]! : items[0]!;
             const z = ensureZone(draft.os, payload.id);
             z.focusedItemId = targetItem;
             z.lastFocusedId = targetItem;

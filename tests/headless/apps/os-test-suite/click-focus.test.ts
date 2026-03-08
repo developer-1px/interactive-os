@@ -6,7 +6,7 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ClickFocusApp } from "@/pages/os-test-suite/patterns/ClickFocusPattern";
 
 function createPage() {

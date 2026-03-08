@@ -11,8 +11,8 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { ListboxDropdownShowcaseApp } from "@/pages/layer-showcase/patterns/ListboxDropdownPattern";
 import { describe, expect, it } from "vitest";
+import { ListboxDropdownShowcaseApp } from "@/pages/layer-showcase/patterns/ListboxDropdownPattern";
 
 const LISTBOX_ZONE_ID = "layer-listbox";
 const TRIGGER_ID = "OpenListboxBtn";

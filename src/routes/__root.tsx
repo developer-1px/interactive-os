@@ -74,9 +74,7 @@ function RootComponent() {
 
         {/* Inspector */}
         {isInspectorOpen && (
-          <aside
-            className="h-full flex-shrink-0 sticky top-0 z-50"
-          >
+          <aside className="h-full flex-shrink-0 sticky top-0 z-50">
             <InspectorShell />
           </aside>
         )}

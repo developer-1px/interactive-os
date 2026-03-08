@@ -8,18 +8,23 @@
  *   - Only Cancel/Confirm buttons can close
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
 
-export const AlertDialogShowcaseApp = defineApp("layer-alertdialog-showcase", {});
+export const AlertDialogShowcaseApp = defineApp(
+  "layer-alertdialog-showcase",
+  {},
+);
 
 // Trigger zone
-const triggerZone = AlertDialogShowcaseApp.createZone("alertdialog-trigger-zone");
+const triggerZone = AlertDialogShowcaseApp.createZone(
+  "alertdialog-trigger-zone",
+);
 triggerZone.bind({
   role: "toolbar",
   getItems: () => ["OpenAlertDialog"],
@@ -51,9 +56,9 @@ export function AlertDialogPattern() {
     <div className="max-w-md">
       <h3 className="text-lg font-semibold mb-3">AlertDialog</h3>
       <p className="text-sm text-gray-500 mb-4">
-        A modal dialog that requires explicit confirmation.{" "}
-        <kbd>Escape</kbd> does NOT close it. Only Cancel or Confirm buttons
-        can dismiss the dialog.
+        A modal dialog that requires explicit confirmation. <kbd>Escape</kbd>{" "}
+        does NOT close it. Only Cancel or Confirm buttons can dismiss the
+        dialog.
       </p>
 
       <Dialog id="layer-alertdialog" role="alertdialog">

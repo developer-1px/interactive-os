@@ -12,8 +12,8 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { NestedShowcaseApp } from "@/pages/layer-showcase/patterns/NestedPattern";
 import { describe, expect, it } from "vitest";
+import { NestedShowcaseApp } from "@/pages/layer-showcase/patterns/NestedPattern";
 
 function createPage() {
   const page = createHeadlessPage(NestedShowcaseApp);

@@ -2,10 +2,16 @@ import { Item, Zone } from "@os-react/internal";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Icon } from "@/components/Icon";
-import { ClickFocusPattern, clickFocusTests } from "./patterns/ClickFocusPattern";
+import {
+  ClickFocusPattern,
+  clickFocusTests,
+} from "./patterns/ClickFocusPattern";
 import { CrossZonePattern, crossZoneTests } from "./patterns/CrossZonePattern";
 import { ExpandPattern, expandTests } from "./patterns/ExpandPattern";
-import { FieldLifecyclePattern, fieldLifecycleTests } from "./patterns/FieldLifecyclePattern";
+import {
+  FieldLifecyclePattern,
+  fieldLifecycleTests,
+} from "./patterns/FieldLifecyclePattern";
 import { OverlayPattern, overlayTests } from "./patterns/OverlayPattern";
 import { SelectionPattern, selectionTests } from "./patterns/SelectionPattern";
 import { ValuePattern, valueTests } from "./patterns/ValuePattern";
@@ -94,9 +100,7 @@ function TestList({ tests }: { tests: TestCase[] }) {
                 <span className="text-emerald-500">✓</span>
               )}
               {t.status === "fail" && <span className="text-red-500">✗</span>}
-              {t.status === "todo" && (
-                <span className="text-gray-400">○</span>
-              )}
+              {t.status === "todo" && <span className="text-gray-400">○</span>}
             </span>
             <span
               className={

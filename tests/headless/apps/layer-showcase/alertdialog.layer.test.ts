@@ -16,8 +16,8 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { AlertDialogShowcaseApp } from "@/pages/layer-showcase/patterns/AlertDialogPattern";
 import { describe, expect, it } from "vitest";
+import { AlertDialogShowcaseApp } from "@/pages/layer-showcase/patterns/AlertDialogPattern";
 
 const DIALOG_ZONE_ID = "layer-alertdialog";
 const TRIGGER_ID = "OpenAlertDialog";
@@ -55,7 +55,9 @@ describe("Layer AlertDialog: Focus Trap", () => {
 describe("Layer AlertDialog: Escape Blocked", () => {
   // OS GAP: alertdialog should block Escape, but current OS closes all overlays
   // regardless of type. See docs/5-backlog/ for tracking.
-  it.todo("Escape does NOT close alertdialog (OS gap: overlay type not checked)");
+  it.todo(
+    "Escape does NOT close alertdialog (OS gap: overlay type not checked)",
+  );
 });
 
 describe("Layer AlertDialog: ARIA Projection", () => {

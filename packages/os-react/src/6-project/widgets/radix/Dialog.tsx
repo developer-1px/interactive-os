@@ -24,8 +24,8 @@ import type { BaseCommand } from "@kernel";
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { Item } from "@os-react/6-project/Item.tsx";
-import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
+import { useZoneContext } from "@os-react/6-project/Zone.tsx";
 import {
   Children,
   cloneElement,
@@ -61,13 +61,19 @@ function DialogRoot({ children, id, role = "dialog" }: DialogProps) {
   Children.forEach(children, (child) => {
     if (isValidElement(child) && (child.type as unknown) === DialogContent) {
       contentProps = child.props as DialogContentProps;
-    } else if (isValidElement(child) && (child.type as unknown) === DialogTrigger) {
+    } else if (
+      isValidElement(child) &&
+      (child.type as unknown) === DialogTrigger
+    ) {
       // Inject trigger attrs into the Trigger wrapper
       triggerElements.push(
-        cloneElement(child as ReactElement<DialogTriggerProps & Record<string, unknown>>, {
-          _overlayId: overlayId,
-          _role: role,
-        }),
+        cloneElement(
+          child as ReactElement<DialogTriggerProps & Record<string, unknown>>,
+          {
+            _overlayId: overlayId,
+            _role: role,
+          },
+        ),
       );
     } else {
       triggerElements.push(child);
@@ -78,7 +84,13 @@ function DialogRoot({ children, id, role = "dialog" }: DialogProps) {
     return <>{triggerElements}</>;
   }
 
-  const { title, description, className: contentClass, contentClassName, children: contentChildren } = contentProps;
+  const {
+    title,
+    description,
+    className: contentClass,
+    contentClassName,
+    children: contentChildren,
+  } = contentProps;
 
   return (
     <>
@@ -128,11 +140,15 @@ function DialogTrigger({
   _overlayId,
   _role,
   ...rest
-}: DialogTriggerProps & { _overlayId?: string; _role?: string } & Record<string, unknown>) {
+}: DialogTriggerProps & { _overlayId?: string; _role?: string } & Record<
+    string,
+    unknown
+  >) {
   const triggerAttrs: Record<string, unknown> = _overlayId
     ? {
         "data-trigger-id": `${_overlayId}-trigger`,
-        "aria-haspopup": _role === "menu" ? ("true" as const) : (_role ?? "dialog"),
+        "aria-haspopup":
+          _role === "menu" ? ("true" as const) : (_role ?? "dialog"),
         "aria-controls": _overlayId,
       }
     : {};
@@ -202,7 +218,13 @@ export interface DialogCloseProps {
  * Renders as an Item inside the overlay zone.
  * When activated, dispatches onActivate (or OS_OVERLAY_CLOSE) via ZoneRegistry.
  */
-function DialogClose({ children, onActivate, className, id, ...rest }: DialogCloseProps) {
+function DialogClose({
+  children,
+  onActivate,
+  className,
+  id,
+  ...rest
+}: DialogCloseProps) {
   const zoneCtx = useZoneContext();
   const zoneId = zoneCtx?.zoneId ?? "";
   const itemId = id ?? `${zoneId}-close`;

@@ -21,7 +21,6 @@ const TriggerUI = triggerZone.bind({
 });
 
 export function AriaInteractionTest() {
-
   const description = (
     <div className="space-y-2">
       <p>Verifies interaction primitives:</p>

@@ -8,17 +8,22 @@
  *   - Escape closes → focus restores
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
-import { Item } from "@os-react/internal";
 import { PopoverPortal } from "@os-react/6-project/widgets/PopoverPortal";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
 
-export const ListboxDropdownShowcaseApp = defineApp("layer-listbox-dropdown-showcase", {});
+export const ListboxDropdownShowcaseApp = defineApp(
+  "layer-listbox-dropdown-showcase",
+  {},
+);
 
-const triggerZone = ListboxDropdownShowcaseApp.createZone("listbox-trigger-zone");
+const triggerZone = ListboxDropdownShowcaseApp.createZone(
+  "listbox-trigger-zone",
+);
 triggerZone.bind({
   role: "toolbar",
   getItems: () => ["OpenListboxBtn"],
@@ -56,9 +61,9 @@ export function ListboxDropdownPattern() {
     <div className="max-w-sm">
       <h3 className="text-lg font-semibold mb-3">Listbox Dropdown</h3>
       <p className="text-sm text-gray-500 mb-4">
-        A trigger that opens a listbox popup for selection.{" "}
-        <kbd>Arrow</kbd> keys navigate options. <kbd>Enter</kbd> selects.{" "}
-        <kbd>Escape</kbd> closes.
+        A trigger that opens a listbox popup for selection. <kbd>Arrow</kbd>{" "}
+        keys navigate options. <kbd>Enter</kbd> selects. <kbd>Escape</kbd>{" "}
+        closes.
       </p>
 
       <div className="relative inline-block">

@@ -10,11 +10,11 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   FieldLifecycleApp,
-  setEnterValue,
   setChangeValue,
+  setEnterValue,
 } from "@/pages/os-test-suite/patterns/FieldLifecyclePattern";
 
 type AppPage = ReturnType<typeof createHeadlessPage>;
@@ -26,7 +26,9 @@ function createPage() {
 }
 
 function appState(page: AppPage) {
-  return (page as unknown as { state: { enterValue: string; changeValue: string } }).state;
+  return (
+    page as unknown as { state: { enterValue: string; changeValue: string } }
+  ).state;
 }
 
 function dispatch(page: AppPage, cmd: unknown) {

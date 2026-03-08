@@ -8,6 +8,9 @@
 
 import { os } from "@os-core/engine/kernel";
 
-export function useZoneValue(zoneId: string, itemId: string): number | undefined {
+export function useZoneValue(
+  zoneId: string,
+  itemId: string,
+): number | undefined {
   return os.useComputed((s) => s.os.focus.zones[zoneId]?.valueNow?.[itemId]);
 }

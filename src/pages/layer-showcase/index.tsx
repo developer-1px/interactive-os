@@ -2,23 +2,23 @@ import { Item, Zone } from "@os-react/internal";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Icon } from "@/components/Icon";
-import { DialogPattern } from "./patterns/DialogPattern";
 import { AlertDialogPattern } from "./patterns/AlertDialogPattern";
-import { MenuPattern } from "./patterns/MenuPattern";
-import { PopoverPattern } from "./patterns/PopoverPattern";
+import { DialogPattern } from "./patterns/DialogPattern";
 import { ListboxDropdownPattern } from "./patterns/ListboxDropdownPattern";
-import { TooltipPattern } from "./patterns/TooltipPattern";
+import { MenuPattern } from "./patterns/MenuPattern";
 import { NestedPattern } from "./patterns/NestedPattern";
+import { PopoverPattern } from "./patterns/PopoverPattern";
+import { TooltipPattern } from "./patterns/TooltipPattern";
 
-const PATTERNS: Record<
-  string,
-  { name: string; component: React.FC }
-> = {
+const PATTERNS: Record<string, { name: string; component: React.FC }> = {
   dialog: { name: "Dialog", component: DialogPattern },
   alertdialog: { name: "AlertDialog", component: AlertDialogPattern },
   menu: { name: "Menu", component: MenuPattern },
   popover: { name: "Popover", component: PopoverPattern },
-  "listbox-dropdown": { name: "Listbox Dropdown", component: ListboxDropdownPattern },
+  "listbox-dropdown": {
+    name: "Listbox Dropdown",
+    component: ListboxDropdownPattern,
+  },
   tooltip: { name: "Tooltip", component: TooltipPattern },
   nested: { name: "Nested Overlay", component: NestedPattern },
 };

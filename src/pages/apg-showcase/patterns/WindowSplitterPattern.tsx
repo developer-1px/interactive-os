@@ -19,8 +19,8 @@
  *   CSS reads data-focused, aria-valuenow. No useState, no onClick, no onKeyDown.
  */
 
-import { defineApp } from "@os-sdk/app/defineApp";
 import { useZoneValue } from "@os-react/6-project/accessors/useZoneValue";
+import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 
 // --- App + Zone (defineApp pattern) ---

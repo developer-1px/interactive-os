@@ -68,7 +68,9 @@ describe("Feature: bind() with triggers object map", () => {
     const props = UI.triggers.ActivateItem("item-1");
     expect(props).toHaveProperty("data-trigger-id", "ActivateItem");
     expect(props).toHaveProperty("data-trigger-payload");
-    expect((props as unknown as Record<string, unknown>)["data-trigger-payload"]).toBe("item-1");
+    expect(
+      (props as unknown as Record<string, unknown>)["data-trigger-payload"],
+    ).toBe("item-1");
   });
 });
 

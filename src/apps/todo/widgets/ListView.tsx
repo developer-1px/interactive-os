@@ -4,12 +4,7 @@
  * <TodoList.Zone> with 0 bindings — all from zone.bind declaration.
  */
 
-import {
-  TodoApp,
-  TodoDraft,
-  TodoList,
-  TodoSearch,
-} from "@apps/todo/app";
+import { TodoApp, TodoDraft, TodoList, TodoSearch } from "@apps/todo/app";
 import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
@@ -182,4 +177,3 @@ export function ListView() {
     </div>
   );
 }
-

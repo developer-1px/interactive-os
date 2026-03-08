@@ -51,8 +51,8 @@ interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-  | string;
+    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+    | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -160,7 +160,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => { });
+  os.defineEffect("clipboardWrite", () => {});
 
   // ── Enter preview sandbox ──
   os.enterPreview({

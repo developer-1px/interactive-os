@@ -15,8 +15,8 @@
  *   Zone-level min/max applies to all thumbs. App-level visual clamping only.
  */
 
-import { defineApp } from "@os-sdk/app/defineApp";
 import { useZoneValue } from "@os-react/6-project/accessors/useZoneValue";
+import { defineApp } from "@os-sdk/app/defineApp";
 import clsx from "clsx";
 import type React from "react";
 

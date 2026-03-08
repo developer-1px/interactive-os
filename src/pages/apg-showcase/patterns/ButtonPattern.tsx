@@ -38,12 +38,9 @@ const actionCounter = ActionButtonApp.selector(
   (s) => s.actionCount,
 );
 
-export const PERFORM_ACTION = actionZone.command(
-  "PERFORM_ACTION",
-  (ctx) => ({
-    state: { actionCount: ctx.state.actionCount + 1 },
-  }),
-);
+export const PERFORM_ACTION = actionZone.command("PERFORM_ACTION", (ctx) => ({
+  state: { actionCount: ctx.state.actionCount + 1 },
+}));
 
 // ─── Bind (triggers declared here — single declaration point) ───
 

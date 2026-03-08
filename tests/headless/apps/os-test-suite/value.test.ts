@@ -5,7 +5,7 @@
  */
 
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ValueApp } from "@/pages/os-test-suite/patterns/ValuePattern";
 
 function createPage() {

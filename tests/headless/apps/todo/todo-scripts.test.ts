@@ -23,20 +23,20 @@ type P = AppPageInternal<any>;
 let page: P;
 
 beforeEach(() => {
-    _resetClipboardStore();
-    page = createHeadlessPage(TodoApp, TodoPage);
-    page.goto("/"); // Playwright-compatible: registers all zones + renders component
+  _resetClipboardStore();
+  page = createHeadlessPage(TodoApp, TodoPage);
+  page.goto("/"); // Playwright-compatible: registers all zones + renders component
 });
 
 afterEach(() => {
-    page.cleanup();
+  page.cleanup();
 });
 
 // ─── Run each TestScript ───
 describe("Todo Unified Scripts (Headless)", () => {
-    for (const script of todoScripts) {
-        it(script.name, async () => {
-            await script.run(page, osExpect);
-        });
-    }
+  for (const script of todoScripts) {
+    it(script.name, async () => {
+      await script.run(page, osExpect);
+    });
+  }
 });

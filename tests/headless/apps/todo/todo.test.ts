@@ -5,7 +5,7 @@
  * Each test: page.click/press/locator/expect → OS pipeline → ARIA state.
  */
 
-import { TodoApp, confirmDeleteTodo } from "@apps/todo/app";
+import { confirmDeleteTodo, TodoApp } from "@apps/todo/app";
 import { createHeadlessPage } from "@os-devtool/testing/page";
 import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 type P = AppPageInternal<any>;
 let page: P;
+
 import TodoPage from "../../../../src/pages/TodoPage";
 
 beforeEach(() => {
@@ -281,7 +282,10 @@ describe("§8 Sidebar: navigation + selection", () => {
 describe("§9 Draft: add todo", () => {
   it("type text + Enter adds a new todo", () => {
     // Headless-only workaround: clicking a field doesn't trigger OS_FOCUS in current OS simulator
-    page.dispatch({ type: "OS_FOCUS", payload: { zoneId: "draft", itemId: null } } as any);
+    page.dispatch({
+      type: "OS_FOCUS",
+      payload: { zoneId: "draft", itemId: null },
+    } as any);
     page.keyboard.type("New headless task");
     page.keyboard.press("Enter");
 

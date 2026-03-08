@@ -9,10 +9,10 @@
  *   - Focus restores correctly through the chain
  */
 
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
@@ -72,8 +72,8 @@ export function NestedPattern() {
       <h3 className="text-lg font-semibold mb-3">Nested Overlay (LIFO)</h3>
       <p className="text-sm text-gray-500 mb-4">
         Opens a dialog, which contains a button to open a second dialog.{" "}
-        <kbd>Escape</kbd> closes the topmost dialog first (LIFO stack).
-        Focus restores correctly through the chain.
+        <kbd>Escape</kbd> closes the topmost dialog first (LIFO stack). Focus
+        restores correctly through the chain.
       </p>
 
       <Dialog id="nested-dialog-1" role="dialog">

@@ -121,9 +121,9 @@ export function buildKeyboardInput(
     // (i.e., the field absorbs it)
     isFieldActive: editingFieldId
       ? !isKeyDelegatedToOS(
-        key,
-        FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline",
-      )
+          key,
+          FieldRegistry.getField(editingFieldId)?.config.fieldType ?? "inline",
+        )
       : false,
     isComposing: false,
     isDefaultPrevented: false,
@@ -266,9 +266,10 @@ export function simulateClick(
     const focusId = activeZoneId
       ? (readFocusedItemId(kernel, activeZoneId) ?? "")
       : "";
-    const cmd = typeof itemCb.onActivate === "function"
-      ? itemCb.onActivate(focusId)
-      : itemCb.onActivate;
+    const cmd =
+      typeof itemCb.onActivate === "function"
+        ? itemCb.onActivate(focusId)
+        : itemCb.onActivate;
     kernel.dispatch(cmd);
     if (_observer && before) {
       _observer({
@@ -336,9 +337,10 @@ export function simulateClick(
   // (overlay triggers need invoker saved in focusStack first)
   if (itemCb?.onActivate && triggerZoneId) {
     const focusId = readFocusedItemId(kernel, triggerZoneId) ?? "";
-    const cmd = typeof itemCb.onActivate === "function"
-      ? itemCb.onActivate(focusId)
-      : itemCb.onActivate;
+    const cmd =
+      typeof itemCb.onActivate === "function"
+        ? itemCb.onActivate(focusId)
+        : itemCb.onActivate;
     kernel.dispatch(cmd);
   }
 

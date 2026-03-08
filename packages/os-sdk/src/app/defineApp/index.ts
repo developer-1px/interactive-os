@@ -30,12 +30,11 @@ import type { CommandFactory } from "@kernel/core/tokens";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import type React from "react";
-
 import type { AppModule } from "../modules/types";
 import { createBoundComponents } from "./bind";
 import { createTestInstance } from "./testInstance";
-import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import {
   __conditionBrand,
   __selectorBrand,
@@ -273,7 +272,6 @@ export function defineApp<S>(
         return createZone(`${zoneName}:${childName}`, zoneGroup);
       },
 
-
       overlay(
         id: string,
         config: import("@os-sdk/app/defineApp/types").ZoneOverlayConfig,
@@ -286,21 +284,27 @@ export function defineApp<S>(
 
         return {
           overlayId: id,
-          trigger: <T extends HTMLElement>(payload?: string) => ({
-            "data-trigger-id": triggerId,
-            "aria-haspopup": role === "menu" ? "true" : (role as string),
-            "aria-controls": id,
-            ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
-          }) as React.HTMLAttributes<T> & {
-            "data-trigger-id": string;
-            "aria-haspopup"?: string;
-            "aria-controls"?: string;
-          },
+          trigger: <T extends HTMLElement>(payload?: string) =>
+            ({
+              "data-trigger-id": triggerId,
+              "aria-haspopup": role === "menu" ? "true" : (role as string),
+              "aria-controls": id,
+              ...(payload !== undefined
+                ? { "data-trigger-payload": payload }
+                : {}),
+            }) as React.HTMLAttributes<T> & {
+              "data-trigger-id": string;
+              "aria-haspopup"?: string;
+              "aria-controls"?: string;
+            },
         };
       },
 
       bind<
-        TriggerMap extends Record<string, (focusId: string) => import("@kernel/core/tokens").BaseCommand> = Record<string, never>,
+        TriggerMap extends Record<
+          string,
+          (focusId: string) => import("@kernel/core/tokens").BaseCommand
+        > = Record<string, never>,
       >(
         config: Omit<ZoneBindings, "triggers"> & {
           field?: FieldBindings;
@@ -312,21 +316,36 @@ export function defineApp<S>(
           triggers?: TriggerMap;
         },
       ): BoundComponents<S> & {
-        triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
+        triggers: {
+          [K in keyof TriggerMap]: <T extends HTMLElement>(
+            payload?: string,
+          ) => React.HTMLAttributes<T>;
+        };
       } {
         // Normalize triggers: object map → TriggerBinding[] + prop-getter map
         let triggerBindings: TriggerBinding[] | undefined;
-        const triggerGetters: Record<string, <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>> = {};
+        const triggerGetters: Record<
+          string,
+          <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T>
+        > = {};
 
         if (config.triggers) {
           triggerBindings = [];
           const map = config.triggers;
           for (const [key, onActivate] of Object.entries(map)) {
-            triggerBindings.push({ id: key, onActivate: onActivate as (focusId: string) => import("@kernel/core/tokens").BaseCommand });
-            triggerGetters[key] = <T extends HTMLElement>(payload?: string) => ({
-              "data-trigger-id": key,
-              ...(payload !== undefined ? { "data-trigger-payload": payload } : {}),
-            }) as React.HTMLAttributes<T> & { "data-trigger-id": string };
+            triggerBindings.push({
+              id: key,
+              onActivate: onActivate as (
+                focusId: string,
+              ) => import("@kernel/core/tokens").BaseCommand,
+            });
+            triggerGetters[key] = <T extends HTMLElement>(payload?: string) =>
+              ({
+                "data-trigger-id": key,
+                ...(payload !== undefined
+                  ? { "data-trigger-payload": payload }
+                  : {}),
+              }) as React.HTMLAttributes<T> & { "data-trigger-id": string };
           }
         }
 
@@ -357,7 +376,11 @@ export function defineApp<S>(
         // Return components + trigger prop-getters
         return {
           ...components,
-          triggers: triggerGetters as { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> },
+          triggers: triggerGetters as {
+            [K in keyof TriggerMap]: <T extends HTMLElement>(
+              payload?: string,
+            ) => React.HTMLAttributes<T>;
+          },
         };
       },
     };

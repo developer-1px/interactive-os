@@ -25,12 +25,15 @@ export interface ZoneOverlayConfig {
 /** OverlayHandle — L1 contract for overlay triggers. No React components. */
 export interface OverlayHandle {
   overlayId: string;
-  trigger: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> & {
+  trigger: <T extends HTMLElement>(
+    payload?: string,
+  ) => React.HTMLAttributes<T> & {
     "data-trigger-id": string;
     "aria-haspopup"?: string;
     "aria-controls"?: string;
   };
 }
+
 import type { ZodSchema } from "zod";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -65,9 +68,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-    state: S;
-    dispatch?: BaseCommand | BaseCommand[] | undefined;
-  }
+      state: S;
+      dispatch?: BaseCommand | BaseCommand[] | undefined;
+    }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -171,14 +174,14 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-    | ReactNode
-    | ((state: {
-      isFocused: boolean;
-      isSelected: boolean;
-      isExpanded: boolean;
-      isAnchor?: boolean;
-      valueNow?: number;
-    }) => ReactNode);
+      | ReactNode
+      | ((state: {
+          isFocused: boolean;
+          isSelected: boolean;
+          isExpanded: boolean;
+          isAnchor?: boolean;
+          valueNow?: number;
+        }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -224,7 +227,10 @@ export interface ZoneHandle<S> {
   overlay(id: string, config: ZoneOverlayConfig): OverlayHandle;
 
   bind<
-    TriggerMap extends Record<string, (focusId: string) => BaseCommand> = Record<string, never>,
+    TriggerMap extends Record<
+      string,
+      (focusId: string) => BaseCommand
+    > = Record<string, never>,
   >(
     config: Omit<ZoneBindings, "triggers"> & {
       field?: FieldBindings;
@@ -234,7 +240,11 @@ export interface ZoneHandle<S> {
       triggers?: TriggerMap;
     },
   ): BoundComponents<S> & {
-    triggers: { [K in keyof TriggerMap]: <T extends HTMLElement>(payload?: string) => React.HTMLAttributes<T> };
+    triggers: {
+      [K in keyof TriggerMap]: <T extends HTMLElement>(
+        payload?: string,
+      ) => React.HTMLAttributes<T>;
+    };
   };
 }
 
@@ -346,7 +356,9 @@ export interface AppPageInternal<S> extends AppPage<S> {
     target: string,
     opts?: {
       focusedItemId?: string | null;
-      config?: Partial<import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig>;
+      config?: Partial<
+        import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig
+      >;
       role?: import("@os-core/engine/registries/roleRegistry").ZoneRole;
       initial?: { selection?: string[]; expanded?: string[] };
       items?: string[];

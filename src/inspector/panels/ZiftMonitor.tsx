@@ -13,24 +13,18 @@
  * - os.getState() (focused zone, focused item per zone)
  */
 
+import type { AppState } from "@os-core/engine/kernel";
+import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
+import {
+  type ZoneEntry,
+  ZoneRegistry,
+} from "@os-core/engine/registries/zoneRegistry";
 import { ensureZone, os } from "@os-sdk/os";
 import { produce } from "immer";
-import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
-import {
-  ZoneRegistry,
-  type ZoneEntry,
-} from "@os-core/engine/registries/zoneRegistry";
-import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
-import type { AppState } from "@os-core/engine/kernel";
-import { InspectorZiftUI } from "../app";
-import {
-  ChevronRight,
-  Circle,
-  CircleDot,
-  Ban,
-  Link,
-} from "lucide-react";
+import { Ban, ChevronRight, Circle, CircleDot, Link } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { InspectorZiftUI } from "../app";
 
 // ═══════════════════════════════════════════════════════════════════
 // Data Collection
@@ -190,7 +184,10 @@ function ZoneCardDetail({ card }: { card: ZoneCard }) {
                 }`}
               >
                 {isFocused ? (
-                  <CircleDot size={7} className="text-[#007acc] flex-shrink-0" />
+                  <CircleDot
+                    size={7}
+                    className="text-[#007acc] flex-shrink-0"
+                  />
                 ) : isDisabled ? (
                   <Ban size={7} className="text-[#f48771] flex-shrink-0" />
                 ) : (
@@ -291,10 +288,7 @@ function ZoneCardDetail({ card }: { card: ZoneCard }) {
             Triggers
           </div>
           {card.triggers.map((t) => (
-            <div
-              key={t.triggerId}
-              className="flex items-center gap-1.5 py-px"
-            >
+            <div key={t.triggerId} className="flex items-center gap-1.5 py-px">
               <Link size={7} className="text-[#b0b0b0] flex-shrink-0" />
               <span className="text-[8px] font-mono text-[#444] truncate">
                 {t.triggerId}
@@ -321,7 +315,10 @@ function ZoneCardView({ card }: { card: ZoneCard }) {
           ${card.isActiveZone ? "bg-[#007acc]/5" : "bg-[#f8f8f8] hover:bg-[#f0f0f0]"}`}
       >
         <div className="flex items-center gap-2">
-          <ChevronRight size={10} className="text-[#999] flex-shrink-0 transition-transform group-aria-expanded:rotate-90" />
+          <ChevronRight
+            size={10}
+            className="text-[#999] flex-shrink-0 transition-transform group-aria-expanded:rotate-90"
+          />
           <div
             className={`w-1 h-3 rounded-full opacity-60 ${
               card.isActiveZone ? "bg-[#007acc]" : "bg-[#4ec9b0]"

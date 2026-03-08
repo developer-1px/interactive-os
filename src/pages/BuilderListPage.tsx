@@ -137,10 +137,11 @@ export default function BuilderListPage() {
         {/* Filter Trigger */}
         <button
           type="button"
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${activeFilter !== "all"
-            ? "bg-blue-50 border-blue-200 text-blue-600"
-            : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-            }`}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+            activeFilter !== "all"
+              ? "bg-blue-50 border-blue-200 text-blue-600"
+              : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+          }`}
           onClick={() => {
             // Cycle filters for demo: All -> Published -> Draft -> Archived -> All
             const next =
@@ -228,7 +229,7 @@ export default function BuilderListPage() {
                       }).format(
                         -Math.round(
                           (Date.now() - page.updatedAt.getTime()) /
-                          (1000 * 60 * 60),
+                            (1000 * 60 * 60),
                         ),
                         "hour",
                       )}

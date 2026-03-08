@@ -17,7 +17,9 @@
 import { describe, it } from "vitest";
 
 describe("Layer Tooltip: Hover Trigger", () => {
-  it.todo("hover on trigger shows tooltip (OS gap: no headless hover simulation)");
+  it.todo(
+    "hover on trigger shows tooltip (OS gap: no headless hover simulation)",
+  );
   it.todo("focus on trigger shows tooltip");
 });
 

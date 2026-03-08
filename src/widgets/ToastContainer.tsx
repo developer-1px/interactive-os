@@ -12,8 +12,8 @@
  */
 
 import type { BaseCommand } from "@kernel/core/tokens";
-import type { NotificationEntry } from "@os-sdk/os";
 import { useNotifications } from "@os-react/6-project/accessors/useNotifications";
+import type { NotificationEntry } from "@os-sdk/os";
 import { OS_NOTIFY_DISMISS, os } from "@os-sdk/os";
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";

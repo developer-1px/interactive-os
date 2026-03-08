@@ -156,10 +156,10 @@ export const requestDeleteTodo = listCollection.command(
       payload.ids.includes(id),
     )
       ? [
-        // Close first to clear any stale overlay from HMR or interrupted flow
-        OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
-        OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
-      ]
+          // Close first to clear any stale overlay from HMR or interrupted flow
+          OS_OVERLAY_CLOSE({ id: "todo-delete-dialog" }),
+          OS_OVERLAY_OPEN({ id: "todo-delete-dialog", type: "dialog" }),
+        ]
       : undefined,
   }),
 );

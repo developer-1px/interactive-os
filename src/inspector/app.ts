@@ -134,9 +134,7 @@ export const InspectorScroll = {
   ...InspectorScrollUI,
 };
 
-export function safeDisabledGroups(
-  s: InspectorState | undefined,
-): Set<string> {
+export function safeDisabledGroups(s: InspectorState | undefined): Set<string> {
   return s?.disabledGroups instanceof Set
     ? s.disabledGroups
     : new Set<string>();
@@ -159,9 +157,7 @@ export function selectFilteredTransactions(
 
   const disabledGroups = safeDisabledGroups(state);
   if (disabledGroups.size > 0) {
-    result = result.filter(
-      (tx) => !disabledGroups.has(inferSignal(tx).group),
-    );
+    result = result.filter((tx) => !disabledGroups.has(inferSignal(tx).group));
   }
 
   const query = state.searchQuery ?? "";

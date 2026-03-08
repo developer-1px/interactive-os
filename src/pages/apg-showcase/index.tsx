@@ -51,28 +51,48 @@ const PATTERNS: Record<
 > = {
   accordion: { name: "Accordion", component: AccordionPattern, status: "dt" },
   alert: { name: "Alert", component: AlertPattern, status: "none" },
-  breadcrumb: { name: "Breadcrumb", component: BreadcrumbPattern, status: "none" },
+  breadcrumb: {
+    name: "Breadcrumb",
+    component: BreadcrumbPattern,
+    status: "none",
+  },
   button: { name: "Button", component: ButtonPattern, status: "dt" },
   carousel: { name: "Carousel", component: CarouselPattern, status: "dt" },
   checkbox: { name: "Checkbox", component: CheckboxPattern, status: "dt" },
   composite: { name: "Composite", component: CompositePattern, status: "none" },
-  disclosure: { name: "Disclosure", component: DisclosurePattern, status: "dt" },
+  disclosure: {
+    name: "Disclosure",
+    component: DisclosurePattern,
+    status: "dt",
+  },
   feed: { name: "Feed", component: FeedPattern, status: "dt" },
   grid: { name: "Grid", component: GridPattern, status: "none" },
   landmarks: { name: "Landmarks", component: LandmarksPattern, status: "none" },
   link: { name: "Link", component: LinkPattern, status: "none" },
   listbox: { name: "Listbox", component: ListboxPattern, status: "dt" },
   menu: { name: "Menu", component: MenuPattern, status: "dt" },
-  "menu-button": { name: "Menu Button", component: MenuButtonPattern, status: "dt" },
+  "menu-button": {
+    name: "Menu Button",
+    component: MenuButtonPattern,
+    status: "dt",
+  },
   meter: { name: "Meter", component: MeterPattern, status: "dt" },
-  radiogroup: { name: "RadioGroup", component: RadioGroupPattern, status: "dt" },
+  radiogroup: {
+    name: "RadioGroup",
+    component: RadioGroupPattern,
+    status: "dt",
+  },
   slider: { name: "Slider", component: SliderPattern, status: "none" },
   "slider-multithumb": {
     name: "Slider (Multi)",
     component: SliderMultiThumbPattern,
     status: "none",
   },
-  spinbutton: { name: "Spinbutton", component: SpinbuttonPattern, status: "none" },
+  spinbutton: {
+    name: "Spinbutton",
+    component: SpinbuttonPattern,
+    status: "none",
+  },
   switch: { name: "Switch", component: SwitchPattern, status: "dt" },
   table: { name: "Table", component: TablePattern, status: "none" },
   tabs: { name: "Tabs", component: TabsPattern, status: "dt" },
@@ -152,7 +172,9 @@ export default function ApgShowcasePage() {
                 "
               >
                 {STATUS_ICON[status] && (
-                  <span className="text-xs leading-none">{STATUS_ICON[status]}</span>
+                  <span className="text-xs leading-none">
+                    {STATUS_ICON[status]}
+                  </span>
                 )}
                 <span>{name}</span>
               </Item>
