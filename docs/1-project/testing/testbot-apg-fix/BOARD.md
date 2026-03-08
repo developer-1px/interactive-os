@@ -10,24 +10,28 @@ Before → After:
 - Menu: OS_OVERLAY_CLOSE가 모든 항목에 적용 → menuitem만 close
 - Menu Button: trigger()에 id 없음 → id 추가
 - Meter: focus nav 테스트 → value display 테스트
-- Spinbutton: focus 시 9→50 점프 → 디버깅 후 수정
+- Spinbutton: focus 시 9→50 점프 → PointerListener isSlider 체크 role 기반으로 수정
 
-Risks: WP4(menu inputmap) 변경이 다른 menu 소비자에 영향 가능. WP8(spinbutton) 50 출처 미확인.
+Risks: Menu inputmap 변경이 다른 menu 소비자에 영향 가능 (config-chain.test.ts 업데이트 완료).
 
 ## Now
 
-- [ ] T1: Accordion initial expand 제거 — AccordionPattern.tsx + accordion.apg.test.ts
-- [ ] T2: Checkbox Enter 기대 제거 — checkbox.ts
-- [ ] T3: Menu overlay close 분기 — roleRegistry.ts + MenuPattern.tsx
-- [ ] T4: trigger() id 추가 — defineApp/index.ts + 기존 test 확장
-- [ ] T5: Meter 시나리오 재작성 — meter.ts
-- [ ] T6: Spinbutton 초기값 디버깅 — SpinbuttonPattern.tsx + seeding 경로
+(All Done)
 
 ## Done
 
+- [x] T1: Accordion initial expand 제거 — AccordionPattern.tsx `initial: []` + 17 tests PASS ✅
+- [x] T2: Checkbox Enter 기대 제거 — checkbox.ts Enter 관련 6줄 삭제 ✅
+- [x] T3: Menu overlay close 분기 — roleRegistry.ts inputmap OS_OVERLAY_CLOSE 제거 + MenuPattern.tsx onAction 분기 ✅
+- [x] T4: trigger() id 추가 — defineApp/index.ts `id: triggerId` 추가 ✅
+- [x] T5: Meter 시나리오 재작성 — meter.ts value display (aria-valuemin/max) ✅
+- [x] T6: Spinbutton — PointerListener.tsx isSlider → role==="slider" 체크 추가 ✅
+- [x] config-chain.test.ts 업데이트 — menu inputmap 변경 반영 ✅
+
+tsc 0 new | 689 tests passed | build OK ✅
+
 ## Unresolved
 
-- Spinbutton 9→50 출처: 코드에서 50 직접 발견 못함. 브라우저 환경 디버깅 필요.
 - Menu inputmap에서 OS_OVERLAY_CLOSE 제거가 OS 수준 정책인지 앱 수준 정책인지 장기적 정리 필요.
 
 ## Ideas
