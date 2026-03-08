@@ -17,6 +17,7 @@
 |--------|---------|-------|
 | apg | **layer-playground** | T1~T8 Done |
 | inspector | **inspector-dogfooding** | T5 Next |
+| os-core | **action-centric-trigger** | Now |
 | testing | **os-test-suite** | T1~T4 Done |
 
 ---
@@ -31,6 +32,7 @@
 | ~~remove-dynamic-trigger~~ | ✅ Archived (W10) | 03-08 |
 | ~~trigger-click-fix~~ | ✅ Archived (W10) | 03-08 |
 | ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
+| **action-centric-trigger** | Scaffold | 03-08 |
 | docs-freshness | WP1~WP8 | 03-06 |
 | kernel-docs-sync | — | 03-06 |
 | keyboard-input-isomorphism | — | 03-07 |
@@ -92,9 +94,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 15 |
+| Active Projects | 16 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
+| Active Focus | 4 (action-centric-trigger, layer-playground, inspector-dogfooding, os-test-suite) |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |

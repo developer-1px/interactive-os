@@ -52,8 +52,8 @@ interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-    | string;
+  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+  | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -161,7 +161,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => {});
+  os.defineEffect("clipboardWrite", () => { });
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -450,6 +450,21 @@ export function createAppPage<S>(
         }),
       );
     }
+
+    // Initial value: explicit initial
+    const valueConfig = zoneConfig?.value;
+    if (valueConfig && valueConfig.initial) {
+      os.setState((s: AppState) =>
+        produce(s, (draft) => {
+          const z = ensureZone(draft.os, zoneName);
+          for (const [itemId, value] of Object.entries(valueConfig.initial!)) {
+            if (z.valueNow[itemId] === undefined) {
+              z.valueNow[itemId] = value as number;
+            }
+          }
+        }),
+      );
+    }
   }
 
   // ── Projection cache ──
@@ -674,7 +689,7 @@ export function createAppPage<S>(
             );
           }
         },
-      };
+      } as any;
     },
   };
 }

@@ -39,20 +39,19 @@ export function TooltipPattern() {
       </p>
 
       <TooltipTrigger.Root>
-        <TooltipTrigger.Trigger>
-          <button
-            type="button"
-            className="
-              inline-flex items-center gap-2 px-4 py-2
-              border border-gray-300 bg-white text-sm rounded-lg
-              hover:bg-gray-50 transition-colors
-              focus:ring-2 focus:ring-violet-400 focus:outline-none
-            "
-          >
-            <Icon name="help-circle" size={14} />
-            Hover me
-          </button>
-        </TooltipTrigger.Trigger>
+        <button
+          {...TooltipTrigger.Trigger()}
+          type="button"
+          className="
+            inline-flex items-center gap-2 px-4 py-2
+            border border-gray-300 bg-white text-sm rounded-lg
+            hover:bg-gray-50 transition-colors
+            focus:ring-2 focus:ring-violet-400 focus:outline-none
+          "
+        >
+          <Icon name="help-circle" size={14} />
+          Hover me
+        </button>
 
         <TooltipTrigger.Popover
           aria-label="Help information"

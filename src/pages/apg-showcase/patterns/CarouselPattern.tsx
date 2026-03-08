@@ -142,21 +142,20 @@ function SlideContent({ slide }: { slide: SlideDef }) {
 function RotationControl() {
   const rotating = CarouselApp.useComputed(isRotating);
   return (
-    <ToggleRotation>
-      <button
-        type="button"
-        aria-label={
-          rotating ? "Stop automatic slide show" : "Start automatic slide show"
-        }
-        className="
-          p-2 rounded-full transition-colors
-          text-gray-500 hover:text-gray-700 hover:bg-gray-100
-          focus:outline-none focus:ring-2 focus:ring-indigo-400
-        "
-      >
-        <Icon name={rotating ? "pause" : "play"} size={16} />
-      </button>
-    </ToggleRotation>
+    <button
+      {...ToggleRotation()}
+      type="button"
+      aria-label={
+        rotating ? "Stop automatic slide show" : "Start automatic slide show"
+      }
+      className="
+        p-2 rounded-full transition-colors
+        text-gray-500 hover:text-gray-700 hover:bg-gray-100
+        focus:outline-none focus:ring-2 focus:ring-indigo-400
+      "
+    >
+      <Icon name={rotating ? "pause" : "play"} size={16} />
+    </button>
   );
 }
 
@@ -168,41 +167,32 @@ function RotationControl() {
 function PrevNextControls() {
   return (
     <div className="flex items-center gap-1">
-      <StopRotation>
-        <button
-          type="button"
-          aria-label="Previous slide"
-          aria-controls="carousel-slides"
-          className="
-            p-2 rounded-full transition-colors
-            text-gray-500 hover:text-gray-700 hover:bg-gray-100
-            focus:outline-none focus:ring-2 focus:ring-indigo-400
-          "
-          onClick={() => {
-            // Navigate to previous slide by programmatically focusing the prev tab
-            // This is a visual affordance; the real keyboard nav is in the tablist
-          }}
-        >
-          <Icon name="chevron-left" size={16} />
-        </button>
-      </StopRotation>
-      <StopRotation>
-        <button
-          type="button"
-          aria-label="Next slide"
-          aria-controls="carousel-slides"
-          className="
-            p-2 rounded-full transition-colors
-            text-gray-500 hover:text-gray-700 hover:bg-gray-100
-            focus:outline-none focus:ring-2 focus:ring-indigo-400
-          "
-          onClick={() => {
-            // Navigate to next slide by programmatically focusing the next tab
-          }}
-        >
-          <Icon name="chevron-right" size={16} />
-        </button>
-      </StopRotation>
+      <button
+        {...StopRotation()}
+        type="button"
+        aria-label="Previous slide"
+        aria-controls="carousel-slides"
+        className="
+          p-2 rounded-full transition-colors
+          text-gray-500 hover:text-gray-700 hover:bg-gray-100
+          focus:outline-none focus:ring-2 focus:ring-indigo-400
+        "
+      >
+        <Icon name="chevron-left" size={16} />
+      </button>
+      <button
+        {...StopRotation()}
+        type="button"
+        aria-label="Next slide"
+        aria-controls="carousel-slides"
+        className="
+          p-2 rounded-full transition-colors
+          text-gray-500 hover:text-gray-700 hover:bg-gray-100
+          focus:outline-none focus:ring-2 focus:ring-indigo-400
+        "
+      >
+        <Icon name="chevron-right" size={16} />
+      </button>
     </div>
   );
 }

@@ -65,11 +65,10 @@ export function TaskItem({ todoId }: TaskItemProps) {
         id={String(todo.id)}
         className={`
                 group relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-200
-                ${
-                  isCompleted
-                    ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
-                    : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
-                }
+                ${isCompleted
+            ? "bg-slate-50/50 border-transparent opacity-60 hover:opacity-100"
+            : "bg-white border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"
+          }
                 outline-none
                 data-[focused=true]:ring-2 data-[focused=true]:ring-indigo-400 data-[focused=true]:border-indigo-300 data-[focused=true]:z-10
                 data-[anchor=true]:ring-1 data-[anchor=true]:ring-slate-200 data-[anchor=true]:z-10
@@ -92,11 +91,10 @@ export function TaskItem({ todoId }: TaskItemProps) {
             <div
               className={`
                             w-5 h-5 mt-0.5 rounded-full border-[1.5px] flex items-center justify-center transition-all cursor-pointer flex-shrink-0
-                            ${
-                              isCompleted
-                                ? "bg-indigo-600 border-indigo-600 scale-100"
-                                : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
-                            }
+                            ${isCompleted
+                  ? "bg-indigo-600 border-indigo-600 scale-100"
+                  : "border-slate-300 bg-white hover:border-indigo-400 group-hover:border-indigo-300"
+                }
                         `}
             >
               <Check
@@ -113,11 +111,10 @@ export function TaskItem({ todoId }: TaskItemProps) {
               <TaskItemEditor todoId={todoId} />
             ) : (
               <span
-                className={`block text-[15px] leading-relaxed transition-all select-none ${
-                  isCompleted
+                className={`block text-[15px] leading-relaxed transition-all select-none ${isCompleted
                     ? "text-slate-400 line-through decoration-slate-300"
                     : "text-slate-700 font-medium"
-                }`}
+                  }`}
               >
                 {todo.text}
               </span>
@@ -139,48 +136,44 @@ export function TaskItem({ todoId }: TaskItemProps) {
               </div>
             ) : (
               <>
-                <TodoList.triggers.StartEdit>
-                  <button
-                    type="button"
-                    className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                    title="Edit (Enter)"
-                  >
-                    <CornerDownLeft size={14} />
-                  </button>
-                </TodoList.triggers.StartEdit>
+                <button
+                  {...TodoList.triggers.StartEdit()}
+                  type="button"
+                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Edit (Enter)"
+                >
+                  <CornerDownLeft size={14} />
+                </button>
 
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
-                <TodoList.triggers.MoveItemUp>
-                  <button
-                    type="button"
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    title="Move Up (Cmd+Up)"
-                  >
-                    <ArrowUp size={14} />
-                  </button>
-                </TodoList.triggers.MoveItemUp>
-                <TodoList.triggers.MoveItemDown>
-                  <button
-                    type="button"
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    title="Move Down (Cmd+Down)"
-                  >
-                    <ArrowDown size={14} />
-                  </button>
-                </TodoList.triggers.MoveItemDown>
+                <button
+                  {...TodoList.triggers.MoveItemUp()}
+                  type="button"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Move Up (Cmd+Up)"
+                >
+                  <ArrowUp size={14} />
+                </button>
+                <button
+                  {...TodoList.triggers.MoveItemDown()}
+                  type="button"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Move Down (Cmd+Down)"
+                >
+                  <ArrowDown size={14} />
+                </button>
 
                 <div className="w-px h-3 bg-slate-200 mx-1" />
 
-                <TodoList.triggers.DeleteTodo>
-                  <button
-                    type="button"
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </TodoList.triggers.DeleteTodo>
+                <button
+                  {...TodoList.triggers.DeleteTodo()}
+                  type="button"
+                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
               </>
             )}
           </div>

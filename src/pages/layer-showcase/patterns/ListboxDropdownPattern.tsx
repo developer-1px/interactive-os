@@ -67,21 +67,20 @@ export function ListboxDropdownPattern() {
 
       <ListboxTrigger.Root>
         <div className="relative inline-block">
-          <ListboxTrigger.Trigger>
-            <button
-              type="button"
-              className="
-                inline-flex items-center gap-2 px-4 py-2
-                border border-gray-300 bg-white text-sm rounded-lg
-                hover:bg-gray-50 transition-colors
-                focus:ring-2 focus:ring-violet-400 focus:outline-none
-              "
-            >
-              <Icon name="palette" size={14} />
-              Choose Color
-              <Icon name="chevron-down" size={14} className="text-gray-400" />
-            </button>
-          </ListboxTrigger.Trigger>
+          <button
+            {...ListboxTrigger.Trigger()}
+            type="button"
+            className="
+              inline-flex items-center gap-2 px-4 py-2
+              border border-gray-300 bg-white text-sm rounded-lg
+              hover:bg-gray-50 transition-colors
+              focus:ring-2 focus:ring-violet-400 focus:outline-none
+            "
+          >
+            <Icon name="palette" size={14} />
+            Choose Color
+            <Icon name="chevron-down" size={14} className="text-gray-400" />
+          </button>
 
           <ListboxTrigger.Popover
             zoneRole="listbox"

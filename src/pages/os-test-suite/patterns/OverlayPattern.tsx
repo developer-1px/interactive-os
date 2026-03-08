@@ -75,17 +75,16 @@ export function OverlayPattern() {
       </p>
 
       <DialogTrigger.Root>
-        <DialogTrigger.Trigger>
-          <button
-            type="button"
-            className="
-              px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg
-              hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:outline-none
-            "
-          >
-            Open Dialog
-          </button>
-        </DialogTrigger.Trigger>
+        <button
+          {...DialogTrigger.Trigger()}
+          type="button"
+          className="
+            px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg
+            hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:outline-none
+          "
+        >
+          Open Dialog
+        </button>
 
         <DialogTrigger.Dialog
           aria-label="Test Dialog"

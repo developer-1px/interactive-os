@@ -17,8 +17,12 @@ import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderListRouteImport } from './routes/_minimal/builder-list'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
+import { Route as MinimalPlaygroundOsTestRouteImport } from './routes/_minimal/playground.os-test'
+import { Route as MinimalPlaygroundLayersRouteImport } from './routes/_minimal/playground.layers'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
 import { Route as MinimalPlaygroundApgRouteImport } from './routes/_minimal/playground.apg'
+import { Route as MinimalPlaygroundOsTestPatternRouteImport } from './routes/_minimal/playground.os-test.$pattern'
+import { Route as MinimalPlaygroundLayersPatternRouteImport } from './routes/_minimal/playground.layers.$pattern'
 import { Route as MinimalPlaygroundApgPatternRouteImport } from './routes/_minimal/playground.apg.$pattern'
 
 const TodoRoute = TodoRouteImport.update({
@@ -59,6 +63,16 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
+const MinimalPlaygroundOsTestRoute = MinimalPlaygroundOsTestRouteImport.update({
+  id: '/playground/os-test',
+  path: '/playground/os-test',
+  getParentRoute: () => MinimalRoute,
+} as any)
+const MinimalPlaygroundLayersRoute = MinimalPlaygroundLayersRouteImport.update({
+  id: '/playground/layers',
+  path: '/playground/layers',
+  getParentRoute: () => MinimalRoute,
+} as any)
 const MinimalPlaygroundFocusRoute = MinimalPlaygroundFocusRouteImport.update({
   id: '/playground/focus',
   path: '/playground/focus',
@@ -69,6 +83,18 @@ const MinimalPlaygroundApgRoute = MinimalPlaygroundApgRouteImport.update({
   path: '/playground/apg',
   getParentRoute: () => MinimalRoute,
 } as any)
+const MinimalPlaygroundOsTestPatternRoute =
+  MinimalPlaygroundOsTestPatternRouteImport.update({
+    id: '/$pattern',
+    path: '/$pattern',
+    getParentRoute: () => MinimalPlaygroundOsTestRoute,
+  } as any)
+const MinimalPlaygroundLayersPatternRoute =
+  MinimalPlaygroundLayersPatternRouteImport.update({
+    id: '/$pattern',
+    path: '/$pattern',
+    getParentRoute: () => MinimalPlaygroundLayersRoute,
+  } as any)
 const MinimalPlaygroundApgPatternRoute =
   MinimalPlaygroundApgPatternRouteImport.update({
     id: '/$pattern',
@@ -84,8 +110,12 @@ export interface FileRoutesByFullPath {
   '/todo': typeof MinimalTodoRoute
   '/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
+  '/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
   '/docs/': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
+  '/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
+  '/playground/os-test/$pattern': typeof MinimalPlaygroundOsTestPatternRoute
 }
 export interface FileRoutesByTo {
   '/': typeof TodoIndexRoute
@@ -94,8 +124,12 @@ export interface FileRoutesByTo {
   '/todo': typeof MinimalTodoRoute
   '/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
+  '/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
   '/docs': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
+  '/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
+  '/playground/os-test/$pattern': typeof MinimalPlaygroundOsTestPatternRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,8 +142,12 @@ export interface FileRoutesById {
   '/_todo/': typeof TodoIndexRoute
   '/_minimal/playground/apg': typeof MinimalPlaygroundApgRouteWithChildren
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
+  '/_minimal/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
+  '/_minimal/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
   '/_minimal/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
+  '/_minimal/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
+  '/_minimal/playground/os-test/$pattern': typeof MinimalPlaygroundOsTestPatternRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,8 +159,12 @@ export interface FileRouteTypes {
     | '/todo'
     | '/playground/apg'
     | '/playground/focus'
+    | '/playground/layers'
+    | '/playground/os-test'
     | '/docs/'
     | '/playground/apg/$pattern'
+    | '/playground/layers/$pattern'
+    | '/playground/os-test/$pattern'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,8 +173,12 @@ export interface FileRouteTypes {
     | '/todo'
     | '/playground/apg'
     | '/playground/focus'
+    | '/playground/layers'
+    | '/playground/os-test'
     | '/docs'
     | '/playground/apg/$pattern'
+    | '/playground/layers/$pattern'
+    | '/playground/os-test/$pattern'
   id:
     | '__root__'
     | '/_minimal'
@@ -144,8 +190,12 @@ export interface FileRouteTypes {
     | '/_todo/'
     | '/_minimal/playground/apg'
     | '/_minimal/playground/focus'
+    | '/_minimal/playground/layers'
+    | '/_minimal/playground/os-test'
     | '/_minimal/docs/'
     | '/_minimal/playground/apg/$pattern'
+    | '/_minimal/playground/layers/$pattern'
+    | '/_minimal/playground/os-test/$pattern'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -211,6 +261,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
     }
+    '/_minimal/playground/os-test': {
+      id: '/_minimal/playground/os-test'
+      path: '/playground/os-test'
+      fullPath: '/playground/os-test'
+      preLoaderRoute: typeof MinimalPlaygroundOsTestRouteImport
+      parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/layers': {
+      id: '/_minimal/playground/layers'
+      path: '/playground/layers'
+      fullPath: '/playground/layers'
+      preLoaderRoute: typeof MinimalPlaygroundLayersRouteImport
+      parentRoute: typeof MinimalRoute
+    }
     '/_minimal/playground/focus': {
       id: '/_minimal/playground/focus'
       path: '/playground/focus'
@@ -224,6 +288,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/playground/apg'
       preLoaderRoute: typeof MinimalPlaygroundApgRouteImport
       parentRoute: typeof MinimalRoute
+    }
+    '/_minimal/playground/os-test/$pattern': {
+      id: '/_minimal/playground/os-test/$pattern'
+      path: '/$pattern'
+      fullPath: '/playground/os-test/$pattern'
+      preLoaderRoute: typeof MinimalPlaygroundOsTestPatternRouteImport
+      parentRoute: typeof MinimalPlaygroundOsTestRoute
+    }
+    '/_minimal/playground/layers/$pattern': {
+      id: '/_minimal/playground/layers/$pattern'
+      path: '/$pattern'
+      fullPath: '/playground/layers/$pattern'
+      preLoaderRoute: typeof MinimalPlaygroundLayersPatternRouteImport
+      parentRoute: typeof MinimalPlaygroundLayersRoute
     }
     '/_minimal/playground/apg/$pattern': {
       id: '/_minimal/playground/apg/$pattern'
@@ -258,6 +336,34 @@ const MinimalPlaygroundApgRouteChildren: MinimalPlaygroundApgRouteChildren = {
 const MinimalPlaygroundApgRouteWithChildren =
   MinimalPlaygroundApgRoute._addFileChildren(MinimalPlaygroundApgRouteChildren)
 
+interface MinimalPlaygroundLayersRouteChildren {
+  MinimalPlaygroundLayersPatternRoute: typeof MinimalPlaygroundLayersPatternRoute
+}
+
+const MinimalPlaygroundLayersRouteChildren: MinimalPlaygroundLayersRouteChildren =
+  {
+    MinimalPlaygroundLayersPatternRoute: MinimalPlaygroundLayersPatternRoute,
+  }
+
+const MinimalPlaygroundLayersRouteWithChildren =
+  MinimalPlaygroundLayersRoute._addFileChildren(
+    MinimalPlaygroundLayersRouteChildren,
+  )
+
+interface MinimalPlaygroundOsTestRouteChildren {
+  MinimalPlaygroundOsTestPatternRoute: typeof MinimalPlaygroundOsTestPatternRoute
+}
+
+const MinimalPlaygroundOsTestRouteChildren: MinimalPlaygroundOsTestRouteChildren =
+  {
+    MinimalPlaygroundOsTestPatternRoute: MinimalPlaygroundOsTestPatternRoute,
+  }
+
+const MinimalPlaygroundOsTestRouteWithChildren =
+  MinimalPlaygroundOsTestRoute._addFileChildren(
+    MinimalPlaygroundOsTestRouteChildren,
+  )
+
 interface MinimalRouteChildren {
   MinimalBuilderRoute: typeof MinimalBuilderRoute
   MinimalBuilderListRoute: typeof MinimalBuilderListRoute
@@ -265,6 +371,8 @@ interface MinimalRouteChildren {
   MinimalTodoRoute: typeof MinimalTodoRoute
   MinimalPlaygroundApgRoute: typeof MinimalPlaygroundApgRouteWithChildren
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
+  MinimalPlaygroundLayersRoute: typeof MinimalPlaygroundLayersRouteWithChildren
+  MinimalPlaygroundOsTestRoute: typeof MinimalPlaygroundOsTestRouteWithChildren
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -274,6 +382,8 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalTodoRoute: MinimalTodoRoute,
   MinimalPlaygroundApgRoute: MinimalPlaygroundApgRouteWithChildren,
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
+  MinimalPlaygroundLayersRoute: MinimalPlaygroundLayersRouteWithChildren,
+  MinimalPlaygroundOsTestRoute: MinimalPlaygroundOsTestRouteWithChildren,
 }
 
 const MinimalRouteWithChildren =

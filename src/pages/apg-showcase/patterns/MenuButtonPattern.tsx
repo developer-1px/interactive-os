@@ -92,24 +92,23 @@ export function MenuButtonPattern() {
       <TriggerUI.Zone aria-label="Actions Menu">
         <ActionsMenu.Root>
           <div className="relative inline-block">
-            <ActionsMenu.Trigger>
-              <button
-                type="button"
-                className="
-                  group inline-flex items-center gap-2 px-4 py-2
-                  bg-indigo-600 text-white text-sm font-medium rounded-lg
-                  hover:bg-indigo-700 transition-colors
-                  focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none
-                "
-              >
-                Actions
-                <Icon
-                  name="chevron-down"
-                  size={14}
-                  className="transition-transform group-aria-expanded:rotate-180"
-                />
-              </button>
-            </ActionsMenu.Trigger>
+            <button
+              {...ActionsMenu.Trigger()}
+              type="button"
+              className="
+                group inline-flex items-center gap-2 px-4 py-2
+                bg-indigo-600 text-white text-sm font-medium rounded-lg
+                hover:bg-indigo-700 transition-colors
+                focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none
+              "
+            >
+              Actions
+              <Icon
+                name="chevron-down"
+                size={14}
+                className="transition-transform group-aria-expanded:rotate-180"
+              />
+            </button>
 
             <ActionsMenu.Popover
               aria-labelledby="apg-menu-button-popup-trigger"

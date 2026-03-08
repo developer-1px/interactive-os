@@ -1,198 +1,247 @@
 # 🌌 Interactive OS
 
-> 앱 개발자가 인터랙션을 신경 안 써도 되는 세상을 만들고 있다.
+> 웹을 위한 범용 상호작용 인프라. AI가 선언하면, OS가 보장한다.
 
 ---
 
-## Why — 브라우저는 운영체제가 아니다
+## Why — AI 시대, 프론트엔드의 검증 문제
 
-브라우저는 문서 뷰어에서 출발했다. `<a>`, `<form>`, `<input>` — 전부 문서를 읽고 제출하는 도구다. 근데 지금 우리가 브라우저 위에서 만드는 건 Figma고, Notion이고, Linear다. **프로 도구**를 문서 뷰어 위에 올리고 있다.
+AI가 코드를 짜는 시대가 왔다. 백엔드는 순조롭다. 함수를 짜고, 테스트를 돌리고, `assert(output === expected)`로 맞는지 확인한다. 입력과 출력이 명확하니까 AI가 스스로 피드백 루프를 닫을 수 있다.
 
-그래서 매번 같은 문제를 겪는다. 포커스가 어디 있는지 브라우저에 물어봐야 하고, 키보드 내비게이션을 처음부터 짜야 하고, 드래그, 클립보드, 멀티셀렉션, Undo/Redo를 앱마다 다시 만든다. **이 프로젝트는 그 "매번"을 없앤다.**
+프론트엔드는 다르다. AI가 만든 UI는 스크린샷으로 보면 꽤 괜찮다. 랜딩 페이지, 대시보드, 마케팅 사이트 — 세상이 "프론트엔드도 AI가 대체할 것"이라고 말하는 이유다.
 
-### 왜 지금까지 없었나
+그런데 Tab 키를 눌러봐라.
 
-있었다. 다만 방향이 달랐다.
+키보드로 이동이 되나? 포커스가 어디 있는지 보이나? Dialog를 닫으면 포커스가 원래 자리로 돌아오나? Shift+ArrowDown으로 범위 선택이 되나? Undo가 되나? 스크린 리더를 켜면 뭐라고 읽나?
 
-React, Vue, Angular — 이것들은 **렌더링 엔진**이다. "화면에 뭘 그릴까"는 풀었지만, "사용자의 의도를 어떻게 해석할까"는 여전히 앱 개발자 몫이다.
+안 된다. **보이기만 하는 앱**이다. 클릭은 되는데 쓸 수는 없다.
 
-Radix, Headless UI, Ark UI — 더 가까운 시도다. 하지만 이것들은 **개별 위젯 라이브러리**다. Dialog 하나, Listbox 하나. 각각은 잘 동작하는데, **위젯 간에 통신이 안 된다.** Listbox에서 선택한 걸 옆 Panel에서 알 수 없고, 포커스가 Dialog에서 뒤의 Tree로 돌아갈 때 어디로 가야 하는지 아무도 모른다. **앱 전체를 하나의 시스템으로 보는 레이어가 없기 때문이다.**
+"프론트엔드가 대체되어 보이는 것"은 그 이상의 수준이 필요 없는 것들이 대부분이기 때문이다. 진짜 프로 도구 — Figma, Notion, Linear, Excel — 이런 수준을 AI에게 시키면, 장난감이 나온다.
 
-그리고 더 근본적인 이유 — 이걸 범용으로 만들어서 풀 비즈니스 인센티브가 없었다. Figma는 Figma의 인터랙션만 잘 되면 되고, Notion은 Notion 것만 잘 되면 된다.
+### 왜 이 갭이 존재하는가
 
-**AI가 이걸 바꿨다.** AI가 코드를 짜는 시대에, 인터랙션 로직이 앱마다 다르면 AI는 매번 새로 배워야 한다. OS 레이어가 하나 있으면, AI는 그 규칙 하나만 알면 된다. 커맨드 하나 dispatch하면 포커스, 셀렉션, Undo가 다 따라온다.
+AI의 지능 부족이 아니다. **프론트엔드의 구조적 특성** 때문이다.
 
-### 기존과 다른 점
+AI가 코딩을 하려면, 짠 코드가 맞는지 스스로 검증할 수 있어야 한다. 프론트엔드의 결과물은 **시각(View)**과 **상호작용(Interaction)**, 두 축으로 이루어져 있다.
 
-**관할권이 다르다.** 컴포넌트 라이브러리는 **"이 위젯을 어떻게 렌더링할까"**를 푼다. Interactive OS는 **"사용자가 뭘 하려는 건지 어떻게 해석할까"**를 푼다.
+**시각은 검증 비용이 낮다.** AI는 눈이 없지만, 사람이 스크린샷 한 장 보고 "여기 틀어졌어" 하면 그만이다. 피드백 루프가 짧다.
 
-사용자가 `Enter`를 누른다:
+**상호작용은 검증이 폭발한다.** 포커스 위치 × 선택 상태 × 확장 상태 × 오버레이 상태 × 입력 모드 — 상태 축들이 서로 의존하면서 조합이 기하급수적으로 늘어난다. 인간은 브라우저를 열고 직접 눌러보면서 몸으로 검증한다. AI는 눈도 손도 없다. 그리고 현재의 프론트엔드 테스팅 도구들(Playwright 등)은 인간이 시나리오를 작성해야 돌아간다. 추상화가 반쯤에서 멈춰 있다. **AI가 스스로 상호작용을 탐색하고 검증할 환경 자체가 없다.**
 
-| | Radix / Headless UI | Interactive OS |
-|---|---|---|
-| **누가 해석?** | 해당 컴포넌트의 `onKeyDown` | OS 커널의 5-Phase Pipeline |
-| **무슨 일이?** | 컴포넌트마다 다름 | `OS_ACTIVATE` 커맨드 하나 |
-| **Dialog에서는?** | Dialog 컴포넌트가 따로 처리 | 같은 `OS_ACTIVATE` |
-| **Tree에서는?** | Tree 컴포넌트가 따로 처리 | 같은 `OS_ACTIVATE` |
-| **Kanban에서는?** | 직접 구현 | 같은 `OS_ACTIVATE` |
-
-**Enter 하나의 의미가 시스템 전체에서 동일하다.** 컨텍스트에 따라 *결과*가 달라질 뿐, *해석 경로*는 하나다. macOS에서 `⌘S`가 어디서든 "저장"인 것처럼.
-
-같은 원리가 데이터에도 적용된다:
-
-```
-기존:  TodoList → flat CRUD      DocsSidebar → tree CRUD      Kanban → grouped CRUD
-       (각자 구현)                (각자 구현)                    (각자 구현)
-
-지금:  NormalizedCollection  →  toFlatList    (List View)
-       CRUD는 한 벌          →  toVisibleTree (Tree View)
-                             →  toGrouped     (Kanban View)
-```
-
-CRUD 로직을 한 번 짜면, 보는 방법만 갈아끼운다.
-
-### 이걸로 뭘 할 것인가
-
-**AI한테 "이런 앱 만들어"라고 말하면 진짜 만들어지게 하려고.**
-
-지금 AI한테 앱을 시키면 버튼 누르면 동작하는 수준이 나온다. Tab 키로 이동 안 되고, 키보드만으로 쓸 수 없고, Undo 없고, 드래그 안 된다. **보이기만 하는 앱.** 인터랙션이 없으니 장난감이지 도구가 아니다.
-
-```
-AI가 할 일                          OS가 보장하는 것
-─────────────                       ──────────────
-1. 데이터 모델 정의                  키보드 내비게이션  ✅
-2. defineApp으로 앱 선언             포커스 복원       ✅
-3. createCollectionZone CRUD 연결    멀티 셀렉션      ✅
-4. Zone/Item으로 UI 선언             클립보드          ✅
-                                    Undo/Redo        ✅
-                                    드래그 앤 드롭    ✅
-                                    접근성 (ARIA)    ✅
-```
-
-AI는 **"뭘 보여줄까"만 결정**하면, **"어떻게 조작할까"는 OS가 보장**한다. 이게 되면 AI가 만든 앱이 장난감이 아니라 **진짜 프로 도구**가 된다. 이건 5년 뒤 이야기가 아니라 지금 이 코드베이스에서 Todo 앱이 이미 그렇게 동작하고 있다. 980개 테스트가 증명한다.
+결과적으로 AI는 자신이 짠 상호작용 코드가 맞는지 확인할 수 없고, 검증을 포기한 껍데기 UI를 뱉어낸다.
 
 ---
 
-## How — 아키텍처
+## How — 검증 문제를 풀지 않고, 검증의 필요성을 없앤다
 
-### 5-Phase Interaction Pipeline
+이 문제를 푸는 방법은 Playwright를 AI 친화적으로 고치는 것이 아니다. 발상을 뒤집는다.
+
+**AI가 상호작용을 검증할 수 없다면, 상호작용을 AI가 짜지 않게 만들면 된다.**
+
+기존 프론트엔드는 컴포넌트마다 `onKeyDown`, `useState(focusIndex)`, `useEffect`로 포커스 복원 — 상호작용을 파편적으로 흩뿌려왔다. 각 컴포넌트가 자기 인터랙션을 직접 구현하고, 앱 전체의 일관성은 개발자의 머릿속에만 있었다.
+
+Interactive OS는 이 흩어진 상호작용 코드를 전부 앱에서 뜯어내서, **시스템 계층(OS)으로 올린다.** 앱은 "이 영역은 리스트다", "이건 트리다" — 역할(role)만 선언한다. 키보드 내비게이션, 포커스 관리, 선택 로직, 접근성 — 전부 OS가 한다.
+
+AI는 상호작용 코드를 짜지 않는다. 짜지 않으니까 검증할 필요도 없다. **프론트엔드에서 가장 비싼 검증 축이 통째로 사라진다.**
+
+이건 인간 개발자의 편의를 위해 만든 것이 아니다. 인간 개발자는 `onKeyDown`을 직접 짜는 게 오히려 이해가 되고 제어가 된다. **이 시스템은 LLM을 위한 인프라다.** LLM은 이해가 필요 없다. 선언하면 보장되는 것이 LLM에게는 이상적이다.
+
+---
+
+## What — Architecture
+
+### ZIFT Primitives
+
+UI를 상호작용 관점에서 추상화하는 4가지 프리미티브.
+
+| 프리미티브 | 역할 | 예시 |
+|:---|:---|:---|
+| **Zone** | 상호작용의 관할 구역. 27개 ARIA role preset 중 하나를 선언하면, 해당 패턴의 키보드/접근성 규칙이 자동 적용 | `role: "listbox"`, `role: "dialog"`, `role: "treegrid"` |
+| **Item** | 포커스의 최소 단위. 선택, 활성화, 확장의 대상 | 리스트의 각 항목, 트리의 각 노드 |
+| **Field** | 편집 가능한 입력 영역. IME 안전, 커맨드 기반 commit/cancel | 인라인 에디터, 검색 입력 |
+| **Trigger** | 커맨드를 발동하거나 오버레이를 여는 인터페이스 | 삭제 버튼, 드롭다운 메뉴 트리거 |
+
+### 5-Phase Kernel Pipeline
+
+사용자의 모든 물리적 입력이 통과하는 단일 파이프라인. 흩어진 `addEventListener`가 0개가 된다.
 
 ```
-1-listeners → 2-contexts → 3-commands → 4-effects → 5-hooks → 6-components
+사용자 입력 (키보드/마우스/클립보드)
+    │
+    ▼
+┌─ 1-listen ──── 이벤트 캡처 (전역 단일 리스너)
+├─ 2-resolve ─── 물리 입력 → 논리 커맨드 변환 (포커스 위치·role에 따라)
+├─ 3-inject ──── 커맨드에 맥락 주입 (선택 상태, 타겟 ID 등)
+├─ 4-command ─── 순수 함수로 상태 트랜잭션 실행
+└─ 5-effect ──── DOM 부수 효과 (focus(), scrollIntoView)
 ```
 
-키보드/마우스 이벤트가 리스너에서 캡처되고, 컨텍스트를 주입받아, 커맨드로 변환되고, 이펙트로 실행되며, 훅을 통해 UI에 반영된다. **모든 상호작용이 이 단일 파이프라인을 통과한다.**
+같은 `Enter` 키가 listbox에서는 "선택", dialog에서는 "확인", menu에서는 "실행 후 닫기"가 된다. 맥락에 따라 **결과**가 달라질 뿐, 해석 경로는 하나다. macOS에서 `⌘S`가 어디서든 "저장"인 것처럼.
 
-### ZIFT 프리미티브 (Zone-Item-Field-Trigger)
+### 28 Universal OS Commands
 
-| 프리미티브 | 역할 |
-|:---|:---|
-| **Zone** | 관할권 정의. ARIA role preset으로 동작을 선언적으로 결정 |
-| **Item** | 포커스 가능한 공간적 단위. Virtual Focus + Roving TabIndex |
-| **Field** | 편집 가능한 텍스트 영역. IME 안전 + 커맨드 기반 커밋/취소 |
-| **Trigger** | 클릭/키보드를 커맨드로 변환. asChild 패턴 |
+앱마다 다르게 구현되던 동작이 시스템 수준의 28개 커맨드로 통일된다.
 
-### 커맨드 시스템 (13개 도메인)
+```
+공간:     OS_NAVIGATE · OS_TAB · OS_FOCUS · OS_STACK_PUSH · OS_STACK_POP
+활성화:   OS_ACTIVATE · OS_CHECK · OS_PRESS · OS_EXPAND
+선택:     OS_SELECT · OS_SELECT_ALL · OS_SELECTION_CLEAR
+편집:     OS_FIELD_START_EDIT · OS_FIELD_COMMIT · OS_FIELD_CANCEL
+CRUD:     OS_DELETE · OS_MOVE_UP · OS_MOVE_DOWN
+히스토리:  OS_UNDO · OS_REDO
+클립보드:  OS_COPY · OS_CUT · OS_PASTE
+오버레이:  OS_OVERLAY_OPEN · OS_OVERLAY_CLOSE · OS_ESCAPE
+값:       OS_VALUE_CHANGE
+알림:     OS_NOTIFY · OS_NOTIFY_DISMISS
+```
 
-`OS_NAVIGATE` (공간 이동) · `OS_TAB` (선형 탐색) · `OS_SELECT` (단일/다중/범위 선택) · `OS_ACTIVATE` · `OS_CHECK` · `OS_DELETE` · `OS_FIELD_START_EDIT` · `OS_FIELD_COMMIT` · `OS_COPY` · `OS_CUT` · `OS_PASTE` · `OS_ESCAPE` · `OS_EXPAND` · `OS_FOCUS` · `OS_STACK_PUSH/POP`
+### 27 Role Presets (W3C APG 완전 준수)
 
-### 7축 포커스 모델
+Zone에 role을 선언하면, W3C ARIA Authoring Practices Guide의 해당 패턴 규칙이 자동 적용된다.
 
-Direction (공간 이동) · Edge (경계 처리) · Tab (선형 탐색) · Target (직접 타겟팅) · Entry (Zone 간 진입점) · Restore (포커스 메모리) · Recovery (삭제 시 자동 복구)
+```
+리스트:    listbox · menu · menubar · radiogroup · tablist · toolbar · feed
+트리/그리드: tree · treegrid · grid
+오버레이:  dialog · alertdialog · combobox
+컨텐츠:   accordion · disclosure
+값:       slider · spinbutton · meter · separator
+토글:     switch · checkbox
+기타:     group · application · textbox · builderBlock
+```
 
-### 데이터 아키텍처
+각 preset은 방향(orientation), 루프(loop), 선택 모드(single/multiple/followFocus), 탭 동작(escape/trap/flow), 엔트리 전략(first/selected/restore) 등 8축의 설정을 내장한다.
 
-```tsx
-// 앱 정의
-const TodoApp = defineApp<TodoState>("todo", INITIAL, { history: true });
-const listZone = TodoApp.createZone("list");
-const { Zone, Item, Field } = listZone.bind({ role: "listbox", onCheck: toggleTodo });
+---
 
-// 데이터: NormalizedCollection { entities, order }
-// CRUD: fromEntities (flat) / fromNormalized (tree)
-// Views: toFlatList · toVisibleTree · toGrouped
+## 실제 코드
+
+### 앱 정의 (Todo App)
+
+```typescript
+// 앱 선언 — 상태 모델과 히스토리 모듈
+const TodoApp = defineApp<TodoState>("todo", INITIAL_STATE, {
+  modules: [history()],
+});
+
+// Zone에 role 선언 — 이 한 줄로 키보드, 선택, 접근성이 활성화됨
+const TodoListUI = listCollection.bind({
+  role: "listbox",
+  options: {
+    select: { mode: "multiple", range: true, toggle: true },
+  },
+  onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
+  onAction: (cursor) => startEdit({ id: cursor.focusId }),
+  onDelete: (cursor) => requestDeleteTodo({ ids: cursor.selection }),
+  onUndo: undoCommand(),
+  onRedo: redoCommand(),
+});
+```
+
+`role: "listbox"` 한 줄로 ArrowUp/Down 내비게이션, Home/End, Shift+Arrow 범위 선택, Meta+Click 토글 선택, 경계 클램핑, roving tabindex, `aria-selected` 프로젝션이 전부 활성화된다. 앱 코드에 `onKeyDown`은 0줄이다.
+
+### Headless 테스트 (DOM 없이 < 1ms)
+
+```typescript
+// Playwright-subset API — 브라우저 없이 동작
+const page = createHeadlessPage(TodoApp, TodoPage);
+page.goto("/");
+
+// 내비게이션 검증
+page.locator("#todo_1").click();
+page.keyboard.press("ArrowDown");
+expect(page.locator("#todo_2").toBeFocused()).toBe(true);
+
+// 범위 선택 검증
+page.keyboard.press("Shift+ArrowDown");
+expect(page.locator("#todo_2").attrs["aria-selected"]).toBe(true);
+expect(page.locator("#todo_3").attrs["aria-selected"]).toBe(true);
+
+// Undo 검증
+page.keyboard.press("Delete");
+page.dispatch(confirmDeleteTodo());
+expect(page.state.data.todoOrder.length).toBe(3);
+page.keyboard.press("Meta+z");
+expect(page.state.data.todoOrder.length).toBe(4);
+```
+
+OS 내부 상태가 브라우저 DOM에서 완전히 분리되어 있기 때문에, 모든 상호작용을 DOM 없이 순수한 상태 트랜잭션으로 검증할 수 있다. 571개 이상의 headless 테스트가 3.5초 안에 통과한다.
+
+### APG Contract 테스트
+
+24개 W3C APG 패턴에 대한 계약 테스트가 headless 환경에서 실행된다. 각 테스트는 W3C 스펙의 키보드 인터랙션 규칙을 1:1로 검증한다.
+
+```typescript
+// listbox.apg.test.ts — W3C APG Listbox 패턴 계약
+it("ArrowDown: moves focus to next option", () => {
+  const t = singleSelect("apple");
+  t.keyboard.press("ArrowDown");
+  expect(t.focusedItemId()).toBe("banana");
+  expect(t.attrs("banana")["aria-selected"]).toBe(true); // followFocus
+});
+
+it("single-select invariant: exactly 1 item selected at all times", () => {
+  const t = singleSelect("apple");
+  t.keyboard.press("ArrowDown");
+  expect(t.selection()).toHaveLength(1);
+  t.keyboard.press("Home");
+  expect(t.selection()).toHaveLength(1);
+  t.keyboard.press("End");
+  expect(t.selection()).toHaveLength(1);
+});
 ```
 
 ---
 
-## What — 현재 동작하는 것
-
-### 앱
+## 동작하는 앱
 
 | 앱 | 설명 |
 |---|---|
-| **Reference Todo** | SaaS 스타일 벤치마크. Kanban 2D Nav, 멀티셀렉션, Undo/Redo, Clipboard, BDD 테스트 |
-| **Web Builder** | Visual CMS 빌더. Bento Grid, Block Preset, Seamless Section Navigation |
-| **Docs Viewer** | 내장 문서 뷰어. Tree sidebar, 마크다운 렌더링 |
-
-### 테스트 인프라
-
-```ts
-// Headless — DOM 없이 커맨드 파이프라인 검증
-const page = createOsPage();
-page.goto("list", { items: ["a", "b", "c"], role: "listbox" });
-page.keyboard.press("ArrowDown");
-expect(page.focusedItemId()).toBe("b");
-
-// App-level — 격리된 커널 단위 테스트
-const app = TodoApp.create();
-app.dispatch(toggleTodo({ id: "task-1" }));
-expect(app.state.todos["task-1"].completed).toBe(true);
-```
-
-Vitest (unit + integration) · Vitest Browser (component rendering) · Playwright (E2E + APG contract)
-
-### 관찰 가능성
-
-- **Command Inspector** (`Cmd+D`) — 실시간 이벤트 트레이싱, 상태 검사
-- **Spatial Laboratory** — `/focus-showcase`, `/aria-showcase`에서 7축 탐색 벤치마킹
-- **APG Contract Tests** — W3C WAI-ARIA Authoring Practices 준수 검증
-
----
-
-## 기술 스택
-
-React 19 · TypeScript 5.9 · Vite 7 · Custom Kernel (순수함수 + Transaction Log) · Tailwind CSS v4 · TanStack Router · Vitest + Playwright · Lucide React · Biome
-
----
-
-## 시작하기
-
-```bash
-git clone https://github.com/developer-1px/interactive-os.git
-npm install
-npm run dev           # 앱 + 문서 동시 실행
-npm test              # unit + integration (headless)
-npm run test:browser  # browser component tests
-npm run test:e2e      # playwright e2e
-npm run typecheck     # 타입 체크
-```
+| **Reference Todo** | 풀스펙 SaaS 벤치마크. Kanban 2D 내비게이션, 멀티셀렉션, Clipboard, Undo/Redo, 카테고리 사이드바, 인라인 에디팅, DnD |
+| **Web Builder** | 비주얼 CMS 빌더. Bento Grid, Block Preset, Seamless Section Navigation |
+| **Inspector** | OS 커맨드 트레이싱, 실시간 상태 검사 (`Cmd+D`) |
+| **APG Showcase** | 28개 W3C APG 패턴의 인터랙티브 데모와 계약 테스트 |
 
 ---
 
 ## 프로젝트 구조
 
 ```
-src/
-├── os/                    # OS 커널 + 파이프라인
-│   ├── 1-listeners/       # 키보드/마우스/클립보드 이벤트 리스너
-│   ├── 2-contexts/        # DI 컨텍스트 (ZoneRegistry 등)
-│   ├── 3-commands/        # 13개 커맨드 도메인
-│   ├── 4-effects/         # Side effects
-│   ├── 5-hooks/           # React hooks
-│   ├── 6-components/      # ZIFT 프리미티브 + Dialog/Toast/QuickPick
-│   ├── collection/        # NormalizedCollection + collectionView + CRUD
-│   ├── defineApp.ts       # 앱 정의 API
-│   └── headless.ts        # Headless 테스트 인프라
-├── apps/
-│   ├── todo/              # Reference Todo 앱
-│   └── builder/           # Web Builder 앱
-├── pages/                 # 페이지 컴포넌트 + Showcase
-└── docs-viewer/           # 내장 문서 뷰어
+packages/
+├── kernel/           # 순수 함수 상태 관리 코어 (UI 무관)
+├── os-core/          # 5-Phase 파이프라인, 27 Role Preset 엔진
+│   ├── 1-listen/     # 이벤트 캡처
+│   ├── 2-resolve/    # 입력 → 커맨드 변환
+│   ├── 3-inject/     # 맥락 주입
+│   ├── 4-command/    # 28개 커맨드 도메인
+│   └── 5-effect/     # DOM 부수효과
+├── os-sdk/           # defineApp, createZone, createCollectionZone
+├── os-react/         # React 바인딩 (Zone, Item, Field, Trigger)
+├── os-devtool/       # Headless 테스트 인프라 (createHeadlessPage)
+└── surface/          # 디자인 토큰, 테마, 타이포그래피
 
-docs/                      # PARA 방법론 기반 문서
-├── 0-inbox/               # 새로운 제안 및 작업 초안
-├── 1-project/             # 활성 프로젝트
-├── 3-resource/            # 연구 및 벤치마크
-└── archive/               # 완료된 프로젝트 아카이브
+src/
+├── apps/todo/        # Reference Todo 앱
+├── apps/builder/     # Web Builder
+├── inspector/        # Command Inspector
+└── pages/apg-showcase/ # 28개 APG 패턴 데모
+
+tests/
+├── apg/              # 24개 APG 계약 테스트
+├── headless/         # 앱 수준 통합 테스트
+└── unit/             # OS 내부 단위 테스트
+```
+
+## 기술 스택
+
+React 19 · TypeScript 5.9 · Vite 7 · Tailwind CSS v4 · Vitest · Playwright
+
+## 시작하기
+
+```bash
+git clone https://github.com/developer-1px/interactive-os.git
+cd interactive-os
+npm install
+npm run dev           # 앱 구동
+npm test              # 571+ headless 테스트 (< 4초)
+npm run test:e2e      # Playwright E2E
 ```

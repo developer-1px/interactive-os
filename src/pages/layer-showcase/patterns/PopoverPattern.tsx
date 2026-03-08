@@ -61,20 +61,19 @@ export function PopoverPattern() {
 
       <PopoverTrigger.Root>
         <div className="relative inline-block">
-          <PopoverTrigger.Trigger>
-            <button
-              type="button"
-              className="
-                inline-flex items-center gap-2 px-4 py-2
-                bg-violet-600 text-white text-sm font-medium rounded-lg
-                hover:bg-violet-700 transition-colors
-                focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
-              "
-            >
-              <Icon name="info" size={14} />
-              Show Info
-            </button>
-          </PopoverTrigger.Trigger>
+          <button
+            {...PopoverTrigger.Trigger()}
+            type="button"
+            className="
+              inline-flex items-center gap-2 px-4 py-2
+              bg-violet-600 text-white text-sm font-medium rounded-lg
+              hover:bg-violet-700 transition-colors
+              focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
+            "
+          >
+            <Icon name="info" size={14} />
+            Show Info
+          </button>
 
           <PopoverTrigger.Popover
             zoneRole="menu"

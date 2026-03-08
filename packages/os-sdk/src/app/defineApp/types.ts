@@ -56,9 +56,9 @@ export type Selector<S, T> = {
 export type CommandContext<S> = { readonly state: S };
 export type HandlerResult<S> =
   | {
-      state: S;
-      dispatch?: BaseCommand | BaseCommand[] | undefined;
-    }
+    state: S;
+    dispatch?: BaseCommand | BaseCommand[] | undefined;
+  }
   | undefined;
 
 /** Flat handler: (ctx, payload) => result */
@@ -169,14 +169,14 @@ export interface BoundComponents<S> {
     id: string | number;
     className?: string;
     children?:
-      | ReactNode
-      | ((state: {
-          isFocused: boolean;
-          isSelected: boolean;
-          isExpanded: boolean;
-          isAnchor?: boolean;
-          valueNow?: number;
-        }) => ReactNode);
+    | ReactNode
+    | ((state: {
+      isFocused: boolean;
+      isSelected: boolean;
+      isExpanded: boolean;
+      isAnchor?: boolean;
+      valueNow?: number;
+    }) => ReactNode);
     asChild?: boolean;
   }> & {
     /** Passive projection of Item's visibility state — auto-manages role + aria-labelledby + hidden/mount */
@@ -218,11 +218,11 @@ export interface ZoneHandle<S> {
 
   createZone(name: string): ZoneHandle<S>;
 
-  /** Declare a trigger: id + activation function. Always a function (focusId) => BaseCommand. */
+  /** Declare a trigger: id + activation function. Returns property getter. */
   trigger(
     id: string,
     onActivate: (focusId: string) => BaseCommand,
-  ): TriggerBinding & React.FC<{ children: ReactNode; payload?: string }>;
+  ): TriggerBinding & (<T extends HTMLElement>() => React.HTMLAttributes<T>);
 
   /** Declare an overlay trigger: id + config. Returns CompoundTriggerComponents. */
   overlay(id: string, config: ZoneOverlayConfig): CompoundTriggerComponents;
@@ -337,6 +337,21 @@ export interface AppPage<_S> {
  * Unit tests (.test.ts) may use this via type assertion: `page as AppPageInternal<S>`.
  */
 export interface AppPageInternal<S> extends AppPage<S> {
+  kernel: import("@os-core/3-inject/headless.types").HeadlessKernel;
+  getDOMElement(id: string): HTMLElement | null;
+  /** Legacy setupZone */
+  setupZone(
+    target: string,
+    opts?: {
+      focusedItemId?: string | null;
+      config?: Partial<import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig>;
+      role?: import("@os-core/engine/registries/roleRegistry").ZoneRole;
+      initial?: { selection?: string[]; expanded?: string[] };
+      items?: string[];
+      expandableItems?: Set<string>;
+      treeLevels?: Map<string, number>;
+    },
+  ): void;
   /** App state (direct access — unit test only, not for TestScript). */
   readonly state: S;
 

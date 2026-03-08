@@ -280,14 +280,13 @@ export function defineApp<S>(
       trigger(
         id: string,
         onActivate: (focusId: string) => import("@kernel/core/tokens").BaseCommand,
-      ): TriggerBinding & React.FC<{ children: ReactNode }> {
+      ): TriggerBinding & (<T extends HTMLElement>() => React.HTMLAttributes<T>) {
         const Component = createFunctionTrigger(appId, onActivate, { id });
 
-        // Merge: React.FC + TriggerBinding
-        const result = Component as React.FC<{ children: ReactNode }> & TriggerBinding;
+        // Merge: getter + TriggerBinding
+        const result = Component as (<T extends HTMLElement>() => React.HTMLAttributes<T>) & TriggerBinding;
         Object.defineProperty(result, "id", { value: id, writable: false, enumerable: true });
         Object.defineProperty(result, "onActivate", { value: onActivate, writable: false, enumerable: true });
-
         return result;
       },
 

@@ -50,31 +50,30 @@ function SidebarCategoryItem({ categoryId }: { categoryId: string }) {
 
   return (
     <TodoSidebar.Item id={category.id} asChild>
-      <TodoSidebar.triggers.SelectCategory>
-        <div
-          className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
-                            hover:bg-slate-100/80
-                            data-[focused=true]:bg-indigo-50
-                            data-[focused=true]:ring-2
-                            data-[focused=true]:ring-indigo-400
-                          `}
+      <div
+        {...TodoSidebar.triggers.SelectCategory()}
+        className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium outline-none ring-0 cursor-pointer transition-all duration-200 overflow-hidden
+                          hover:bg-slate-100/80
+                          data-[focused=true]:bg-indigo-50
+                          data-[focused=true]:ring-2
+                          data-[focused=true]:ring-indigo-400
+                        `}
+      >
+        <span
+          className={`transition-colors duration-200 ${isSelected ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
         >
-          <span
-            className={`transition-colors duration-200 ${isSelected ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`}
-          >
-            {getIcon(category.id)}
-          </span>
-          <span
-            className={`transition-colors duration-200 ${isSelected ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
-          >
-            {category.text}
-          </span>
+          {getIcon(category.id)}
+        </span>
+        <span
+          className={`transition-colors duration-200 ${isSelected ? "text-slate-900 font-semibold" : "text-slate-600 group-hover:text-slate-900"}`}
+        >
+          {category.text}
+        </span>
 
-          {isSelected && (
-            <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
-          )}
-        </div>
-      </TodoSidebar.triggers.SelectCategory>
+        {isSelected && (
+          <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300" />
+        )}
+      </div>
     </TodoSidebar.Item>
   );
 }
