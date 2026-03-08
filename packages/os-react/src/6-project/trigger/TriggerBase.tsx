@@ -42,7 +42,8 @@ type OverlayRole = OverlayEntry["type"];
 export interface TriggerProps<T extends BaseCommand>
   extends React.HTMLAttributes<HTMLElement> {
   id?: string;
-  onActivate?: T;
+  /** Command or cursor-dependent factory. Functions are registered directly in ZoneRegistry. */
+  onActivate?: T | ((focusId: string) => T);
   children: ReactNode;
 
   /** Overlay role — when set, click opens an overlay */
@@ -132,7 +133,12 @@ export const TriggerBase = forwardRef<HTMLElement, TriggerProps<BaseCommand>>(
     useEffect(() => {
       if (!id || !onActivate || overlayRole) return;
       const targetZoneId = zoneId ?? "__standalone__";
-      ZoneRegistry.setItemCallback(targetZoneId, id, { onActivate: () => onActivate });
+      // Register function factories directly — preserves focusId argument.
+      // Static BaseCommands are wrapped in a thunk for backward compatibility.
+      const cb = typeof onActivate === "function"
+        ? { onActivate: onActivate as (focusId: string) => BaseCommand }
+        : { onActivate: () => onActivate };
+      ZoneRegistry.setItemCallback(targetZoneId, id, cb);
       return () => ZoneRegistry.clearItemCallback(targetZoneId, id);
     }, [id, onActivate, overlayRole, zoneId]);
 

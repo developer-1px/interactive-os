@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-08T23:50
+> Last updated: 2026-03-08T15:20
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -15,6 +15,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
+| os-core | **remove-dynamic-trigger** | T1~T3 Now |
 | apg | **layer-playground** | T1~T8 Done |
 | inspector | **inspector-dogfooding** | T5 Next |
 | testing | **os-test-suite** | T1~T4 Done |
@@ -28,6 +29,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| **remove-dynamic-trigger** | T1~T3 Now | 03-08 |
 | ~~trigger-click-fix~~ | ✅ Archived (W10) | 03-08 |
 | ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
 | docs-freshness | WP1~WP8 | 03-06 |
@@ -91,9 +93,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 6 |
-| Active Projects | 14 |
+| Active Projects | 15 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
+| Active Focus | 4 (remove-dynamic-trigger, layer-playground, inspector-dogfooding, os-test-suite) |
 | Stale (7d+) | 0 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |

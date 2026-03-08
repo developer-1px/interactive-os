@@ -38,7 +38,7 @@ import { createTestInstance } from "./testInstance";
 import {
   type CompoundTriggerComponents,
   createCompoundTrigger,
-  createDynamicTrigger,
+  createFunctionTrigger,
 } from "./trigger";
 import {
   __conditionBrand,
@@ -280,12 +280,11 @@ export function defineApp<S>(
       trigger(
         id: string,
         onActivate: (focusId: string) => import("@kernel/core/tokens").BaseCommand,
-      ): TriggerBinding & React.FC<{ children: ReactNode; payload?: string }> {
-        // Always dynamic: function receives focusId at dispatch time
-        const Component = createDynamicTrigger(appId, onActivate as CommandFactory<string, unknown>, { id });
+      ): TriggerBinding & React.FC<{ children: ReactNode }> {
+        const Component = createFunctionTrigger(appId, onActivate, { id });
 
         // Merge: React.FC + TriggerBinding
-        const result = Component as React.FC<{ children: ReactNode; payload?: string }> & TriggerBinding;
+        const result = Component as React.FC<{ children: ReactNode }> & TriggerBinding;
         Object.defineProperty(result, "id", { value: id, writable: false, enumerable: true });
         Object.defineProperty(result, "onActivate", { value: onActivate, writable: false, enumerable: true });
 

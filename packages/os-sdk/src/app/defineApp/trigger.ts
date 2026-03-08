@@ -5,52 +5,40 @@
  * Only dependency: appId (for displayName) and OS primitives.
  */
 
-import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
+import type { BaseCommand } from "@kernel/core/tokens";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import { Trigger } from "@os-react/6-project/Trigger";
 import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
 import React, { type ReactNode, useEffect } from "react";
 
-// ═══════════════════════════════════════════════════════════════════
-// Dynamic Trigger (CommandFactory bound at render time)
-// ═══════════════════════════════════════════════════════════════════
-
 export interface TriggerOptions {
   id?: string;
 }
 
-/** Props for dynamic trigger — payload required when P is not void */
-type DynamicTriggerProps<P> = P extends void
-  ? { children: ReactNode; payload?: never }
-  : { children: ReactNode; payload?: P };
-
-export function createDynamicTrigger<P>(
+/**
+ * createFunctionTrigger — simple FC that passes (focusId) => BaseCommand
+ * directly to <Trigger onActivate={fn}>. No payload, no thunk wrapping.
+ */
+export function createFunctionTrigger(
   appId: string,
-  factory: CommandFactory<string, P>,
-  options?: TriggerOptions,
-): React.FC<DynamicTriggerProps<P>> {
-  if (!options?.id) {
-    throw new Error(
-      '[Trigger] onActivate requires an id. Use createTrigger(factory, { id: "my-id" })',
-    );
-  }
-  const DynamicTrigger: React.FC<DynamicTriggerProps<P>> = ({
+  onActivate: (focusId: string) => BaseCommand,
+  options: TriggerOptions & { id: string },
+): React.FC<{ children: ReactNode }> {
+  const FnTrigger: React.FC<{ children: ReactNode }> = ({
     children,
-    payload,
     ...rest
   }) => {
-    const cmd = (factory as unknown as (p: P) => ReturnType<typeof factory>)(
-      (payload ?? "") as P,
-    );
+    // Spread rest AFTER id so outer Item asChild can override id
+    // (e.g. <Item id="cat_inbox" asChild><SelectCategory> passes id through)
     return React.createElement(Trigger, {
-      ...(options?.id ? { id: options.id } : {}),
-      onActivate: cmd,
+      id: options.id,
+      onActivate,
       children,
       ...rest,
     });
   };
-  DynamicTrigger.displayName = `${appId}.DynamicTrigger`;
-  return DynamicTrigger;
+  FnTrigger.displayName = `${appId}.Trigger(${options.id})`;
+  return FnTrigger;
 }
 
 // ═══════════════════════════════════════════════════════════════════
