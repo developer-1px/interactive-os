@@ -9,3 +9,8 @@
 - 하나의 논리적 변경 단위마다 커밋한다.
 - pre-commit hook(husky)이 lint + tsc + vitest를 자동 실행한다. 통과해야 커밋이 완료된다.
 - hook을 스킵(`--no-verify`)하지 않는다.
+
+## 테스트 작성
+
+- headless test 작성 시 `.agent/knowledge/headless-test-guide.md`를 먼저 읽는다.
+- 관찰된 버그 재현 시 `/repro` 스킬을 사용한다.

@@ -107,6 +107,7 @@
 | 테스트 도구 선택 | `.agent/knowledge/verification-standards.md` |
 | 테스트 함정 회피 | `.agent/knowledge/testing-hazards.md` |
 | 테스트 구조 (TestScript ONE) | `.agent/knowledge/testing-tools.md` |
+| headless test 작성법 | `.agent/knowledge/headless-test-guide.md` |
 | 성능 패턴·코딩 함정 | `.agent/knowledge/coding-rules.md` |
 | 계약 위반 자가 점검 | `.agent/knowledge/contract-checklist.md` |
 | 스코프·가설 검증 | `.agent/knowledge/working-standards.md` |
