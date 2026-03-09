@@ -1,10 +1,11 @@
 ---
-description: Discussion 결론을 프로젝트로 전환한다. scaffold 후 `/go` Phase 1(숙지)로 진입한다.
+description: Discussion 결론을 전략 컨테이너(BOARD.md Context)로 전환한다. Task Map은 /plan이 담당.
 ---
 
-## /project — 프로젝트 생애주기
+## /project — 전략 컨테이너
 
-> **분류**: 오케스트레이터. `/go` 진입 라우터.
+> **분류**: 행선지. `/discussion` 종료 후 프로젝트를 만든다.
+> **책임**: Context(왜, 무엇을) + Scaffold. **전술(어떻게, 얼마나)은 `/plan`이 담당.**
 > **진입점**: `/discussion` 종료 → "새 프로젝트" 판정 시 자동 전환.
 
 ### 라우팅
@@ -54,10 +55,9 @@ Before → After: [핵심 변경 한눈에]
 Risks: [Rebuttal에서 온 위험/단점]
 
 ## Now
-- [ ] T1: description
+<!-- /plan이 Task Map으로 채운다. /project는 비워둔다. -->
 
 ## Done
-- [x] T1: description — tsc 0 | +N tests | build OK ✅
 
 ## Unresolved
 - [Discussion의 Open Gap에서 온 미해결 질문]
@@ -65,6 +65,9 @@ Risks: [Rebuttal에서 온 위험/단점]
 ## Ideas
 - [미래 아이디어]
 ```
+
+> **`/project`는 Context + Unresolved + Ideas만 작성한다.**
+> **Now 태스크는 `/plan`이 Task Map으로 채운다.**
 
 **DoD (Definition of Done)**: Done 항목에는 반드시 증빙을 포함한다.
 증빙 없이 `✅`만 찍는 것은 금지.

@@ -36,7 +36,9 @@ description: 기능 명세서. BDD Scenarios + Decision Table을 하나의 spec.
 ## 저장 위치
 
 - `docs/1-project/[프로젝트명]/spec.md`
-- 프로젝트당 **1파일**. Living document.
+- 프로젝트당 **1파일**, **태스크별 섹션**. Living document.
+- 각 태스크는 `## T{N}: [태스크명]` 헤딩으로 구분한다.
+- `/spec`은 현재 태스크의 섹션만 작성한다 (전체를 한번에 쓰지 않는다).
 
 ## 절차
 

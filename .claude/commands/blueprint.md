@@ -62,14 +62,7 @@ Ideal에 도달하기 위해 필요한 모든 전제 조건:
 - **Gap**: Have와 Need의 차이 → 실제 작업 범위
 - 각 Gap에 영향도(High/Med/Low)와 의존 관계 표시
 
-#### 7. Execution Plan — 실행 설계 (TT: Transition Tree → /divide)
-
-Gap을 `/divide` 방식으로 분해하여 실행 순서를 설계한다.
-- 각 Gap → Cynefin 도메인 판단 (Clear/Complicated/Complex)
-- Clear/Complicated → 바로 실행 단위로
-- Complex → 추가 분해 또는 실험(Probe) 설계
-- 의존 관계에 따른 실행 순서 결정
-- 결과물: 순서가 매겨진 실행 항목 목록
+> **실행 계획은 `/plan`이 담당한다.** /blueprint는 §6(Gap)까지만. Gap 분석이 끝나면 `/plan`으로 전환하여 Task Map을 작성한다.
 
 ### 템플릿
 
@@ -95,8 +88,4 @@ Gap을 `/divide` 방식으로 분해하여 실행 순서를 설계한다.
 ## 6. Gap
 | # | Need | Have | Gap | Impact | Depends |
 |-|-|-|-|-|-|
-
-## 7. Execution Plan
-| # | Task | Domain | Depends | Description |
-|-|-|-|-|-|
 ```

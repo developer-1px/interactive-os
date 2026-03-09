@@ -1,5 +1,5 @@
 ---
-description: Goal에서 역추적하여 Work Package를 도출한다. /solve의 입력을 만든다.
+description: 논의 도구. 복잡한 문제를 이해하기 위해 Goal에서 역추적하여 분해한다. 실행 계획은 /plan이 담당.
 ---
 
 ## /divide — Goal-Driven Backward Chaining

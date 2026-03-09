@@ -23,16 +23,17 @@ Risks:
 
 ## Now
 
-- [ ] T1: /plan 재작성 — Task Map + 현황판 + 1턴 크기 분해. /divide의 전술 기능 흡수
-- [ ] T2: /go 멀티턴 게이트 추가 — 정량 검증 + 재진입 루프 (≤3회) + 보고·정지
-- [ ] T3: /project 축소 — Now 태스크 작성 제거, Context만 남김. Task Map은 /plan이 담당
-- [ ] T4: /spec 태스크별 전환 — "프로젝트당 1파일" → spec.md 안에 태스크별 섹션
-- [ ] T5: /divide 역할 축소 — 실행 계획 제거, "논의 중 이해를 위한 분해" 도구로 재정의
-- [ ] T6: /blueprint §7 제거 — Execution Plan 섹션 삭제, §1~§6만 유지
-- [ ] T7: 삭제 3개 — /rework, /design, /routes .md 파일 제거
 - [ ] T8: 검증 — 변경된 파이프라인으로 os-react AP-1~AP-8 프로젝트 실행하여 워킹 테스트
 
 ## Done
+
+- [x] T1: /plan 재작성 — Task Map + 현황판 + S/M/L 크기 분해 ✅
+- [x] T2: /go 멀티턴 게이트 — 11단계 파이프라인 + 정량 검증 + ≤3 재시도 ✅
+- [x] T3: /project 축소 — Context만 남김, Now는 /plan이 담당 ✅
+- [x] T4: /spec 태스크별 — `## T{N}:` 헤딩으로 태스크별 섹션 ✅
+- [x] T5: /divide 논의 도구 — description + 역할 재정의 ✅
+- [x] T6: /blueprint §7 제거 — §1~§6만 유지, /plan 위임 안내 추가 ✅
+- [x] T7: 삭제 3개 — /rework, /design, /routes + .agent/workflows 동기화 ✅
 
 ## Unresolved
 
