@@ -181,6 +181,9 @@ testbot 파일 + runScenarios로 보일러플레이트 제거.
 ```ts
 // testbot-myapp.ts — scenarios declare zone + role + scripts only.
 // Items are resolved from ZoneRegistry (single path for headless & browser).
+export const zones = ["my-zone"];
+export const route = "/my-app";  // TestBot panel filters by current route
+export const group = "My App";
 export const scenarios: TestScenario[] = [
   { zone: "my-zone", role: "listbox", scripts: myScripts },
 ];
