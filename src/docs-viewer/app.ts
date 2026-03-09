@@ -15,11 +15,13 @@
 
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE, os } from "@os-sdk/os";
+import { zoneItemId } from "@os-sdk/zoneItemId";
 import { produce } from "immer";
 import {
   buildDocTree,
   type DocItem,
   docsModules,
+  findFolder,
   flattenTree,
   flattenVisibleTree,
   getFavoriteFiles,
@@ -276,6 +278,28 @@ export const PREV_SECTION = readerZone.command(
 export const DocsReaderUI = readerZone.bind({
   role: "feed",
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
+  getItems: () => {
+    const rid = (id: string) => zoneItemId("docs-reader", id);
+    const appState = os.getState().apps["docs-viewer"] as DocsState | undefined;
+    const activePath = appState?.activePath;
+
+    // Folder view → children IDs
+    if (activePath?.startsWith("folder:")) {
+      const folderPath = activePath.slice("folder:".length);
+      const folder = findFolder(docTree, folderPath);
+      return (folder?.children ?? []).map((c) =>
+        rid(c.type === "folder" ? `folder:${c.path}` : c.path),
+      );
+    }
+
+    // File view → single article
+    if (activePath) return [rid(activePath)];
+
+    // No active path → root folder index (initial state)
+    return docTree.map((c) =>
+      rid(c.type === "folder" ? `folder:${c.path}` : c.path),
+    );
+  },
   options: {
     inputmap: { click: [OS_ACTIVATE()] },
   },

@@ -21,7 +21,9 @@ export type { ExpectLocator, TestScenario, TestScript } from "./scripts";
 
 export interface Locator extends LocatorAssertions {
   /** Click this element. Sync (headless/browser) or async (Playwright). */
-  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void | Promise<void>;
+  click(opts?: {
+    modifiers?: ("Meta" | "Shift" | "Control")[];
+  }): void | Promise<void>;
 
   /** Get a single attribute value. */
   getAttribute(name: string): string | null | Promise<string | null>;

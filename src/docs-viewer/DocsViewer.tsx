@@ -22,6 +22,7 @@ import { StatusDashboard } from "./StatusDashboard";
 
 // Side-effect: register docs-viewer commands on kernel
 import "./app";
+import { zoneItemId } from "@os-sdk/zoneItemId";
 import {
   DocsApp,
   DocsNavbarUI,
@@ -87,7 +88,10 @@ function FolderIndexView({ folder }: { folder: DocItem }) {
         {children.map((child) => (
           <div key={child.path}>
             <DocsReaderUI.Item
-              id={child.type === "folder" ? `folder:${child.path}` : child.path}
+              id={zoneItemId(
+                "docs-reader",
+                child.type === "folder" ? `folder:${child.path}` : child.path,
+              )}
               asChild
             >
               <button
