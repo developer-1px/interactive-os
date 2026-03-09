@@ -23,13 +23,13 @@ Risks:
 - route convention이 복잡한 라우팅(동적 params)에서 깨질 수 있음
 
 ## Now
-- [ ] T1: ManifestEntry에 route? 필드 추가 + buildAutoEntries 추출 — 크기: S, 의존: —
-- [ ] T2: testbot 3파일에 export const route 추가 — 크기: S, 의존: —
-- [ ] T3: TestBotRegistry route 필터링 (getCurrentRoute 콜백) — 크기: M, 의존: →T1
-- [ ] T4: TestBotPanel route getter 연결 — 크기: S, 의존: →T3
-- [ ] T5: 전체 vitest regression 검증 — 크기: S, 의존: →T4
 
 ## Done
+- [x] T1: ManifestEntry에 route? 필드 추가 + buildAutoEntries 추출 — tsc 0 ✅
+- [x] T2: testbot 3파일에 export const route 추가 (todo=/todo, docs=/docs, builder=/builder) — tsc 0 ✅
+- [x] T3: TestBotRegistry route 필터링 (isEntryMatched: route-first, zone-fallback) — tsc 0 ✅
+- [x] T4: TestBotPanel useRouter() + getRoute callback 연결 — tsc 0 ✅
+- [x] T5: 전체 vitest regression — 727 PASS, 31 FAIL (전부 pre-existing APG/OS) ✅
 
 ## Unresolved
 - engine opt-out 메커니즘의 구체적 API (engines 필드? 파일 convention?)
