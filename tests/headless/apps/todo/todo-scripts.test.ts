@@ -1,46 +1,18 @@
 /**
- * Todo App — Unified TestScript Runner (Headless)
+ * Todo App — auto-runner for testbot-todo.ts scenarios.
+ *
+ * Bridges testbot scenarios (§1 List, §2 Sidebar)
+ * to vitest via runScenarios().
  *
  * "Write once, run anywhere":
- *   - Headless (vitest): this file — page = createHeadlessPage(TodoApp, TodoPage)
- *   - Browser (TestBot):  run(browserPage, ourExpect)
- *   - Playwright E2E:     run(playwrightPage, playwrightExpect)
- *
- * Each TestScript from scripts/todo.ts is executed with the exact same
- * page interface and assertions. No setupZone("zoneName") seeding.
+ *   - Headless (vitest): this file
+ *   - Browser (TestBot): testbot-manifest auto-discovery
+ *   - Playwright E2E: tests/e2e/todo.spec.ts
  */
 
 import { TodoApp } from "@apps/todo/app";
-import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { todoScripts } from "@os-devtool/testing/scripts/todo";
-import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
-import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
-import { afterEach, beforeEach, describe, it } from "vitest";
-import type { AppState } from "../../../../src/apps/todo/model/appState";
+import { scenarios } from "@apps/todo/testbot-todo";
+import { runScenarios } from "@os-devtool/testing/runScenarios";
 import TodoPage from "../../../../src/pages/TodoPage";
 
-type P = AppPageInternal<AppState>;
-let page: P;
-
-beforeEach(() => {
-  _resetClipboardStore();
-  page = createHeadlessPage(TodoApp, TodoPage);
-  page.goto("/"); // Playwright-compatible: registers all zones + renders component
-});
-
-afterEach(() => {
-  page.cleanup();
-});
-
-// ─── Run each TestScript ───
-describe("Todo Unified Scripts (Headless)", () => {
-  for (const script of todoScripts) {
-    it(script.name, async () => {
-      await script.run(
-        page as unknown as import("@os-devtool/testing/types").Page,
-        osExpect,
-      );
-    });
-  }
-});
+runScenarios(scenarios, TodoApp, TodoPage);
