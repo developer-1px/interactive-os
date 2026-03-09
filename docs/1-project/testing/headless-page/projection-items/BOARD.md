@@ -32,3 +32,4 @@ Evidence:
 ## Ideas
 - browser 쪽 DOM_ITEMS도 DOM scan only로 통일 + getItems API deprecated (후속 프로젝트)
 - binding-provided getItems도 점진적으로 제거하여 전체 projection-only로 전환
+- DocsViewer headless test — `virtual:docs-meta` + `import.meta.glob` mock으로 실제 DocsViewer를 headless에서 테스트 (별도 프로젝트)
