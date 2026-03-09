@@ -18,9 +18,9 @@ Risks:
 파일럿: AP-4(Dialog.tsx 삭제)를 먼저 수행하여 파이프라인 검증. 성공 후 스케일업.
 
 ## Now
-- [ ] T1: Dialog.tsx 삭제 + 소비자 7개 ModalPortal 전환 — 크기: M, 의존: —
 
 ## Done
+- [x] T1: Dialog.tsx 삭제 + 소비자 7개 ModalPortal 전환 — `tsc 0 | 10 tests pass | build OK | 0 Dialog traces` (787d5baf)
 
 ## Unresolved
 - AP 간 최적 실행 순서 — /plan에서 코드 조사 후 확정
