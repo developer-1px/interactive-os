@@ -5,7 +5,7 @@
  * Controlled by DocsApp.searchOpen state.
  * Fuzzy matches file names from allFiles.
  */
-import { os } from "@os-sdk/os";
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import clsx from "clsx";
 import { FileText, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +24,7 @@ function fuzzyMatch(query: string, text: string): boolean {
 }
 
 export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
+  const dispatch = useDispatch();
   const searchOpen = DocsApp.useComputed((s) => s.searchOpen);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -63,16 +64,19 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
     prevResultsLength.current = results.length;
   }, [results.length]);
 
-  const handleSelect = useCallback((path: string) => {
-    os.dispatch(selectDoc({ id: path }));
-    os.dispatch(closeSearch());
-  }, []);
+  const handleSelect = useCallback(
+    (path: string) => {
+      dispatch(selectDoc({ id: path }));
+      dispatch(closeSearch());
+    },
+    [dispatch],
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        os.dispatch(closeSearch());
+        dispatch(closeSearch());
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -85,7 +89,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
         if (selected) handleSelect(selected.path);
       }
     },
-    [results, selectedIndex, handleSelect],
+    [results, selectedIndex, handleSelect, dispatch],
   );
 
   if (!searchOpen) return null;
@@ -94,7 +98,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/30 backdrop-blur-sm"
       onClick={(e) => {
-        if (e.target === e.currentTarget) os.dispatch(closeSearch());
+        if (e.target === e.currentTarget) dispatch(closeSearch());
       }}
       onKeyDown={() => {}}
       role="presentation"

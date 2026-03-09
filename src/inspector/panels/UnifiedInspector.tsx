@@ -9,7 +9,7 @@
  */
 
 import type { Transaction } from "@kernel/core/transaction";
-import { os } from "@os-sdk/os";
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import {
   ChevronDown,
   ClipboardCopy,
@@ -44,10 +44,12 @@ function highlightElement(id: string, active: boolean) {
   if (active) {
     el.style.outline = "2px solid #f06595";
     el.style.outlineOffset = "2px";
+    // biome-ignore lint/complexity/useLiteralKeys: tsc noPropertyAccessFromIndexSignature requires bracket notation for dataset
     el.dataset["inspectorHighlight"] = "true";
   } else {
     el.style.outline = "";
     el.style.outlineOffset = "";
+    // biome-ignore lint/complexity/useLiteralKeys: tsc noPropertyAccessFromIndexSignature requires bracket notation for dataset
     delete el.dataset["inspectorHighlight"];
   }
 }
@@ -63,6 +65,7 @@ export function UnifiedInspector({
   storeState?: Record<string, unknown>;
   onClear?: () => void;
 }) {
+  const dispatch = useDispatch();
   const disabledGroups = InspectorApp.useComputed(safeDisabledGroups);
   const searchQuery = InspectorApp.useComputed(
     (s: InspectorState) => s.searchQuery,
@@ -90,14 +93,14 @@ export function UnifiedInspector({
   }, [transactions]);
 
   const handleToggleGroup = (group: string) => {
-    os.dispatch(toggleGroup({ group }));
+    dispatch(toggleGroup({ group }));
   };
 
   // --- End of Component State ---
 
   const latestTxId =
     filteredTx.length > 0
-      ? String(filteredTx[filteredTx.length - 1]!.id)
+      ? String(filteredTx[filteredTx.length - 1]?.id)
       : undefined;
   const expandedIds = new Set(manualToggles);
 
@@ -145,9 +148,9 @@ export function UnifiedInspector({
     if (isProgrammaticScroll.current) return;
     const UserScrolled = !isAtBottom();
     if (isUserScrolled !== UserScrolled) {
-      os.dispatch(setScrollState({ isUserScrolled: !!UserScrolled }));
+      dispatch(setScrollState({ isUserScrolled: !!UserScrolled }));
     }
-  }, [isAtBottom, isUserScrolled]);
+  }, [isAtBottom, isUserScrolled, dispatch]);
 
   // React to OS_SCROLL commands via scrollTick change
   useEffect(() => {
@@ -223,7 +226,7 @@ export function UnifiedInspector({
                 onClick={() => {
                   onClear();
                   setManualToggles(new Set());
-                  os.dispatch(clearSearchQuery());
+                  dispatch(clearSearchQuery());
                   // TODO: add command for clearDisabledGroups if needed
                 }}
                 className="px-1.5 py-0.5 rounded text-[8px] font-bold text-[#999] hover:text-[#ef4444] hover:bg-[#fef2f2] cursor-pointer border border-[#e5e5e5]"

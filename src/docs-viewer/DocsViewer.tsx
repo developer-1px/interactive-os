@@ -1,5 +1,6 @@
 import "./docs-viewer.css";
 import docsMeta from "virtual:docs-meta";
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { os } from "@os-sdk/os";
 import clsx from "clsx";
 import {
@@ -130,6 +131,7 @@ function FolderIndexView({ folder }: { folder: DocItem }) {
 }
 
 export function DocsViewer() {
+  const dispatch = useDispatch();
   // activePath — Single Source of Truth from DocsApp state
   const activePath = DocsApp.useComputed((s) => s.activePath) ?? undefined;
   const favVersion = DocsApp.useComputed((s) => s.favVersion);
@@ -160,8 +162,9 @@ export function DocsViewer() {
 
       if (direction === "prev") {
         for (let i = headings.length - 1; i >= 0; i--) {
-          if (headings[i]!.offsetTop < scrollTop - offset) {
-            headings[i]!.scrollIntoView({ behavior: "smooth", block: "start" });
+          const h = headings[i];
+          if (h && h.offsetTop < scrollTop - offset) {
+            h.scrollIntoView({ behavior: "smooth", block: "start" });
             return;
           }
         }
@@ -232,7 +235,7 @@ export function DocsViewer() {
   // --- Derived: is current path a folder or STATUS? ---
   const isStatusView = activePath?.endsWith("STATUS") ?? false;
   const isFolderView = activePath?.startsWith("folder:") ?? false;
-  const folderPath = isFolderView ? activePath!.slice("folder:".length) : null;
+  const folderPath = isFolderView ? activePath?.slice("folder:".length) : null;
   const folderNode = useMemo(
     () => (folderPath ? findFolder(docTree, folderPath) : null),
     [folderPath, docTree],
@@ -261,10 +264,10 @@ export function DocsViewer() {
     if (!activePath && allFiles.length > 0) {
       const first = allFiles[0];
       if (first) {
-        os.dispatch(selectDoc({ id: first.path }));
+        dispatch(selectDoc({ id: first.path }));
       }
     }
-  }, [allFiles, activePath]);
+  }, [allFiles, activePath, dispatch]);
 
   // --- Folder open / close ---
   const handleOpenFolder = async () => {
@@ -273,7 +276,7 @@ export function DocsViewer() {
 
     setExternalSource(result);
     externalRef.current = result;
-    os.dispatch(resetDoc());
+    dispatch(resetDoc());
     setContent("");
     setError(null);
     // Auto-select will fire via the allFiles effect
@@ -282,7 +285,7 @@ export function DocsViewer() {
   const handleCloseFolder = () => {
     setExternalSource(null);
     externalRef.current = null;
-    os.dispatch(resetDoc());
+    dispatch(resetDoc());
     setContent("");
     setError(null);
   };
