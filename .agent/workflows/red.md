@@ -2,8 +2,6 @@
 description: 실패하는 테스트를 작성한다. 이 세션의 유일한 산출물은 🔴 FAIL하는 .test.ts 파일이다.
 ---
 
-// turbo-all
-
 ## /red — 실패하는 테스트 작성
 
 > **산출물 1개**: 테스트 코드 `.test.ts` (🔴 FAIL)

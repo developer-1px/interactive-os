@@ -2,8 +2,6 @@
 description: Green 테스트를 통과한 헤드리스 로직을 UI 컴포넌트에 연결한다. 산출물은 화면에서 동작하는 UI다.
 ---
 
-// turbo-all
-
 ## /bind — UI 연결
 
 > **전제**: `/green` 완료 (헤드리스 테스트 🟢 PASS).

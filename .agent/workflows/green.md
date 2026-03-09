@@ -2,8 +2,6 @@
 description: Red 테스트를 Green으로 만든다. 이 세션의 유일한 산출물은 🟢 PASS하는 구현 코드다.
 ---
 
-// turbo-all
-
 ## /green — 테스트를 통과시킨다
 
 > **산출물**: 구현 코드 (🟢 PASS)

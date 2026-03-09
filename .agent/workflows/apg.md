@@ -2,8 +2,6 @@
 description: W3C APG 스펙 기반으로 APG 패턴을 구현·검증한다. 스펙이 유일한 근거다. 즉흥 금지.
 ---
 
-// turbo-all
-
 ## /apg — W3C APG 패턴 구현 워크플로우
 
 > **원칙**: W3C APG Example이 **유일한 근거**다. Example의 표와 코드를 그대로 따른다.
