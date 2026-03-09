@@ -9,7 +9,9 @@ import { selectVisibleTodoIds } from "@apps/todo/selectors";
 import { TaskItem } from "@apps/todo/widgets/TaskItem";
 import { useSelection } from "@os-react/6-project/accessors/useSelection";
 import { Field } from "@os-react/6-project/field/Field";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { Item } from "@os-react/6-project/Item";
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
+import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
 import {
   AlertTriangle,
   CheckCheck,
@@ -138,42 +140,60 @@ export function ListView() {
         </div>
       )}
 
-      {/* DeleteDialog — OverlayHandle + Dialog widget (opened programmatically via OS_OVERLAY_OPEN) */}
-      <Dialog id={DeleteDialog.overlayId} role="alertdialog">
-        <Dialog.Content title="Delete items?">
-          <div className="flex items-start gap-3 py-3">
-            <div className="p-2 bg-red-50 rounded-lg border border-red-100">
-              <AlertTriangle size={20} className="text-red-500" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-800 font-medium">
-                {pendingDeleteIds.length > 1
-                  ? `Delete ${pendingDeleteIds.length} items?`
-                  : "Delete this item?"}
-              </p>
-              <p className="text-xs text-slate-500 mt-1">
-                This action cannot be undone. Are you sure?
-              </p>
-            </div>
+      {/* DeleteDialog — ModalPortal + onAction (opened programmatically via OS_OVERLAY_OPEN) */}
+      <ModalPortal
+        overlayId={DeleteDialog.overlayId}
+        role="alertdialog"
+        title="Delete items?"
+        onAction={(cursor) => {
+          if (cursor.focusId === "confirm") {
+            return [
+              TodoList.commands.confirmDeleteTodo(),
+              OS_OVERLAY_CLOSE({ id: DeleteDialog.overlayId }),
+            ];
+          }
+          return [
+            TodoList.commands.cancelDeleteTodo(),
+            OS_OVERLAY_CLOSE({ id: DeleteDialog.overlayId }),
+          ];
+        }}
+      >
+        <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+          Delete items?
+        </div>
+        <div className="flex items-start gap-3 py-3">
+          <div className="p-2 bg-red-50 rounded-lg border border-red-100">
+            <AlertTriangle size={20} className="text-red-500" />
           </div>
+          <div>
+            <p className="text-sm text-slate-800 font-medium">
+              {pendingDeleteIds.length > 1
+                ? `Delete ${pendingDeleteIds.length} items?`
+                : "Delete this item?"}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              This action cannot be undone. Are you sure?
+            </p>
+          </div>
+        </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-            <Dialog.Close
-              className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer"
-              onActivate={TodoList.commands.cancelDeleteTodo()}
-            >
-              Cancel
-            </Dialog.Close>
-            <Dialog.Close
-              id="confirm"
-              onActivate={TodoList.commands.confirmDeleteTodo()}
-              className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium cursor-pointer"
-            >
-              Delete
-            </Dialog.Close>
-          </div>
-        </Dialog.Content>
-      </Dialog>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <Item
+            id={`${DeleteDialog.overlayId}-close`}
+            as="button"
+            className="px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors font-medium cursor-pointer"
+          >
+            Cancel
+          </Item>
+          <Item
+            id="confirm"
+            as="button"
+            className="px-3 py-1.5 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors font-medium cursor-pointer"
+          >
+            Delete
+          </Item>
+        </div>
+      </ModalPortal>
     </div>
   );
 }

@@ -8,6 +8,7 @@
 
 import { OS_OVERLAY_CLOSE } from "@os-core/4-command/overlay/overlay";
 import { os } from "@os-core/engine/kernel.ts";
+import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import { useOverlay } from "@os-react/6-project/accessors/useOverlay";
 import { Zone } from "@os-react/6-project/Zone";
 import type { ReactNode } from "react";
@@ -28,6 +29,8 @@ export interface ModalPortalProps {
   className?: string;
   /** Additional className for the content wrapper (.os-modal-content) */
   contentClassName?: string;
+  /** Callback when an item is activated inside the overlay zone */
+  onAction?: ZoneCallback;
 }
 
 export function ModalPortal({
@@ -38,6 +41,7 @@ export function ModalPortal({
   children,
   className,
   contentClassName,
+  onAction,
 }: ModalPortalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -90,6 +94,7 @@ export function ModalPortal({
         id={overlayId}
         role={role}
         onDismiss={OS_OVERLAY_CLOSE({ id: overlayId })}
+        {...(onAction ? { onAction } : {})}
       >
         <div
           className={`os-modal-content${contentClassName ? ` ${contentClassName}` : ""}`}

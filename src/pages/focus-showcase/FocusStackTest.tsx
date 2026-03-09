@@ -1,6 +1,7 @@
 import { Item } from "@os-react/6-project/Item.tsx";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog.tsx";
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
 import { Zone } from "@os-react/6-project/Zone.tsx";
+import { OS_OVERLAY_CLOSE } from "@os-sdk/os";
 import { useRef } from "react";
 import { TestBox } from "../shared/TestLayout";
 
@@ -23,7 +24,7 @@ export function FocusStackTest() {
           <strong>Focus Stack</strong>: Modal open/close restores previous focus
           via{" "}
           <code className="text-xs bg-gray-100 px-1 rounded">
-            Dialog (ZIFT Kernel)
+            ModalPortal (ZIFT Kernel)
           </code>
           .
         </li>
@@ -66,73 +67,97 @@ export function FocusStackTest() {
               >
                 {item}
                 {i === 0 && (
-                  <Dialog>
-                    <Dialog.Trigger>
-                      <button
-                        type="button"
-                        id="fs-open-modal"
-                        className="ml-2 text-xs text-blue-500 hover:underline"
-                      >
-                        Open Modal
-                      </button>
-                    </Dialog.Trigger>
-                    <Dialog.Content
-                      title="Modal 1"
-                      zoneClassName="flex flex-col gap-1 p-4"
-                    >
-                      {["Modal Item A", "Modal Item B"].map((mItem, mi) => (
-                        <Item
-                          key={mItem}
-                          id={`fs-modal1-${mi + 1}`}
-                          role="menuitem"
-                          className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm"
-                        >
-                          {mItem}
-                          {mi === 1 && (
-                            <Dialog>
-                              <Dialog.Trigger>
-                                <button
-                                  type="button"
-                                  id="fs-open-sub-modal"
-                                  className="ml-2 text-xs text-violet-500 hover:underline"
-                                >
-                                  Open Sub-Modal
-                                </button>
-                              </Dialog.Trigger>
-                              <Dialog.Content
-                                title="Sub-Modal"
-                                zoneClassName="flex flex-col gap-1 p-4"
-                              >
-                                {["Sub Item 1", "Sub Item 2"].map(
-                                  (sItem, si) => (
-                                    <Item
-                                      key={sItem}
-                                      id={`fs-modal2-${si + 1}`}
-                                      role="menuitem"
-                                      className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm"
-                                    >
-                                      {sItem}
-                                    </Item>
-                                  ),
-                                )}
-                                <Dialog.Close className="mt-2 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100">
-                                  Close Sub-Modal
-                                </Dialog.Close>
-                              </Dialog.Content>
-                            </Dialog>
-                          )}
-                        </Item>
-                      ))}
-                      <Dialog.Close className="mt-2 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100">
-                        Close Modal
-                      </Dialog.Close>
-                    </Dialog.Content>
-                  </Dialog>
+                  <button
+                    type="button"
+                    id="fs-open-modal"
+                    data-trigger-id="fs-open-modal"
+                    aria-haspopup="dialog"
+                    className="ml-2 text-xs text-blue-500 hover:underline"
+                  >
+                    Open Modal
+                  </button>
                 )}
               </Item>
             ))}
           </Zone>
         </div>
+
+        {/* Modal 1 */}
+        <ModalPortal
+          overlayId="dialog-dialog"
+          role="dialog"
+          title="Modal 1"
+          onAction={(cursor) => {
+            if (cursor.focusId === "fs-modal1-close") {
+              return OS_OVERLAY_CLOSE({ id: "dialog-dialog" });
+            }
+            return [];
+          }}
+        >
+          <div className="flex flex-col gap-1 p-4">
+            {["Modal Item A", "Modal Item B"].map((mItem, mi) => (
+              <Item
+                key={mItem}
+                id={`fs-modal1-${mi + 1}`}
+                role="menuitem"
+                className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-violet-100 aria-[current=true]:text-violet-700 text-sm"
+              >
+                {mItem}
+                {mi === 1 && (
+                  <button
+                    type="button"
+                    id="fs-open-sub-modal"
+                    data-trigger-id="fs-open-sub-modal"
+                    aria-haspopup="dialog"
+                    className="ml-2 text-xs text-violet-500 hover:underline"
+                  >
+                    Open Sub-Modal
+                  </button>
+                )}
+              </Item>
+            ))}
+            <Item
+              id="fs-modal1-close"
+              as="button"
+              className="mt-2 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+            >
+              Close Modal
+            </Item>
+          </div>
+        </ModalPortal>
+
+        {/* Sub-Modal (nested) */}
+        <ModalPortal
+          overlayId="dialog-dialog-sub"
+          role="dialog"
+          title="Sub-Modal"
+          onAction={(cursor) => {
+            if (cursor.focusId === "fs-modal2-close") {
+              return OS_OVERLAY_CLOSE({ id: "dialog-dialog-sub" });
+            }
+            return [];
+          }}
+        >
+          <div className="flex flex-col gap-1 p-4">
+            {["Sub Item 1", "Sub Item 2"].map((sItem, si) => (
+              <Item
+                key={sItem}
+                id={`fs-modal2-${si + 1}`}
+                role="menuitem"
+                className="px-3 py-2 rounded hover:bg-gray-100 aria-[current=true]:bg-pink-100 aria-[current=true]:text-pink-700 text-sm"
+              >
+                {sItem}
+              </Item>
+            ))}
+            <Item
+              id="fs-modal2-close"
+              as="button"
+              className="mt-2 px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 rounded hover:bg-gray-100"
+            >
+              Close Sub-Modal
+            </Item>
+          </div>
+        </ModalPortal>
 
         {/* Scroll Sync Test */}
         <div className="space-y-1">

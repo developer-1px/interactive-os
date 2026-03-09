@@ -39,7 +39,7 @@ import {
   useOverlay,
 } from "@os-react/6-project/accessors/useOverlay";
 import { Item } from "@os-react/6-project/Item";
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
 import { Zone } from "@os-react/6-project/Zone";
 import type { ZoneCallback, ZoneCursor } from "@os-sdk/os";
 import type React from "react";
@@ -257,141 +257,137 @@ export function QuickPick<T extends QuickPickItem = QuickPickItem>({
   if (!isOpen) return null;
 
   return (
-    <Dialog id={id}>
-      <Dialog.Content
-        title=""
-        className={
-          className ??
-          "fixed inset-0 w-screen h-screen max-w-none max-h-none m-0 bg-black/20 z-50 p-0 flex items-center justify-center"
-        }
-        contentClassName={
-          contentClassName ??
-          "w-[640px] max-w-[90vw] bg-white rounded-xl shadow-2xl border border-black/5 flex flex-col overflow-hidden text-zinc-900"
-        }
+    <ModalPortal
+      overlayId={id}
+      role="dialog"
+      className={
+        className ??
+        "fixed inset-0 w-screen h-screen max-w-none max-h-none m-0 bg-black/20 z-50 p-0 flex items-center justify-center"
+      }
+      contentClassName={
+        contentClassName ??
+        "w-[640px] max-w-[90vw] bg-white rounded-xl shadow-2xl border border-black/5 flex flex-col overflow-hidden text-zinc-900"
+      }
+    >
+      <div
+        ref={containerRef}
+        onMouseDown={handleContainerMouseDown}
+        className="flex flex-col flex-1 overflow-hidden"
       >
-        <div
-          ref={containerRef}
-          onMouseDown={handleContainerMouseDown}
-          className="flex flex-col flex-1 overflow-hidden"
-        >
-          {/* Search Input */}
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
-            <svg
-              className="w-[18px] h-[18px] text-zinc-400 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <title>Search</title>
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <div className="flex-1 relative">
-              <input
-                ref={inputRef}
-                type="text"
-                className="w-full bg-transparent border-none outline-none text-[16px] leading-6 font-normal text-zinc-900 placeholder:text-zinc-400 caret-blue-600 relative z-10"
-                placeholder={placeholder}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onBlur={handleInputBlur}
-                autoComplete="off"
-                spellCheck={false}
-                role="combobox"
-                aria-expanded={filteredItems.length > 0}
-                aria-controls={zoneId}
-                aria-autocomplete={typeahead ? "both" : "list"}
-              />
-              {completion && (
-                <div className="absolute inset-0 pointer-events-none flex items-center overflow-hidden whitespace-pre text-[16px] leading-6 font-normal">
-                  <span className="opacity-0">{query}</span>
-                  <span className="text-zinc-400 opacity-60">{completion}</span>
-                </div>
-              )}
-            </div>
-            <Kbd
-              keys={["Esc"]}
-              className="shrink-0 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
-            />
-          </div>
-
-          {/* Item List */}
-          <Zone
-            id={zoneId}
-            role="listbox"
-            options={QUICKPICK_ZONE_OPTIONS}
-            onAction={handleAction}
-            className="min-h-[380px] max-h-[380px] overflow-y-auto p-2 scroll-py-2 custom-scrollbar"
+        {/* Search Input */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-100">
+          <svg
+            className="w-[18px] h-[18px] text-zinc-400 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden="true"
           >
-            {filteredItems.length === 0
-              ? (renderEmpty?.(query) ?? (
-                  <div className="py-8 text-center text-sm text-zinc-500">
-                    No results found
-                  </div>
-                ))
-              : filteredItems.map((item) => (
-                  <Item key={item.id} id={item.id}>
-                    {({ isFocused, isSelected }) =>
-                      renderItem ? (
-                        renderItem(item, { isFocused, isSelected, query })
-                      ) : (
-                        <DefaultQuickPickRow
-                          item={item}
-                          isFocused={isFocused}
-                        />
-                      )
-                    }
-                  </Item>
-                ))}
-          </Zone>
-
-          {/* Footer */}
-          {renderFooter ? (
-            renderFooter()
-          ) : (
-            <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
-              <span className="flex items-center gap-1.5">
-                <Kbd
-                  keys={["Up"]}
-                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
-                />
-                <Kbd
-                  keys={["Down"]}
-                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
-                />
-                navigate
-              </span>
-              {typeahead && (
-                <span className="flex items-center gap-1.5">
-                  <Kbd
-                    keys={["Tab"]}
-                    className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
-                  />
-                  complete
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <Kbd
-                  keys={["Enter"]}
-                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
-                />
-                select
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Kbd
-                  keys={["Esc"]}
-                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
-                />
-                close
-              </span>
-            </div>
-          )}
+            <title>Search</title>
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <div className="flex-1 relative">
+            <input
+              ref={inputRef}
+              type="text"
+              className="w-full bg-transparent border-none outline-none text-[16px] leading-6 font-normal text-zinc-900 placeholder:text-zinc-400 caret-blue-600 relative z-10"
+              placeholder={placeholder}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleInputBlur}
+              autoComplete="off"
+              spellCheck={false}
+              role="combobox"
+              aria-expanded={filteredItems.length > 0}
+              aria-controls={zoneId}
+              aria-autocomplete={typeahead ? "both" : "list"}
+            />
+            {completion && (
+              <div className="absolute inset-0 pointer-events-none flex items-center overflow-hidden whitespace-pre text-[16px] leading-6 font-normal">
+                <span className="opacity-0">{query}</span>
+                <span className="text-zinc-400 opacity-60">{completion}</span>
+              </div>
+            )}
+          </div>
+          <Kbd
+            keys={["Esc"]}
+            className="shrink-0 text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200 font-mono shadow-sm"
+          />
         </div>
-      </Dialog.Content>
-    </Dialog>
+
+        {/* Item List */}
+        <Zone
+          id={zoneId}
+          role="listbox"
+          options={QUICKPICK_ZONE_OPTIONS}
+          onAction={handleAction}
+          className="min-h-[380px] max-h-[380px] overflow-y-auto p-2 scroll-py-2 custom-scrollbar"
+        >
+          {filteredItems.length === 0
+            ? (renderEmpty?.(query) ?? (
+                <div className="py-8 text-center text-sm text-zinc-500">
+                  No results found
+                </div>
+              ))
+            : filteredItems.map((item) => (
+                <Item key={item.id} id={item.id}>
+                  {({ isFocused, isSelected }) =>
+                    renderItem ? (
+                      renderItem(item, { isFocused, isSelected, query })
+                    ) : (
+                      <DefaultQuickPickRow item={item} isFocused={isFocused} />
+                    )
+                  }
+                </Item>
+              ))}
+        </Zone>
+
+        {/* Footer */}
+        {renderFooter ? (
+          renderFooter()
+        ) : (
+          <div className="flex items-center gap-4 px-4 py-2 bg-zinc-50 border-t border-zinc-100 text-[11px] text-zinc-500 select-none">
+            <span className="flex items-center gap-1.5">
+              <Kbd
+                keys={["Up"]}
+                className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+              />
+              <Kbd
+                keys={["Down"]}
+                className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+              />
+              navigate
+            </span>
+            {typeahead && (
+              <span className="flex items-center gap-1.5">
+                <Kbd
+                  keys={["Tab"]}
+                  className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+                />
+                complete
+              </span>
+            )}
+            <span className="flex items-center gap-1.5">
+              <Kbd
+                keys={["Enter"]}
+                className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+              />
+              select
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Kbd
+                keys={["Esc"]}
+                className="bg-zinc-200 text-zinc-700 px-1 rounded text-[10px] min-w-[16px] text-center"
+              />
+              close
+            </span>
+          </div>
+        )}
+      </div>
+    </ModalPortal>
   );
 }
 

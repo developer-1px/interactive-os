@@ -8,10 +8,10 @@
  *   - Only Cancel/Confirm buttons can close
  */
 
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
-
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
+import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
@@ -47,6 +47,15 @@ alertZone.bind({
     tab: { behavior: "trap" as const },
     // No dismiss.escape — alertdialog blocks Escape
   },
+  onAction: (cursor) => {
+    if (
+      cursor.focusId === "alert-cancel" ||
+      cursor.focusId === "alert-confirm"
+    ) {
+      return OS_OVERLAY_CLOSE({ id: "layer-alertdialog" });
+    }
+    return [];
+  },
 });
 
 // ─── React Component ───
@@ -61,55 +70,61 @@ export function AlertDialogPattern() {
         dialog.
       </p>
 
-      <Dialog id="layer-alertdialog" role="alertdialog">
-        <Dialog.Trigger asChild>
-          <button
-            type="button"
+      <button
+        type="button"
+        data-trigger-id="OpenAlertDialog"
+        aria-haspopup="dialog"
+        aria-controls="layer-alertdialog"
+        className="
+          inline-flex items-center gap-2 px-4 py-2
+          bg-red-600 text-white text-sm font-medium rounded-lg
+          hover:bg-red-700 transition-colors
+          focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:outline-none
+        "
+      >
+        <Icon name="alert-triangle" size={14} />
+        Delete Item
+      </button>
+
+      <ModalPortal
+        overlayId="layer-alertdialog"
+        role="alertdialog"
+        title="Confirm Delete"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        contentClassName="bg-white rounded-xl shadow-2xl p-6 w-80"
+      >
+        <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+          Confirm Delete
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Are you sure you want to delete this item? This action cannot be
+          undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Item
+            id="alert-cancel"
+            as="button"
             className="
-              inline-flex items-center gap-2 px-4 py-2
-              bg-red-600 text-white text-sm font-medium rounded-lg
-              hover:bg-red-700 transition-colors
-              focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:outline-none
+              px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md
+              hover:bg-gray-50 transition-colors
+              data-[focused=true]:ring-2 data-[focused=true]:ring-red-300
             "
           >
-            <Icon name="alert-triangle" size={14} />
-            Delete Item
-          </button>
-        </Dialog.Trigger>
-
-        <Dialog.Content
-          title="Confirm Delete"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          contentClassName="bg-white rounded-xl shadow-2xl p-6 w-80"
-        >
-          <p className="text-sm text-gray-600 mb-4">
-            Are you sure you want to delete this item? This action cannot be
-            undone.
-          </p>
-          <div className="flex justify-end gap-2">
-            <Dialog.Close
-              id="alert-cancel"
-              className="
-                px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md
-                hover:bg-gray-50 transition-colors
-                data-[focused=true]:ring-2 data-[focused=true]:ring-red-300
-              "
-            >
-              Cancel
-            </Dialog.Close>
-            <Dialog.Close
-              id="alert-confirm"
-              className="
-                px-4 py-2 text-sm text-white bg-red-600 rounded-md
-                hover:bg-red-700 transition-colors
-                data-[focused=true]:ring-2 data-[focused=true]:ring-red-300
-              "
-            >
-              Delete
-            </Dialog.Close>
-          </div>
-        </Dialog.Content>
-      </Dialog>
+            Cancel
+          </Item>
+          <Item
+            id="alert-confirm"
+            as="button"
+            className="
+              px-4 py-2 text-sm text-white bg-red-600 rounded-md
+              hover:bg-red-700 transition-colors
+              data-[focused=true]:ring-2 data-[focused=true]:ring-red-300
+            "
+          >
+            Delete
+          </Item>
+        </div>
+      </ModalPortal>
     </div>
   );
 }

@@ -9,10 +9,10 @@
  *   - Focus restores correctly through the chain
  */
 
-import { Dialog } from "@os-react/6-project/widgets/radix/Dialog";
+import { ModalPortal } from "@os-react/6-project/widgets/ModalPortal";
 import { Item } from "@os-react/internal";
 import { defineApp } from "@os-sdk/app/defineApp";
-import { OS_OVERLAY_OPEN } from "@os-sdk/os";
+import { OS_OVERLAY_CLOSE, OS_OVERLAY_OPEN } from "@os-sdk/os";
 import { Icon } from "@/components/Icon";
 
 // ─── App Definition ───
@@ -51,6 +51,12 @@ dialog1Zone.bind({
         entry: "first",
       }),
   },
+  onAction: (cursor) => {
+    if (cursor.focusId === "d1-close") {
+      return OS_OVERLAY_CLOSE({ id: "nested-dialog-1" });
+    }
+    return [];
+  },
 });
 
 // Dialog 2
@@ -61,6 +67,12 @@ dialog2Zone.bind({
   options: {
     tab: { behavior: "trap" as const },
     dismiss: { escape: "close" as const },
+  },
+  onAction: (cursor) => {
+    if (cursor.focusId === "d2-ok" || cursor.focusId === "d2-cancel") {
+      return OS_OVERLAY_CLOSE({ id: "nested-dialog-2" });
+    }
+    return [];
   },
 });
 
@@ -76,81 +88,90 @@ export function NestedPattern() {
         restores correctly through the chain.
       </p>
 
-      <Dialog id="nested-dialog-1" role="dialog">
-        <Dialog.Trigger asChild>
-          <button
-            type="button"
-            className="
-              inline-flex items-center gap-2 px-4 py-2
-              bg-violet-600 text-white text-sm font-medium rounded-lg
-              hover:bg-violet-700 transition-colors
-              focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
-            "
-          >
-            <Icon name="layers" size={14} />
-            Open Settings
-          </button>
-        </Dialog.Trigger>
+      <button
+        type="button"
+        data-trigger-id="OpenNestedBtn"
+        aria-haspopup="dialog"
+        aria-controls="nested-dialog-1"
+        className="
+          inline-flex items-center gap-2 px-4 py-2
+          bg-violet-600 text-white text-sm font-medium rounded-lg
+          hover:bg-violet-700 transition-colors
+          focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:outline-none
+        "
+      >
+        <Icon name="layers" size={14} />
+        Open Settings
+      </button>
 
-        <Dialog.Content
-          title="Settings"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          contentClassName="bg-white rounded-xl shadow-2xl p-6 w-96"
+      <ModalPortal
+        overlayId="nested-dialog-1"
+        role="dialog"
+        title="Settings"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        contentClassName="bg-white rounded-xl shadow-2xl p-6 w-96"
+      >
+        <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+          Settings
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          This is the first dialog. Click below to open a nested confirmation.
+        </p>
+
+        <Item
+          id="D1OpenNested"
+          as="button"
+          data-trigger-id="D1OpenNested"
+          className="
+            px-4 py-2 text-sm bg-amber-500 text-white rounded-md
+            hover:bg-amber-600 transition-colors mb-2
+            data-[focused=true]:ring-2 data-[focused=true]:ring-amber-300
+          "
         >
-          <p className="text-sm text-gray-600 mb-4">
-            This is the first dialog. Click below to open a nested confirmation.
-          </p>
+          Open Nested Dialog
+        </Item>
 
-          <Dialog id="nested-dialog-2" role="dialog">
-            <Dialog.Trigger asChild>
-              <Item
-                id="D1OpenNested"
-                as="button"
-                className="
-                  px-4 py-2 text-sm bg-amber-500 text-white rounded-md
-                  hover:bg-amber-600 transition-colors mb-2
-                  data-[focused=true]:ring-2 data-[focused=true]:ring-amber-300
-                "
-              >
-                Open Nested Dialog
-              </Item>
-            </Dialog.Trigger>
-
-            <Dialog.Content
-              title="Confirm"
-              className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30"
-              contentClassName="bg-white rounded-xl shadow-2xl p-6 w-72"
+        <ModalPortal
+          overlayId="nested-dialog-2"
+          role="dialog"
+          title="Confirm"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30"
+          contentClassName="bg-white rounded-xl shadow-2xl p-6 w-72"
+        >
+          <div className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-200 mb-1">
+            Confirm
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Are you sure?</p>
+          <div className="flex justify-end gap-2">
+            <Item
+              id="d2-cancel"
+              as="button"
+              className="px-3 py-1.5 text-sm border rounded-md data-[focused=true]:ring-2"
             >
-              <p className="text-sm text-gray-600 mb-4">Are you sure?</p>
-              <div className="flex justify-end gap-2">
-                <Dialog.Close
-                  id="d2-cancel"
-                  className="px-3 py-1.5 text-sm border rounded-md data-[focused=true]:ring-2"
-                >
-                  No
-                </Dialog.Close>
-                <Dialog.Close
-                  id="d2-ok"
-                  className="px-3 py-1.5 text-sm bg-violet-600 text-white rounded-md data-[focused=true]:ring-2"
-                >
-                  Yes
-                </Dialog.Close>
-              </div>
-            </Dialog.Content>
-          </Dialog>
+              No
+            </Item>
+            <Item
+              id="d2-ok"
+              as="button"
+              className="px-3 py-1.5 text-sm bg-violet-600 text-white rounded-md data-[focused=true]:ring-2"
+            >
+              Yes
+            </Item>
+          </div>
+        </ModalPortal>
 
-          <Dialog.Close
-            id="d1-close"
-            className="
-              block mt-3 px-4 py-2 text-sm text-gray-600 border rounded-md
-              hover:bg-gray-50 transition-colors
-              data-[focused=true]:ring-2 data-[focused=true]:ring-violet-300
-            "
-          >
-            Close Settings
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog>
+        <Item
+          id="d1-close"
+          as="button"
+          className="
+            block mt-3 px-4 py-2 text-sm text-gray-600 border rounded-md
+            hover:bg-gray-50 transition-colors
+            data-[focused=true]:ring-2 data-[focused=true]:ring-violet-300
+          "
+        >
+          Close Settings
+        </Item>
+      </ModalPortal>
     </div>
   );
 }
