@@ -32,7 +32,7 @@ description: 모든 워크플로우에 적용되는 지식 축적 미들웨어. 
 | 유형 | 트리거 | 예시 |
 |------|--------|------|
 | **패턴 (Pattern)** | "이렇게 하니까 됐다" | "Zone autoFocus는 bind 전에 설정해야 한다" |
-| **함정 (Hazard)** | "이렇게 하면 안 됐다" | "createOsPage로 앱 기능 테스트하면 거짓 GREEN" |
+| **함정 (Hazard)** | "이렇게 하면 안 됐다" | "Tier 1(OS-only)로 앱 기능 테스트하면 거짓 GREEN" |
 | **정의 (Definition)** | "이것의 경계는 여기까지다" | "Pure Projection = 렌더링 + show/hide + ARIA" |
 | **원칙 (Principle)** | "항상 이래야 한다" | "컴포넌트는 상태 변경을 결정하지 않는다" |
 | **선례 (Precedent)** | "이 상황에서 이렇게 판정했다" | "TabsPattern useState 모드 토글 → ⚪ 정당한 예외" |
