@@ -15,17 +15,18 @@ Risks:
 - docs-viewer/inspector는 defineApp 미적용 앱 — Zone 전환 폭 큼
 
 ## Now
-- [ ] T5: DocsSearch dispatch 4건 → zone onAction + overlay — 크기: M, 의존: —
-- [ ] T6: DocsViewer dispatch 3건 → trigger + effect — 크기: M, 의존: —
-- [ ] T7: UnifiedInspector 3건 → trigger + effect — 크기: M, 의존: —
-- [ ] T8: TestBotPanel 1건 → effect — 크기: S, 의존: —
-- [ ] T9: MeterPattern 1건 → app effect — 크기: S, 의존: —
-- [ ] T10: 전수 검증 — dispatch-in-tsx 잔여 건수 확인 — 크기: S, 의존: →T1~T9
+(empty — all tasks complete)
 
 ## Done
 - [x] T1: EditorToolbar undo/redo → trigger — `tsc 0 | +3 pre-existing fixes` (1add1cad)
 - [x] T2: BuilderPage loadPagePreset → trigger (preset ID lookup) — `tsc 0` (e5357cd5)
 - [x] T3: SectionSidebar addBlock → trigger (preset ID lookup) — `tsc 0` (e5357cd5)
+- [x] T5: DocsSearch 4건 → useDispatch() — `tsc 0` (269887fc)
+- [x] T6: DocsViewer 3건 → useDispatch() — `tsc 0` (269887fc)
+- [x] T7: UnifiedInspector 3건 → useDispatch() — `tsc 0 | +2 pre-existing fixes` (269887fc)
+- [x] T8: TestBotPanel 2건 → useDispatch() — `tsc 0` (5daeb106)
+- [x] T9: MeterPattern 1건 → useDispatch() — `tsc 0` (5daeb106)
+- [x] T10: 전수 검증 — `grep os.dispatch src/**/*.tsx` = 0건 ✅
 
 ## Deferred (builder-v2 scope)
 - T4-a: PropertiesPanel OS_EXPAND → useDispatch() 사용 중 (sanctioned hook), builder zone 의존
