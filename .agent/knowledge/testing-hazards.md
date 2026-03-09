@@ -45,6 +45,8 @@
 | **meter = 읽기전용 role** | meter는 value display 전용 — focus navigation, toggle, activate 모두 불가. toBeFocused/ArrowDown 등 focus nav 테스트는 browser에서 실패 | meter 테스트는 value attribute(aria-valuemin/max/now) 검증으로 작성 | Red |
 | **Vite virtual module mock** | `vi.mock("virtual:*")` 불가 — Vite import analysis가 vitest mock보다 먼저 실행 | vitest.config.ts의 `resolve.alias`로 물리 mock 파일에 매핑 | Red |
 | **import.meta.glob module mock** | `importOriginal` 불가 — glob import가 vitest에서 실행 안 됨. 전체 factory mock 필요 | `vi.mock(module, async () => ({ ...inlinedPureFunctions }))` — 실제 모듈의 **전체 export**를 mock에 포함 (부분 mock → SSR 크래시) | Red |
+| **공유 mock은 `__mocks__/` 폴더** | 여러 테스트 파일이 같은 모듈을 mock → inline mock 중복 170줄+ | `__mocks__/moduleName.ts`로 추출, `vi.mock(path, () => import("./__mocks__/moduleName"))` 한 줄로 사용 | Red |
+| **testbot 수동 getItems = drift** | testbot에서 `getSidebarItems()` 등 수동 items → headless/browser items 불일치 | `TestScenario.items`/`getItems` 필드 제거. `runScenarios`가 `getZoneItems(zoneId)` → ZoneRegistry 단일 경로 | Red |
 
 ## Precedents
 

@@ -179,15 +179,18 @@ expect(page.locator("#todo-1")).toBeFocused();
 testbot 파일 + runScenarios로 보일러플레이트 제거.
 
 ```ts
-// testbot-myapp.ts
+// testbot-myapp.ts — scenarios declare zone + role + scripts only.
+// Items are resolved from ZoneRegistry (single path for headless & browser).
 export const scenarios: TestScenario[] = [
-  { zone: "my-zone", items: [...], role: "listbox", scripts: myScripts },
+  { zone: "my-zone", role: "listbox", scripts: myScripts },
 ];
 
 // test file
 import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { MyApp } from "./app";
+import { MyView } from "./MyView";  // optional — for projection-based item discovery
 import { scenarios } from "./testbot-myapp";
-runScenarios(scenarios);
+runScenarios(scenarios, MyApp, MyView);
 ```
 
 ## Links

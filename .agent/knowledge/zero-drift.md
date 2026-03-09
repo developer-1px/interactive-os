@@ -86,6 +86,21 @@
 
 ---
 
+## Items 단일 경로 원칙
+
+> **Items 해석 경로는 하나여야 한다: ZoneRegistry.getItems().**
+
+headless와 browser가 서로 다른 getItems 함수를 호출하면 drift가 발생한다.
+테스트 전용 getItems(scenario.getItems, 수동 getSidebarItems 등)는 금지.
+
+- `runScenarios`는 `getZoneItems(zoneId)` → ZoneRegistry에서 items 해석
+- browser TestBot도 동일한 `ZoneRegistry.getItems()` 경로
+- binding-provided getItems와 projection getItems 모두 ZoneRegistry를 경유
+
+**위반 증상**: headless N PASS / browser M FAIL — 같은 스크립트가 다른 items를 받아 다른 결과.
+
+---
+
 ## 검증 기준
 
 Zero Drift가 지켜지고 있는지 판단하는 체크리스트:
@@ -94,3 +109,4 @@ Zero Drift가 지켜지고 있는지 판단하는 체크리스트:
 2. 컴포넌트에서 `useEffect` + `os.dispatch`로 초기값을 설정하면 drift 신호
 3. TestBot 스크립트가 headless 테스트와 다른 assertion을 가지면 drift 신호
 4. DOM 전용 목록(위 표) 외의 것이 headless에서 동작하지 않으면 OS gap
+5. testbot 파일에 수동 getItems/items 상수가 있으면 drift 신호 — ZoneRegistry 경로를 사용해야 함
