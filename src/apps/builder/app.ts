@@ -30,6 +30,8 @@ import {
   findBlockInfo,
   INITIAL_STATE,
 } from "./model/appState";
+import { BLOCK_PRESETS } from "./presets/blocks";
+import { PAGE_PRESETS } from "./presets/pages";
 export type { Block, BuilderState };
 export { INITIAL_STATE, findBlock, findBlockInfo };
 
@@ -197,6 +199,21 @@ export const BuilderSidebarUI = sidebarCollection.bind({
       OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
     Undo: () => undoCommand(),
     Redo: () => redoCommand(),
+    LoadPagePreset: (presetId: string) => {
+      const preset = PAGE_PRESETS.find((p) => p.id === presetId);
+      return loadPagePreset({ blocks: preset?.blocks ?? [] });
+    },
+    AddBlock: (presetType: string) => {
+      const preset = BLOCK_PRESETS.find((p) => p.type === presetType);
+      return addBlock({
+        block: preset?.block ?? {
+          id: "",
+          label: "",
+          type: presetType,
+          fields: {},
+        },
+      });
+    },
   },
 });
 

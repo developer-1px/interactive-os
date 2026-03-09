@@ -9,14 +9,13 @@
  * Uses BuilderSidebarUI.Zone + Item from app.ts bind().
  */
 
-import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useDragState } from "@os-react/6-project/accessors/useDragState";
 import { useExpanded } from "@os-react/6-project/accessors/useExpanded";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import { ChevronDown, ChevronRight, Layers, Plus, X } from "lucide-react";
 import { useState } from "react";
 import type { Block } from "@/apps/builder/app";
-import { addBlock, BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
+import { BuilderApp, BuilderSidebarUI } from "@/apps/builder/app";
 import { BLOCK_REGISTRY } from "@/apps/builder/blockRegistry";
 import { BLOCK_PRESETS } from "@/apps/builder/presets/blocks";
 
@@ -319,12 +318,7 @@ function getFlatNodes(blocks: Block[], isExpanded: (id: string) => boolean) {
 
 function AddBlockButton() {
   const [open, setOpen] = useState(false);
-  const dispatch = useDispatch();
-
-  const handleAdd = (preset: (typeof BLOCK_PRESETS)[number]) => {
-    dispatch(addBlock({ block: preset.block }));
-    setOpen(false);
-  };
+  const { AddBlock } = BuilderSidebarUI.triggers;
 
   return (
     <>
@@ -365,7 +359,8 @@ function AddBlockButton() {
               <button
                 type="button"
                 key={preset.type}
-                onClick={() => handleAdd(preset)}
+                {...AddBlock(preset.type)}
+                onClick={() => setOpen(false)}
                 className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg hover:bg-indigo-50 transition-colors group text-left"
               >
                 <span className="text-lg shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 group-hover:bg-indigo-100 transition-colors">
