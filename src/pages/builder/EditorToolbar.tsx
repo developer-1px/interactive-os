@@ -1,4 +1,3 @@
-import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { useEditingItem } from "@os-react/6-project/accessors/useEditingItem";
 import { useFocusedItem } from "@os-react/6-project/accessors/useFocusedItem";
 import {
@@ -15,10 +14,9 @@ import {
 } from "lucide-react";
 import {
   BuilderApp,
+  BuilderSidebarUI,
   canRedo,
   canUndo,
-  redoCommand,
-  undoCommand,
 } from "@/apps/builder/app";
 import { LocaleSwitcher } from "@/apps/builder/LocaleSwitcher";
 
@@ -38,7 +36,7 @@ export function EditorToolbar({
   currentViewport: ViewportMode;
   onViewportChange: (mode: ViewportMode) => void;
 }) {
-  const dispatch = useDispatch();
+  const { Undo, Redo } = BuilderSidebarUI.triggers;
   return (
     <div className="absolute top-3 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
       <div className="flex items-center gap-1 px-1.5 py-1 bg-white/80 backdrop-blur-2xl rounded-xl ring-1 ring-slate-900/[0.06] shadow-lg shadow-slate-900/[0.04]">
@@ -56,12 +54,12 @@ export function EditorToolbar({
           <ToolButton
             icon={<Undo2 size={15} />}
             disabled={!BuilderApp.useComputed(canUndo.evaluate)}
-            onClick={() => dispatch(undoCommand())}
+            {...Undo()}
           />
           <ToolButton
             icon={<Redo2 size={15} />}
             disabled={!BuilderApp.useComputed(canRedo.evaluate)}
-            onClick={() => dispatch(redoCommand())}
+            {...Redo()}
           />
         </div>
 
@@ -154,18 +152,17 @@ function ToolButton({
   icon,
   active,
   disabled,
-  onClick,
+  ...rest
 }: {
   icon: React.ReactNode;
   active?: boolean;
   disabled?: boolean;
-  onClick?: () => void;
-}) {
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
-      onClick={onClick}
       disabled={disabled}
+      {...rest}
       className={`
         w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150
         ${disabled ? "text-slate-300 cursor-not-allowed" : ""}

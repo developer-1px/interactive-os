@@ -37,6 +37,7 @@ import { reorderBlocks } from "./model/reorderBlocks";
 
 /** Read current builder state from kernel. */
 function getBuilderState(): BuilderState {
+  // biome-ignore lint/complexity/useLiteralKeys: tsc noPropertyAccessFromIndexSignature
   return os.getState().apps["builder"] as BuilderState;
 }
 
@@ -194,6 +195,8 @@ export const BuilderSidebarUI = sidebarCollection.bind({
   triggers: {
     LocaleSwitcherTrigger: () =>
       OS_OVERLAY_OPEN({ id: "locale-menu", type: "menu" }),
+    Undo: () => undoCommand(),
+    Redo: () => redoCommand(),
   },
 });
 
@@ -284,11 +287,11 @@ function buildCanvasCollections() {
         parentId: "sidebar",
         accept: (data: unknown) => {
           const d = data as Block;
-          if (d?.type && block.accept!.includes(d.type)) return data;
+          if (d?.type && block.accept?.includes(d.type)) return data;
           return null;
         },
         containsItem: (itemId: string) =>
-          block.children!.some((c) => c.id === itemId),
+          block.children?.some((c) => c.id === itemId) ?? false,
       });
 
       // Nested: children with their own accept
@@ -299,11 +302,11 @@ function buildCanvasCollections() {
             parentId: `${block.id}:children`,
             accept: (data: unknown) => {
               const d = data as Block;
-              if (d?.type && child.accept!.includes(d.type)) return data;
+              if (d?.type && child.accept?.includes(d.type)) return data;
               return null;
             },
             containsItem: (itemId: string) =>
-              child.children!.some((c) => c.id === itemId),
+              child.children?.some((c) => c.id === itemId) ?? false,
           });
         }
       }
