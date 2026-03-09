@@ -14,61 +14,70 @@
 
 | 질문 | 예 → | 아니오 → |
 |------|------|----------|
-| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createHeadlessPage(App, UI)` | **Tier 1** `createHeadlessPage()` |
+| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createHeadlessPage(App)` | **Tier 1** `createHeadlessPage()` + `setupZone()` |
+
+### TestScript ONE — Write Once, Run Anywhere
+
+> ⛔ **plain `describe/it` 테스트 금지.** page를 사용하는 테스트는 반드시 TestScript 형식.
+> 유일한 예외: page를 사용하지 않는 순수 단위 테스트 (config 검증, 순수 함수 등).
+
+**산출물 구조**:
+- **본체**: `src/[app-path]/testbot-[app].ts` — TestScript + scenarios export
+- **runner**: `tests/headless/apps/[app-name]/[name].test.ts` — `runScenarios(scenarios, App)` 한 줄
+
+### Tier 2: 앱 통합 테스트 (표준)
+
+> 실제 앱의 bind 경로를 검증. **dispatch 금지. click/press만 허용.**
+
+**testbot-myapp.ts** (본체):
+
+```ts
+import type { TestScenario, TestScript } from "@os-devtool/testing";
+
+export const zones = ["my-zone-a", "my-zone-b"];
+export const group = "My App";
+
+function getMyItems(): string[] {
+  // 앱의 순수 함수에서 아이템 계산
+  return ["item-1", "item-2", "item-3"];
+}
+
+export const myScripts: TestScript[] = [
+  {
+    name: "§1 [기능]: [입력] → [기대 결과]",
+    zone: "my-zone-a",
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await page.keyboard.press("ArrowDown");
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
+    },
+  },
+];
+
+export const scenarios: TestScenario[] = [
+  {
+    zone: "my-zone-a",
+    getItems: getMyItems,
+    role: "listbox",
+    scripts: myScripts,
+  },
+];
+```
+
+**runner .test.ts** (3줄):
+
+```ts
+import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { MyApp } from "@/my-app/app";
+import { scenarios } from "@/my-app/testbot-myapp";
+
+runScenarios(scenarios, MyApp);
+```
 
 ### Tier 1: OS 커널 테스트
 
 > OS 자체의 커맨드 파이프라인을 검증. 앱 코드 없이 커널만 테스트.
-
-```ts
-/**
- * @spec docs/1-project/[name]/spec.md
- */
-import { createHeadlessPage } from "@os-devtool/testing";
-
-describe("Feature: [태스크명]", () => {
-  let page: HeadlessPage;
-
-  beforeEach(() => {
-    page = createHeadlessPage();
-    page.setupZone(ZONE_ID, { items, role, config });
-  });
-
-  it("#N [입력] → [결과]", () => {
-    page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("item-2");
-  });
-});
-```
-
-### Tier 2: 앱 통합 테스트
-
-> 실제 앱의 bind 경로를 검증. **dispatch 금지. click/press만 허용.**
-> **2번째 인자(UI Component) 필수.** Component 없으면 React 렌더 없음 = UI 결합 미검증.
-
-```ts
-/**
- * @spec docs/1-project/[name]/spec.md
- */
-import { createHeadlessPage } from "@os-devtool/testing";
-import { BuilderApp } from "@apps/builder/app";
-import { BuilderUI } from "@apps/builder/BuilderUI";
-
-describe("Feature: [태스크명]", () => {
-  let page: AppPage<BuilderState>;
-
-  beforeEach(() => {
-    page = createHeadlessPage(BuilderApp, BuilderUI);
-    page.goto("/builder");  // URL only — Playwright 동형
-  });
-
-  it("#N [사용자 행동] → [결과]", () => {
-    page.click("trigger-id");
-    page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("item-2");
-  });
-});
-```
+> Tier 1도 TestScript 형식을 사용한다. `createTestBench()` 기반.
 
 ### 공통 금지 목록
 
@@ -76,6 +85,7 @@ describe("Feature: [태스크명]", () => {
 - ❌ 내부 함수 직접 호출 (`Keybindings.resolve()`, `createDrillDown()`, `resolveMouse()`)
 - ❌ `node:fs`, 동적 `import()`로 모듈 존재 테스트
 - ❌ 커맨드 팩토리 직접 호출 후 반환값 검사
+- ❌ **plain `describe/it` with page** — TestScript ONE 위반
 - ✅ `page.click()`, `page.keyboard.press()` → `page.focusedItemId()` / `page.state` / `page.attrs()`
 
 ---
@@ -85,13 +95,18 @@ describe("Feature: [태스크명]", () => {
 | 패턴 | 설명 | 발견일 |
 |------|------|--------|
 | **입력 우선 테스트** | `page.keyboard.press()` 또는 `page.locator().click()`으로 시작. dispatch 금지 | 2026-02-25 |
+| **TestScript ONE** | testbot-*.ts(본체) + runScenarios runner(3줄). 3-engine 동기화 보장 | 2026-03-09 |
 
 ## Hazards
 
 | 함정 | 결과 | 대응 | 발견일 |
 |------|------|------|--------|
 | **Tier 혼동** | Tier 1(OS-only)로 앱 기능 테스트 → 커널만 검증됨 → browser에서 실패 | 도구 선택 기준 표 참조 | 2026-02-25 |
+| **plain describe/it** | vitest에서만 돌고 browser TestBot/E2E에서 안 돎 → 3-engine 계약 위반 | TestScript ONE 형식 강제 | 2026-03-09 |
+| **sync script.run** | async TestScript를 await 없이 호출 → unhandled rejection으로 FAIL 누락 | runScenarios에서 await 필수 | 2026-03-09 |
 
 ## Precedents
 
-(축적 중)
+| 선례 | 파일 | 핵심 |
+|------|------|------|
+| DocsViewer 19 scenarios | `src/docs-viewer/testbot-docs.ts` | §1-§4, cross-zone Tab 포함, runScenarios로 자동 실행 |
