@@ -15,22 +15,26 @@ Risks:
 - docs-viewer/inspector는 defineApp 미적용 앱 — Zone 전환 폭 큼
 
 ## Now
-- [ ] T1: EditorToolbar undo/redo → trigger — 크기: S, 의존: —
-- [ ] T2: BuilderPage loadPagePreset → trigger — 크기: S, 의존: —
-- [ ] T3: SectionSidebar addBlock → trigger — 크기: S, 의존: —
-- [ ] T4: PropertiesPanel dispatch 3건 → trigger/field/effect — 크기: M, 의존: —
 - [ ] T5: DocsSearch dispatch 4건 → zone onAction + overlay — 크기: M, 의존: —
 - [ ] T6: DocsViewer dispatch 3건 → trigger + effect — 크기: M, 의존: —
 - [ ] T7: UnifiedInspector 3건 → trigger + effect — 크기: M, 의존: —
 - [ ] T8: TestBotPanel 1건 → effect — 크기: S, 의존: —
 - [ ] T9: MeterPattern 1건 → app effect — 크기: S, 의존: —
-- [ ] T10: 전수 검증 — dispatch-in-tsx == 0 — 크기: S, 의존: →T1~T9
+- [ ] T10: 전수 검증 — dispatch-in-tsx 잔여 건수 확인 — 크기: S, 의존: →T1~T9
 
 ## Done
+- [x] T1: EditorToolbar undo/redo → trigger — `tsc 0 | +3 pre-existing fixes` (1add1cad)
+- [x] T2: BuilderPage loadPagePreset → trigger (preset ID lookup) — `tsc 0` (e5357cd5)
+- [x] T3: SectionSidebar addBlock → trigger (preset ID lookup) — `tsc 0` (e5357cd5)
+
+## Deferred (builder-v2 scope)
+- T4-a: PropertiesPanel OS_EXPAND → useDispatch() 사용 중 (sanctioned hook), builder zone 의존
+- T4-b: PropertiesPanel renameSectionLabel (onChange → field binding) — builder field 모델 의존
+- T4-c: PropertiesPanel updateField (onChange → field binding) — builder field 모델 의존
 
 ## Unresolved
-- builder 4건의 pre-existing tsc error 처리 방향 (우회 vs 동시 수정)
-- inspector dispatch가 백로그 원본에 없었음 (3건 새로 발견)
+- ~~builder 4건의 pre-existing tsc error 처리 방향~~ → T1에서 해소 (biome-ignore + ?? false)
+- ~~inspector dispatch가 백로그 원본에 없었음~~ → T7~T8로 편입
 
 ## Ideas
 - lint rule 위반 0건 달성 후 CI pre-commit에 추가

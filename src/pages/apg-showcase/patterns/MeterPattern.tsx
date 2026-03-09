@@ -21,6 +21,7 @@
  * ZIFT Classification: Field (readonly)
  */
 
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_VALUE_CHANGE, os } from "@os-sdk/os";
 import clsx from "clsx";
@@ -182,6 +183,7 @@ function MeterRow({ meter }: { meter: MeterDef }) {
 
 function useSimulatedValues() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Simulate changing values every 3 seconds (app logic — not OS init)
@@ -197,7 +199,7 @@ function useSimulatedValues() {
           Math.min(meter.max, currentValue + delta),
         );
 
-        os.dispatch(
+        dispatch(
           OS_VALUE_CHANGE({
             action: "set",
             value: Number(newValue.toFixed(1)),
@@ -213,7 +215,7 @@ function useSimulatedValues() {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  }, [dispatch]);
 }
 
 // ─── Main Component ───

@@ -37,7 +37,7 @@ import {
 } from "@apps/testbot/app";
 import type { BrowserStep } from "@os-devtool/testing";
 import { TestBotRegistry } from "@os-devtool/testing";
-import { os } from "@os-sdk/os";
+import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
 import { TESTBOT_MANIFEST } from "@/testing/testbot-manifest";
 import {
   registerTestBotGlobalApi,
@@ -320,6 +320,8 @@ function CopyButton({
 export function TestBotPanel() {
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set());
 
+  const dispatch = useDispatch();
+
   // ── Kernel store ──
   const suites = TestBotApp.useComputed((s) => s.suites);
   const isRunning = TestBotApp.useComputed((s) => s.isRunning);
@@ -343,7 +345,7 @@ export function TestBotPanel() {
 
   // When scripts change, init suites as "planned"
   useEffect(() => {
-    os.dispatch(
+    dispatch(
       initSuites({
         scripts: activeScripts.map((s) => ({
           name: s.name,
@@ -351,7 +353,7 @@ export function TestBotPanel() {
         })),
       }),
     );
-  }, [activeScripts]);
+  }, [activeScripts, dispatch]);
 
   // ── Handlers (stable refs — never change) ──
   const runAll = useCallback(() => executeAll(scriptsRef.current, false), []);
@@ -416,9 +418,7 @@ export function TestBotPanel() {
             {isRunning ? (
               <button
                 type="button"
-                onClick={() =>
-                  os.dispatch({ type: "testbot:allDone" } as never)
-                }
+                onClick={() => dispatch({ type: "testbot:allDone" } as never)}
                 className="flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-md text-xs font-semibold transition-all shadow-sm"
               >
                 <Square size={12} className="mr-1" fill="currentColor" /> Stop
