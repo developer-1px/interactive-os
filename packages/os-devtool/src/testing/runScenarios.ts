@@ -38,11 +38,11 @@ export function runScenarios<S>(
 
     describe(label, () => {
       for (const script of scenario.scripts) {
-        it(script.name, () => {
+        it(script.name, async () => {
           const page = createHeadlessPage(app);
           page.goto("/");
           const items = scenario.getItems?.() ?? scenario.items ?? [];
-          script.run(page, expect, items);
+          await script.run(page, expect, items);
         });
       }
     });

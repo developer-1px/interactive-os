@@ -283,10 +283,10 @@ export const favoritesScripts: TestScript[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════
-// §4 Tab Navigation — Zone 간 전환 (cross-zone, 수동 테스트 유지)
+// §4 Tab Navigation — Zone 간 전환 (cross-zone)
 //
-// Cross-zone 시나리오는 auto-runner 대상이 아님.
-// 단일 zone setupZone()으로 표현 불가 — 별도 테스트 파일에서 수동 관리.
+// Tier 2 auto-runner (createHeadlessPage(app) + goto("/"))에서
+// 모든 zone이 등록되므로 cross-zone Tab도 auto-runner 대상.
 // ═══════════════════════════════════════════════════════════════════
 
 export const tabNavigationScripts: TestScript[] = [
@@ -348,18 +348,28 @@ export const tabNavigationScripts: TestScript[] = [
 // Scenarios — auto-runner reads this for vitest auto-registration
 // ═══════════════════════════════════════════════════════════════════
 
+/** §4 sidebar Tab scripts (§4a, §4b, §4d) */
+const sidebarTabScripts = tabNavigationScripts.filter(
+  (s) => s.zone === "docs-sidebar",
+);
+
+/** §4 recent Tab scripts (§4c) */
+const recentTabScripts = tabNavigationScripts.filter(
+  (s) => s.zone === "docs-recent",
+);
+
 export const scenarios: TestScenario[] = [
   {
     zone: "docs-sidebar",
     getItems: getSidebarItems,
     role: "tree",
-    scripts: sidebarNavScripts,
+    scripts: [...sidebarNavScripts, ...sidebarTabScripts],
   },
   {
     zone: "docs-recent",
     getItems: () => allFiles.slice(0, 5).map((f) => f.path),
     role: "listbox",
-    scripts: recentListScripts,
+    scripts: [...recentListScripts, ...recentTabScripts],
   },
   {
     zone: "docs-favorites",
