@@ -85,6 +85,55 @@ interface LocatorResult {
   ): void;
 }
 
+/** Create negated locator assertions — .not.toBeFocused() etc. */
+function createNegatedLocator(
+  os: typeof import("@os-core/engine/kernel").os,
+  elementId: string,
+): LocatorAssertionResult {
+  return {
+    toHaveAttribute(name: string, value: string | boolean) {
+      return resolveElement(os, elementId)[name] !== value;
+    },
+    toBeFocused() {
+      return readFocusedItemId(os) !== elementId;
+    },
+    toBeChecked() {
+      return resolveElement(os, elementId)["aria-checked"] !== true;
+    },
+    toBeDisabled() {
+      return resolveElement(os, elementId)["aria-disabled"] !== true;
+    },
+    get not(): LocatorAssertionResult {
+      // .not.not returns positive — lazy, creates on access
+      return createPositiveLocator(os, elementId);
+    },
+  };
+}
+
+/** Create positive locator assertions — for .not.not chain */
+function createPositiveLocator(
+  os: typeof import("@os-core/engine/kernel").os,
+  elementId: string,
+): LocatorAssertionResult {
+  return {
+    toHaveAttribute(name: string, value: string | boolean) {
+      return resolveElement(os, elementId)[name] === value;
+    },
+    toBeFocused() {
+      return readFocusedItemId(os) === elementId;
+    },
+    toBeChecked() {
+      return resolveElement(os, elementId)["aria-checked"] === true;
+    },
+    toBeDisabled() {
+      return resolveElement(os, elementId)["aria-disabled"] === true;
+    },
+    get not(): LocatorAssertionResult {
+      return createNegatedLocator(os, elementId);
+    },
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // createAppPage — Preview-based, ~50 lines of logic
 // ═══════════════════════════════════════════════════════════════════
@@ -198,9 +247,10 @@ export function createAppPage<S>(
 
   // Auto-register diagnostics on test failure (vitest only)
   try {
+    const key = "onTestFailed";
     const g = globalThis as Record<string, unknown>;
-    if (typeof g["onTestFailed"] === "function") {
-      (g["onTestFailed"] as (fn: () => void) => void)(() =>
+    if (typeof g[key] === "function") {
+      (g[key] as (fn: () => void) => void)(() =>
         console.log(formatDiagnostics(os)),
       );
     }
@@ -467,7 +517,7 @@ export function createAppPage<S>(
 
     // Initial value: explicit initial
     const valueConfig = zoneConfig?.value;
-    if (valueConfig && valueConfig.initial) {
+    if (valueConfig?.initial) {
       os.setState((s: AppState) =>
         produce(s, (draft) => {
           const z = ensureZone(draft.os, zoneName);
@@ -666,25 +716,7 @@ export function createAppPage<S>(
         },
 
         get not(): LocatorAssertionResult {
-          const positive = this;
-          const negated: LocatorAssertionResult = {
-            toHaveAttribute(name: string, value: string | boolean) {
-              return resolveElement(os, elementId)[name] !== value;
-            },
-            toBeFocused() {
-              return readFocusedItemId(os) !== elementId;
-            },
-            toBeChecked() {
-              return resolveElement(os, elementId)["aria-checked"] !== true;
-            },
-            toBeDisabled() {
-              return resolveElement(os, elementId)["aria-disabled"] !== true;
-            },
-            get not() {
-              return positive;
-            },
-          };
-          return negated;
+          return createNegatedLocator(os, elementId);
         },
 
         // ── Playwright expect() hooks ──
