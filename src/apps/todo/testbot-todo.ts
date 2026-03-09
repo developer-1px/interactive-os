@@ -7,6 +7,7 @@
  *   3. Playwright E2E  — native page
  *
  * Locator convention: always use "#id" selector (Playwright-compatible).
+ * Item IDs are resolved dynamically from ZoneRegistry — no hardcoded items.
  */
 
 import type { TestScenario, TestScript } from "@os-devtool/testing";
@@ -22,13 +23,6 @@ export const zones = ["list", "sidebar"];
 export const group = "Todo";
 
 // ═══════════════════════════════════════════════════════════════════
-// Zone metadata — shared by scenarios and TestBot manifest
-// ═══════════════════════════════════════════════════════════════════
-
-export const LIST_ITEMS = ["todo_1", "todo_2", "todo_3", "todo_4"];
-export const SIDEBAR_ITEMS = ["cat_inbox", "cat_work", "cat_personal"];
-
-// ═══════════════════════════════════════════════════════════════════
 // §1 List Zone — navigation + selection + check
 // ═══════════════════════════════════════════════════════════════════
 
@@ -36,64 +30,64 @@ export const listNavScripts: TestScript[] = [
   {
     name: "§1a List: click focuses item",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§1b List: ArrowDown moves focus",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
     },
   },
   {
     name: "§1c List: ArrowUp moves focus",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[1]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[1]}`).click();
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§1d List: Home moves to first",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[2]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[2]}`).click();
       await page.keyboard.press("Home");
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§1e List: End moves to last",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page.keyboard.press("End");
-      await expect(page.locator(`#${LIST_ITEMS[3]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[items.length - 1]}`)).toBeFocused();
     },
   },
   {
     name: "§1f List: Space toggles checked",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await expect(page.locator(`#${items[0]}`)).not.toBeChecked();
       await page.keyboard.press("Space");
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
+      await expect(page.locator(`#${items[0]}`)).toBeChecked();
     },
   },
   {
     name: "§1g List: Shift+ArrowDown extends selection",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page.keyboard.press("Shift+ArrowDown");
-      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toHaveAttribute(
+      await expect(page.locator(`#${items[1]}`)).toHaveAttribute(
         "aria-selected",
         "true",
       );
@@ -113,62 +107,60 @@ export const triggerClickScripts: TestScript[] = [
   {
     name: "§3a Trigger: start-edit preserves focus",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await page
-        .locator(`#${LIST_ITEMS[0]!} [data-trigger-id="start-edit"]`)
-        .click();
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeFocused();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await page.locator(`#${items[0]} [data-trigger-id="start-edit"]`).click();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§3b Trigger: move-item-down reorders",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page
-        .locator(`#${LIST_ITEMS[0]!} [data-trigger-id="move-item-down"]`)
+        .locator(`#${items[0]} [data-trigger-id="move-item-down"]`)
         .click();
-      // After moving todo_1 down, todo_2 is now first → Home lands on todo_2
+      // After moving items[0] down, items[1] is now first → Home lands on items[1]
       await page.keyboard.press("Home");
-      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
     },
   },
   {
     name: "§3c Trigger: move-item-up reorders",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[1]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[1]}`).click();
       await page
-        .locator(`#${LIST_ITEMS[1]!} [data-trigger-id="move-item-up"]`)
+        .locator(`#${items[1]} [data-trigger-id="move-item-up"]`)
         .click();
-      // After moving todo_2 up, todo_2 is now first → Home lands on todo_2
+      // After moving items[1] up, items[1] is now first → Home lands on items[1]
       await page.keyboard.press("Home");
-      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
     },
   },
   {
     name: "§3d Trigger: delete-todo removes focused item",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page
-        .locator(`#${LIST_ITEMS[0]!} [data-trigger-id="delete-todo"]`)
+        .locator(`#${items[0]} [data-trigger-id="delete-todo"]`)
         .click();
       // After delete, focus should move to next item
-      await expect(page.locator(`#${LIST_ITEMS[1]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
     },
   },
   {
     name: "§3e Trigger: toggle-todo checks item",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${LIST_ITEMS[0]!}`).click();
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).not.toBeChecked();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await expect(page.locator(`#${items[0]}`)).not.toBeChecked();
       await page
-        .locator(`#${LIST_ITEMS[0]!} [data-trigger-id="toggle-todo"]`)
+        .locator(`#${items[0]} [data-trigger-id="toggle-todo"]`)
         .click();
-      await expect(page.locator(`#${LIST_ITEMS[0]!}`)).toBeChecked();
+      await expect(page.locator(`#${items[0]}`)).toBeChecked();
     },
   },
 ];
@@ -181,36 +173,36 @@ export const sidebarScripts: TestScript[] = [
   {
     name: "§2a Sidebar: click focuses category",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${SIDEBAR_ITEMS[0]!}`).click();
-      await expect(page.locator(`#${SIDEBAR_ITEMS[0]!}`)).toBeFocused();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§2b Sidebar: ArrowDown moves focus",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${SIDEBAR_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${SIDEBAR_ITEMS[1]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[1]}`)).toBeFocused();
     },
   },
   {
     name: "§2c Sidebar: ArrowUp moves focus",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${SIDEBAR_ITEMS[1]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[1]}`).click();
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${SIDEBAR_ITEMS[0]!}`)).toBeFocused();
+      await expect(page.locator(`#${items[0]}`)).toBeFocused();
     },
   },
   {
     name: "§2d Sidebar: followFocus selects on navigate",
     group: "Todo",
-    async run(page, expect) {
-      await page.locator(`#${SIDEBAR_ITEMS[0]!}`).click();
+    async run(page, expect, items = []) {
+      await page.locator(`#${items[0]}`).click();
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${SIDEBAR_ITEMS[1]!}`)).toHaveAttribute(
+      await expect(page.locator(`#${items[1]}`)).toHaveAttribute(
         "aria-selected",
         "true",
       );
@@ -225,7 +217,6 @@ export const sidebarScripts: TestScript[] = [
 export const scenarios: TestScenario[] = [
   {
     zone: "list",
-    items: LIST_ITEMS,
     role: "listbox",
     config: {
       dismiss: { escape: "deselect", outsideClick: "none" },
@@ -242,7 +233,6 @@ export const scenarios: TestScenario[] = [
   },
   {
     zone: "sidebar",
-    items: SIDEBAR_ITEMS,
     role: "listbox",
     config: {
       select: {

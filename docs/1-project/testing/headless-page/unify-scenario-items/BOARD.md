@@ -23,6 +23,11 @@ Risks:
 - testbot 파일 전수 수정 필요 — `scenario.getItems` 사용처 전체 grep
 
 ## Now
+- [ ] T1: runScenarios에서 scenario.getItems 대신 getZoneItems(script.zone) 사용 — 크기: S, 의존: —
+- [ ] T2: testbot-docs.ts에서 getSidebarItems/getFavItems/수동 getItems 제거 — 크기: S, 의존: →T1
+- [ ] T3: testbot-todo.ts에서 LIST_ITEMS/SIDEBAR_ITEMS 정적 items 제거 — 크기: S, 의존: →T1
+- [ ] T4: testbot-builder-arrow.ts에서 CANVAS_ITEMS 정적 items 제거 — 크기: S, 의존: →T1
+- [ ] T5: TestScenario 타입에서 items/getItems 필드 제거 — 크기: S, 의존: →T2,T3,T4
 
 ## Done
 

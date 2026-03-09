@@ -49,10 +49,6 @@ export interface TestScript {
 export interface TestScenario {
   /** Zone ID to pass to page.setupZone() */
   zone: string;
-  /** Item IDs for the zone (static — prefer getItems for real apps) */
-  items?: string[];
-  /** Dynamic item discovery — pure function returning real item IDs from zone bindings */
-  getItems?: () => string[];
   /** ARIA role for the zone */
   role: ZoneRole;
   /** Optional FocusGroupConfig overrides */
@@ -74,9 +70,11 @@ export interface TestScenario {
  * The name MUST be "scenarios" — no auto-detection, explicit contract.
  */
 export function extractScenarios(mod: Record<string, unknown>): TestScenario[] {
+  // biome-ignore lint/complexity/useLiteralKeys: TS noPropertyAccessFromIndexSignature requires bracket notation
   const scenarios = mod["scenarios"];
   if (Array.isArray(scenarios) && scenarios.length > 0) {
     const first = scenarios[0] as Record<string, unknown>;
+    // biome-ignore lint/complexity/useLiteralKeys: TS noPropertyAccessFromIndexSignature requires bracket notation
     if (typeof first["zone"] === "string" && Array.isArray(first["scripts"])) {
       return scenarios as TestScenario[];
     }

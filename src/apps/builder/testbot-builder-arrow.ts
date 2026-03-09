@@ -23,20 +23,6 @@ import type { TestScenario, TestScript } from "@os-devtool/testing";
 export const zones = ["canvas"];
 export const group = "Builder";
 
-// Test fixtures
-const CANVAS_ITEMS = [
-  "ge-hero",
-  "ge-notice",
-  "ge-features",
-  "ge-usecase",
-  "ge-detail",
-  "ge-card-1",
-  "ge-card-2",
-  "ge-card-3",
-  "ge-card-1-card-title",
-  "ge-card-1-card-desc",
-];
-
 export const builderArrowNavScripts: TestScript[] = [
   // ─── Level 1: Section ───────────────────────────────────
   {
@@ -164,7 +150,6 @@ export const builderArrowNavScripts: TestScript[] = [
 export const scenarios: TestScenario[] = [
   {
     zone: "canvas",
-    items: CANVAS_ITEMS,
     role: "builderBlock",
     scripts: builderArrowNavScripts,
   },

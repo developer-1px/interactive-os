@@ -18,13 +18,6 @@
  */
 
 import type { TestScenario, TestScript } from "@os-devtool/testing";
-import {
-  buildDocTree,
-  docsModules,
-  flattenTree,
-  flattenVisibleTree,
-  getFavoriteFiles,
-} from "./docsUtils";
 
 // ═══════════════════════════════════════════════════════════════════
 // Auto-discovery metadata — testbot-manifest.ts reads these eagerly
@@ -34,27 +27,6 @@ import {
 export const zones = ["docs-sidebar", "docs-recent", "docs-favorites"];
 /** UI group name */
 export const group = "Docs Viewer";
-
-// ═══════════════════════════════════════════════════════════════════
-// Item Discovery — pure functions, no OS state dependency
-// ═══════════════════════════════════════════════════════════════════
-
-const docTree = buildDocTree(Object.keys(docsModules));
-const allFiles = flattenTree(docTree);
-
-/** Sidebar items with no folders expanded (initial view) */
-function getSidebarItems(): string[] {
-  const nodes = flattenVisibleTree(docTree, [], 0, { sectionLevel: 0 });
-  return nodes
-    .filter((n) => !(n.type === "folder" && n.level === 0))
-    .map((n) => n.id);
-}
-
-/** Favorite items from localStorage (falls back to first 2 files if none pinned) */
-function getFavItems(): string[] {
-  const favs = getFavoriteFiles(allFiles).map((f) => f.path);
-  return favs.length >= 2 ? favs : allFiles.slice(0, 2).map((f) => f.path);
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // §1 사이드바 트리 — 핵심 탐색
@@ -361,19 +333,16 @@ const recentTabScripts = tabNavigationScripts.filter(
 export const scenarios: TestScenario[] = [
   {
     zone: "docs-sidebar",
-    getItems: getSidebarItems,
     role: "tree",
     scripts: [...sidebarNavScripts, ...sidebarTabScripts],
   },
   {
     zone: "docs-recent",
-    getItems: () => allFiles.slice(0, 5).map((f) => f.path),
     role: "listbox",
     scripts: [...recentListScripts, ...recentTabScripts],
   },
   {
     zone: "docs-favorites",
-    getItems: getFavItems,
     role: "listbox",
     scripts: favoritesScripts,
   },
