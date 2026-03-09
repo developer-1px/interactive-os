@@ -24,6 +24,8 @@ Risks:
 - DocsViewer 내부 useEffect (async content load 등) SSR에서 무시됨 — projection은 초기 렌더만 캡처
 
 ## Now
+- [ ] T1: `virtual:docs-meta` + `docsModules` vi.mock → DocsViewer import 가능 — 크기: S, 의존: —
+- [ ] T2: DocsViewer headless Tab cycle + projection items 테스트 — 크기: M, 의존: →T1
 
 ## Done
 
