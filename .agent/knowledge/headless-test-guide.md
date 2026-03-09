@@ -195,7 +195,61 @@ expect(page.activeZoneId()).not.toBe("stuck-zone"); // 실패 = 버그 재현!
 
 ---
 
-## 7. 참조 패턴 (실제 테스트 파일)
+## 7. TestBot 등록 — 필수
+
+> **headless test를 작성하면 반드시 TestBot에 등록한다.**
+> vitest에서만 도는 고아 테스트는 금지. 브라우저 Inspector에서도 실행 가능해야 한다.
+
+### 등록 방법
+
+테스트 스크립트를 `testbot-*.ts` 파일에 TestScript 형식으로 export한다:
+
+```ts
+// testbot-myapp.ts
+import type { TestScenario, TestScript } from "@os-devtool/testing";
+
+export const zones = ["my-zone-a", "my-zone-b"];  // 필수: 트리거 zone
+export const group = "My App";                      // 필수: UI 표시 이름
+
+export const myScripts: TestScript[] = [
+  {
+    name: "§1 Tab cycle: zone-a → zone-b → zone-a",
+    zone: "my-zone-a",
+    async run(page, expect, items = []) {
+      // Playwright subset API 사용
+      await page.locator(`#${items[0]}`).click();
+      await page.keyboard.press("Tab");
+      // assertion...
+    },
+  },
+];
+
+// auto-runner용 (vitest)
+export const scenarios: TestScenario[] = [
+  { zone: "my-zone-a", getItems: () => [...], role: "listbox", scripts: myScripts },
+];
+```
+
+### auto-discovery 경로
+
+`src/testing/testbot-manifest.ts`가 아래 경로에서 자동 발견:
+
+```
+src/apps/**/testbot-*.ts
+src/docs-viewer/testbot-*.ts
+src/pages/**/testbot-*.ts
+```
+
+**새 파일 생성만 하면 자동 등록된다.** 수동 등록 불필요.
+
+### 기존 testbot 파일이 있는 경우
+
+기존 `testbot-*.ts`에 스크립트를 **추가**한다. 새 파일을 만들지 않는다.
+예: `testbot-docs.ts`에 §5로 Tab cycle 스크립트 추가.
+
+---
+
+## 8. 참조 패턴 (실제 테스트 파일)
 
 | 패턴 | 파일 | 핵심 |
 |------|------|------|
