@@ -18,13 +18,13 @@ Risks:
 파일럿: AP-4(Dialog.tsx 삭제)를 먼저 수행하여 파이프라인 검증. 성공 후 스케일업.
 
 ## Now
-<!-- /plan이 Task Map으로 채운다. /project는 비워둔다. -->
+- [ ] T1: Dialog.tsx 삭제 + 소비자 7개 ModalPortal 전환 — 크기: M, 의존: —
 
 ## Done
 
 ## Unresolved
 - AP 간 최적 실행 순서 — /plan에서 코드 조사 후 확정
-- Dialog.tsx를 사용하는 소비자(앱/showcase) 존재 여부 확인 필요
+- ~~Dialog.tsx 소비자~~ → 7개 확인됨 (showcase 3 + command-palette 1 + todo 2 + focus-showcase 1)
 - headless Field 추출의 API 설계 — /spec에서 결정
 
 ## Ideas
