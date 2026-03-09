@@ -13,28 +13,23 @@ Backing:
 - docs-viewer-headless 프로젝트에서 DocsViewer headless 검증 가능 확인 (19/19 PASS)
 - `/diagnose` 분석: 4 FAIL의 근본 원인 = items 해석 경로 이원화
 
-Evidence:
-- `packages/os-devtool/src/testing/runScenarios.ts:44` — `scenario.getItems?.() ?? scenario.items ?? []`
-- `src/apps/testbot/app.ts:242` — `getZoneItems(script.zone)` → `ZoneRegistry.get(zoneId)?.getItems()`
-- `src/docs-viewer/testbot-docs.ts:46-57` — 수동 `getSidebarItems()`, `getFavItems()`
-
 Risks:
 - `getItems` binding이 없는 zone은 projection fallback이 필요 — `syncProjectionToRegistry()`가 이미 해결
 - testbot 파일 전수 수정 필요 — `scenario.getItems` 사용처 전체 grep
 
 ## Now
-- [ ] T1: runScenarios에서 scenario.getItems 대신 getZoneItems(script.zone) 사용 — 크기: S, 의존: —
-- [ ] T2: testbot-docs.ts에서 getSidebarItems/getFavItems/수동 getItems 제거 — 크기: S, 의존: →T1
-- [ ] T3: testbot-todo.ts에서 LIST_ITEMS/SIDEBAR_ITEMS 정적 items 제거 — 크기: S, 의존: →T1
-- [ ] T4: testbot-builder-arrow.ts에서 CANVAS_ITEMS 정적 items 제거 — 크기: S, 의존: →T1
-- [ ] T5: TestScenario 타입에서 items/getItems 필드 제거 — 크기: S, 의존: →T2,T3,T4
 
 ## Done
+- [x] T1: runScenarios에서 scenario.getItems 대신 getZoneItems(script.zone) 사용 — tsc 0 | +component param for projection ✅
+- [x] T2: testbot-docs.ts에서 getSidebarItems/getFavItems/수동 getItems 제거 — docsUtils import 5개 제거 ✅
+- [x] T3: testbot-todo.ts에서 LIST_ITEMS/SIDEBAR_ITEMS 정적 items 제거 — scripts 전환 to items param, 89 tests PASS ✅
+- [x] T4: testbot-builder-arrow.ts에서 CANVAS_ITEMS 정적 items 제거 — 15줄 삭제 ✅
+- [x] T5: TestScenario 타입에서 items/getItems 필드 제거 — scripts.ts 4줄 삭제, tsc 0 ✅
 
 ## Unresolved
-- runScenarios에서 ZoneRegistry.getItems를 쓰려면 page.goto() 이후 zone 등록이 완료된 상태여야 함 — 타이밍 확인 필요
-- TestScenario 타입에서 getItems/items 필드를 제거하면 기존 testbot 파일 전부 수정 필요 — 영향 범위 파악
+- docs-viewer 5 FAIL (§1d, §1f, §4a sidebar + §2e, §4c recent): cross-zone item ID overlap — 동일 ID가 sidebar/favorites 양쪽에 존재하여 navigation이 zone을 넘어감. browser TestBot도 동일 증상 (§1f, §1h). 이는 items 경로 문제가 아니라 app-level zone 설계 이슈.
+- docsUtils vi.mock이 docs-scenarios.test.ts에 필요 — import.meta.glob 대체. __mocks__/docsUtils.ts로 추출하여 공유.
 
 ## Ideas
-- TestScenario를 { zone, role, scripts } 최소 구조로 슬림화
-- runScenarios가 scenario.zone 기반으로 page.goto(zone) 후 ZoneRegistry에서 items 자동 해석
+- TestScenario를 { zone, role, scripts } 최소 구조로 슬림화 → 완료 (T5)
+- docs-viewer zones에서 item ID 중복 해소 (zoneItemId prefix 적용)
