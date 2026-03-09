@@ -31,7 +31,7 @@ description: 세션을 세 관점(개발·협업·워크플로우)으로 KPT 회
    |---|------|----------|----------|
    | K1 | ... | 어디서 발견? | design-principles / rules / backlog |
 
-   - `/discussion`의 📝 Knowledge, `/solve`의 실패 학습, `/green`의 발견 등을 전부 수확.
+   - `/discussion`의 📝 Knowledge, `/diagnose`의 진단 결과, `/green`의 발견 등을 전부 수확.
    - 이미 반영된 것은 ✅, 미반영은 ❌ 표시 → MECE 액션에 포함.
 
 4. **KPT 평가** — 세 관점을 순서대로 수행. 각 관점 완료 후 `/audit`(인라인).

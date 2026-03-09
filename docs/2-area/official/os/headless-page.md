@@ -27,7 +27,7 @@ expect(page.locator("#b")).toBeFocused();
 expect(page.locator("#b")).toHaveAttribute("aria-selected", "true");
 ```
 
-## Architecture: 3-Engine
+## Architecture: 3-Engine, 2-Track
 
 동일한 테스트 코드가 3개 엔진에서 실행된다:
 
@@ -36,6 +36,15 @@ expect(page.locator("#b")).toHaveAttribute("aria-selected", "true");
 | **Headless** | `createHeadlessPage()` | vitest (DOM 없음) | <1ms/test |
 | **Browser** | `createBrowserPage()` | Inspector (real DOM) | ~100ms/step |
 | **Playwright** | native Page | 실제 브라우저 | ~1s/test |
+
+### 2-Track 운영
+
+| Track | Engine | 주체 | 자동화 | 게이트 |
+|-------|--------|------|--------|--------|
+| **Machine** | Headless + Playwright | LLM/CI | 자동 | commit=headless, push=E2E |
+| **Human** | Browser TestBot | 인간 | 수동 | archive 전 확인 |
+
+**Zero Drift 증명**: 같은 TestScript가 headless와 E2E에서 동일한 결과를 내는 것이 경험적 증거.
 
 ### DOM 없이 어떻게 동작하는가
 
