@@ -15,6 +15,16 @@ Risks:
 - docs-viewer/inspector는 defineApp 미적용 앱 — Zone 전환 폭 큼
 
 ## Now
+- [ ] T1: EditorToolbar undo/redo → trigger — 크기: S, 의존: —
+- [ ] T2: BuilderPage loadPagePreset → trigger — 크기: S, 의존: —
+- [ ] T3: SectionSidebar addBlock → trigger — 크기: S, 의존: —
+- [ ] T4: PropertiesPanel dispatch 3건 → trigger/field/effect — 크기: M, 의존: —
+- [ ] T5: DocsSearch dispatch 4건 → zone onAction + overlay — 크기: M, 의존: —
+- [ ] T6: DocsViewer dispatch 3건 → trigger + effect — 크기: M, 의존: —
+- [ ] T7: UnifiedInspector 3건 → trigger + effect — 크기: M, 의존: —
+- [ ] T8: TestBotPanel 1건 → effect — 크기: S, 의존: —
+- [ ] T9: MeterPattern 1건 → app effect — 크기: S, 의존: —
+- [ ] T10: 전수 검증 — dispatch-in-tsx == 0 — 크기: S, 의존: →T1~T9
 
 ## Done
 
