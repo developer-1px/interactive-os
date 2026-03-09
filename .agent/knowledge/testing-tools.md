@@ -37,11 +37,6 @@ import type { TestScenario, TestScript } from "@os-devtool/testing";
 export const zones = ["my-zone-a", "my-zone-b"];
 export const group = "My App";
 
-function getMyItems(): string[] {
-  // 앱의 순수 함수에서 아이템 계산
-  return ["item-1", "item-2", "item-3"];
-}
-
 export const myScripts: TestScript[] = [
   {
     name: "§1 [기능]: [입력] → [기대 결과]",
@@ -57,7 +52,6 @@ export const myScripts: TestScript[] = [
 export const scenarios: TestScenario[] = [
   {
     zone: "my-zone-a",
-    getItems: getMyItems,
     role: "listbox",
     scripts: myScripts,
   },
@@ -96,6 +90,7 @@ runScenarios(scenarios, MyApp);
 |------|------|--------|
 | **입력 우선 테스트** | `page.keyboard.press()` 또는 `page.locator().click()`으로 시작. dispatch 금지 | 2026-02-25 |
 | **TestScript ONE** | testbot-*.ts(본체) + runScenarios runner(3줄). 3-engine 동기화 보장 | 2026-03-09 |
+| **Playwright E2E 증명** | `apgAccordionScript.run(page, expect)` → Playwright PASS. Engine 3 동작 확인. 단, testbot에서 OS runtime import(OS_CHECK 등)가 있으면 Playwright 로드 불가 — 스크립트와 시나리오 설정 분리 필요 | 2026-03-09 |
 
 ## Hazards
 
