@@ -18,13 +18,13 @@ Knowledge:
 - K3. testbot-todo.ts가 3-engine 공유 소스 기준. scripts/todo는 정리 대상
 
 ## Now
-- [ ] T1: todo-scripts.test.ts → runScenarios 전환 — 크기: S, 의존: —
-- [ ] T2: scripts/todo.ts 삭제 — 크기: S, 의존: →T1
-- [ ] T3: E2E spec: todo — 크기: S, 의존: →T1
-- [ ] T4: E2E spec: docs-viewer — 크기: S, 의존: —
-- [ ] T5: pre-push hook 설정 — 크기: S, 의존: →T3,T4
 
 ## Done
+- [x] T1: todo-scripts.test.ts → runScenarios 전환 — 11 tests (10 PASS, 1 pre-existing FAIL §1f) ✅
+- [x] T2: scripts/todo.ts 삭제 — tsc 0, 0 remaining imports ✅
+- [x] T3: E2E spec: todo — tests/e2e/todo.spec.ts (scenarios → Playwright) ✅
+- [x] T4: E2E spec: docs-viewer — tests/e2e/docs-viewer.spec.ts (scenarios → Playwright) ✅
+- [x] T5: pre-push hook — .husky/pre-push (vitest + playwright) ✅
 
 ## Unresolved
 
