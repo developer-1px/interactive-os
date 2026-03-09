@@ -17,10 +17,10 @@ Risks:
 - runbook이 비대해지면 에이전트가 읽지 않는다 → 핵심 패턴만 수록, 200줄 이내
 
 ## Now
-- [ ] T1: `headless-test-guide.md` SSOT runbook 작성 — 크기: M, 의존: —
-- [ ] T2: `/repro` 스킬 작성 (dual-file) — 크기: S, 의존: →T1
-- [ ] T3: `rules.md` 참조 표에 포인터 추가 — 크기: S, 의존: →T1
-- [ ] T4: `CLAUDE.md`에 headless test 참조 추가 — 크기: S, 의존: →T1
+- [x] T1: `headless-test-guide.md` SSOT runbook 작성 — `.agent/knowledge/headless-test-guide.md` 164줄 ✅
+- [x] T2: `/repro` 스킬 작성 (dual-file) — `.claude/commands/repro.md` + `.agent/workflows/repro.md` ✅
+- [x] T3: `rules.md` 참조 표에 포인터 추가 — 1행 추가 ✅
+- [x] T4: `CLAUDE.md`에 headless test 참조 추가 — 테스트 작성 섹션 추가 ✅
 
 ## Done
 
