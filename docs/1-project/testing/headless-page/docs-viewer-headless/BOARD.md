@@ -24,13 +24,13 @@ Risks:
 - DocsViewer 내부 useEffect (async content load 등) SSR에서 무시됨 — projection은 초기 렌더만 캡처
 
 ## Now
-- [ ] T1: `virtual:docs-meta` + `docsModules` vi.mock → DocsViewer import 가능 — 크기: S, 의존: —
-- [ ] T2: DocsViewer headless Tab cycle + projection items 테스트 — 크기: M, 의존: →T1
 
 ## Done
+- [x] T1: `virtual:docs-meta` alias + `docsUtils` vi.mock factory → DocsViewer import 가능 — tsc 0 | 3 tests PASS ✅
+- [x] T2: DocsViewer headless Tab cycle (3 zones) + docs-reader projection items 검증 — tsc 0 | 3 tests PASS | 732/766 suite (pre-existing 26 fail) ✅
 
 ## Unresolved
-- DocsViewer 내부 `loadDocContent`가 async glob loader — renderToString에서 content가 빈 문자열일 수 있음. 초기 상태에서 어떤 items가 렌더되는지 확인 필요
+- DocsViewer 내부 `loadDocContent`가 async glob loader — renderToString에서 content가 빈 문자열. 초기 상태에서 docs-reader는 selectDoc dispatch 후 projection으로 1 item 발견 (제목 행)
 
 ## Ideas
 - mock 패턴을 다른 Vite 전용 앱에도 재사용할 수 있는 vitest setup 유틸로 추출

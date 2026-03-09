@@ -11,6 +11,8 @@ export default defineConfig({
       "@apps": "/src/apps",
       "@inspector": "/src/inspector",
       "@": "/src",
+      "virtual:docs-meta":
+        "/tests/headless/apps/docs-viewer/__mocks__/docs-meta.ts",
     },
   },
   test: {
