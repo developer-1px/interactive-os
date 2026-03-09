@@ -35,6 +35,7 @@ function notify() {
 interface ManifestEntry {
   zones: string[];
   group: string;
+  route?: string | undefined;
   load: () => Promise<TestScript[]>;
 }
 

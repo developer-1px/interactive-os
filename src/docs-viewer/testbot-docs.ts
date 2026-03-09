@@ -25,6 +25,8 @@ import type { TestScenario, TestScript } from "@os-devtool/testing";
 
 /** Zone IDs that trigger this file's scripts */
 export const zones = ["docs-sidebar", "docs-recent", "docs-favorites"];
+/** Route path prefix — primary filter key for TestBot panel */
+export const route = "/docs";
 /** UI group name */
 export const group = "Docs Viewer";
 

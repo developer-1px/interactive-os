@@ -19,6 +19,8 @@ import { OS_CHECK } from "@os-sdk/os";
 
 /** Zone IDs that trigger this file's scripts */
 export const zones = ["list", "sidebar"];
+/** Route path prefix — primary filter key for TestBot panel */
+export const route = "/todo";
 /** UI group name */
 export const group = "Todo";
 

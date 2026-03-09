@@ -21,6 +21,7 @@ import type { TestScenario, TestScript } from "@os-devtool/testing";
 
 // Auto-discovery metadata — testbot-manifest.ts reads these eagerly
 export const zones = ["canvas"];
+export const route = "/builder";
 export const group = "Builder";
 
 export const builderArrowNavScripts: TestScript[] = [

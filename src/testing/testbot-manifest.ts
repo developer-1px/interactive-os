@@ -20,6 +20,8 @@ export interface ManifestEntry {
   zones: string[];
   /** Human-readable group name for UI display */
   group: string;
+  /** Route path prefix — primary filter key. Zone matching is fallback. */
+  route?: string | undefined;
   /** Lazy import — called once on first zone match, cached thereafter */
   load: () => Promise<TestScript[]>;
 }
@@ -32,6 +34,7 @@ export interface ManifestEntry {
 type MetadataModule = {
   zones?: string[];
   group?: string;
+  route?: string;
 };
 
 /** Eager: synchronously import zone/group metadata from all testbot files */
@@ -61,10 +64,10 @@ const loaders = import.meta.glob<Record<string, unknown>>(
 function extractScripts(mod: Record<string, unknown>): TestScript[] {
   for (const [key, value] of Object.entries(mod)) {
     if (key === "zones" || key === "group") continue;
+    const first = Array.isArray(value) && value.length > 0 ? value[0] : null;
     if (
-      Array.isArray(value) &&
-      value.length > 0 &&
-      typeof (value[0] as Record<string, unknown>)?.["run"] === "function"
+      first != null &&
+      typeof (first as { run?: unknown }).run === "function"
     ) {
       return value as TestScript[];
     }
@@ -116,6 +119,7 @@ function buildAutoEntries(): ManifestEntry[] {
     entries.push({
       zones,
       group: group ?? path.split("/").slice(-2, -1)[0] ?? "Unknown",
+      route: meta.route,
       load: () =>
         loader().then((mod) => extractScripts(mod as Record<string, unknown>)),
     });
