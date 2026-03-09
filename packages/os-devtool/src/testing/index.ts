@@ -24,7 +24,6 @@ export {
 } from "./createBrowserPage";
 export { expect } from "./expect";
 export { createHeadlessPage } from "./page";
-export { runScenarios } from "./runScenarios";
 export {
   accordionScript,
   allAriaScripts,
