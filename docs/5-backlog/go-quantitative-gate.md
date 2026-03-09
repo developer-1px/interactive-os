@@ -24,7 +24,7 @@
 - 의미적 완성도(spec 분량, 구현 커버리지)는 LLM 자기 판단에 의존
 
 관련 파일:
-- `.claude/commands/go.md` (slash command로 정의됨)
+- `.claude/skills/go/SKILL.md` (slash command로 정의됨)
 - `.agent/workflows/verify.md`
 - `.agent/workflows/green.md`, `red.md`, `spec.md`
 

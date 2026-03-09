@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # sync-commands.sh
-# .claude/commands/ → .agent/workflows/ 단방향 동기화
+# .claude/skills/ → .agent/workflows/ 단방향 동기화
 #
 # 동작:
-#   1. .claude/commands/*.md 를 .agent/workflows/ 에 복사
+#   1. .claude/skills/*/SKILL.md 를 .agent/workflows/{name}.md 에 복사
 #   2. 변경된 파일만 덮어쓰기 (diff 기반)
-#   3. .agent/workflows/ 에만 있고 .claude/commands/ 에 없는 파일 제거
+#   3. .agent/workflows/ 에만 있고 .claude/skills/ 에 없는 파일 제거
 #
 # 사용법:
 #   ./scripts/sync-commands.sh          # 실행 (변경분만 적용)
@@ -14,7 +14,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC="$ROOT/.claude/commands"
+SRC="$ROOT/.claude/skills"
 DST="$ROOT/.agent/workflows"
 
 DRY=false
@@ -25,14 +25,14 @@ updated=0
 unchanged=0
 removed=0
 
-# 보호 대상: workflows 전용 파일 (commands에 원본이 없는 파일)
+# 보호 대상: workflows 전용 파일 (skills에 원본이 없는 파일)
 PROTECTED_FILES=()
 
-# .claude/commands/*.md 순회 (flat only)
-for src_file in "$SRC"/*.md; do
+# .claude/skills/*/SKILL.md 순회
+for src_file in "$SRC"/*/SKILL.md; do
   [[ -f "$src_file" ]] || continue
-  filename="$(basename "$src_file")"
-  dst_file="$DST/$filename"
+  skill_name="$(basename "$(dirname "$src_file")")"
+  dst_file="$DST/$skill_name.md"
 
   if [[ -f "$dst_file" ]]; then
     if diff -q "$src_file" "$dst_file" > /dev/null 2>&1; then
@@ -46,17 +46,18 @@ for src_file in "$SRC"/*.md; do
     ((added++))
   fi
 
-  echo "  $label  $filename"
+  echo "  $label  $skill_name.md"
 
   if [[ "$DRY" == false ]]; then
     cp "$src_file" "$dst_file"
   fi
 done
 
-# .agent/workflows/ 에만 있고 .claude/commands/ 에 없는 파일 제거
+# .agent/workflows/ 에만 있고 .claude/skills/ 에 없는 파일 제거
 for dst_file in "$DST"/*.md; do
   [[ -f "$dst_file" ]] || continue
   filename="$(basename "$dst_file")"
+  skill_name="${filename%.md}"
 
   # 보호 대상은 건너뛴다
   for protected in "${PROTECTED_FILES[@]+"${PROTECTED_FILES[@]}"}"; do
@@ -65,7 +66,7 @@ for dst_file in "$DST"/*.md; do
     fi
   done
 
-  if [[ ! -f "$SRC/$filename" ]]; then
+  if [[ ! -f "$SRC/$skill_name/SKILL.md" ]]; then
     echo "  REMOVE  $filename"
     if [[ "$DRY" == false ]]; then
       rm "$dst_file"

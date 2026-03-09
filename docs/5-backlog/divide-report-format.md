@@ -12,5 +12,5 @@
 - 역추론(왜 깨졌나)과 순추론(뭘 먼저 하나) 분리
 
 ## 해야 할 것
-- `.claude/commands/divide.md` 템플릿의 Report Format 섹션을 위 구조로 교체
+- `.claude/skills/divide/SKILL.md` 템플릿의 Report Format 섹션을 위 구조로 교체
 - zero-drift REPORT가 실험 사례 (`docs/1-project/os-core/zero-drift/REPORT.md`)

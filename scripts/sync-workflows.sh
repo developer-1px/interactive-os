@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # sync-workflows.sh
-# .agent/workflows/ → .claude/commands/ 단방향 동기화
+# .agent/workflows/ → .claude/skills/ 단방향 동기화
 #
 # 동작:
-#   1. .agent/workflows/**/*.md 를 flat 하게 .claude/commands/ 에 복사
+#   1. .agent/workflows/**/*.md 를 .claude/skills/{name}/SKILL.md 에 복사
 #   2. `// turbo`, `// turbo-all` 디렉티브 라인 제거
 #   3. 변경된 파일만 덮어쓰기 (diff 기반)
 #
@@ -15,7 +15,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/.agent/workflows"
-DST="$ROOT/.claude/commands"
+DST="$ROOT/.claude/skills"
 
 DRY=false
 [[ "${1:-}" == "--dry" ]] && DRY=true
@@ -33,7 +33,9 @@ trap 'rm -rf "$tmp"' EXIT
 # .agent/workflows/**/*.md 순회 (하위 폴더 포함, flat 변환)
 while IFS= read -r src_file; do
   filename="$(basename "$src_file")"
-  dst_file="$DST/$filename"
+  skill_name="${filename%.md}"
+  dst_dir="$DST/$skill_name"
+  dst_file="$dst_dir/SKILL.md"
   cleaned="$tmp/$filename"
 
   # // turbo, // turbo-all 라인 제거 + 연속 빈 줄 정리
@@ -55,36 +57,37 @@ while IFS= read -r src_file; do
   fi
 
   rel_src="${src_file#"$ROOT"/}"
-  echo "  $label  $filename  ← $rel_src"
+  echo "  $label  $skill_name/SKILL.md  ← $rel_src"
 
   if [[ "$DRY" == false ]]; then
+    mkdir -p "$dst_dir"
     cp "$cleaned" "$dst_file"
   fi
 done < <(find "$SRC" -name '*.md' -type f | sort)
 
-# .claude/commands/ 에만 있고 .agent/workflows/ 에 없는 파일 제거
-# (workflows에서 삭제된 파일을 commands에서도 삭제)
-# 보호 대상: commands 전용 파일 (workflows에 원본이 없는 파일)
-PROTECTED_FILES=("auto.md")
+# .claude/skills/ 에만 있고 .agent/workflows/ 에 없는 스킬 제거
+# (workflows에서 삭제된 파일을 skills에서도 삭제)
+# 보호 대상: skills 전용 파일 (workflows에 원본이 없는 파일)
+PROTECTED_SKILLS=("auto")
 
 src_names="$tmp/_src_names"
-find "$SRC" -name '*.md' -type f -exec basename {} \; | sort -u > "$src_names"
+find "$SRC" -name '*.md' -type f -exec basename {} .md \; | sort -u > "$src_names"
 
-for dst_file in "$DST"/*.md; do
-  [[ -f "$dst_file" ]] || continue
-  filename="$(basename "$dst_file")"
+for dst_dir in "$DST"/*/; do
+  [[ -d "$dst_dir" ]] || continue
+  skill_name="$(basename "$dst_dir")"
 
   # 보호 대상은 건너뛴다
-  for protected in "${PROTECTED_FILES[@]}"; do
-    if [[ "$filename" == "$protected" ]]; then
+  for protected in "${PROTECTED_SKILLS[@]}"; do
+    if [[ "$skill_name" == "$protected" ]]; then
       continue 2
     fi
   done
 
-  if ! grep -qxF "$filename" "$src_names"; then
-    echo "  REMOVE  $filename"
+  if ! grep -qxF "$skill_name" "$src_names"; then
+    echo "  REMOVE  $skill_name/"
     if [[ "$DRY" == false ]]; then
-      rm "$dst_file"
+      rm -rf "$dst_dir"
     fi
     ((removed++))
   fi

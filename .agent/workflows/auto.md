@@ -34,7 +34,7 @@ echo "GO_PIPELINE_ID=$GO_ID"
 
 **Step 2**: `/go` 파이프라인 진입
 
-`.claude/commands/go.md`를 읽고 그대로 실행한다.
+`.claude/skills/go/SKILL.md`를 읽고 그대로 실행한다.
 `/go`의 모든 규칙이 동일하게 적용된다.
 
 ### 안전장치
