@@ -5,6 +5,7 @@
  * If headless PASS = E2E PASS, Zero Drift is empirically proven.
  */
 
+import "./vite-polyfill";
 import { scenarios } from "@apps/todo/testbot-todo";
 import { expect, test } from "@playwright/test";
 
