@@ -91,6 +91,8 @@ runScenarios(scenarios, MyApp);
 | **입력 우선 테스트** | `page.keyboard.press()` 또는 `page.locator().click()`으로 시작. dispatch 금지 | 2026-02-25 |
 | **TestScript ONE** | testbot-*.ts(본체) + runScenarios runner(3줄). 3-engine 동기화 보장 | 2026-03-09 |
 | **Playwright E2E 증명** | `apgAccordionScript.run(page, expect)` → Playwright PASS. Engine 3 동작 확인. 단, testbot에서 OS runtime import(OS_CHECK 등)가 있으면 Playwright 로드 불가 — 스크립트와 시나리오 설정 분리 필요 | 2026-03-09 |
+| **TestBot 패널 필터링** | discovery = route 기반 (`export const route`), execution = zone 기반. `useRouterState()` + `import.meta.glob("**/testbot-*.ts")` 매칭. 발견과 실행의 키가 다르다 | 2026-03-10 |
+| **describe/it SDK 기각** | TestScript.run과 it() 콜백은 동형 — wrapper는 순수 overhead. LLM 친화성은 format이 아니라 context 공급(knowledge 문서) 문제 | 2026-03-10 |
 
 ## Hazards
 
