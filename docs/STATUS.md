@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T23:45
+> Last updated: 2026-03-09T22:50
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -15,7 +15,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
-| os-core | ban-os-from-tsx | Scaffold (T1-T8) |
+| testing | **headless-page**/unify-scenario-items | Scaffold |
 
 ---
 
@@ -26,14 +26,14 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| ban-os-from-tsx 🔥 | Scaffold | 03-09 |
-| condition-auto-disabled ⚠️ | Done (코드), 문서 미정리 | 03-05 |
+| ban-os-from-tsx ⚠️ | Scaffold (T1-T8) | 03-09 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
+| **headless-page**/unify-scenario-items 🔥 | Scaffold | 03-09 |
 | **headless-page**/headless-simulator ⚠️ | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
@@ -66,9 +66,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 4 |
-| Active Projects | 7 |
+| Active Projects | 8 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (ban-os-from-tsx) |
+| Active Focus | 1 (unify-scenario-items) |
 | Stale (4d+) | 6 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
