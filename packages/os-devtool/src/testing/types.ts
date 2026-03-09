@@ -20,14 +20,14 @@ export type { ExpectLocator, TestScenario, TestScript } from "./scripts";
 // ═══════════════════════════════════════════════════════════════════
 
 export interface Locator extends LocatorAssertions {
-  /** Click this element. Playwright-identical signature. */
-  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): Promise<void>;
+  /** Click this element. Sync (headless/browser) or async (Playwright). */
+  click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void | Promise<void>;
 
   /** Get a single attribute value. */
-  getAttribute(name: string): Promise<string | null>;
+  getAttribute(name: string): string | null | Promise<string | null>;
 
   /** Get the input value (contenteditable / input). */
-  inputValue(): Promise<string>;
+  inputValue(): string | Promise<string>;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -35,17 +35,17 @@ export interface Locator extends LocatorAssertions {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface LocatorAssertions {
-  /** Assert: has attribute with value. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-attribute */
-  toHaveAttribute(name: string, value: string | RegExp): Promise<void>;
+  /** Assert: has attribute with value. */
+  toHaveAttribute(name: string, value: string | RegExp): void | Promise<void>;
 
-  /** Assert: element is focused. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-focused */
-  toBeFocused(): Promise<void>;
+  /** Assert: element is focused. */
+  toBeFocused(): void | Promise<void>;
 
-  /** Assert: element is checked. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-checked */
-  toBeChecked(): Promise<void>;
+  /** Assert: element is checked. */
+  toBeChecked(): void | Promise<void>;
 
-  /** Assert: element is disabled. @see https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-disabled */
-  toBeDisabled(): Promise<void>;
+  /** Assert: element is disabled. */
+  toBeDisabled(): void | Promise<void>;
 
   /** Negated assertions (Playwright-compatible). */
   not: LocatorAssertions;
@@ -61,9 +61,9 @@ export interface Page {
 
   /** Keyboard actions. @see https://playwright.dev/docs/api/class-keyboard */
   keyboard: {
-    /** Press a key. @see https://playwright.dev/docs/api/class-keyboard#keyboard-press */
-    press(key: string): Promise<void>;
-    /** Type text. @see https://playwright.dev/docs/api/class-keyboard#keyboard-type */
-    type(text: string): Promise<void>;
+    /** Press a key. Sync (headless/browser) or async (Playwright). */
+    press(key: string): void | Promise<void>;
+    /** Type text. Sync (headless/browser) or async (Playwright). */
+    type(text: string): void | Promise<void>;
   };
 }

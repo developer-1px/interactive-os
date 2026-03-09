@@ -57,16 +57,26 @@ interface ZoneOrderEntry {
   lastFocusedId: string | null;
 }
 
+/** Assertion subset with recursive .not — Playwright locator compatibility */
+interface LocatorAssertionResult {
+  toHaveAttribute(name: string, value: string | boolean | RegExp): boolean;
+  toBeFocused(): boolean;
+  toBeChecked(): boolean;
+  toBeDisabled(): boolean;
+  not: LocatorAssertionResult;
+}
+
 /** Extended locator returned by createAppPage — includes internal expect() hooks */
 interface LocatorResult {
   readonly attrs: import("@os-core/3-inject/headless.types").ElementAttrs;
   getAttribute(name: string): string | null;
   click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
-  toHaveAttribute(name: string, value: string | boolean): boolean;
+  toHaveAttribute(name: string, value: string | boolean | RegExp): boolean;
   toBeFocused(): boolean;
   toBeChecked(): boolean;
   toBeDisabled(): boolean;
   inputValue(): string;
+  not: LocatorAssertionResult;
   _toBeFocused(negated?: boolean): void;
   _toHaveAttribute(
     name: string,
@@ -653,6 +663,28 @@ export function createAppPage<S>(
         },
         inputValue() {
           return String(FieldRegistry.getValue(elementId) ?? "");
+        },
+
+        get not(): LocatorAssertionResult {
+          const positive = this;
+          const negated: LocatorAssertionResult = {
+            toHaveAttribute(name: string, value: string | boolean) {
+              return resolveElement(os, elementId)[name] !== value;
+            },
+            toBeFocused() {
+              return readFocusedItemId(os) !== elementId;
+            },
+            toBeChecked() {
+              return resolveElement(os, elementId)["aria-checked"] !== true;
+            },
+            toBeDisabled() {
+              return resolveElement(os, elementId)["aria-disabled"] !== true;
+            },
+            get not() {
+              return positive;
+            },
+          };
+          return negated;
         },
 
         // ── Playwright expect() hooks ──

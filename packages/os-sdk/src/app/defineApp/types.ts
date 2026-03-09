@@ -268,6 +268,15 @@ export interface TestInstance<S> {
 // AppPage — Playwright Page isomorphic headless interface
 // ═══════════════════════════════════════════════════════════════════
 
+/** Locator assertion subset — recursive via .not for Playwright compatibility */
+export interface AppLocatorAssertions {
+  toHaveAttribute(name: string, value: string | boolean | RegExp): void;
+  toBeFocused(): void;
+  toBeChecked(): void;
+  toBeDisabled(): void;
+  not: AppLocatorAssertions;
+}
+
 export interface AppPage<_S> {
   /**
    * Navigate to a URL — Playwright page.goto() isomorphic.
@@ -322,12 +331,14 @@ export interface AppPage<_S> {
   locator(elementId: string): {
     getAttribute(name: string): string | null;
     click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
-    toHaveAttribute(name: string, value: string | boolean): boolean;
-    toBeFocused(): boolean;
-    toBeChecked(): boolean;
-    toBeDisabled(): boolean;
+    toHaveAttribute(name: string, value: string | boolean | RegExp): void;
+    toBeFocused(): void;
+    toBeChecked(): void;
+    toBeDisabled(): void;
     inputValue(): string;
     readonly attrs: import("@os-core/3-inject/headless.types").ElementAttrs;
+    /** Negated assertions — Playwright locator.not isomorphic. */
+    not: AppLocatorAssertions;
   };
 
   // ── Projection Checkpoint (optional — requires Component) ────────
