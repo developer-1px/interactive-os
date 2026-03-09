@@ -16,7 +16,6 @@
 | Domain | Project | Phase |
 |--------|---------|-------|
 | os-core | ban-os-from-tsx | Scaffold (T1-T8) |
-| testing | repro-skill | Scaffold |
 
 ---
 
@@ -34,7 +33,6 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| repro-skill 🔥 | Scaffold | 03-09 |
 | **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
@@ -67,9 +65,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 4 |
-| Active Projects | 8 |
+| Active Projects | 7 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 2 (ban-os-from-tsx, repro-skill) |
+| Active Focus | 1 (ban-os-from-tsx) |
 | Stale (4d+) | 4 (builder-v2, builder-v3, test-observability, replay) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
