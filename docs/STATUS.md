@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T21:00
+> Last updated: 2026-03-09T22:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -16,6 +16,7 @@
 | Domain | Project | Phase |
 |--------|---------|-------|
 | os-core | ban-os-from-tsx | Scaffold (T1-T8) |
+| testing | repro-skill | Scaffold |
 
 ---
 
@@ -33,7 +34,8 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| **headless-page**/headless-simulator 🔥 | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
+| repro-skill 🔥 | Scaffold | 03-09 |
+| **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
@@ -50,7 +52,7 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| apg-suite 🔥 | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
+| apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
 
 ---
 
@@ -65,9 +67,9 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 4 |
-| Active Projects | 7 |
+| Active Projects | 8 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (ban-os-from-tsx) |
+| Active Focus | 2 (ban-os-from-tsx, repro-skill) |
 | Stale (4d+) | 4 (builder-v2, builder-v3, test-observability, replay) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
