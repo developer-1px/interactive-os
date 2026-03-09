@@ -45,6 +45,22 @@ expect(page.locator("#b")).toHaveAttribute("aria-selected", "true");
 4. `computeItem()` — Zone 상태에서 ARIA 속성을 순수 함수로 계산
 5. DOM은 이 상태의 **투영**일 뿐 — headless 검증 = DOM 검증
 
+### Projection Mode — Item Discovery
+
+Component가 제공되면(`createHeadlessPage(app, Component)`), 아이템 목록은 **렌더링된 HTML에서 추출**된다:
+
+```
+renderToString(Component) → jsdom parse → querySelectorAll("[data-zone]") 내 [data-item] 추출
+→ Map<zoneId, string[]> → ZoneRegistry.getItems에 주입
+```
+
+이것이 browser의 DOM scan(`el.querySelectorAll("[data-item]")`)의 headless 등가물이다.
+**동일 인터페이스(getItems), 다른 소스(browser=real DOM, headless=renderToString).**
+
+- **binding-provided getItems 우선**: `bind({ getItems })` 명시 시 projection으로 덮어쓰지 않음
+- **projection-only zones**: getItems 없는 zone은 렌더링 결과가 유일한 아이템 소스
+- **캐시 무효화**: click, press, dispatch 시 자동 무효화 → 다음 접근 시 lazy 재렌더링
+
 ## API Reference
 
 ### Factory
