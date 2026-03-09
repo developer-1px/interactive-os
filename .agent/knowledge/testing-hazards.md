@@ -43,6 +43,8 @@
 | **value.mode="continuous" ≠ slider** | spinbutton/meter/separator도 `value.mode="continuous"` — role 체크 없이 slider로 판정하면 click 시 포인터 좌표가 value로 변환되어 값 점프 발생 (예: 9→50) | `value.mode` 분기 시 반드시 `role === "slider"` 추가 체크 | Green |
 | **trigger() prop-getter id 누락** | overlay trigger()가 HTML `id` attribute를 반환하지 않으면 브라우저 TestBot의 `aria-haspopup` 등 attribute assertion 실패 — headless는 OS state로 통과하지만 browser는 DOM 검증 | trigger() 반환 객체에 `id: triggerId` 포함 확인 | Green |
 | **meter = 읽기전용 role** | meter는 value display 전용 — focus navigation, toggle, activate 모두 불가. toBeFocused/ArrowDown 등 focus nav 테스트는 browser에서 실패 | meter 테스트는 value attribute(aria-valuemin/max/now) 검증으로 작성 | Red |
+| **Vite virtual module mock** | `vi.mock("virtual:*")` 불가 — Vite import analysis가 vitest mock보다 먼저 실행 | vitest.config.ts의 `resolve.alias`로 물리 mock 파일에 매핑 | Red |
+| **import.meta.glob module mock** | `importOriginal` 불가 — glob import가 vitest에서 실행 안 됨. 전체 factory mock 필요 | `vi.mock(module, async () => ({ ...inlinedPureFunctions }))` — 실제 모듈의 **전체 export**를 mock에 포함 (부분 mock → SSR 크래시) | Red |
 
 ## Precedents
 
