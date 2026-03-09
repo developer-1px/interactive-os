@@ -2,8 +2,6 @@
 description: 패턴 A를 패턴 B로 전환하는 리팩토링 파이프라인. 대상 식별부터 재발 방지까지.
 ---
 
-// turbo-all
-
 ## /refactor — Green 후 정리 + 검증 + 커밋
 
 > **산출물**: 정리된 코드 + git commit

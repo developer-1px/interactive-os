@@ -40,64 +40,35 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
    - 예시: `K1. 컴포넌트의 합법적 책임 = 렌더링 + show/hide + DOM focus + ARIA binding (NEW)`
    - **트리거**: 사용자가 명시적으로 확인/동의한 정의·원칙·경계가 Knowledge 후보다. AI의 추론만으로는 추가하지 않는다.
 
-2-4. **📎 References — 코드 근거 추적** (앵커링 편향 방지):
-   - 이번 세션에서 `view_file`로 **실제 열어본 코드 파일**을 📂 Ground에 누적한다.
-   - Warrant이 참조하는 코드가 📎 References에 **없으면**, 해당 Warrant에 `⚠️ unverified`를 태깅한다.
-   - **⚠️ unverified Warrant가 있으면 ⚖️ Cynefin은 🟢가 될 수 없다.**
-   - 목적: 직전 작업 컨텍스트에 앵커링하여 코드를 안 보고 추론하는 실수를 방지한다.
-   - 형식: `📎 References: senseKeyboard.ts (L1-120), simulate.ts (L115-170)`
-
 3. **누적 구조** (매 턴 끝에 표시):
 
    | 요소 | 내용 |
    |------|------|
    | **📌 Current Intent** | 현재 턴의 숨겨진 의도 1문장 |
-   | **📋 Warrants** | W1. ... / W2. ... (⚠️ unverified) / W3. ... (NEW) |
    | **🎯 Emerging Claim** | 현재까지 수렴된 결론 후보 |
+   | **📋 Warrants** | W1. ... / W2. ... ← supports W1 / W3. ... (NEW) |
    | **📝 Knowledge** | K1. ... / K2. ... (NEW) — 이 대화에서 발견된 영구 지식 |
-   | **📎 References** | 이번 세션에서 `view_file`로 실제 열어본 코드 파일 (누적) |
-   | **⚖️ Cynefin** | 사용자 의도 이해도: 🟢 Clear / 🟡 Complicated / 🔴 Complex |
-   | **🚀 Next** | 다음 워크플로우 라우팅 (Cynefin과 독립. 아래 규칙 참조) |
-   | **❓ Gap** | 열린 질문 (있을 때만) |
+   | **📎 References** | 이 대화에서 참조된 `docs/` 문서 경로 (누적) |
+   | **⚖️ Cynefin** | Clear / Complicated / Complex |
+   | **🚀 Next** | Cynefin 게이트 + 논의 성격으로 예측한 다음 워크플로우 (아래 규칙 참조) |
+   | **❓ Complex Gap** | 질문 (Complex일 때만) |
 
-4. **⚖️ Cynefin — 사용자 의도 이해도** (독립 축 1):
+4. **🚀 Next 판정 규칙** — Cynefin이 게이트:
 
-   > Cynefin은 "사용자가 뭘 원하는지 이해했는가?"를 나타낸다.
+   | Cynefin | 의미 | Next 행동 |
+   |---------|------|-----------|
+   | 🔴 **Complex — 정보 부족** | Gap 질문에 새 정보 나올 여지 | `→ 계속 /discussion` (Gap 질문 계속) |
+   | 🔴 **Complex — 충돌 불명확** | 뭐가 부딪히는지 모르겠다 | `→ /conflict` (충돌의 양쪽을 진단) |
+   | 🔴 **Complex — 선택 불가** | 사용자가 2안 갈팡질팡 | `→ /blueprint` (AI가 EC로 해소 제안) |
+   | 🟡 **Complicated** | 방향은 잡힘, 분해 필요 | `→ /divide` (Clear까지 분해) |
+   | 🟢 **Clear** | 뭘 할지 안다 | `→ /go` (파이프라인 자율 실행) |
 
-   | 레벨 | 의미 | 🟢 승격 조건 |
-   |------|------|-------------|
-   | 🔴 **Complex** | 사용자의 의도가 불명확 | — |
-   | 🟡 **Complicated** | 의도는 보이지만 확인 필요 | Gap 질문으로 확인 |
-   | 🟢 **Clear** | 의도를 확실히 이해 | **❓ Gap 0건 + ⚠️ unverified 0건** |
+   > **/discussion의 exit은 항상 `/go`다.** `/go`가 `/plan` → 라우팅(`/project`·`/issue` 등) → 실행까지 자동 처리한다.
+   > `/conflict`·`/blueprint`는 **대화 내 탈출 밸브**다. 해소 후 `/discussion`으로 복귀하여 수렴을 이어간다.
 
-   > **🟢 Clear 게이트**: ❓ Gap 질문이 남아있거나, ⚠️ unverified Warrant가 있으면 **🟢가 될 수 없다.**
-   > 이는 AI의 주관적 판정이 아니라, 누적 구조에서 기계적으로 확인 가능하다.
+   **표시 형식**: `| 🚀 Next | 🟢 Clear → /go |`
 
-5. **🚀 Next — 다음 워크플로우 라우팅** (독립 축 2):
-
-   > Next는 "그래서 뭘 해야 하는지 알겠는가?"를 나타낸다.
-   > Cynefin과 **독립 변수**다. 의도를 이해했어도 방법을 모를 수 있고, 방법을 알아도 의도를 잘못 이해했을 수 있다.
-
-   thinking 워크플로우 중 하나를 라우팅으로 고른다:
-
-   | 라우팅 | 언제 |
-   |--------|------|
-   | `→ 계속 /discussion` | 의도 파악이 더 필요할 때 |
-   | `→ /conflict` | 충돌하는 가치·패턴이 보일 때 |
-   | `→ /blueprint` | 선택지 해소가 필요할 때 |
-   | `→ /why` | 막혀서 근본 원인을 찾아야 할 때 |
-   | `→ /divide` | 방향이 잡혀서 분해할 때 |
-   | `→ /research` | 다른 데서는 어떻게 하는지 찾아보면 좋을 것 같을 때 |
-   | `→ /go` | 바로 실행 가능할 때 |
-
-   > **/discussion의 exit은 항상 `/go`다.** `/go`가 `/plan` → 라우팅 → 실행까지 자동 처리한다.
-   > `/conflict`·`/blueprint`·`/why`는 **대화 내 탈출 밸브**다. 해소 후 `/discussion`으로 복귀하여 수렴을 이어간다.
-
-   **⚠️ 위험한 조합**: Cynefin 🔴 + Next → /go = **잘못된 문제를 풀 위험**. Cynefin이 🟢가 아닌 한 /go나 /divide로 진행하지 않는다.
-
-   **표시 형식**: `| ⚖️ Cynefin | 🟢 Clear | 🚀 Next | 🟢 Clear → /divide |`
-
-6. **Expert Toolkit** — 매 턴 적절한 기법을 선택하여 전문가 수준의 지적 기여를 더한다:
+5. **Expert Toolkit** — 매 턴 적절한 기법을 선택하여 전문가 수준의 지적 기여를 더한다:
 
    | 기법 | 트리거 |
    |------|--------|
@@ -109,7 +80,7 @@ description: Toulmin 기반 Expert Consulting. 숨겨진 Intent를 추출하고 
    | **Reframing** | 논의가 한 관점에 고착됐을 때 |
    | **Tension Surfacing** | 트레이드오프가 숨어 있을 때 |
 
-7. **종료 시그널**: 다음 중 하나가 발생하면 종료 프로세스(산출물 작성)를 시작한다:
+6. **종료 시그널**: 다음 중 하나가 발생하면 종료 프로세스(산출물 작성)를 시작한다:
    - 사용자가 "수고했어 고마워" (또는 유사 표현)를 보낸다
    - 사용자가 **라우팅 슬래시 커맨드**를 직접 입력한다: `/plan`, `/project`, `/go`, `/stories`, `/issue`, `/resource`, `/backlog`
    - 슬래시 커맨드 입력 시, `🚀 Next`의 예측과 무관하게 **사용자가 직접 지정한 것**으로 간주하고 해당 행선지로 바로 진행한다.
