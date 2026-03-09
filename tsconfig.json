@@ -1,4 +1,19 @@
 {
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@kernel": ["./packages/kernel/src/index.ts"],
+      "@kernel/*": ["./packages/kernel/src/*"],
+      "@os-core/*": ["./packages/os-core/src/*"],
+      "@os-react/*": ["./packages/os-react/src/*"],
+      "@os-sdk/*": ["./packages/os-sdk/src/*"],
+      "@os-devtool/*": ["./packages/os-devtool/src/*"],
+      "@inspector": ["./src/inspector/index.ts"],
+      "@inspector/*": ["./src/inspector/*"],
+      "@apps/*": ["./src/apps/*"],
+      "@/*": ["./src/*"]
+    }
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
