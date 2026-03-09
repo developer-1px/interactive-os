@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-09T06:00
+> Last updated: 2026-03-09T15:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -15,9 +15,7 @@
 
 | Domain | Project | Phase |
 |--------|---------|-------|
-| apg | **layer-playground** | T1~T8 Done |
-| inspector | **inspector-dogfooding** | T5 Next |
-| testing | **os-test-suite** | T1~T4 Done |
+| (없음) | | |
 
 ---
 
@@ -28,16 +26,9 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| ~~remove-dynamic-trigger~~ | ✅ Archived (W10) | 03-08 |
-| ~~trigger-click-fix~~ | ✅ Archived (W10) | 03-08 |
-| ~~trigger-unify~~ | ✅ Archived (W10) | 03-08 |
-| ~~action-centric-trigger~~ | ✅ Archived (W11) | 03-09 |
-| ~~seal-useComputed~~ | ✅ Archived (W11) | 03-09 |
 | ban-os-from-tsx | Scaffold | 03-09 |
 | condition-auto-disabled ⚠️ | — | 03-05 |
-| docs-freshness | WP1~WP8 | 03-06 |
-| kernel-docs-sync | — | 03-06 |
-| keyboard-input-isomorphism | — | 03-07 |
+| ~~react-antipattern~~ | ✅ Archived (W11) | 03-09 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
@@ -45,11 +36,6 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | **headless-page**/headless-simulator | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
-| os-test-suite | T1~T4 Done | 03-08 |
-| ~~headless-overlay~~ | ✅ Archived (W10) | 03-08 |
-| ~~lint-zero~~ | ✅ Archived (W11) | 03-09 |
-| ~~ban-dispatch-tsx~~ | ✅ Archived (W11) | 03-09 |
-| ~~testbot-apg-fix~~ | ✅ Archived (W11) | 03-09 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
@@ -61,29 +47,12 @@
 | builder-v2 ⚠️ | T12, T13, T20 | 03-05 |
 | builder-v3 ⚠️ | 기획 완료. 개발 보류 | 03-05 |
 
-### inspector
-> `src/inspector/`
-
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| inspector-dogfooding | T1~T4,T6~T9 ✅, T5 Next | 03-08 |
-| ~~testbot-zift~~ | ✅ Archived (W10) | 03-08 |
-
 ### apg
 > `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | apg-suite | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
-| ~~apg-dt-standard~~ | ✅ Archived (W10) | 03-07 |
-| layer-playground | T1~T8 Done | 03-08 |
-
-### nondeterministic-paradigm
-> 탐색적 연구
-
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| (domain-level) | 탐색 중 | 03-06 |
 
 ---
 
@@ -97,10 +66,10 @@
 
 | Metric | Count |
 |--------|-------|
-| Domains | 6 |
-| Active Projects | 15 |
+| Domains | 4 |
+| Active Projects | 8 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 3 (layer-playground, inspector-dogfooding, os-test-suite) |
+| Active Focus | 0 |
 | Stale (4d+) | 5 (builder-v2, builder-v3, test-observability, replay, condition-auto-disabled) |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |

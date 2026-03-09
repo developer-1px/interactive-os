@@ -23,9 +23,9 @@ Risks:
 
 ## Now
 
-- [ ] T8: 검증 — 변경된 파이프라인으로 os-react AP-1~AP-8 프로젝트 실행하여 워킹 테스트
-
 ## Done
+
+- [x] T8: 검증 — AP-4(Dialog.tsx 삭제) `/auto`→`/go` 파이프라인 완주. project→plan→spec→green→verify→archive 전 단계 정상 동작 (787d5baf)
 
 - [x] T1: /plan 재작성 — Task Map + 현황판 + S/M/L 크기 분해 ✅
 - [x] T2: /go 멀티턴 게이트 — 11단계 파이프라인 + 정량 검증 + ≤3 재시도 ✅
