@@ -162,6 +162,9 @@ export function createAppPage<S>(
   /** Track app-level keybinding unregister */
   let unregisterAppKeybindings: (() => void) | null = null;
 
+  /** Zones whose binding provides getItems — projection won't overwrite these */
+  const zonesWithBindingGetItems = new Set<string>();
+
   // Register app-level keybindings immediately (mirrors production module-load behavior)
   if (appKeybindings && appKeybindings.length > 0) {
     unregisterAppKeybindings = Keybindings.registerAll(
@@ -179,10 +182,8 @@ export function createAppPage<S>(
   // Override DOM contexts for headless (no DOM, no React)
   os.defineContext("dom-items", () => {
     const zoneId = os.getState().os.focus.activeZoneId;
-    const entry = zoneId ? ZoneRegistry.get(zoneId) : undefined;
-
-    // Headless: getItems() is the single path (state-derived).
-    // Zones must register getItems via bind({ getItems }).
+    if (!zoneId) return [];
+    const entry = ZoneRegistry.get(zoneId);
     if (entry?.getItems) {
       const items = entry.getItems();
       return entry.itemFilter ? entry.itemFilter(items) : items;
@@ -210,13 +211,18 @@ export function createAppPage<S>(
   os.defineContext("dom-zone-order", () => {
     const state = os.getState();
     const entries: Array<ZoneOrderEntry> = [];
+
     for (const zoneId of ZoneRegistry.keys()) {
       const zoneEntry = ZoneRegistry.get(zoneId);
       if (!zoneEntry) continue;
       const zoneState = state.os.focus.zones[zoneId];
       const entry = zoneEntry.config?.navigate?.entry ?? "first";
-      // Items from getItems accessor (single path)
+
       const items = zoneEntry.getItems?.() ?? [];
+
+      // Skip zones with no items and no prior focus state
+      if (items.length === 0 && !zoneState?.lastFocusedId) continue;
+
       const filtered = zoneEntry.itemFilter
         ? zoneEntry.itemFilter(items)
         : items;
@@ -309,7 +315,12 @@ export function createAppPage<S>(
         config,
         element: null,
         parentId: null,
-        ...(opts.items ? { getItems: () => opts.items! } : {}),
+        ...(opts.items
+          ? (() => {
+              zonesWithBindingGetItems.add(zoneName);
+              return { getItems: () => opts.items! };
+            })()
+          : {}),
         ...(opts.expandableItems
           ? { getExpandableItems: () => opts.expandableItems! }
           : {}),
@@ -404,8 +415,13 @@ export function createAppPage<S>(
     if (bindings.onRedo) entry.onRedo = bindings.onRedo;
     if (bindings.onSelect) entry.onSelect = bindings.onSelect;
     if (bindings.itemFilter) entry.itemFilter = bindings.itemFilter;
-    if (itemsOverride) entry.getItems = () => itemsOverride;
-    else if (bindings.getItems) entry.getItems = bindings.getItems;
+    if (itemsOverride) {
+      entry.getItems = () => itemsOverride;
+      zonesWithBindingGetItems.add(zoneName);
+    } else if (bindings.getItems) {
+      entry.getItems = bindings.getItems;
+      zonesWithBindingGetItems.add(zoneName);
+    }
     if (expandableOverride) entry.getExpandableItems = () => expandableOverride;
     else if (bindings.getExpandableItems)
       entry.getExpandableItems = bindings.getExpandableItems;
@@ -535,6 +551,7 @@ export function createAppPage<S>(
   // When Component is provided, renderToString is cached and invalidated
   // on state-changing operations (click, press, goto, setupZone, dispatch).
   let _htmlCache: string | null = null;
+  let _projectionItemsCache: Map<string, string[]> | null = null;
 
   function renderHtml(): string {
     if (!Component) {
@@ -548,14 +565,81 @@ export function createAppPage<S>(
     return _htmlCache;
   }
 
+  /**
+   * Parse rendered HTML to extract [data-item] elements per [data-zone].
+   * Uses jsdom environment (vitest default) to parse HTML and querySelectorAll.
+   * Mirrors browser's 3-inject/index.ts DOM_ITEMS pattern:
+   *   el.querySelectorAll("[data-item]") + el.closest("[data-zone]")
+   */
+  function parseProjectionItems(): Map<string, string[]> {
+    if (!Component) return new Map();
+    if (_projectionItemsCache) return _projectionItemsCache;
+
+    const html = renderHtml();
+    const container = document.createElement("div");
+    container.innerHTML = html;
+
+    const result = new Map<string, string[]>();
+
+    // Find all zone containers
+    const zoneEls = container.querySelectorAll("[data-zone]");
+    for (const zoneEl of zoneEls) {
+      const zoneId = zoneEl.getAttribute("data-zone");
+      if (!zoneId) continue;
+
+      // Find items that DIRECTLY belong to this zone (not nested zones)
+      const itemEls = zoneEl.querySelectorAll("[data-item]");
+      const items: string[] = [];
+      for (const itemEl of itemEls) {
+        // Only include items whose closest zone is THIS zone
+        if (itemEl.closest("[data-zone]") !== zoneEl) continue;
+        const id = itemEl.id;
+        if (id) items.push(id);
+      }
+      result.set(zoneId, items);
+    }
+
+    _projectionItemsCache = result;
+    return result;
+  }
+
   function invalidateCache() {
     _htmlCache = null;
+    _projectionItemsCache = null;
+    // When Component is provided, feed projection data into ZoneRegistry's
+    // getItems. This is the "thin DOM slice" — projection renders HTML once,
+    // parses [data-item]/[data-zone], and injects results into getItems so
+    // all downstream code (findZoneByItemId, dom-items, dom-zone-order) works.
+    if (Component) {
+      syncProjectionToRegistry();
+    }
+  }
+
+  /** Inject lazy projection-backed getItems into zones WITHOUT binding-provided getItems */
+  function syncProjectionToRegistry() {
+    for (const zoneId of ZoneRegistry.keys()) {
+      // Skip zones that already have getItems from bind() — the app
+      // explicitly defines their navigation order (e.g., todo list excludes DRAFT).
+      // Projection only fills the gap for zones without binding-provided getItems.
+      if (zonesWithBindingGetItems.has(zoneId)) continue;
+      const entry = ZoneRegistry.get(zoneId);
+      if (!entry) continue;
+      const capturedZoneId = zoneId;
+      entry.getItems = () => {
+        const projection = parseProjectionItems();
+        return projection.get(capturedZoneId) ?? [];
+      };
+    }
   }
 
   function assertElementInProjection(elementId: string): void {
     if (!Component) return; // headless only — no projection check
     const html = renderHtml();
-    if (!html.includes(`id="${elementId}"`)) {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    // CSS.escape may not exist in jsdom — use a safe selector
+    const found = container.querySelector(`[id="${elementId}"]`);
+    if (!found) {
       throw new Error(
         `locator: element "#${elementId}" not found in rendered Component output.`,
       );
