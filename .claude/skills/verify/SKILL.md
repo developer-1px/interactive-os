@@ -52,6 +52,17 @@ npx vite build 2>&1 | tail -20
 - success → 완료
 - fail → 보고하고 멈춘다
 
+#### Gate 6: Dev Server Smoke
+
+> tsc·build 통과해도 esbuild(Vite dev)의 module resolution은 다르다.
+> **모든 vite config**를 대상으로 기동 → 요청 → 에러 확인한다.
+
+```bash
+bash scripts/vite-smoke.sh
+```
+- exit 0 → 완료
+- exit 1 → 실패한 config와 에러 메시지를 보고하고 멈춘다
+
 ### 결과 보고
 
 ```
@@ -60,24 +71,8 @@ npx vite build 2>&1 | tail -20
 | tsc  | ✅ 0 errors |
 | lint | ✅ |
 | unit | ✅ N passed |
-| e2e  | ✅ / ⏭ skip |
+| bind | ✅ / ⏭ skip |
 | build| ✅ |
-```
-
-### Dev Server 복구 & 에러 확인
-
-빌드 또는 테스트 완료 후 dev 서버 상태를 확인한다.
-tsc는 통과해도 esbuild(Vite)의 module resolution은 다를 수 있다.
-
-```bash
-# 1. 기존 서버 kill + 캐시 삭제
-lsof -t -i :5555 | xargs kill -9 2>/dev/null
-rm -rf node_modules/.vite
-
-# 2. 서버 재기동
-source ~/.nvm/nvm.sh && nvm use && npx vite
-
-# 3. 기동 후 5초 내 콘솔 에러(esbuild ERROR) 확인
-# 에러가 있으면 보고하고 멈춘다
+| dev  | ✅ |
 ```
 
