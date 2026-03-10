@@ -3,8 +3,9 @@
  *
  * Structure:
  *   DocsApp (defineApp)
- *     ├── State: activePath, searchOpen, favVersion
+ *     ├── State: activePath, favVersion
  *     ├── Commands: selectDoc, goBack, goForward, openSearch, toggleFav
+ *     ├── Overlays: docs-search (dialog)
  *     ├── Zones:
  *     │   ├── docs-navbar    — navigation toolbar (toolbar)
  *     │   ├── docs-favorites — pinned files (listbox)
@@ -14,7 +15,7 @@
  */
 
 import { defineApp } from "@os-sdk/app/defineApp";
-import { OS_ACTIVATE, os } from "@os-sdk/os";
+import { OS_ACTIVATE, OS_OVERLAY_OPEN, os } from "@os-sdk/os";
 import { zoneItemId } from "@os-sdk/zoneItemId";
 import { produce } from "immer";
 import {
@@ -86,13 +87,11 @@ function getInitialPath(): string | null {
 
 export interface DocsState {
   activePath: string | null;
-  searchOpen: boolean;
   favVersion: number;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
   activePath: getInitialPath(),
-  searchOpen: false,
   favVersion: 0,
 });
 
@@ -135,23 +134,15 @@ export const goForward = DocsApp.command(
   { key: "Alt+ArrowRight" },
 );
 
-/** OPEN_SEARCH — opens the docs search overlay. */
+/** OPEN_SEARCH — opens the docs search overlay via OS overlay system. */
 export const openSearch = DocsApp.command(
   "OPEN_SEARCH",
   (ctx) => ({
-    state: produce(ctx.state, (draft) => {
-      draft.searchOpen = true;
-    }),
+    state: ctx.state,
+    dispatch: [OS_OVERLAY_OPEN({ id: "docs-search", type: "dialog" })],
   }),
   { key: "/", when: "navigating" },
 );
-
-/** CLOSE_SEARCH — closes the docs search overlay. */
-export const closeSearch = DocsApp.command("CLOSE_SEARCH", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    draft.searchOpen = false;
-  }),
-}));
 
 /** TOGGLE_FAVORITE — toggles pin for activePath, bumps favVersion for re-render. */
 export const toggleFav = DocsApp.command("TOGGLE_FAVORITE", (ctx) => {
@@ -170,6 +161,11 @@ export const toggleFav = DocsApp.command("TOGGLE_FAVORITE", (ctx) => {
 // ═══════════════════════════════════════════════════════════════════
 
 const navbarZone = DocsApp.createZone("docs-navbar");
+
+/** Search overlay — dialog role, triggered from navbar */
+export const searchOverlay = navbarZone.overlay("docs-search", {
+  role: "dialog",
+});
 
 export const DocsNavbarUI = navbarZone.bind({
   role: "toolbar",
