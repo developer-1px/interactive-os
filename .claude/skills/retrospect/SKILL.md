@@ -113,4 +113,4 @@ description: 세션을 세 관점(개발·협업·워크플로우)으로 KPT 회
 
    - **Z > 0이면 경고**: 왜 반영하지 못했는지 사유를 명시하고, 다음 세션의 첫 번째 태스크로 지정한다.
    - 인라인으로 세 관점의 KPT + 액션 반영 결과를 보여준다.
-   - 프로젝트 회고 시: `docs/1-project/{name}/retrospective.md`에도 저장.
+   - 프로젝트 회고 시: `docs/1-project/{name}/discussions/retrospective.md`에도 저장.

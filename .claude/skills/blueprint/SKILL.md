@@ -14,10 +14,16 @@ description: 코드 수정 전 TOC 기반 실행 설계도. Goal → Why → Cha
 
 ### 산출물
 
-단일 마크다운 문서. 저장 위치:
-- 프로젝트 → `docs/1-project/{project}/blueprint-{slug}.md`
-- 이슈   → `docs/1-project/{project}/issues/blueprint-{slug}.md`
-- 기타   → `docs/0-inbox/YYYY-MMDD-HHmm-blueprint-{slug}.md`
+단일 마크다운 문서. **Challenge 섹션이 있는 경우에만 파일을 생성한다.**
+
+Challenge가 없는 blueprint = 실행 계획(disposable). 코드가 완성되면 가치가 소멸한다.
+Challenge가 있는 blueprint = "안 간 길" 기록(archivable). 기각된 전제와 무효화된 가정이 보존 가치를 갖는다.
+
+저장 위치:
+- 프로젝트 (Challenge 있음) → `docs/1-project/{project}/discussions/blueprint-{slug}.md`
+- 이슈 (Challenge 있음)   → `docs/1-project/{project}/discussions/blueprint-{slug}.md`
+- 기타 (Challenge 있음)   → `docs/0-inbox/YYYY-MMDD-HHmm-blueprint-{slug}.md`
+- **Challenge 없음 → 파일 미생성** (대화 내 인라인으로만 존재)
 
 ### 절차
 

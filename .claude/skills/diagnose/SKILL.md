@@ -67,7 +67,11 @@ description: 테스트 실패 시 코드를 수정하지 않고 원인을 분석
 
 ## 산출물: 진단서
 
-`docs/0-inbox/YYYY-MMDD-HHmm-[diagnose]-{slug}.md` 에 저장한다.
+저장 위치:
+- 프로젝트 귀속 → `docs/1-project/{project}/discussions/[diagnose]-{slug}.md`
+- 프로젝트 미귀속 → `docs/0-inbox/YYYY-MMDD-HHmm-[diagnose]-{slug}.md`
+
+> 진단서는 "안 간 길"(탈락한 용의자, 검증한 가설)을 기록한다 → discussions/에 속한다.
 
 ```markdown
 # 🔍 진단서: [한줄 제목]

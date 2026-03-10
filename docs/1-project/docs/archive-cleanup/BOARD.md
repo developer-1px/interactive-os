@@ -1,35 +1,25 @@
 # archive-cleanup
 
-## Context
+| Key | Value |
+|-----|-------|
+| Claim | 프로젝트 스캐폴딩 v2: BOARD.md + spec.md + discussions/ only. notes/ 삭제. /archive 판단 0 |
+| Before | v1: BOARD + spec + discussions/ + notes/ (혼재). /archive 시 296개 중 77% 개별 판단 삭제 |
+| After | v2: BOARD(테이블) + spec(진실) + discussions/(안 간 길). /archive = discussions/ 이동 + BOARD Context 잔존 + 나머지 삭제 |
+| Size | Meta |
+| Risk | 기존 v1 프로젝트 8개는 기존 구조 유지, 새 프로젝트부터 v2 적용 |
 
-Claim: 아카이브 정리를 실행하면서 프로젝트 스캐폴딩 v2 설계의 입력이 될 인사이트를 축적한다. 정리 자체가 목적이 아니라, 정리 경험에서 구조적 패턴을 추출하는 것이 목적.
+## Tasks
 
-Before → After:
-- Before: 296 markdown files across W08/W10/W11. 구조적 의문 없이 기계적 매장
-- After: ~50 files 보존 + `scaffold-insights.md`에 애매한 판단·패턴·구조적 의문 누적
-
-3-Gate Test (정리 기준):
-1. 코드에서 읽을 수 있는가? → 삭제
-2. 살아있는 문서에 반영되어 있는가? → 삭제
-3. 둘 다 아닌가? (기각된 대안, 교훈, 안 간 길) → 보존
-
-Risks:
-- 보존 판정 실수 시 git restore로 복구 가능 (low risk)
-
-## Now
-
-- [x] T1. scaffold-insights.md 생성 ✅
-- [x] T2. W08 정리 — 42→15 files ✅
-- [x] T3. W01 정리 — 8→1 files ✅
-- [x] T4. W10 정리 — 178→32 files ✅
-- [x] T5. W11 정리 — 74→20 files ✅
-- [x] T6. 최종 검증 — 296→68 files (77% 삭제), 11 insights 기록 ✅
-
-## Done
+| # | Task | AC | Status | Evidence |
+|---|------|----|--------|----------|
+| T1 | `/project` 스킬 수정 — scaffold에서 notes/ 제거, BOARD 테이블 템플릿 | skill.md 갱신 완료 | ✅ | notes/ 제거, 표준 구조 v2, BOARD 테이블 포맷 반영 |
+| T2 | `/archive` 스킬 수정 — 판단 0 로직 (discussions/ + spec + BOARD Context 이동, 나머지 삭제) | skill.md 갱신 완료 | ✅ | v2 판단 0 로직 + v1 호환 분기 추가 |
+| T3 | `/blueprint` 스킬 수정 — Challenge 있으면 discussions/, 없으면 파일 미생성 | skill.md 갱신 완료 | ✅ | 저장 위치 discussions/, Challenge 없으면 미생성 |
+| T4 | `/diagnose` 스킬 수정 — 출력을 discussions/에 | skill.md 갱신 완료 | ✅ | 프로젝트 귀속 시 discussions/, 미귀속 시 0-inbox |
+| T5 | `/retrospect` 스킬 수정 — 출력을 discussions/에 | skill.md 갱신 완료 | ✅ | retrospective.md → discussions/retrospective.md |
+| T6 | blueprint 문서 저장 — Challenge 포함이므로 discussions/에 | 파일 이동 완료 | ✅ | discussions/blueprint-scaffold-v2.md 생성 |
 
 ## Unresolved
-- 스캐폴딩 v2 구체 설계 (인사이트 축적 후 결정)
 
-## Ideas
-- `/archive` 워크플로우에 3-Gate Test 자동 적용 로직 통합
-- `/project` 스킬 + `/archive` 스킬 동시 업데이트
+| # | Question | Impact |
+|---|----------|--------|

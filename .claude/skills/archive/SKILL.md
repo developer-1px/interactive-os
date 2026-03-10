@@ -63,16 +63,18 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 
 #### 3. 지식 분배 (핵심)
 
-프로젝트의 모든 문서를 하나씩 검토하고 **4갈래 라우팅**:
+**v2 프로젝트 (BOARD.md + spec.md + discussions/ 구조)**:
 
-| 판단 기준 | 행선지 | 예시 |
-|-----------|--------|------|
-| **시점 독립 원칙/스펙** | `2-area/official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
-| **Product에 귀속되는 검증된 결정** | `6-products/[name]/` 에스컬레이션 | 기능 스펙, 디자인 결정, 인터랙션 정의 |
-| **아직 성숙 안 된 지식** | `2-area/` 잔류 (인큐베이터) | 초기 설계, 미확정 패턴 |
-| **그 외 전부** | `4-archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
+판단 0 로직 — 개별 파일 검토 불필요:
 
-구체적 동작:
+| 대상 | 행선지 | 이유 |
+|------|--------|------|
+| `discussions/` 전체 | `4-archive/YYYY/MM/WNN/[project]/discussions/` | "안 간 길" 보존 |
+| `spec.md` | `4-archive/YYYY/MM/WNN/[project]/spec.md` | "진실의 원천" 보존 |
+| `BOARD.md` Context 테이블 | `4-archive/YYYY/MM/WNN/[project]/BOARD.md` | "프로젝트 1장" 보존 (Context 테이블만) |
+| 나머지 전부 | 🗑️ 삭제 | 코드가 말하는 것은 보존 불필요 |
+
+그 후, 지식 환류를 수행한다:
 
 **a) official 갱신 (살아있는 문서)**
 - 프로젝트에서 확정된 스펙/동작이 있으면 → `2-area/official/` 해당 섹션 **덮어쓰기**
@@ -104,10 +106,16 @@ src/os/schemas/focus/  →  2-area/20-os/22-focus/
 - 아직 official로 졸업시킬 만큼 성숙하지 않은 지식
 - cross-cutting standards, 미확정 설계 등
 
-**d) Archive 매장 (죽은 문서)**
-- BOARD.md, discussions, 진행 기록, 분석 보고서 — 전부
-- `4-archive/YYYY/MM/WNN/`에 주차별로 이동 (프로젝트 이름은 폴더 없이 flat)
-- 주차 계산: `python3 -c "from datetime import date; d=date.today(); print(f'W{d.isocalendar()[1]:02d}')"`
+**v1 프로젝트 (기존 BOARD + spec + discussions/ + notes/ 구조)**:
+
+기존 v1 프로젝트는 4갈래 라우팅으로 개별 파일 검토:
+
+| 판단 기준 | 행선지 | 예시 |
+|-----------|--------|------|
+| **시점 독립 원칙/스펙** | `2-area/official/` 갱신 또는 `rules.md` 추가 | 커맨드 동작 스펙, 아키텍처 원칙 |
+| **Product에 귀속되는 검증된 결정** | `6-products/[name]/` 에스컬레이션 | 기능 스펙, 디자인 결정, 인터랙션 정의 |
+| **아직 성숙 안 된 지식** | `2-area/` 잔류 (인큐베이터) | 초기 설계, 미확정 패턴 |
+| **그 외 전부** | `4-archive/YYYY/MM/WNN/` 매장 | BOARD, discussions, 보고서, 분석 |
 
 #### 4. Area 동기화 검증
 
