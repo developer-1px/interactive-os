@@ -1,21 +1,19 @@
 /**
  * @os-devtool/testing — Playwright-compatible testing interface.
  *
- * 3경계 원칙: page (Playwright sanctum) · os (싱글턴) · app (defineApp)
+ * page = 유일한 테스트 API. Action과 Assert 모두 page 경유.
  *
- *   1. Headless:  createPage()        — vitest, pure functions, <1ms
- *   2. Browser:   createBrowserPage() — Inspector, PointerEvent + animation
- *   3. Playwright: native page        — E2E, shim 0 lines
+ *   1. Headless:    createPage()        — vitest, pure functions, <1ms
+ *   2. Browser:     createBrowserPage() — Inspector, PointerEvent + animation
+ *   3. Playwright:  native page         — E2E, shim 0 lines
  *
  * Usage:
- *   import { createPage } from "@os-devtool/testing";
- *   import { os } from "@os-core/engine/kernel";
- *   import { readFocusedItemId } from "@os-core/3-inject/readState";
+ *   import { createPage, expect } from "@os-devtool/testing";
  *
- *   const page = createPage(TodoApp, TodoPage);
+ *   const { page, cleanup } = createPage(app, Component);
  *   page.goto("/");
  *   page.keyboard.press("ArrowDown");
- *   readFocusedItemId(os); // os 직접
+ *   await expect(page.locator(":focus")).toBeFocused();
  */
 
 export {

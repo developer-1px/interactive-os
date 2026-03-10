@@ -888,22 +888,20 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { Page } from "./types";
 
 /**
- * Create a headless test page — Playwright sanctum.
+ * Create a headless test page — Playwright isomorphic.
  *
  * Returns { page, cleanup }:
- * - page: Page interface only (goto, click, keyboard, locator)
+ * - page: Page interface (goto, click, keyboard, locator, content)
  * - cleanup: teardown function for afterEach()
  *
- * OS state inspection uses standalone functions directly:
- *   import { os } from "@os-core/engine/kernel";
- *   import { readFocusedItemId } from "@os-core/3-inject/readState";
+ * page is the ONLY test API. All actions and assertions go through page.
  *
  * Usage:
- *   const { page, cleanup } = createPage(TodoApp, TodoPage);
+ *   const { page, cleanup } = createPage(app, Component);
  *   afterEach(() => cleanup());
  *   page.goto("/");
  *   page.keyboard.press("ArrowDown");
- *   readFocusedItemId(os);  // os 직접
+ *   await expect(page.locator(":focus")).toBeFocused();
  */
 export function createPage<S>(
   app: AppHandle<S>,
