@@ -13,7 +13,7 @@
 
 ## 🔥 Active Focus
 
-(없음 — 다음 프로젝트 선택 필요)
+**os-core / sdk-role-factory** — ARIA-driven defineRole + role별 config 타입 + role 팩토리 재설계
 
 ---
 
@@ -26,7 +26,7 @@
 |---------|-------|---------------|
 | ban-os-from-tsx ⚠️ | Scaffold (T1-T8) | 03-09 |
 | condition-auto-disabled ⚠️ | — | — |
-| sdk-role-factory ⚠️ | — | — |
+| **sdk-role-factory** 🔥 | Scaffold (Heavy) | 03-11 |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
@@ -75,7 +75,7 @@
 | Domains | 5 |
 | Active Projects | 10 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 0 |
+| Active Focus | 1 (sdk-role-factory) |
 | Stale (4d+) | 10 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
