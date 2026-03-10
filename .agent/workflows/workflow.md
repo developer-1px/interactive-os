@@ -20,4 +20,5 @@ description: 대화형으로 workflow를 생성하거나 수정한다.
         ---
         [Step-by-step instructions]
         ```
-    - Confirm the registration to the user with the file path.
+    - **Claude Skill 동시 등록**: `.claude/skills/{name}/SKILL.md`에 동일한 내용을 저장한다. workflow와 skill은 항상 쌍으로 존재해야 한다.
+    - Confirm the registration to the user with the file path (workflow + skill 양쪽).

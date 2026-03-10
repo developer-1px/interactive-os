@@ -856,18 +856,12 @@ export type { AppPage, AppPageInternal } from "@os-sdk/app/defineApp/types";
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 
 /**
- * Create a Playwright Page-isomorphic headless integration test interface.
+ * Create a headless integration test page.
  *
  * Usage:
- *   import { createPage } from "@os-sdk/app/defineApp/page";
- *   const page = createPage(TodoApp, ListView);    // headless + projection
- *   const page = createPage(TodoApp);              // headless only (no UI)
- *
- * When Component is provided, locator() verifies elements exist in the
- * rendered output. Without Component, locator() resolves from OS state only.
- *
- * createPage is an OS capability — it reads app data(appId, zone bindings)
- * from the AppHandle and sets up the headless test environment.
+ *   const page = createHeadlessPage(TodoApp, ListView);
+ *   page.goto("/");
+ *   page.keyboard.press("ArrowDown");
  */
 export function createHeadlessPage<S>(
   app: AppHandle<S>,

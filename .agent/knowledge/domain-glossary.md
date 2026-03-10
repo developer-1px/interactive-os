@@ -273,17 +273,56 @@ zone.bind({
 
 ## 8. Testing Layer
 
+### 핵심 패러다임
+
 | 용어 | 정의 |
 |------|------|
-| **Headless** | DOM 없이 커널 상태만으로 계산하는 모드 |
-| **HeadlessPage** | Vitest에서 실행되는 DOM-없는 테스트 환경 |
-| **BrowserPage** | Inspector에서 실행되는 시각적 테스트 환경 |
-| **TestInstance** | `defineApp.create()`로 생성. headless에서 앱을 완전히 제어하는 인스턴스 |
-| **Page** | Playwright-호환 인터페이스. `locator()`, `press()` |
+| **Headless Test** | DOM 없이 커널 상태만으로 동일한 TestScript를 3환경에서 실행하는 테스트 패러다임 |
+| **3-Tier Execution** | 하나의 TestScript가 Vitest(headless), Browser(Inspector), Playwright(E2E) 세 환경에서 동일하게 실행 |
+| **Zero Drift** | Headless 통과 = DOM 동일 동작. headless 결과와 실제 DOM 결과의 불일치가 0 |
+
+### Contract — page · os · app 삼각 구조
+
+| 용어 | 정의 | 역할 | 접근 방법 |
+|------|------|------|----------|
+| **Page** | Playwright 호환 인터페이스. `keyboard`, `click`, `locator`, `goto` | **성역** — OS 메서드 부착 절대 금지. Script는 Page만 import | `createPage(app, Component)` (devtool 제공) |
+| **os** | OS 커널 싱글턴. 테스트에서 상태 관찰 | `attrs`, `focusedItemId`, `selection`, `activeZoneId` 등. **래핑 금지** | `import { os } from "@os-core/engine/kernel"` 직접 |
+| **app** | `defineApp()` 반환값. 앱 커맨드 + 상태 | `dispatch`, `state`. **래핑 금지** | 테스트에서 직접 사용 |
+
+> **3경계 원칙** (2026-03-10 합의): page·os·app 외의 모든 테스트 API는 **새는 추상화**다.
+> - 중간 팩토리(`createTestEnv`) 불필요 — 3경계가 독립적으로 존재
+> - os 래핑(`OsTestHandle`) 불필요 — 싱글턴 직접 import
+> - SDK에 테스트 메서드(`app.createPage()`) 부착 금지 — 테스트는 devtool의 책임
+
+### Adapter (WHERE 명명)
+
+| 용어 | 정의 |
+|------|------|
+| **VitestAdapter** | Simulate 계층을 사용하여 headless로 실행하는 어댑터 |
+| **BrowserAdapter** | 실제 DOM Event를 사용하는 Inspector 환경 어댑터 |
+| **PlaywrightAdapter** | native Playwright — shim 0 |
+
+> ⚠️ "Headless"는 **개념**(패러다임)이지 **어댑터**가 아니다. Adapter 이름은 환경(WHERE)으로 짓는다.
+
+### 인프라
+
+| 용어 | 정의 |
+|------|------|
 | **Locator** | 요소를 찾고 `click()`, `getAttribute()`를 제공 |
 | **simulateKeyPress** | 키 입력을 headless에서 재현 (테스트 전용) |
 | **simulateClick** | 클릭을 headless에서 재현 (테스트 전용) |
 | **resolveElement** | 요소 ID로 모든 DOM 속성을 계산. Playwright `locator("#id")`의 headless 등가물 |
+
+### ⛔ 안티패턴 (제거 대상)
+
+| 용어 | 문제 | 대체 |
+|------|------|------|
+| ~~AppPage~~ | Playwright + OS 메서드 혼합 → E2E 동형성 파괴 | `Page` + `os` 분리 |
+| ~~AppPageInternal~~ | AppPage에 dispatch/state 부착 | `app` (defineApp 반환값) 직접 사용 |
+| ~~setupZone~~ | defineApp zone 선언 우회하는 백도어 | `defineApp.bind()` + `page.goto("/")` |
+| ~~createTestEnv~~ | 3경계를 불필요하게 묶는 중간 팩토리 | `createPage()` + `os` 싱글턴 + `app` 직접 |
+| ~~OsTestHandle~~ | os 싱글턴 래핑 — 존재 이유 없음 | `os` 직접 import |
+| ~~HeadlessAdapter~~ | "Headless"는 개념이지 환경 아님 | `VitestAdapter` |
 
 ---
 

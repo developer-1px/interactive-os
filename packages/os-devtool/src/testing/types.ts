@@ -6,7 +6,7 @@
  *   2. Browser  (Inspector, PointerEvent + visual animation)
  *   3. Playwright E2E (native, shim 0 lines)
  *
- * Only 6 methods — all native Playwright.
+ * Only native Playwright methods — no OS extensions.
  * Test code written with this interface IS valid Playwright code.
  *
  * @see https://playwright.dev/docs/api/class-page
@@ -54,12 +54,33 @@ export interface LocatorAssertions {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Page — Playwright.Page subset
+// Page — Playwright.Page subset (Sanctum: no OS methods)
 // ═══════════════════════════════════════════════════════════════════
 
 export interface Page {
+  /**
+   * Navigate to a URL — Playwright page.goto() isomorphic.
+   *
+   * Headless: registers all app zones from bindings and renders the
+   * component tree (renderToString). No internal state seeding.
+   * Playwright: delegates to native page.goto().
+   */
+  goto(url: string): void | Promise<void>;
+
   /** Create a locator for an element. Uses item ID (headless/browser) or CSS selector (Playwright). */
   locator(selector: string): Locator;
+
+  /** Click an item — Playwright page.click() isomorphic. */
+  click(
+    selector: string,
+    opts?: {
+      shift?: boolean;
+      meta?: boolean;
+      ctrl?: boolean;
+      zoneId?: string;
+      modifiers?: ("Meta" | "Shift" | "Control")[];
+    },
+  ): void | Promise<void>;
 
   /** Keyboard actions. @see https://playwright.dev/docs/api/class-keyboard */
   keyboard: {

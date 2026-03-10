@@ -644,9 +644,33 @@ export function createBrowserPage(
   // ── Page interface ──
 
   return {
+    goto(_url: string) {
+      // Browser: already on the page — no-op (zone registration handled by React)
+    },
+
     locator(selector: string): Locator {
       const id = selector.startsWith("#") ? selector.slice(1) : selector;
       return createBrowserLocator(id);
+    },
+
+    async click(
+      selector: string,
+      clickOpts?: {
+        shift?: boolean;
+        meta?: boolean;
+        ctrl?: boolean;
+        zoneId?: string;
+        modifiers?: ("Meta" | "Shift" | "Control")[];
+      },
+    ) {
+      const id = selector.startsWith("#") ? selector.slice(1) : selector;
+      const loc = createBrowserLocator(id);
+      const modifiers: ("Meta" | "Shift" | "Control")[] =
+        clickOpts?.modifiers ?? [];
+      if (clickOpts?.shift) modifiers.push("Shift");
+      if (clickOpts?.meta) modifiers.push("Meta");
+      if (clickOpts?.ctrl) modifiers.push("Control");
+      await loc.click({ modifiers });
     },
 
     keyboard: {

@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-10T16:00
+> Last updated: 2026-03-10T13:40
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,7 +13,7 @@
 
 ## 🔥 Active Focus
 
-(없음 — 모든 프로젝트 Stale)
+**testing / headless-page / page-contract-split** — AppPage 삭제 + Page·os·TestInstance 삼각 분리
 
 ---
 
@@ -31,7 +31,8 @@
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| **headless-page**/headless-simulator ⚠️ | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
+| **headless-page/page-contract-split** 🔥 | Scaffold (Heavy) | 03-10 |
+| headless-page/headless-simulator ⚠️ | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
 
@@ -63,10 +64,10 @@
 | Metric | Count |
 |--------|-------|
 | Domains | 4 |
-| Active Projects | 7 |
+| Active Projects | 8 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 0 |
-| Stale (4d+) | 7 |
+| Active Focus | 1 (page-contract-split) |
+| Stale (4d+) | 6 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
