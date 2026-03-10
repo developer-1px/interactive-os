@@ -97,7 +97,7 @@ export const group = "My App";
 > runner가 이미 있으면 이 단계를 건너뛴다 — testbot에 scenario를 추가하면 자동 반영.
 
 ```ts
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { MyApp } from "@/my-app/app";
 import { scenarios } from "@/my-app/testbot-myapp";
 

@@ -92,8 +92,8 @@ URL: https://www.w3.org/WAI/ARIA/apg/patterns/{pattern}/examples/{example}/
 **API (Playwright-subset)**:
 
 ```typescript
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createHeadlessPage } from "@os-testing/page";
+import { expect as osExpect } from "@os-testing/expect";
 
 const page = createHeadlessPage(App, Component);
 page.goto("/");
@@ -109,7 +109,7 @@ await expect(page.locator("#id")).toHaveAttribute("aria-expanded", "true");
 
 **규칙**:
 - `page.locator("#id")` — `#` prefix 필수 (Playwright 호환)
-- `osExpect` 사용 (`@os-devtool/testing/expect`)
+- `osExpect` 사용 (`@os-testing/expect`)
 - `dispatch()` 금지 — `click()`, `keyboard.press()` 만 사용
 - App에 `getItems` bind 필수 (headless goto 모드 전제조건)
 

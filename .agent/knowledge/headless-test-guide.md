@@ -12,7 +12,7 @@
 ### Tier 1: OS 커널 테스트 (bind + goto)
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 
 const { page, cleanup } = createPage(app);
 page.goto("/");
@@ -24,7 +24,7 @@ page.goto("/");
 ### Tier 2: 앱 통합 테스트 (defineApp 기반)
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { MyApp } from "@/my-app/app";
 
 const { page, cleanup } = createPage(MyApp);

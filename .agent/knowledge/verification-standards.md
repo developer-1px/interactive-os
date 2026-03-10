@@ -83,14 +83,14 @@ export const scenarios: TestScenario[] = [
 
 ```ts
 // tests/headless/apps/myapp/myapp-interaction.test.ts — OS-level (zone만, app 없음)
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { scenarios } from "@apps/myapp/testbot-myapp";
 runScenarios(scenarios);
 ```
 
 ```ts
 // tests/headless/apps/myapp/myapp-interaction.test.ts — App-level (React projection 포함)
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { scenarios } from "@apps/myapp/testbot-myapp";
 import { MyApp } from "@apps/myapp/app";
 import { MyView } from "@apps/myapp/MyView";

@@ -17,12 +17,12 @@
 `createPage(app, Component?)`는 Playwright `Page`와 동형인 API를 DOM 없이 제공한다.
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 
 const app = defineApp("test-app", {});
 const zone = app.createZone("my-list");
-zone.bind({ role: "listbox", getItems: () => ["a", "b", "c"] });
+zone.bind("listbox", { getItems: () => ["a", "b", "c"] });
 
 const { page, cleanup } = createPage(app);
 page.goto("/");
@@ -88,7 +88,7 @@ renderToString(Component) → jsdom parse → querySelectorAll("[data-zone]") �
 ### Factory
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 
 // App-level: defineApp 기반, zone bindings 자동 해석
 const { page, cleanup } = createPage(app);
@@ -135,7 +135,7 @@ expect(loc).not.toBeFocused()             // 부정
 ### osExpect (Playwright Isomorphic)
 
 ```ts
-import { expect as osExpect } from "@os-devtool/testing/expect";
+import { expect as osExpect } from "@os-testing/expect";
 
 // locator + plain value 통합 — Playwright expect()와 동일 시그니처
 await osExpect(page.locator("#item")).toBeFocused();
@@ -163,7 +163,7 @@ page.content()
 inline `defineApp` + `zone.bind`로 fixture를 구성하고, `page`만으로 검증.
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 
 const ITEMS = ["apple", "banana", "cherry"];
@@ -171,7 +171,7 @@ const ITEMS = ["apple", "banana", "cherry"];
 function createListbox(focusedItem = "apple") {
   const app = defineApp("test-listbox", {});
   const zone = app.createZone("fruits");
-  zone.bind({ role: "listbox", getItems: () => ITEMS });
+  zone.bind("listbox", { getItems: () => ITEMS });
   const { page, cleanup } = createPage(app);
   page.goto("/");
   page.click(focusedItem);
@@ -191,7 +191,7 @@ it("ArrowDown moves focus", () => {
 실제 앱의 bind 경로를 검증. `os` singleton으로 state/dispatch 접근 가능.
 
 ```ts
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { os } from "@os-core/engine/kernel";
 import { TodoApp } from "@apps/todo/app";
 import TodoPage from "@pages/TodoPage";
@@ -219,7 +219,7 @@ export const scenarios: TestScenario[] = [
 ];
 
 // test file
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { MyApp } from "./app";
 import { MyView } from "./MyView";
 import { scenarios } from "./testbot-myapp";

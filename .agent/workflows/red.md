@@ -91,7 +91,7 @@ export const group = "My App";
 > **이 파일은 3줄이다.** 로직을 넣지 않는다.
 
 ```ts
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { MyApp } from "@/my-app/app";
 import { scenarios } from "@/my-app/testbot-myapp";
 
