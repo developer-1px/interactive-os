@@ -20,14 +20,14 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { FC } from "react";
 import { describe, it } from "vitest";
 import { expect } from "./expect";
-import { createHeadlessPage } from "./page";
+import { createPage } from "./page";
 import type { TestScenario } from "./scripts";
 import { getZoneItems } from "./zoneItems";
 
 /**
  * Register TestScenario[] as vitest describe/it blocks.
  *
- * Tier 2 (app integration): createHeadlessPage(app) + goto("/")
+ * Tier 2 (app integration): createPage(app, component) + goto("/")
  * registers all zones from the app's defineApp bindings.
  * Items are resolved from ZoneRegistry (same path as browser TestBot).
  *
@@ -45,12 +45,16 @@ export function runScenarios<S>(
     describe(label, () => {
       for (const script of scenario.scripts) {
         it(script.name, async () => {
-          const page = createHeadlessPage(app, component);
+          const { page, cleanup } = createPage(app, component);
           page.goto("/");
           const items = script.zone
             ? getZoneItems(script.zone)
             : getZoneItems(scenario.zone);
-          await script.run(page, expect, items);
+          try {
+            await script.run(page, expect, items);
+          } finally {
+            cleanup();
+          }
         });
       }
     });

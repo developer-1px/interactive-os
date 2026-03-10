@@ -146,11 +146,11 @@ function createHeadlessEffects(): VisualEffects {
   return {
     STEP_DELAY: 0,
     ANIM_DURATION: 0,
-    moveCursorTo() {},
-    showRipple() {},
-    showKeyBadge() {},
-    showStamp() {},
-    hideCursor() {},
+    moveCursorTo() { },
+    showRipple() { },
+    showKeyBadge() { },
+    showStamp() { },
+    hideCursor() { },
   };
 }
 
@@ -476,10 +476,10 @@ export function createBrowserPage(
         ...(passed
           ? {}
           : {
-              error: negated
-                ? `Expected NOT ${displayExpected}, but got ${displayActual}`
-                : `Expected ${displayExpected}, got ${displayActual}`,
-            }),
+            error: negated
+              ? `Expected NOT ${displayExpected}, but got ${displayActual}`
+              : `Expected ${displayExpected}, got ${displayActual}`,
+          }),
         timestamp: timestamp(),
       });
       await delay(fx.STEP_DELAY / 2);
@@ -737,6 +737,10 @@ export function createBrowserPage(
         });
         await delay(fx.STEP_DELAY);
       },
+    },
+
+    content() {
+      return document.documentElement.outerHTML;
     },
 
     hideCursor() {

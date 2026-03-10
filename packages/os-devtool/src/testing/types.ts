@@ -82,6 +82,9 @@ export interface Page {
     },
   ): void | Promise<void>;
 
+  /** Get full serialized HTML. @see https://playwright.dev/docs/api/class-page#page-content */
+  content(): string | Promise<string>;
+
   /** Keyboard actions. @see https://playwright.dev/docs/api/class-keyboard */
   keyboard: {
     /** Press a key. Sync (headless/browser) or async (Playwright). */

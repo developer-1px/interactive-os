@@ -51,8 +51,8 @@ interface ZoneOrderEntry {
   firstItemId: string | null;
   lastItemId: string | null;
   entry:
-    | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
-    | string;
+  | import("@os-core/schema/types/focus/config/FocusGroupConfig").NavigateEntry
+  | string;
   selectedItemId: string | null;
   lastFocusedId: string | null;
 }
@@ -251,7 +251,7 @@ export function createAppPage<S>(
   });
 
   // Override browser-only effects for headless (no navigator.clipboard)
-  os.defineEffect("clipboardWrite", () => {});
+  os.defineEffect("clipboardWrite", () => { });
 
   // ── Enter preview sandbox ──
   os.enterPreview({
@@ -276,7 +276,7 @@ export function createAppPage<S>(
   function goto(url: string) {
     if (!url.startsWith("/")) {
       throw new Error(
-        `page.goto() accepts URLs only (must start with "/"). Got "${url}". Use page.setupZone() for zone-level setup.`,
+        `page.goto() accepts URLs only (must start with "/"). Got "${url}".`,
       );
     }
     for (const [zoneName, bindingEntry] of zoneBindingEntries) {
@@ -325,9 +325,9 @@ export function createAppPage<S>(
         parentId: null,
         ...(opts.items
           ? (() => {
-              zonesWithBindingGetItems.add(zoneName);
-              return { getItems: () => opts.items! };
-            })()
+            zonesWithBindingGetItems.add(zoneName);
+            return { getItems: () => opts.items! };
+          })()
           : {}),
         ...(opts.expandableItems
           ? { getExpandableItems: () => opts.expandableItems! }
@@ -875,7 +875,6 @@ export function createAppPage<S>(
 }
 
 export type { ItemAttrs };
-export type { AppPage, AppPageInternal } from "@os-sdk/app/defineApp/types";
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { Page } from "./types";
@@ -914,23 +913,9 @@ export function createPage<S>(
     click: internal.click,
     keyboard: internal.keyboard,
     locator: internal.locator,
+    content: internal.html,
   };
 
   return { page, cleanup: internal.cleanup };
 }
 
-/**
- * @deprecated Use createPage() instead.
- * Returns the mixed AppPageInternal (anti-pattern: page + os + app 혼합).
- */
-export function createHeadlessPage<S>(
-  app: AppHandle<S>,
-  Component?: FC,
-): AppPageInternal<S> {
-  return createAppPage<S>(
-    app.__appId,
-    app.__zoneBindings,
-    Component ?? null,
-    app.__appKeybindings,
-  );
-}

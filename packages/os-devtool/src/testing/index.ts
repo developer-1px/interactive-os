@@ -26,7 +26,7 @@ export {
   resetFocusState,
 } from "./createBrowserPage";
 export { expect } from "./expect";
-export { createHeadlessPage, createPage } from "./page";
+export { createPage } from "./page";
 export {
   accordionScript,
   allAriaScripts,
