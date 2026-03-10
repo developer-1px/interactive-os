@@ -77,10 +77,12 @@ App.dispatch(command);          // app 직접
 - [x] T7: `contracts.ts` locator 기반 재작성 (os import 0줄) — tsc 0 ✅
 - [x] T7a: `locator(":focus")` 지원 추가 (headless + browser) — tsc 0 ✅
 - [x] T7b: `expect()` Playwright 동형 확장 (locator + value 통합) — tsc 0 ✅
+- [x] T7c: JSDoc + domain-glossary 1경계 원칙 반영 — 43 tests ✅
 
-> 📐 **원칙 변경**: 3경계 → **2경계** (page + app). os는 인프라 세부사항.
-> - 테스트에서 os import 금지. 모든 assertion은 `page.locator()` 경유.
-> - 설계 문서: `notes/2026-0310-1907-analysis-naming-apg-fixture.md`
+> 📐 **원칙 확정**: **1경계** — 테스트 시나리오에서 API는 `page`뿐.
+> - `os` = 인프라 세부사항. 테스트 코드에서 등장 금지.
+> - `app` = fixture 설정(Arrange)에서만. 시나리오(Act+Assert)에서 등장하면 동형 위반.
+> - 설계 문서: `notes/2026-0310-1926-analysis-naming-app-os-page.md`
 
 ### Phase 3: 테스트 삭제→재작성
 - [ ] T8: APG contracts 의존 9파일 (combobox, dialog, listbox, menu, toolbar, tree, treegrid, carousel, feed) — 크기: M, 의존: →T7
