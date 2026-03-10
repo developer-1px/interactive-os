@@ -1,14 +1,8 @@
 /**
  * DocsSearch Overlay Test — OS overlay lifecycle verification.
  *
- * Verifies that DocsSearch overlay open/close is managed by the OS overlay system:
- *   - T4a: Click search button → overlay opens (OS_OVERLAY_OPEN)
- *   - T4b: "/" keybinding → overlay opens
- *   - T4c: OS_OVERLAY_CLOSE → overlay closes
- *   - T4d: Re-open after close → works
- *
- * Known gap: Escape key closes overlay via React handler (not OS pipeline).
- * ModalPortal migration (Phase 2) will move Escape handling to OS.
+ * Phase 1 (T4a–T4d): Overlay open/close via OS commands.
+ * Phase 2 (T6–T7): ModalPortal — Escape via OS pipeline, ArrowDown gap check.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -81,5 +75,45 @@ describe("DocsSearch Overlay", () => {
 
     page.click("docs-btn-search");
     expect(isOverlayOpen("docs-search")).toBe(true);
+  });
+
+  it("T6: Escape key closes overlay via OS pipeline", () => {
+    const page = createHeadlessPage(DocsApp, DocsViewer);
+    page.goto("/");
+    page.dispatch(selectDoc({ id: "STATUS" }));
+
+    // Open overlay
+    page.click("docs-btn-search");
+    expect(isOverlayOpen("docs-search")).toBe(true);
+
+    // Escape → OS_ESCAPE → OS_OVERLAY_CLOSE (no React handler needed)
+    page.keyboard.press("Escape");
+    expect(isOverlayOpen("docs-search")).toBe(false);
+  });
+
+  it("T7: ArrowDown inside overlay — OS gap: leaks to OS_NAVIGATE", () => {
+    const page = createHeadlessPage(DocsApp, DocsViewer);
+    page.goto("/");
+    page.dispatch(selectDoc({ id: "STATUS" }));
+
+    // Open overlay — dialog zone becomes active
+    page.click("docs-btn-search");
+    expect(isOverlayOpen("docs-search")).toBe(true);
+
+    // GAP: ArrowDown leaks to OS_NAVIGATE(down) because dialog role has no
+    // inputmap to claim Arrow keys. OS global keybinding intercepts them.
+    // In browser, React onKeyDown with e.preventDefault() handles this.
+    // In headless, there's no React — OS pipeline runs unimpeded.
+    page.keyboard.press("ArrowDown");
+
+    // Overlay stays open (ArrowDown doesn't dismiss)
+    expect(isOverlayOpen("docs-search")).toBe(true);
+
+    // GAP EVIDENCE: activeZoneId changed from overlay zone to navbar
+    // This proves OS_NAVIGATE leaks through dialog zones without inputmap.
+    // Future fix: either add Arrow keys to dialog inputmap (block/noop),
+    // or convert search results to a listbox zone inside the dialog.
+    const activeZone = os.getState().os.focus.activeZoneId;
+    expect(activeZone).toBe("docs-navbar"); // gap: should be "docs-search"
   });
 });

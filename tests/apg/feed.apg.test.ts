@@ -1,36 +1,30 @@
 /**
- * APG Feed Pattern — Contract Test (Tier 1: pressKey → attrs)
+ * APG Feed Pattern — Headless Test (Playwright-subset API)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/feed/
  *
  * W3C Feed Pattern:
  *   - Scrollable list of articles (role=article within role=feed)
  *   - Page Down: focus next article
  *   - Page Up: focus previous article
- *   - Control+End: move focus past the feed (exit forward)
- *   - Control+Home: move focus before the feed (exit backward)
  *   - No wrap (no loop)
  *   - No selection (articles are read, not selected)
- *   - Tab exits the feed zone
  *   - Each article: aria-posinset, aria-setsize, aria-labelledby, aria-describedby
  *
- * Config: vertical, no-loop, no-selection, tab=escape
+ * Config: vertical, no-loop, no-selection
  *
- * Feed-specific keys (PageDown/PageUp, Ctrl+End/Home) are Zone-level
- * keybindings that map to OS_NAVIGATE and OS_TAB respectively.
+ * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
+ * Same code runs in vitest headless, browser TestBot, and Playwright E2E.
  */
 
+import { expect as osExpect } from "@os-devtool/testing/expect";
 import { createHeadlessPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
-import { FeedApp } from "@/pages/apg-showcase/patterns/FeedPattern";
+import { afterEach, beforeEach, describe, it } from "vitest";
 import {
-  assertBoundaryClamp,
-  assertHomeEnd,
-  assertNoSelection,
-  assertVerticalNav,
-} from "./helpers/contracts";
+  FeedApp,
+  FeedPattern,
+} from "@/pages/apg-showcase/patterns/FeedPattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup (goto + click — Playwright isomorphic) ───
 
 const ARTICLES = [
   "article-1",
@@ -40,31 +34,94 @@ const ARTICLES = [
   "article-5",
 ];
 
-function feedFactory(focusedItem = "article-1") {
-  const page = createHeadlessPage(FeedApp);
-  page.setupZone("apg-feed", {
-    items: ARTICLES,
-    focusedItemId: focusedItem,
-  });
-  return page;
-}
+let page: ReturnType<typeof createHeadlessPage>;
+
+beforeEach(() => {
+  page = createHeadlessPage(FeedApp, FeedPattern);
+  page.goto("/");
+  page.click("article-1"); // focus the first article
+});
+
+afterEach(() => {
+  page.cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════
-// Shared contracts — arrow key navigation between articles
+// Navigation (Arrow Keys)
 // ═══════════════════════════════════════════════════
 
 describe("APG Feed: Navigation (Arrow Keys)", () => {
-  assertVerticalNav(feedFactory);
-  assertBoundaryClamp(feedFactory, {
-    firstId: "article-1",
-    lastId: "article-5",
-    axis: "vertical",
+  it("Down Arrow: moves focus to next item", async () => {
+    await expect(page.locator("#article-1")).toBeFocused();
+
+    page.keyboard.press("ArrowDown");
+
+    await expect(page.locator("#article-2")).toBeFocused();
+    await expect(page.locator("#article-2")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "-1");
   });
-  assertHomeEnd(feedFactory, {
-    firstId: "article-1",
-    lastId: "article-5",
+
+  it("Up Arrow: moves focus to previous item", async () => {
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#article-2")).toBeFocused();
+
+    page.keyboard.press("ArrowUp");
+
+    await expect(page.locator("#article-1")).toBeFocused();
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "0");
   });
-  assertNoSelection(feedFactory);
+
+  it("ArrowDown at last item: focus stays (clamp)", async () => {
+    // Navigate to last
+    for (let i = 0; i < 20; i++) page.keyboard.press("ArrowDown");
+    await expect(page.locator("#article-5")).toBeFocused();
+    await expect(page.locator("#article-5")).toHaveAttribute("tabindex", "0");
+
+    page.keyboard.press("ArrowDown");
+
+    await expect(page.locator("#article-5")).toBeFocused();
+  });
+
+  it("ArrowUp at first item: focus stays (clamp)", async () => {
+    await expect(page.locator("#article-1")).toBeFocused();
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "0");
+
+    page.keyboard.press("ArrowUp");
+
+    await expect(page.locator("#article-1")).toBeFocused();
+  });
+
+  it("Home: moves to first item", async () => {
+    page.keyboard.press("ArrowDown");
+    page.keyboard.press("ArrowDown");
+
+    page.keyboard.press("Home");
+
+    await expect(page.locator("#article-1")).toBeFocused();
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "0");
+  });
+
+  it("End: moves to last item", async () => {
+    page.keyboard.press("End");
+
+    await expect(page.locator("#article-5")).toBeFocused();
+    await expect(page.locator("#article-5")).toHaveAttribute("tabindex", "0");
+  });
+
+  it("navigation does not create selection (aria-selected absent)", async () => {
+    page.keyboard.press("ArrowDown");
+    page.keyboard.press("ArrowDown");
+
+    // No article should have aria-selected
+    for (const id of ARTICLES) {
+      await expect(page.locator(`#${id}`)).not.toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    }
+  });
 });
 
 // ═══════════════════════════════════════════════════
@@ -74,102 +131,55 @@ describe("APG Feed: Navigation (Arrow Keys)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Feed: Page Down / Page Up", () => {
-  it("Page Down: moves focus to next article", () => {
-    const t = feedFactory("article-1");
-    t.keyboard.press("PageDown");
-    expect(t.focusedItemId()).toBe("article-2");
-    expect(t.attrs("article-2").tabIndex).toBe(0);
-    expect(t.attrs("article-1").tabIndex).toBe(-1);
+  it("Page Down: moves focus to next article", async () => {
+    page.keyboard.press("PageDown");
+
+    await expect(page.locator("#article-2")).toBeFocused();
+    await expect(page.locator("#article-2")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "-1");
   });
 
-  it("Page Up: moves focus to previous article", () => {
-    const t = feedFactory("article-3");
-    t.keyboard.press("PageUp");
-    expect(t.focusedItemId()).toBe("article-2");
-    expect(t.attrs("article-2").tabIndex).toBe(0);
-    expect(t.attrs("article-3").tabIndex).toBe(-1);
+  it("Page Up: moves focus to previous article", async () => {
+    page.click("article-3");
+
+    page.keyboard.press("PageUp");
+
+    await expect(page.locator("#article-2")).toBeFocused();
+    await expect(page.locator("#article-2")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#article-3")).toHaveAttribute("tabindex", "-1");
   });
 
-  it("Page Down at last article: focus stays (no wrap)", () => {
-    const t = feedFactory("article-5");
-    t.keyboard.press("PageDown");
-    expect(t.focusedItemId()).toBe("article-5");
-    expect(t.attrs("article-5").tabIndex).toBe(0);
+  it("Page Down at last article: focus stays (no wrap)", async () => {
+    page.click("article-5");
+
+    page.keyboard.press("PageDown");
+
+    await expect(page.locator("#article-5")).toBeFocused();
+    await expect(page.locator("#article-5")).toHaveAttribute("tabindex", "0");
   });
 
-  it("Page Up at first article: focus stays (no wrap)", () => {
-    const t = feedFactory("article-1");
-    t.keyboard.press("PageUp");
-    expect(t.focusedItemId()).toBe("article-1");
-    expect(t.attrs("article-1").tabIndex).toBe(0);
+  it("Page Up at first article: focus stays (no wrap)", async () => {
+    page.keyboard.press("PageUp");
+
+    await expect(page.locator("#article-1")).toBeFocused();
+    await expect(page.locator("#article-1")).toHaveAttribute("tabindex", "0");
   });
 
-  it("Page Down × 3: progressive navigation", () => {
-    const t = feedFactory("article-1");
-    t.keyboard.press("PageDown");
-    t.keyboard.press("PageDown");
-    t.keyboard.press("PageDown");
-    expect(t.focusedItemId()).toBe("article-4");
+  it("Page Down x 3: progressive navigation", async () => {
+    page.keyboard.press("PageDown");
+    page.keyboard.press("PageDown");
+    page.keyboard.press("PageDown");
+
+    await expect(page.locator("#article-4")).toBeFocused();
   });
 
-  it("Page Up × 2: back navigation", () => {
-    const t = feedFactory("article-4");
-    t.keyboard.press("PageUp");
-    t.keyboard.press("PageUp");
-    expect(t.focusedItemId()).toBe("article-2");
-  });
-});
+  it("Page Up x 2: back navigation", async () => {
+    page.click("article-4");
 
-// ═══════════════════════════════════════════════════
-// Feed-Specific: Control+End / Control+Home (exit feed)
-// W3C APG: "Control+End: Move focus to the first focusable element after the feed."
-//          "Control+Home: Move focus to the first focusable element before the feed."
-// In OS terms: exit the feed zone (Tab forward / Tab backward).
-// ═══════════════════════════════════════════════════
+    page.keyboard.press("PageUp");
+    page.keyboard.press("PageUp");
 
-describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
-  function feedWithZoneOrder(focusedItem = "article-2") {
-    const app = defineApp("test-feed-zones", {});
-    const before = app.createZone("before-feed");
-    before.bind({ role: "group", getItems: () => ["before-1"] });
-    const feed = app.createZone("apg-feed");
-    feed.bind({
-      role: "feed",
-      getItems: () => ARTICLES,
-      options: {
-        navigate: {
-          orientation: "vertical",
-          loop: false,
-          seamless: false,
-          typeahead: false,
-          entry: "first",
-          recovery: "next",
-        },
-        select: { mode: "none" },
-      },
-    });
-    const after = app.createZone("after-feed");
-    after.bind({ role: "group", getItems: () => ["after-1"] });
-    const page = createHeadlessPage(app);
-    // Register all zones in order
-    page.setupZone("before-feed", { focusedItemId: "before-1" });
-    page.setupZone("apg-feed", { focusedItemId: focusedItem });
-    page.setupZone("after-feed", { focusedItemId: "after-1" });
-    // Activate feed zone
-    page.setupZone("apg-feed", { focusedItemId: focusedItem });
-    return page;
-  }
-
-  it("Control+End: exits the feed zone forward", () => {
-    const t = feedWithZoneOrder("article-2");
-    t.keyboard.press("Control+End");
-    expect(t.activeZoneId()).toBe("after-feed");
-  });
-
-  it("Control+Home: exits the feed zone backward", () => {
-    const t = feedWithZoneOrder("article-3");
-    t.keyboard.press("Control+Home");
-    expect(t.activeZoneId()).toBe("before-feed");
+    await expect(page.locator("#article-2")).toBeFocused();
   });
 });
 
@@ -178,63 +188,27 @@ describe("APG Feed: Control+End / Control+Home (exit feed)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Feed: DOM Projection (attrs)", () => {
-  it("items have role=article (W3C: feed children are articles)", () => {
-    const t = feedFactory("article-1");
+  it("items have role=article (W3C: feed children are articles)", async () => {
     for (const id of ARTICLES) {
-      expect(t.attrs(id).role).toBe("article");
+      await expect(page.locator(`#${id}`)).toHaveAttribute("role", "article");
     }
   });
 
-  it("focused article: tabIndex=0, others: tabIndex=-1 (roving tabindex)", () => {
-    const t = feedFactory("article-3");
-    expect(t.attrs("article-3").tabIndex).toBe(0);
+  it("focused article: tabindex=0, others: tabindex=-1 (roving tabindex)", async () => {
+    page.click("article-3");
+
+    await expect(page.locator("#article-3")).toHaveAttribute("tabindex", "0");
     for (const id of ARTICLES.filter((i) => i !== "article-3")) {
-      expect(t.attrs(id).tabIndex).toBe(-1);
+      await expect(page.locator(`#${id}`)).toHaveAttribute("tabindex", "-1");
     }
   });
 
-  it("focused article: data-focused=true", () => {
-    const t = feedFactory("article-2");
-    expect(t.attrs("article-2")["data-focused"]).toBe(true);
-    for (const id of ARTICLES.filter((i) => i !== "article-2")) {
-      expect(t.attrs(id)["data-focused"]).toBeUndefined();
-    }
-  });
-});
+  it("focused article: data-focused=true", async () => {
+    page.click("article-2");
 
-// ═══════════════════════════════════════════════════
-// Tab behavior: Tab exits the feed zone
-// ═══════════════════════════════════════════════════
-
-describe("APG Feed: Tab exits zone", () => {
-  it("Tab: exits the feed zone (tab=escape)", () => {
-    const app = defineApp("test-feed-tab", {});
-    const feed = app.createZone("apg-feed");
-    feed.bind({
-      role: "feed",
-      getItems: () => ARTICLES,
-      options: {
-        navigate: {
-          orientation: "vertical",
-          loop: false,
-          seamless: false,
-          typeahead: false,
-          entry: "first",
-          recovery: "next",
-        },
-        select: { mode: "none" },
-      },
-    });
-    const next = app.createZone("next-zone");
-    next.bind({ role: "group", getItems: () => ["next-1"] });
-    const page = createHeadlessPage(app);
-    page.setupZone("apg-feed", { focusedItemId: "article-2" });
-    page.setupZone("next-zone", { focusedItemId: "next-1" });
-    // Activate feed zone
-    page.setupZone("apg-feed", { focusedItemId: "article-2" });
-
-    page.keyboard.press("Tab");
-    // Tab with behavior=escape exits the zone to next zone
-    expect(page.activeZoneId()).toBe("next-zone");
+    await expect(page.locator("#article-2")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });

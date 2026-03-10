@@ -20,80 +20,63 @@
  *
  * ZIFT: Field(number) — same as Slider, but role=separator + Enter toggle.
  * Config: separator role, value axis with min/max/step, activate for Enter toggle.
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp";
-import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
-import { describe, expect, it } from "vitest";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import {
+  SplitterApp,
+  WindowSplitterPattern,
+} from "@/pages/apg-showcase/patterns/WindowSplitterPattern";
 
 // ─── Test Setup ───
+// Initial value = 50 (from pattern config: value.initial)
+// page.click("main-splitter") focuses the splitter
 
-const SPLITTER_ID = "main-splitter";
+const SPLITTER = "#main-splitter";
 
-const SplitterApp = defineApp("window-splitter-test", {});
-const splitterZone = SplitterApp.createZone("splitter-zone");
-splitterZone.bind({
-  role: "separator",
-  getItems: () => [SPLITTER_ID],
-  options: {
-    value: {
-      mode: "continuous" as const,
-      min: 0,
-      max: 100,
-      step: 1,
-      largeStep: 10,
-    },
-  },
+let page: Page;
+let cleanup: () => void;
+
+beforeEach(() => {
+  ({ page, cleanup } = createPage(SplitterApp, WindowSplitterPattern));
+  page.goto("/");
+  page.click("main-splitter");
 });
 
-function splitterFactory(_initialValue = 50) {
-  const page = createHeadlessPage(SplitterApp) as AppPageInternal<unknown>;
-  page.setupZone("splitter-zone", {
-    role: "separator",
-    items: [SPLITTER_ID],
-    config: {
-      value: {
-        mode: "continuous" as const,
-        min: 0,
-        max: 100,
-        step: 1,
-        largeStep: 10,
-      },
-    },
-  });
-  // Set initial value
-  page.goto("/");
-  return page;
-}
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════════════════════
-// Value Adjustment via Arrow Keys
+// Value Adjustment via Arrow Keys (initial value = 50)
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Window Splitter: Arrow Key Value Changes", () => {
-  it("Right Arrow: increases value by one step", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(51);
+  it("Right Arrow: increases value by one step", async () => {
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "51");
   });
 
-  it("Up Arrow: increases value by one step", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("ArrowUp");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(51);
+  it("Up Arrow: increases value by one step", async () => {
+    page.keyboard.press("ArrowUp");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "51");
   });
 
-  it("Left Arrow: decreases value by one step", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("ArrowLeft");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(49);
+  it("Left Arrow: decreases value by one step", async () => {
+    page.keyboard.press("ArrowLeft");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "49");
   });
 
-  it("Down Arrow: decreases value by one step", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("ArrowDown");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(49);
+  it("Down Arrow: decreases value by one step", async () => {
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "49");
   });
 });
 
@@ -102,16 +85,19 @@ describe("APG Window Splitter: Arrow Key Value Changes", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Window Splitter: Boundary Clamping", () => {
-  it("Right Arrow at max: value stays at max", () => {
-    const t = splitterFactory(100);
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(100);
+  it("Right Arrow at max: value stays at max", async () => {
+    page.keyboard.press("End"); // go to 100
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator(SPLITTER)).toHaveAttribute(
+      "aria-valuenow",
+      "100",
+    );
   });
 
-  it("Left Arrow at min: value stays at min", () => {
-    const t = splitterFactory(0);
-    t.keyboard.press("ArrowLeft");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
+  it("Left Arrow at min: value stays at min", async () => {
+    page.keyboard.press("Home"); // go to 0
+    page.keyboard.press("ArrowLeft");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
   });
 });
 
@@ -120,16 +106,17 @@ describe("APG Window Splitter: Boundary Clamping", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Window Splitter: Home/End", () => {
-  it("Home: sets value to minimum", () => {
-    const t = splitterFactory(75);
-    t.keyboard.press("Home");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
+  it("Home: sets value to minimum", async () => {
+    page.keyboard.press("Home");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
   });
 
-  it("End: sets value to maximum", () => {
-    const t = splitterFactory(25);
-    t.keyboard.press("End");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(100);
+  it("End: sets value to maximum", async () => {
+    page.keyboard.press("End");
+    await expect(page.locator(SPLITTER)).toHaveAttribute(
+      "aria-valuenow",
+      "100",
+    );
   });
 });
 
@@ -138,37 +125,35 @@ describe("APG Window Splitter: Home/End", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Window Splitter: Enter Toggle (Collapse/Restore)", () => {
-  it("Enter on expanded (non-zero): collapses to minimum", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("Enter");
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
+  it("Enter on expanded (non-zero): collapses to minimum", async () => {
+    page.keyboard.press("Enter");
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
   });
 
-  it("Enter on collapsed (at min): restores to previous position", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("Enter"); // collapse: 50 → 0
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
-    t.keyboard.press("Enter"); // restore: 0 → 50
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(50);
+  it("Enter on collapsed (at min): restores to previous position", async () => {
+    page.keyboard.press("Enter"); // collapse: 50 → 0
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
+    page.keyboard.press("Enter"); // restore: 0 → 50
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "50");
   });
 
-  it("Enter collapse/restore preserves exact previous position", () => {
-    const t = splitterFactory(73);
-    t.keyboard.press("Enter"); // collapse: 73 → 0
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
-    t.keyboard.press("Enter"); // restore: 0 → 73
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(73);
+  it("Enter collapse/restore preserves exact previous position", async () => {
+    // Move to 51 (non-round value) to prove exact restoration
+    page.keyboard.press("ArrowRight"); // 50 → 51
+    page.keyboard.press("Enter"); // collapse: 51 → 0
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
+    page.keyboard.press("Enter"); // restore: 0 → 51
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "51");
   });
 
-  it("adjusting value after collapse sets new restore point", () => {
-    const t = splitterFactory(50);
-    t.keyboard.press("Enter"); // collapse: 50 → 0
+  it("adjusting value after collapse sets new restore point", async () => {
+    page.keyboard.press("Enter"); // collapse: 50 → 0
     // Manually set a non-zero value using arrow keys while collapsed
-    t.keyboard.press("ArrowRight"); // 0 → 1 (now non-zero, no longer "collapsed")
-    t.keyboard.press("Enter"); // collapse: 1 → 0
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(0);
-    t.keyboard.press("Enter"); // restore: 0 → 1 (new restore point)
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(1);
+    page.keyboard.press("ArrowRight"); // 0 → 1 (now non-zero, no longer "collapsed")
+    page.keyboard.press("Enter"); // collapse: 1 → 0
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "0");
+    page.keyboard.press("Enter"); // restore: 0 → 1 (new restore point)
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "1");
   });
 });
 
@@ -177,33 +162,33 @@ describe("APG Window Splitter: Enter Toggle (Collapse/Restore)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Window Splitter: DOM Projection (attrs)", () => {
-  it("splitter has role=separator", () => {
-    const t = splitterFactory(50);
-    expect(t.attrs(SPLITTER_ID).role).toBe("separator");
+  it("splitter has role=separator", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute("role", "separator");
   });
 
-  it("splitter has aria-valuenow matching current value", () => {
-    const t = splitterFactory(42);
-    expect(t.attrs(SPLITTER_ID)["aria-valuenow"]).toBe(42);
+  it("splitter has aria-valuenow matching current value", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuenow", "50");
   });
 
-  it("splitter has aria-valuemin=0", () => {
-    const t = splitterFactory(50);
-    expect(t.attrs(SPLITTER_ID)["aria-valuemin"]).toBe(0);
+  it("splitter has aria-valuemin=0", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute("aria-valuemin", "0");
   });
 
-  it("splitter has aria-valuemax=100", () => {
-    const t = splitterFactory(50);
-    expect(t.attrs(SPLITTER_ID)["aria-valuemax"]).toBe(100);
+  it("splitter has aria-valuemax=100", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute(
+      "aria-valuemax",
+      "100",
+    );
   });
 
-  it("focused splitter: tabIndex=0", () => {
-    const t = splitterFactory(50);
-    expect(t.attrs(SPLITTER_ID).tabIndex).toBe(0);
+  it("focused splitter: tabIndex=0", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute("tabindex", "0");
   });
 
-  it("focused splitter: data-focused=true", () => {
-    const t = splitterFactory(50);
-    expect(t.attrs(SPLITTER_ID)["data-focused"]).toBe(true);
+  it("focused splitter: data-focused=true", async () => {
+    await expect(page.locator(SPLITTER)).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });
