@@ -8,7 +8,7 @@
 | Size | Heavy |
 | Risk | 27개 role별 config 타입 정의 비용. 기존 bind() 호출처 71건 마이그레이션. defineRole schema 설계가 ARIA 순수성과 OS 고유 관심사를 분리해야 함 |
 
-## Tasks (Phase 1: bind 시그니처 + role별 타입)
+## Tasks (Phase 1: bind 시그니처 + role별 타입) — ✅ COMPLETE
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|

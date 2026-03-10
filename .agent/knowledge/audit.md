@@ -16,7 +16,7 @@
 |------|--------|-----------|
 | 상태 관리 | `BuilderApp.useComputed()`, `os.getState()` | `useState` |
 | 커맨드 dispatch | `os.dispatch(command())` | 직접 state mutate |
-| 목록 포커스/네비게이션 | Zone `bind({ role: "tree"/"grid" })` | `onKeyDown` arrow key |
+| 목록 포커스/네비게이션 | Zone `bind("tree", config)` / `bind("grid", config)` | `onKeyDown` arrow key |
 | 아이템 선택 | Zone `onAction`, `onActivate` | `onClick` 직접 state 변경 |
 | 필드 편집 | `Field.Editable`, `OS_FIELD_COMMIT` | `<input onChange>` |
 | Undo/Redo | `createUndoRedoCommands` | 별도 history stack |
