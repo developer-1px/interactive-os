@@ -1,24 +1,28 @@
 /**
- * Navigation Tree (Finder-like) — Contract Test
+ * Navigation Tree (Finder-like) — Contract Test (Playwright 동형)
  *
- * Config: activate.onClick: true, select.followFocus: true
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
+ *
+ * Config: select.followFocus: true, select.mode: "single"
  *
  * Navigation Tree differs from Application Tree:
- *   - Click on folder → OS_ACTIVATE → OS_EXPAND (toggle)
- *   - Click on file → OS_ACTIVATE → onAction (navigate)
- *   - Arrow to file → followFocus selects → onSelect fires
- *   - Arrow to folder → followFocus selects → onSelect fires (app decides to skip)
- *   - Enter on folder → OS_ACTIVATE → OS_EXPAND
- *   - Enter on file → OS_ACTIVATE → onAction
- *
- * Uses defineApp+createPage for full pipeline testing.
+ *   - Click on folder → focuses AND expands (via inputmap click: [OS_EXPAND()])
+ *   - Arrow keys with followFocus → auto-selects
+ *   - ArrowRight on collapsed → expands
+ *   - ArrowLeft on expanded → collapses
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
-// ─── Configs ───
+const expect = osExpect;
+
+// ─── Test Data ───
 
 const NAV_ITEMS = [
   "folder:docs",
@@ -27,43 +31,52 @@ const NAV_ITEMS = [
   "folder:src",
   "file:index",
 ];
+const EXPANDABLE = new Set(["folder:docs", "folder:src"]);
+const TREE_LEVELS = new Map([
+  ["folder:docs", 1],
+  ["file:readme", 2],
+  ["file:guide", 2],
+  ["folder:src", 1],
+  ["file:index", 2],
+]);
 
-function navTreeFactory(focusedItem = "folder:docs") {
+// ─── Factory ───
+
+function createNavTreeApp() {
   const app = defineApp("test-navtree", {});
   const zone = app.createZone("nav-tree");
   zone.bind({
     role: "tree",
     getItems: () => NAV_ITEMS,
-    getExpandableItems: () => new Set(["folder:docs", "folder:src"]),
-    getTreeLevels: () =>
-      new Map([
-        ["folder:docs", 1],
-        ["file:readme", 2],
-        ["file:guide", 2],
-        ["folder:src", 1],
-        ["file:index", 2],
-      ]),
+    getExpandableItems: () => EXPANDABLE,
+    getTreeLevels: () => TREE_LEVELS,
     options: {
-      navigate: {
-        orientation: "vertical",
-        loop: false,
-        seamless: false,
-        typeahead: false,
-        entry: "first",
-        recovery: "next",
-      },
       select: {
-        mode: "single",
+        mode: "single" as const,
         followFocus: true,
-        disallowEmpty: false,
-        range: false,
         toggle: false,
       },
     },
   });
-  const page = createHeadlessPage(app);
-  page.setupZone("nav-tree", { focusedItemId: focusedItem });
-  return page;
+  return app;
+}
+
+/** Focus a non-expandable item (no click side effects) */
+function createNavTree(focusedItem = "file:readme"): { page: Page; cleanup: () => void } {
+  const app = createNavTreeApp();
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
+  page.click(focusedItem);
+  return { page, cleanup };
+}
+
+/** Focus an expandable item (click also expands it) */
+function createNavTreeExpanded(folderId = "folder:docs"): { page: Page; cleanup: () => void } {
+  const app = createNavTreeApp();
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
+  page.click(folderId); // click on expandable → focuses AND expands
+  return { page, cleanup };
 }
 
 // ═══════════════════════════════════════════════════
@@ -71,33 +84,35 @@ function navTreeFactory(focusedItem = "folder:docs") {
 // ═══════════════════════════════════════════════════
 
 describe("Navigation Tree: followFocus", () => {
-  it("ArrowDown moves focus AND selects the next item", () => {
-    const t = navTreeFactory("folder:docs");
+  it("ArrowDown moves focus AND selects the next item", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    page.keyboard.press("ArrowDown");
 
-    t.keyboard.press("ArrowDown");
-
-    expect(t.focusedItemId()).toBe("file:readme");
-    expect(t.selection()).toContain("file:readme");
+    await expect(page.locator("#file:guide")).toBeFocused();
+    await expect(page.locator("#file:guide")).toHaveAttribute("aria-selected", "true");
+    cleanup();
   });
 
-  it("ArrowUp moves focus AND selects the previous item", () => {
-    const t = navTreeFactory("file:guide");
+  it("ArrowUp moves focus AND selects the previous item", async () => {
+    const { page, cleanup } = createNavTree("file:guide");
+    page.keyboard.press("ArrowUp");
 
-    t.keyboard.press("ArrowUp");
-
-    expect(t.focusedItemId()).toBe("file:readme");
-    expect(t.selection()).toContain("file:readme");
+    await expect(page.locator("#file:readme")).toBeFocused();
+    await expect(page.locator("#file:readme")).toHaveAttribute("aria-selected", "true");
+    cleanup();
   });
 
-  it("multiple ArrowDown: selection follows focus (single-select)", () => {
-    const t = navTreeFactory("folder:docs");
+  it("multiple ArrowDown: selection follows focus (single-select)", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#file:guide")).toHaveAttribute("aria-selected", "true");
 
-    t.keyboard.press("ArrowDown");
-    expect(t.selection()).toEqual(["file:readme"]);
-
-    t.keyboard.press("ArrowDown");
-    expect(t.selection()).toEqual(["file:guide"]);
-    expect(t.focusedItemId()).toBe("file:guide");
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#folder:src")).toBeFocused();
+    await expect(page.locator("#folder:src")).toHaveAttribute("aria-selected", "true");
+    // Previous item deselected (single-select)
+    await expect(page.locator("#file:guide")).toHaveAttribute("aria-selected", "false");
+    cleanup();
   });
 });
 
@@ -106,38 +121,45 @@ describe("Navigation Tree: followFocus", () => {
 // ═══════════════════════════════════════════════════
 
 describe("Navigation Tree: Expansion", () => {
-  it("ArrowRight on collapsed folder → expands", () => {
-    const t = navTreeFactory("folder:docs");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
+  it("ArrowRight on collapsed folder → expands", async () => {
+    // Start expanded (click), collapse, then expand with ArrowRight
+    const { page, cleanup } = createNavTreeExpanded("folder:docs");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
+    page.keyboard.press("ArrowLeft"); // collapse
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "false");
+
+    page.keyboard.press("ArrowRight"); // expand
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
+    cleanup();
   });
 
-  it("ArrowLeft on expanded folder → collapses", () => {
-    const t = navTreeFactory("folder:docs");
-    t.keyboard.press("ArrowRight"); // expand
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
+  it("ArrowLeft on expanded folder → collapses", async () => {
+    const { page, cleanup } = createNavTreeExpanded("folder:docs");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("ArrowLeft"); // collapse
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
+    page.keyboard.press("ArrowLeft");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "false");
+    cleanup();
   });
 
-  it("Enter on folder → toggles expansion (not navigation)", () => {
-    const t = navTreeFactory("folder:docs");
+  it("Enter on folder → toggles expansion", async () => {
+    const { page, cleanup } = createNavTreeExpanded("folder:docs");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("Enter");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
+    page.keyboard.press("Enter"); // collapse
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "false");
 
-    t.keyboard.press("Enter");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
+    page.keyboard.press("Enter"); // expand
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
+    cleanup();
   });
 
-  it("ArrowRight on file → does NOT expand", () => {
-    const t = navTreeFactory("file:readme");
-
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs("file:readme")["aria-expanded"]).toBeUndefined();
+  it("ArrowRight on file → does NOT expand", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator("#file:readme")).not.toHaveAttribute("aria-expanded");
+    cleanup();
   });
 });
 
@@ -146,39 +168,35 @@ describe("Navigation Tree: Expansion", () => {
 // ═══════════════════════════════════════════════════
 
 describe("Navigation Tree: Activation", () => {
-  it("Enter on file → does NOT expand (no expandedItems change)", () => {
-    const t = navTreeFactory("file:readme");
-
-    t.keyboard.press("Enter");
-
-    expect(t.attrs("file:readme")["aria-expanded"]).toBeUndefined();
+  it("Enter on file → does NOT expand", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    page.keyboard.press("Enter");
+    await expect(page.locator("#file:readme")).not.toHaveAttribute("aria-expanded");
+    cleanup();
   });
 });
 
 // ═══════════════════════════════════════════════════
-// aria-expanded: only folders get it
+// DOM Projection
 // ═══════════════════════════════════════════════════
 
 describe("Navigation Tree: DOM Projection", () => {
-  it("folder has aria-expanded=false when collapsed", () => {
-    const t = navTreeFactory("folder:docs");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(false);
+  it("folder has aria-expanded after click (expanded)", async () => {
+    const { page, cleanup } = createNavTreeExpanded("folder:docs");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("aria-expanded", "true");
+    cleanup();
   });
 
-  it("folder has aria-expanded=true when expanded", () => {
-    const t = navTreeFactory("folder:docs");
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs("folder:docs")["aria-expanded"]).toBe(true);
+  it("file does NOT have aria-expanded", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    await expect(page.locator("#file:readme")).not.toHaveAttribute("aria-expanded");
+    cleanup();
   });
 
-  it("file does NOT have aria-expanded", () => {
-    const t = navTreeFactory("file:readme");
-    expect(t.attrs("file:readme")["aria-expanded"]).toBeUndefined();
-  });
-
-  it("focused item has tabIndex=0, others -1", () => {
-    const t = navTreeFactory("folder:docs");
-    expect(t.attrs("folder:docs").tabIndex).toBe(0);
-    expect(t.attrs("file:readme").tabIndex).toBe(-1);
+  it("focused item has tabIndex=0, others -1", async () => {
+    const { page, cleanup } = createNavTree("file:readme");
+    await expect(page.locator("#file:readme")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#folder:docs")).toHaveAttribute("tabindex", "-1");
+    cleanup();
   });
 });

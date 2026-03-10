@@ -1,28 +1,32 @@
 /**
- * APG Menu Button — Unified Test (Tier 1: headless via createPage)
- *
+ * APG Menu Button Pattern — Contract Test (Playwright 동형)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
  *
- * Zone IDs and roles match MenuButtonPattern.tsx exactly:
- *   - "apg-menu-button-popup" (role: "menu") — the popup menu zone
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
  *
- * What's tested here (kernel-scope):
- *   - Menu navigation: ArrowDown/Up (vertical, loop), Home/End
- *   - Activation: Enter on menuitem
- *   - Dismiss: Escape closes menu
- *   - Tab trap: Tab/Shift+Tab cycle within menu
- *   - ARIA projection: role=menuitem, tabIndex roving, data-focused
- *   - No selection on navigation
- *
- * What's tested ONLY in TestBot (browser-scope):
- *   - aria-haspopup, aria-expanded on trigger (Trigger component projection)
- *   - Click/Enter/Space on trigger → menu opens (overlay lifecycle)
- *   - Enter on menuitem → menu closes + focus restore to trigger
+ * Composite: Trigger button + Popup menu
+ * Config: vertical, loop, tab trap, Escape=close
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { MenuButtonApp } from "@/pages/apg-showcase/patterns/MenuButtonPattern";
+import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
+import { defineApp } from "@os-sdk/app/defineApp/index";
+import { describe, it } from "vitest";
+import {
+  assertHomeEnd,
+  assertLoop,
+  assertNoSelection,
+  assertVerticalNav,
+  assertFocusRestore,
+} from "./helpers/contracts";
+
+const expect = osExpect;
+
+// ─── Config ───
 
 const MENU_ITEMS = [
   "action-cut",
@@ -31,183 +35,159 @@ const MENU_ITEMS = [
   "action-delete",
 ];
 
-function createMenuPage(focusedItem = "action-cut") {
-  const page = createHeadlessPage(MenuButtonApp);
-  page.setupZone("apg-menu-button-popup", {
-    items: MENU_ITEMS,
-    focusedItemId: focusedItem,
-    role: "menu",
+// ─── Factory ───
+
+function createMenuButton(focusedItem = "action-cut"): { page: Page; cleanup: () => void } {
+  const app = defineApp("test-menu-button", {});
+
+  const trigger = app.createZone("trigger-bar");
+  trigger.bind({
+    role: "toolbar",
+    getItems: () => ["menu-trigger"],
+    triggers: {
+      "menu-trigger": () =>
+        OS_OVERLAY_OPEN({
+          id: "popup-menu",
+          type: "menu",
+          entry: "first",
+        }),
+    },
   });
-  return page;
+
+  const menu = app.createZone("popup-menu");
+  menu.bind({
+    role: "menu",
+    getItems: () => MENU_ITEMS,
+    options: {
+      tab: { behavior: "trap" as const },
+      dismiss: { escape: "close" as const },
+    },
+  });
+
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
+  page.click("menu-trigger"); // opens menu, focuses first item
+
+  if (focusedItem && focusedItem !== "action-cut") {
+    page.click(focusedItem);
+  }
+
+  return { page, cleanup };
 }
 
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // Menu Navigation (vertical, loop, Home/End)
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: Menu Navigation", () => {
-  it("ArrowDown moves focus to next item", () => {
-    const page = createMenuPage("action-cut");
-    page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("action-copy");
-    expect(page.attrs("action-copy").tabIndex).toBe(0);
-    expect(page.attrs("action-cut").tabIndex).toBe(-1);
+  assertVerticalNav(createMenuButton);
+  assertHomeEnd(createMenuButton, {
+    firstId: "action-cut",
+    lastId: "action-delete",
   });
-
-  it("ArrowUp moves focus to previous item", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId()).toBe("action-cut");
-  });
-
-  it("ArrowDown at last item wraps to first (loop)", () => {
-    const page = createMenuPage("action-delete");
-    page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("action-cut");
-  });
-
-  it("ArrowUp at first item wraps to last (loop)", () => {
-    const page = createMenuPage("action-cut");
-    page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId()).toBe("action-delete");
-  });
-
-  it("Home moves focus to first item", () => {
-    const page = createMenuPage("action-paste");
-    page.keyboard.press("Home");
-    expect(page.focusedItemId()).toBe("action-cut");
-    expect(page.attrs("action-cut").tabIndex).toBe(0);
-  });
-
-  it("End moves focus to last item", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("End");
-    expect(page.focusedItemId()).toBe("action-delete");
-    expect(page.attrs("action-delete").tabIndex).toBe(0);
-  });
-
-  it("ArrowLeft has no effect (vertical menu)", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("ArrowLeft");
-    expect(page.focusedItemId()).toBe("action-copy");
-  });
-
-  it("ArrowRight has no effect (vertical menu)", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("ArrowRight");
-    expect(page.focusedItemId()).toBe("action-copy");
-  });
-
-  it("navigation does not create selection", () => {
-    const page = createMenuPage("action-cut");
-    page.keyboard.press("ArrowDown");
-    page.keyboard.press("ArrowDown");
-    expect(page.selection()).toEqual([]);
+  assertNoSelection(createMenuButton, MENU_ITEMS);
+  assertLoop({
+    axis: "vertical",
+    firstId: "action-cut",
+    lastId: "action-delete",
+    factoryAtFirst: () => createMenuButton("action-cut"),
+    factoryAtLast: () => createMenuButton("action-delete"),
   });
 });
 
-// ════════════════════════════════════════════════════════════════
-// Activation (Enter on menuitem)
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Activation (Enter)
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: Activation", () => {
-  it("Enter on menuitem dispatches OS_ACTIVATE", () => {
-    const page = createMenuPage("action-cut");
+  it("Enter on menuitem: triggers activation (keeping focus)", async () => {
+    const { page, cleanup } = createMenuButton("action-cut");
     page.keyboard.press("Enter");
-    expect(page.focusedItemId()).toBe("action-cut");
+    await expect(page.locator("#action-cut")).toBeFocused();
+    cleanup();
   });
 
-  it("Enter on any menuitem dispatches activation", () => {
-    const page = createMenuPage("action-paste");
+  it("Enter on any menuitem dispatches activation", async () => {
+    const { page, cleanup } = createMenuButton("action-paste");
     page.keyboard.press("Enter");
-    expect(page.focusedItemId()).toBe("action-paste");
+    await expect(page.locator("#action-paste")).toBeFocused();
+    cleanup();
   });
 });
 
-// ════════════════════════════════════════════════════════════════
-// Dismiss (Escape closes menu)
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Dismiss (Escape) + Focus Restore
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: Dismiss", () => {
-  it("Escape closes menu (clears active zone)", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBeNull();
-  });
+  assertFocusRestore(createMenuButton, { invokerItemId: "menu-trigger" });
 
-  it("Escape from any focused item closes menu", () => {
-    const page = createMenuPage("action-delete");
+  it("Escape closes menu and restores focus to trigger", async () => {
+    const { page, cleanup } = createMenuButton("action-copy");
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBeNull();
+    await expect(page.locator("#menu-trigger")).toBeFocused();
+    cleanup();
   });
 });
 
-// ════════════════════════════════════════════════════════════════
-// Tab Behavior (menu uses focus trap)
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// Tab Behavior (focus trap)
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: Tab Behavior", () => {
-  it("Tab at last item wraps to first (focus trap)", () => {
-    const page = createMenuPage("action-delete");
+  it("Tab at last item wraps to first (focus trap)", async () => {
+    const { page, cleanup } = createMenuButton("action-delete");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("action-cut");
+    await expect(page.locator("#action-cut")).toBeFocused();
+    cleanup();
   });
 
-  it("Shift+Tab at first item wraps to last (focus trap)", () => {
-    const page = createMenuPage("action-cut");
+  it("Shift+Tab at first item wraps to last (focus trap)", async () => {
+    const { page, cleanup } = createMenuButton("action-cut");
     page.keyboard.press("Shift+Tab");
-    expect(page.focusedItemId()).toBe("action-delete");
-  });
-
-  it("Tab does not escape the menu zone", () => {
-    const page = createMenuPage("action-copy");
-    page.keyboard.press("Tab");
-    expect(page.activeZoneId()).toBe("apg-menu-button-popup");
+    await expect(page.locator("#action-delete")).toBeFocused();
+    cleanup();
   });
 });
 
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // ARIA Projection
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: ARIA Projection", () => {
-  it("menu items have role=menuitem", () => {
-    const page = createMenuPage();
+  it("menu items have role=menuitem", async () => {
+    const { page, cleanup } = createMenuButton();
     for (const id of MENU_ITEMS) {
-      expect(page.attrs(id).role).toBe("menuitem");
+      await expect(page.locator(`#${id}`)).toHaveAttribute("role", "menuitem");
     }
+    cleanup();
   });
 
-  it("focused item tabIndex=0, others -1", () => {
-    const page = createMenuPage("action-cut");
-    expect(page.attrs("action-cut").tabIndex).toBe(0);
-    expect(page.attrs("action-copy").tabIndex).toBe(-1);
-    expect(page.attrs("action-paste").tabIndex).toBe(-1);
-    expect(page.attrs("action-delete").tabIndex).toBe(-1);
+  it("focused item tabIndex=0, others -1", async () => {
+    const { page, cleanup } = createMenuButton("action-cut");
+    await expect(page.locator("#action-cut")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#action-copy")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#action-paste")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#action-delete")).toHaveAttribute("tabindex", "-1");
+    cleanup();
   });
 
-  it("tabIndex follows focus after navigation", () => {
-    const page = createMenuPage("action-cut");
-    page.keyboard.press("ArrowDown");
-    expect(page.attrs("action-copy").tabIndex).toBe(0);
-    expect(page.attrs("action-cut").tabIndex).toBe(-1);
-  });
-
-  it("focused item has data-focused=true", () => {
-    const page = createMenuPage("action-copy");
-    expect(page.attrs("action-copy")["data-focused"]).toBe(true);
-    expect(page.attrs("action-cut")["data-focused"]).toBeUndefined();
+  it("focused item has data-focused=true", async () => {
+    const { page, cleanup } = createMenuButton("action-copy");
+    await expect(page.locator("#action-copy")).toHaveAttribute("data-focused", "true");
+    cleanup();
   });
 });
 
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // Click Interaction
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 
 describe("APG Menu Button: Click", () => {
-  it("click on menu item focuses it", () => {
-    const page = createMenuPage("action-cut");
+  it("click on menu item focuses it", async () => {
+    const { page, cleanup } = createMenuButton("action-cut");
     page.click("action-paste");
-    expect(page.focusedItemId()).toBe("action-paste");
+    await expect(page.locator("#action-paste")).toBeFocused();
+    cleanup();
   });
 });

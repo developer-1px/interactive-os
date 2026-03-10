@@ -1,26 +1,34 @@
 /**
- * Dropdown-as-Menu headless test
+ * Dropdown-as-Menu — Contract Test (Playwright 동형)
+ *
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
  *
  * Verifies that OS menu role provides all behaviors needed for a dropdown:
  *   1. Arrow navigation (vertical, loop)
- *   2. Enter activates item (automatic mode)
+ *   2. Enter activates item
  *   3. Escape closes + focus restore to trigger
  *   4. AutoFocus on first item when opened
  *   5. Tab trap
- *
- * NO dispatch(), NO setupZone(), NO @os-core imports (except OS_OVERLAY_OPEN for trigger payload).
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 
-// ── Simulate the LocaleSwitcher dropdown as a menu ──
+const expect = osExpect;
+
+// ─── Config ───
 
 const LOCALE_ITEMS = ["ko", "en", "ja", "zh"];
 
-function openDropdown() {
+// ─── Factory ───
+
+function openDropdown(): { page: Page; cleanup: () => void } {
   const app = defineApp("test-dropdown", {});
 
   const toolbar = app.createZone("toolbar");
@@ -47,70 +55,93 @@ function openDropdown() {
     },
   });
 
-  const page = createHeadlessPage(app);
+  const { page, cleanup } = createPage(app);
   page.goto("/");
   page.click("LocaleTrigger");
-  return page;
+  return { page, cleanup };
 }
 
-describe("Dropdown-as-Menu: headless proof", () => {
-  // ── AutoFocus ──
+// ═══════════════════════════════════════════════════
+// AutoFocus
+// ═══════════════════════════════════════════════════
 
-  it("menu opens with focus on first item (entry: first)", () => {
-    const page = openDropdown();
-    expect(page.activeZoneId()).toBe("locale-menu");
-    expect(page.focusedItemId("locale-menu")).toBe("ko");
+describe("Dropdown-as-Menu: AutoFocus", () => {
+  it("menu opens with focus on first item (entry: first)", async () => {
+    const { page, cleanup } = openDropdown();
+    await expect(page.locator("#ko")).toBeFocused();
+    cleanup();
   });
+});
 
-  // ── Navigation ──
+// ═══════════════════════════════════════════════════
+// Navigation (vertical, loop)
+// ═══════════════════════════════════════════════════
 
-  it("Arrow Down moves to next locale", () => {
-    const page = openDropdown();
+describe("Dropdown-as-Menu: Navigation", () => {
+  it("Arrow Down moves to next locale", async () => {
+    const { page, cleanup } = openDropdown();
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId("locale-menu")).toBe("en");
+    await expect(page.locator("#en")).toBeFocused();
+    cleanup();
   });
 
-  it("Arrow Up from first item loops to last (loop: true)", () => {
-    const page = openDropdown();
+  it("Arrow Up from first item loops to last (loop: true)", async () => {
+    const { page, cleanup } = openDropdown();
     page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId("locale-menu")).toBe("zh");
+    await expect(page.locator("#zh")).toBeFocused();
+    cleanup();
   });
 
-  it("Arrow Down from last item loops to first", () => {
-    const page = openDropdown();
-    // Navigate to last
-    page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId("locale-menu")).toBe("zh");
-    page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId("locale-menu")).toBe("ko");
+  it("Arrow Down from last item loops to first", async () => {
+    const { page, cleanup } = openDropdown();
+    page.keyboard.press("ArrowUp"); // go to last
+    await expect(page.locator("#zh")).toBeFocused();
+    page.keyboard.press("ArrowDown"); // loop to first
+    await expect(page.locator("#ko")).toBeFocused();
+    cleanup();
   });
+});
 
-  // ── Activation (Enter) ──
+// ═══════════════════════════════════════════════════
+// Activation (Enter)
+// ═══════════════════════════════════════════════════
 
-  it("Enter on focused item triggers activation (automatic mode)", () => {
-    const page = openDropdown();
+describe("Dropdown-as-Menu: Activation", () => {
+  it("Enter on focused item triggers activation", async () => {
+    const { page, cleanup } = openDropdown();
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId("locale-menu")).toBe("en");
+    await expect(page.locator("#en")).toBeFocused();
     page.keyboard.press("Enter");
-    expect(page.focusedItemId("locale-menu")).toBe("en");
+    await expect(page.locator("#en")).toBeFocused();
+    cleanup();
   });
+});
 
-  // ── Dismiss (Escape) + Focus Restore ──
+// ═══════════════════════════════════════════════════
+// Dismiss (Escape) + Focus Restore
+// ═══════════════════════════════════════════════════
 
-  it("Escape closes the dropdown and restores focus to trigger", () => {
-    const page = openDropdown();
-    expect(page.activeZoneId()).toBe("locale-menu");
+describe("Dropdown-as-Menu: Dismiss", () => {
+  it("Escape closes the dropdown and restores focus to trigger", async () => {
+    const { page, cleanup } = openDropdown();
+    await expect(page.locator("#ko")).toBeFocused();
 
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("LocaleTrigger");
+    await expect(page.locator("#LocaleTrigger")).toBeFocused();
+    cleanup();
   });
+});
 
-  // ── Tab trap ──
+// ═══════════════════════════════════════════════════
+// Tab trap
+// ═══════════════════════════════════════════════════
 
-  it("Tab does not escape the menu (tab: trap)", () => {
-    const page = openDropdown();
+describe("Dropdown-as-Menu: Tab trap", () => {
+  it("Tab does not escape the menu (tab: trap)", async () => {
+    const { page, cleanup } = openDropdown();
     page.keyboard.press("Tab");
-    expect(page.activeZoneId()).toBe("locale-menu");
+    // Tab trap wraps focus within menu — focus still on a menu item
+    await expect(page.locator("#en")).toBeFocused();
+    cleanup();
   });
 });
