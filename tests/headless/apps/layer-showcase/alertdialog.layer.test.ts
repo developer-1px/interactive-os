@@ -15,7 +15,13 @@
  *   4. Confirm click closes alertdialog and restores focus
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { AlertDialogShowcaseApp } from "@/pages/layer-showcase/patterns/AlertDialogPattern";
 
@@ -23,55 +29,55 @@ const DIALOG_ZONE_ID = "layer-alertdialog";
 const TRIGGER_ID = "OpenAlertDialog";
 const ALERTDIALOG_ITEMS = ["alert-cancel", "alert-confirm"];
 
-function createPage() {
-  const page = createHeadlessPage(AlertDialogShowcaseApp);
+function setup() {
+  const { page } = createPage(AlertDialogShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer AlertDialog: Trigger → Open", () => {
   it("click trigger opens alertdialog and focuses first item", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
-    expect(page.focusedItemId()).toBe(ALERTDIALOG_ITEMS[0]);
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe(ALERTDIALOG_ITEMS[0]);
   });
 });
 
 describe("Layer AlertDialog: Focus Trap", () => {
   it("Tab cycles within alertdialog items", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
-    expect(page.focusedItemId()).toBe("alert-cancel");
+    expect(readFocusedItemId(os)).toBe("alert-cancel");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("alert-confirm");
+    expect(readFocusedItemId(os)).toBe("alert-confirm");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("alert-cancel"); // wraps
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe("alert-cancel"); // wraps
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
   });
 });
 
 describe("Layer AlertDialog: Escape Blocked", () => {
   it("Escape does NOT close alertdialog", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
 
     page.keyboard.press("Escape");
 
     // alertdialog must remain open — Escape is blocked per W3C APG spec
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
-    expect(page.focusedItemId()).toBe(ALERTDIALOG_ITEMS[0]);
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe(ALERTDIALOG_ITEMS[0]);
   });
 });
 
 describe("Layer AlertDialog: ARIA Projection", () => {
   it("focused item has tabIndex=0, others -1", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
-    expect(page.attrs("alert-cancel").tabIndex).toBe(0);
-    expect(page.attrs("alert-confirm").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "alert-cancel").tabIndex).toBe(0);
+    expect(computeAttrs(os, "alert-confirm").tabIndex).toBe(-1);
   });
 });

@@ -16,7 +16,13 @@
  *   5. Dialog items get correct ARIA attrs (tabIndex roving)
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { DialogShowcaseApp } from "@/pages/layer-showcase/patterns/DialogPattern";
 
@@ -30,83 +36,83 @@ const DIALOG_ITEMS = [
   "dialog-save",
 ];
 
-function createPage() {
-  const page = createHeadlessPage(DialogShowcaseApp);
+function setup() {
+  const { page } = createPage(DialogShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer Dialog: Trigger → Open", () => {
   it("click trigger opens dialog and focuses first item", () => {
-    const page = createPage();
+    const page = setup();
     // goto registers zones but doesn't auto-activate (Playwright isomorphic)
-    expect(page.activeZoneId()).toBeNull();
+    expect(readActiveZoneId(os)).toBeNull();
 
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
-    expect(page.focusedItemId()).toBe(DIALOG_ITEMS[0]);
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe(DIALOG_ITEMS[0]);
   });
 });
 
 describe("Layer Dialog: Focus Trap", () => {
   it("Tab cycles forward through dialog items", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
-    expect(page.focusedItemId()).toBe("dialog-close");
+    expect(readFocusedItemId(os)).toBe("dialog-close");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("dialog-name");
+    expect(readFocusedItemId(os)).toBe("dialog-name");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("dialog-email");
+    expect(readFocusedItemId(os)).toBe("dialog-email");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("dialog-save");
+    expect(readFocusedItemId(os)).toBe("dialog-save");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("dialog-close"); // wraps
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID); // still trapped
+    expect(readFocusedItemId(os)).toBe("dialog-close"); // wraps
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID); // still trapped
   });
 
   it("Shift+Tab cycles backward through dialog items", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
-    expect(page.focusedItemId()).toBe("dialog-close");
+    expect(readFocusedItemId(os)).toBe("dialog-close");
     page.keyboard.press("Shift+Tab");
-    expect(page.focusedItemId()).toBe("dialog-save"); // wraps backward
+    expect(readFocusedItemId(os)).toBe("dialog-save"); // wraps backward
     page.keyboard.press("Shift+Tab");
-    expect(page.focusedItemId()).toBe("dialog-email");
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe("dialog-email");
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
   });
 });
 
 describe("Layer Dialog: Escape Dismiss", () => {
   it("Escape closes dialog and restores focus to trigger", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(DIALOG_ZONE_ID);
+    expect(readActiveZoneId(os)).toBe(DIALOG_ZONE_ID);
 
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe(TRIGGER_ZONE_ID);
-    expect(page.focusedItemId(TRIGGER_ZONE_ID)).toBe(TRIGGER_ID);
+    expect(readActiveZoneId(os)).toBe(TRIGGER_ZONE_ID);
+    expect(readFocusedItemId(os, TRIGGER_ZONE_ID)).toBe(TRIGGER_ID);
   });
 });
 
 describe("Layer Dialog: ARIA Projection", () => {
   it("focused dialog item has tabIndex=0, others -1", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
-    expect(page.attrs("dialog-close").tabIndex).toBe(0);
-    expect(page.attrs("dialog-name").tabIndex).toBe(-1);
-    expect(page.attrs("dialog-email").tabIndex).toBe(-1);
-    expect(page.attrs("dialog-save").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "dialog-close").tabIndex).toBe(0);
+    expect(computeAttrs(os, "dialog-name").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "dialog-email").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "dialog-save").tabIndex).toBe(-1);
   });
 
   it("tabIndex follows focus after Tab", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
 
     page.keyboard.press("Tab");
-    expect(page.attrs("dialog-name").tabIndex).toBe(0);
-    expect(page.attrs("dialog-close").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "dialog-name").tabIndex).toBe(0);
+    expect(computeAttrs(os, "dialog-close").tabIndex).toBe(-1);
   });
 });

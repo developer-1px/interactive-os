@@ -10,54 +10,60 @@
  *   4. ARIA: tabIndex roving
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { PopoverShowcaseApp } from "@/pages/layer-showcase/patterns/PopoverPattern";
 
 const POPOVER_ZONE_ID = "layer-popover";
 const TRIGGER_ID = "OpenPopoverBtn";
 
-function createPage() {
-  const page = createHeadlessPage(PopoverShowcaseApp);
+function setup() {
+  const { page } = createPage(PopoverShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer Popover: Trigger → Open", () => {
   it("click trigger opens popover and focuses first item", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(POPOVER_ZONE_ID);
-    expect(page.focusedItemId()).toBe("popover-item-1");
+    expect(readActiveZoneId(os)).toBe(POPOVER_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe("popover-item-1");
   });
 });
 
 describe("Layer Popover: Navigation", () => {
   it("ArrowDown navigates within popover", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("popover-item-2");
+    expect(readFocusedItemId(os)).toBe("popover-item-2");
   });
 });
 
 describe("Layer Popover: Escape Dismiss", () => {
   it("Escape closes popover and restores focus to trigger", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(POPOVER_ZONE_ID);
+    expect(readActiveZoneId(os)).toBe(POPOVER_ZONE_ID);
 
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("popover-trigger-zone");
-    expect(page.focusedItemId("popover-trigger-zone")).toBe(TRIGGER_ID);
+    expect(readActiveZoneId(os)).toBe("popover-trigger-zone");
+    expect(readFocusedItemId(os, "popover-trigger-zone")).toBe(TRIGGER_ID);
   });
 });
 
 describe("Layer Popover: ARIA Projection", () => {
   it("focused item tabIndex=0, others -1", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.attrs("popover-item-1").tabIndex).toBe(0);
-    expect(page.attrs("popover-item-2").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "popover-item-1").tabIndex).toBe(0);
+    expect(computeAttrs(os, "popover-item-2").tabIndex).toBe(-1);
   });
 });

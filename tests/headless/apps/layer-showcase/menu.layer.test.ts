@@ -11,7 +11,13 @@
  *   5. ARIA: focused item tabIndex=0, others -1
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { MenuShowcaseApp } from "@/pages/layer-showcase/patterns/MenuPattern";
 
@@ -19,93 +25,93 @@ const MENU_ZONE_ID = "layer-menu";
 const TRIGGER_ID = "OpenMenuBtn";
 const MENU_ITEMS = ["menu-cut", "menu-copy", "menu-paste", "menu-delete"];
 
-function createPage() {
-  const page = createHeadlessPage(MenuShowcaseApp);
+function setup() {
+  const { page } = createPage(MenuShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer Menu: Trigger → Open", () => {
   it("click trigger opens menu and focuses first item", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(MENU_ZONE_ID);
-    expect(page.focusedItemId()).toBe(MENU_ITEMS[0]);
+    expect(readActiveZoneId(os)).toBe(MENU_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe(MENU_ITEMS[0]);
   });
 });
 
 describe("Layer Menu: Arrow Navigation", () => {
   it("ArrowDown moves to next item", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("menu-copy");
+    expect(readFocusedItemId(os)).toBe("menu-copy");
   });
 
   it("ArrowUp moves to previous item", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId()).toBe("menu-cut");
+    expect(readFocusedItemId(os)).toBe("menu-cut");
   });
 
   it("ArrowDown at last item wraps to first (loop)", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("menu-delete");
+    expect(readFocusedItemId(os)).toBe("menu-delete");
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("menu-cut");
+    expect(readFocusedItemId(os)).toBe("menu-cut");
   });
 });
 
 describe("Layer Menu: Escape Dismiss", () => {
   it("Escape closes menu and restores focus to trigger", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(MENU_ZONE_ID);
+    expect(readActiveZoneId(os)).toBe(MENU_ZONE_ID);
 
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("menu-trigger-zone");
-    expect(page.focusedItemId("menu-trigger-zone")).toBe(TRIGGER_ID);
+    expect(readActiveZoneId(os)).toBe("menu-trigger-zone");
+    expect(readFocusedItemId(os, "menu-trigger-zone")).toBe(TRIGGER_ID);
   });
 });
 
 describe("Layer Menu: Focus Trap", () => {
   it("Tab wraps within menu (focus trap)", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.focusedItemId()).toBe("menu-cut");
+    expect(readFocusedItemId(os)).toBe("menu-cut");
 
     // Tab through all items
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("menu-copy");
+    expect(readFocusedItemId(os)).toBe("menu-copy");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("menu-paste");
+    expect(readFocusedItemId(os)).toBe("menu-paste");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("menu-delete");
+    expect(readFocusedItemId(os)).toBe("menu-delete");
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("menu-cut"); // wraps
-    expect(page.activeZoneId()).toBe(MENU_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe("menu-cut"); // wraps
+    expect(readActiveZoneId(os)).toBe(MENU_ZONE_ID);
   });
 });
 
 describe("Layer Menu: ARIA Projection", () => {
   it("focused item tabIndex=0, others -1", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.attrs("menu-cut").tabIndex).toBe(0);
-    expect(page.attrs("menu-copy").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "menu-cut").tabIndex).toBe(0);
+    expect(computeAttrs(os, "menu-copy").tabIndex).toBe(-1);
   });
 
   it("items have role=menuitem", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     for (const id of MENU_ITEMS) {
-      expect(page.attrs(id).role).toBe("menuitem");
+      expect(computeAttrs(os, id).role).toBe("menuitem");
     }
   });
 });

@@ -10,65 +10,71 @@
  *   4. ARIA: role=option, tabIndex roving
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { ListboxDropdownShowcaseApp } from "@/pages/layer-showcase/patterns/ListboxDropdownPattern";
 
 const LISTBOX_ZONE_ID = "layer-listbox";
 const TRIGGER_ID = "OpenListboxBtn";
 
-function createPage() {
-  const page = createHeadlessPage(ListboxDropdownShowcaseApp);
+function setup() {
+  const { page } = createPage(ListboxDropdownShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer Listbox Dropdown: Trigger → Open", () => {
   it("click trigger opens listbox and focuses first option", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.activeZoneId()).toBe(LISTBOX_ZONE_ID);
-    expect(page.focusedItemId()).toBe("opt-red");
+    expect(readActiveZoneId(os)).toBe(LISTBOX_ZONE_ID);
+    expect(readFocusedItemId(os)).toBe("opt-red");
   });
 });
 
 describe("Layer Listbox Dropdown: Navigation", () => {
   it("ArrowDown moves to next option", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("opt-green");
+    expect(readFocusedItemId(os)).toBe("opt-green");
   });
 
   it("ArrowUp at first stays at first (no loop for listbox)", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("ArrowUp");
-    expect(page.focusedItemId()).toBe("opt-red");
+    expect(readFocusedItemId(os)).toBe("opt-red");
   });
 });
 
 describe("Layer Listbox Dropdown: Escape Dismiss", () => {
   it("Escape closes listbox and restores focus", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("listbox-trigger-zone");
-    expect(page.focusedItemId("listbox-trigger-zone")).toBe(TRIGGER_ID);
+    expect(readActiveZoneId(os)).toBe("listbox-trigger-zone");
+    expect(readFocusedItemId(os, "listbox-trigger-zone")).toBe(TRIGGER_ID);
   });
 });
 
 describe("Layer Listbox Dropdown: ARIA Projection", () => {
   it("options have role=option", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.attrs("opt-red").role).toBe("option");
+    expect(computeAttrs(os, "opt-red").role).toBe("option");
   });
 
   it("focused option tabIndex=0, others -1", () => {
-    const page = createPage();
+    const page = setup();
     page.click(TRIGGER_ID);
-    expect(page.attrs("opt-red").tabIndex).toBe(0);
-    expect(page.attrs("opt-green").tabIndex).toBe(-1);
+    expect(computeAttrs(os, "opt-red").tabIndex).toBe(0);
+    expect(computeAttrs(os, "opt-green").tabIndex).toBe(-1);
   });
 });

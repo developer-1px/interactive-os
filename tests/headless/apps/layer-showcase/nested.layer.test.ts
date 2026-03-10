@@ -11,72 +11,77 @@
  *   5. Full focus chain: trigger → D1 → D2 → D1 → trigger
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { NestedShowcaseApp } from "@/pages/layer-showcase/patterns/NestedPattern";
 
-function createPage() {
-  const page = createHeadlessPage(NestedShowcaseApp);
+function setup() {
+  const { page } = createPage(NestedShowcaseApp);
   page.goto("/");
   return page;
 }
 
 describe("Layer Nested: Dialog 1 Opens", () => {
   it("click trigger opens Dialog 1", () => {
-    const page = createPage();
+    const page = setup();
     page.click("OpenNestedBtn");
-    expect(page.activeZoneId()).toBe("nested-dialog-1");
-    expect(page.focusedItemId()).toBe("d1-close");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-1");
+    expect(readFocusedItemId(os)).toBe("d1-close");
   });
 });
 
 describe("Layer Nested: Dialog 2 Stacked", () => {
   it("click nested trigger opens Dialog 2 on top", () => {
-    const page = createPage();
+    const page = setup();
     page.click("OpenNestedBtn");
 
     // Navigate to nested trigger and click
     page.keyboard.press("Tab");
-    expect(page.focusedItemId()).toBe("D1OpenNested");
+    expect(readFocusedItemId(os)).toBe("D1OpenNested");
     page.click("D1OpenNested");
 
-    expect(page.activeZoneId()).toBe("nested-dialog-2");
-    expect(page.focusedItemId()).toBe("d2-ok");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-2");
+    expect(readFocusedItemId(os)).toBe("d2-ok");
   });
 });
 
 describe("Layer Nested: LIFO Escape Chain", () => {
   it("Escape closes Dialog 2, restores to Dialog 1", () => {
-    const page = createPage();
+    const page = setup();
     page.click("OpenNestedBtn");
     page.keyboard.press("Tab");
     page.click("D1OpenNested");
-    expect(page.activeZoneId()).toBe("nested-dialog-2");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-2");
 
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("nested-dialog-1");
-    expect(page.focusedItemId("nested-dialog-1")).toBe("D1OpenNested");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-1");
+    expect(readFocusedItemId(os, "nested-dialog-1")).toBe("D1OpenNested");
   });
 
   it("full chain: trigger → D1 → D2 → Escape → D1 → Escape → trigger", () => {
-    const page = createPage();
+    const page = setup();
 
     // Open D1
     page.click("OpenNestedBtn");
-    expect(page.activeZoneId()).toBe("nested-dialog-1");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-1");
 
     // Open D2
     page.keyboard.press("Tab");
     page.click("D1OpenNested");
-    expect(page.activeZoneId()).toBe("nested-dialog-2");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-2");
 
     // Escape → D1
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("nested-dialog-1");
+    expect(readActiveZoneId(os)).toBe("nested-dialog-1");
 
     // Escape → trigger
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("nested-trigger-zone");
-    expect(page.focusedItemId("nested-trigger-zone")).toBe("OpenNestedBtn");
+    expect(readActiveZoneId(os)).toBe("nested-trigger-zone");
+    expect(readFocusedItemId(os, "nested-trigger-zone")).toBe("OpenNestedBtn");
   });
 });
