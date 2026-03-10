@@ -859,18 +859,25 @@ import type { Page } from "./types";
 /**
  * Create a headless test page — Playwright sanctum.
  *
- * Returns ONLY the Page interface (goto, click, keyboard, locator).
- * OS state inspection uses `os` singleton directly:
+ * Returns { page, cleanup }:
+ * - page: Page interface only (goto, click, keyboard, locator)
+ * - cleanup: teardown function for afterEach()
+ *
+ * OS state inspection uses standalone functions directly:
  *   import { os } from "@os-core/engine/kernel";
  *   import { readFocusedItemId } from "@os-core/3-inject/readState";
  *
  * Usage:
- *   const page = createPage(TodoApp, TodoPage);
+ *   const { page, cleanup } = createPage(TodoApp, TodoPage);
+ *   afterEach(() => cleanup());
  *   page.goto("/");
  *   page.keyboard.press("ArrowDown");
  *   readFocusedItemId(os);  // os 직접
  */
-export function createPage<S>(app: AppHandle<S>, Component?: FC): Page {
+export function createPage<S>(
+  app: AppHandle<S>,
+  Component?: FC,
+): { page: Page; cleanup: () => void } {
   const internal = createAppPage<S>(
     app.__appId,
     app.__zoneBindings,
@@ -878,12 +885,14 @@ export function createPage<S>(app: AppHandle<S>, Component?: FC): Page {
     app.__appKeybindings,
   );
 
-  return {
+  const page: Page = {
     goto: internal.goto,
     click: internal.click,
     keyboard: internal.keyboard,
     locator: internal.locator,
   };
+
+  return { page, cleanup: internal.cleanup };
 }
 
 /**

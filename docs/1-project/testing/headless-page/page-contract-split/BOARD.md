@@ -39,8 +39,8 @@ App.dispatch(command);          // app 직접
 ```
 
 ## Now
-- [ ] T1: `createPage` 팩토리 — `createHeadlessPage` → `createPage` 리네임, `Page`만 반환 — 크기: S
-- [ ] T2: 테스트 마이그레이션 — `page.{os method}` → `os.{os method}` 싱글턴 직접 호출 — 크기: M
+- [x] T1: `createPage` 팩토리 — `Page`만 반환 — tsc 0 | 회귀 0 ✅
+- [ ] T2: 테스트 마이그레이션 — `page.{os method}` → `os` 싱글턴 + readState 헬퍼 직접 호출 — 크기: M
 - [ ] T3: `AppPage`/`AppPageInternal` 타입 정리 + `createHeadlessPage` 삭제 — 크기: S, 의존: →T2
 
 ## Done
