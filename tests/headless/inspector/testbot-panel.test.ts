@@ -8,7 +8,7 @@
  * OS gap discovery is an explicit goal.
  */
 
-import { initSuites, TestBotApp } from "@apps/testbot/app";
+import { initSuites, TestBotApp } from "@os-devtool/testbot/app";
 import { TestBotPanelV2 } from "@inspector/panels/TestBotPanelV2";
 import { os } from "@os-core/engine/kernel";
 import type { Page } from "@os-testing/types";
@@ -16,7 +16,7 @@ import { createPage } from "@os-testing/page";
 import { beforeEach, describe, it, expect as vitestExpect } from "vitest";
 
 // Ensure zones are registered by importing the module
-import "@apps/testbot/zones";
+import "@os-devtool/testbot/zones";
 
 const SUITES = [
   { name: "Listbox Nav", group: "APG" },

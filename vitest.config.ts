@@ -10,7 +10,7 @@ export default defineConfig({
       "@os-devtool": "/packages/os-devtool/src",
       "@os-testing": "/packages/os-testing/src",
       "@apps": "/src/apps",
-      "@inspector": "/src/inspector",
+      "@inspector": "/packages/os-devtool/src/inspector",
       "@": "/src",
       "virtual:docs-meta":
         "/tests/headless/apps/docs-viewer/__mocks__/docs-meta.ts",

@@ -6,8 +6,8 @@
  * Existing TestBotPanel.tsx is preserved for side-by-side comparison.
  */
 
-import { type SuiteState, TestBotApp } from "@apps/testbot/app";
-import { SuitesUI, suiteItemId, ToolbarUI } from "@apps/testbot/zones";
+import { type SuiteState, TestBotApp } from "@os-devtool/testbot/app";
+import { SuitesUI, suiteItemId, ToolbarUI } from "@os-devtool/testbot/zones";
 
 // ── Suite Row (accordion item + content) ─────────────────────────
 

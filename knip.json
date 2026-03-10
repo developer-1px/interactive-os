@@ -3,7 +3,7 @@
   "ignore": [
     "packages/surface/**",
     "scripts/move-docs.mjs",
-    "src/inspector/testbot/playwright/index.ts",
+    "packages/os-devtool/src/inspector/testbot/playwright/index.ts",
     "src/docs-viewer/**",
     "vite-plugins/component-inspector/ui/**"
   ]

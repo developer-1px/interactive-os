@@ -34,7 +34,7 @@ import {
   progress,
   type SuiteState,
   TestBotApp,
-} from "@apps/testbot/app";
+} from "@os-devtool/testbot/app";
 import type { BrowserStep } from "@os-devtool/testing";
 import { TestBotRegistry } from "@os-devtool/testing";
 import { useDispatch } from "@os-react/6-project/accessors/useDispatch";

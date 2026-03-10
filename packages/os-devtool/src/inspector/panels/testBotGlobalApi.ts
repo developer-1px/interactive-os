@@ -9,7 +9,7 @@
  * State is read from kernel store (TestBotApp.getState()).
  */
 
-import { getTestBotState, type SuiteState } from "@apps/testbot/app";
+import { getTestBotState, type SuiteState } from "@os-devtool/testbot/app";
 import {
   type BrowserStep,
   createBrowserPage,

@@ -42,9 +42,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@playwright/test": "/src/inspector/testbot/playwright/index.ts",
-      vitest: "/src/inspector/testbot/vitest/index.ts",
-      "@inspector": "/src/inspector",
+      "@playwright/test": "/packages/os-devtool/src/inspector/testbot/playwright/index.ts",
+      vitest: "/packages/os-devtool/src/inspector/testbot/vitest/index.ts",
+      "@inspector": "/packages/os-devtool/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os-core": "/packages/os-core/src",
       "@os-react": "/packages/os-react/src",

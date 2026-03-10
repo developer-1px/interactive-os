@@ -1,6 +1,6 @@
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
-import { TestBotReporter } from "./src/inspector/testbot/reporter/TestBotReporter";
+import { TestBotReporter } from "./packages/os-devtool/src/inspector/testbot/reporter/TestBotReporter";
 
 /**
  * Vitest Browser Mode Configuration
@@ -18,7 +18,7 @@ export default defineConfig({
       "@kernel": "/packages/kernel/src",
       "@os": "/src/os",
       "@apps": "/src/apps",
-      "@inspector": "/src/inspector",
+      "@inspector": "/packages/os-devtool/src/inspector",
       "@": "/src",
     },
   },

@@ -34,12 +34,13 @@ export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {
-      "@inspector": "/src/inspector",
+      "@inspector": "/packages/os-devtool/src/inspector",
       "@kernel": "/packages/kernel/src",
       "@os-core": "/packages/os-core/src",
       "@os-react": "/packages/os-react/src",
       "@os-sdk": "/packages/os-sdk/src",
       "@os-devtool": "/packages/os-devtool/src",
+      "@os-testing": "/packages/os-testing/src",
       "@os": "/src/os",
       "@apps": "/src/apps",
       "@": "/src",

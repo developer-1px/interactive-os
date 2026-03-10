@@ -34,8 +34,8 @@
       "@os-sdk/*": ["./packages/os-sdk/src/*"],
       "@os-devtool/*": ["./packages/os-devtool/src/*"],
       "@os-testing/*": ["./packages/os-testing/src/*"],
-      "@inspector": ["./src/inspector/index.ts"],
-      "@inspector/*": ["./src/inspector/*"],
+      "@inspector": ["./packages/os-devtool/src/inspector/index.ts"],
+      "@inspector/*": ["./packages/os-devtool/src/inspector/*"],
       "@apps/*": ["./src/apps/*"],
       "@/*": ["./src/*"]
     }
