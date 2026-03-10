@@ -5,7 +5,9 @@
  * Root cause hypothesis: docs-reader has no getItems() → excluded from DOM_ZONE_ORDER.
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { readActiveZoneId } from "@os-core/3-inject/readState";
+import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-devtool/testing/page";
 import { describe, expect, it } from "vitest";
 import { DocsApp } from "@/docs-viewer/app";
 import {
@@ -23,25 +25,25 @@ function getSidebarItems(): string[] {
     .map((n) => n.id);
 }
 
-function createPage() {
-  const page = createHeadlessPage(DocsApp);
+function setup() {
+  const { page } = createPage(DocsApp);
   page.goto("/");
   return page;
 }
 
 describe("DocsViewer: Tab Cycle Bug Reproduction", () => {
   it("Tab from docs-sidebar should cycle through zones (not get stuck)", () => {
-    const page = createPage();
+    const page = setup();
     const items = getSidebarItems();
 
     // Bootstrap: click first sidebar item
     const first = items[0]!;
     page.click(first);
-    expect(page.activeZoneId()).toBe("docs-sidebar");
+    expect(readActiveZoneId(os)).toBe("docs-sidebar");
 
     // Tab forward — should escape to next zone
     page.keyboard.press("Tab");
-    const afterFirstTab = page.activeZoneId();
+    const afterFirstTab = readActiveZoneId(os);
     expect(afterFirstTab).not.toBe("docs-sidebar");
 
     // Keep pressing Tab until we either:
@@ -49,9 +51,9 @@ describe("DocsViewer: Tab Cycle Bug Reproduction", () => {
     // b) get stuck (same zone after Tab)
     const visited: string[] = [afterFirstTab!];
     for (let i = 0; i < 10; i++) {
-      const before = page.activeZoneId();
+      const before = readActiveZoneId(os);
       page.keyboard.press("Tab");
-      const after = page.activeZoneId();
+      const after = readActiveZoneId(os);
 
       if (after === "docs-sidebar") {
         // Full cycle complete
@@ -72,7 +74,7 @@ describe("DocsViewer: Tab Cycle Bug Reproduction", () => {
   });
 
   it("docs-reader zone should be reachable via Tab", () => {
-    const page = createPage();
+    const page = setup();
     const items = getSidebarItems();
 
     // Bootstrap
@@ -80,11 +82,11 @@ describe("DocsViewer: Tab Cycle Bug Reproduction", () => {
 
     // Collect all zones reachable by Tab
     const reachable = new Set<string>();
-    reachable.add(page.activeZoneId()!);
+    reachable.add(readActiveZoneId(os)!);
 
     for (let i = 0; i < 10; i++) {
       page.keyboard.press("Tab");
-      const zoneId = page.activeZoneId();
+      const zoneId = readActiveZoneId(os);
       if (zoneId && reachable.has(zoneId)) break; // full cycle
       if (zoneId) reachable.add(zoneId);
     }
