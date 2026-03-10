@@ -16,47 +16,67 @@
  *   Tab flows between buttons (tab.behavior="flow"), no roving tabindex.
  *
  * Config: flow tab, manual activate with onClick, expand=all
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
+ *
+ * Setup note: page.click("disc-faq-1") focuses AND expands the item.
+ * Tests account for this side effect.
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { DisclosureApp } from "@/pages/apg-showcase/patterns/DisclosurePattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import {
+  DisclosureApp,
+  DisclosurePattern,
+} from "@/pages/apg-showcase/patterns/DisclosurePattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup ───
+// click focuses AND expands the disclosure (onAction → OS_EXPAND)
+// So initial state after beforeEach: disc-faq-1 is focused + expanded
 
-const DISCLOSURES = ["disc-faq-1", "disc-faq-2", "disc-faq-3"];
+const FIRST = "#disc-faq-1";
+const SECOND = "#disc-faq-2";
+const THIRD = "#disc-faq-3";
 
-function disclosureFactory(focusedItem = "disc-faq-1") {
-  const page = createHeadlessPage(DisclosureApp);
-  page.setupZone("apg-disclosure", {
-    items: DISCLOSURES,
-    focusedItemId: focusedItem,
-  });
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
+
+beforeEach(() => {
+  ({ page, cleanup } = createPage(DisclosureApp, DisclosurePattern));
+  page.goto("/");
+  page.click("disc-faq-1");
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════════════════════
 // Expand/Collapse via Enter
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: Toggle via Enter", () => {
-  it("Enter on collapsed button: expands the content", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+  it("Enter on expanded button: collapses the content", async () => {
+    // After beforeEach click, disc-faq-1 is expanded
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter");
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("Enter on expanded button: collapses the content", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.keyboard.press("Enter");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+  it("Enter toggles: collapse then re-expand", async () => {
+    // disc-faq-1 is expanded from click
+    page.keyboard.press("Enter"); // collapse
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter"); // re-expand
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -65,23 +85,22 @@ describe("APG Disclosure: Toggle via Enter", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: Toggle via Space", () => {
-  it("Space on collapsed button: expands the content", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+  it("Space on expanded button: collapses the content", async () => {
+    // After beforeEach click, disc-faq-1 is expanded
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space");
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("Space on expanded button: collapses the content", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.keyboard.press("Space");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+  it("Space toggles: collapse then re-expand", async () => {
+    page.keyboard.press("Space"); // collapse
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space"); // re-expand
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -90,36 +109,33 @@ describe("APG Disclosure: Toggle via Space", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: Multiple independent sections", () => {
-  it("multiple disclosures can be expanded independently", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.keyboard.press("Enter"); // expand faq-1
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+  it("multiple disclosures can be expanded independently", async () => {
+    // disc-faq-1 already expanded from click
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
 
     // Move to faq-2 via Tab (flow mode) and expand
-    t.keyboard.press("Tab");
-    expect(t.focusedItemId()).toBe("disc-faq-2");
-    t.keyboard.press("Enter"); // expand faq-2
+    page.keyboard.press("Tab");
+    await expect(page.locator(SECOND)).toHaveAttribute("data-focused", "true");
+    page.keyboard.press("Enter"); // expand faq-2
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("collapsing one does not affect others", () => {
-    const t = disclosureFactory("disc-faq-1");
-    // Expand faq-1 and faq-2
-    t.keyboard.press("Enter");
-    t.keyboard.press("Tab");
-    t.keyboard.press("Enter");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+  it("collapsing one does not affect others", async () => {
+    // disc-faq-1 expanded from click. Expand faq-2 too.
+    page.keyboard.press("Tab");
+    page.keyboard.press("Enter");
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
 
     // Collapse faq-1
-    t.keyboard.press("Shift+Tab");
-    expect(t.focusedItemId()).toBe("disc-faq-1");
-    t.keyboard.press("Enter");
+    page.keyboard.press("Shift+Tab");
+    await expect(page.locator(FIRST)).toHaveAttribute("data-focused", "true");
+    page.keyboard.press("Enter");
 
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -130,31 +146,32 @@ describe("APG Disclosure: Multiple independent sections", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: Tab navigation (flow mode)", () => {
-  it("Tab moves focus to next disclosure button", () => {
-    const t = disclosureFactory("disc-faq-1");
+  it("Tab moves focus to next disclosure button", async () => {
+    page.keyboard.press("Tab");
 
-    t.keyboard.press("Tab");
-
-    expect(t.focusedItemId()).toBe("disc-faq-2");
+    await expect(page.locator(SECOND)).toHaveAttribute("data-focused", "true");
   });
 
-  it("Shift+Tab moves focus to previous disclosure button", () => {
-    const t = disclosureFactory("disc-faq-2");
+  it("Shift+Tab moves focus to previous disclosure button", async () => {
+    // Navigate to faq-2 first
+    page.keyboard.press("Tab");
+    await expect(page.locator(SECOND)).toHaveAttribute("data-focused", "true");
 
-    t.keyboard.press("Shift+Tab");
+    page.keyboard.press("Shift+Tab");
 
-    expect(t.focusedItemId()).toBe("disc-faq-1");
+    await expect(page.locator(FIRST)).toHaveAttribute("data-focused", "true");
   });
 
-  it("Tab does NOT toggle expand (only navigates)", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+  it("Tab does NOT toggle expand (only navigates)", async () => {
+    // disc-faq-1 is expanded from click
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
 
-    t.keyboard.press("Tab");
+    page.keyboard.press("Tab");
 
-    // Tab should move focus, not toggle expand
-    expect(t.focusedItemId()).toBe("disc-faq-2");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    // Tab should move focus, not toggle expand on disc-faq-1
+    await expect(page.locator(SECOND)).toHaveAttribute("data-focused", "true");
+    // disc-faq-1 should stay expanded (Tab doesn't toggle)
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -163,39 +180,34 @@ describe("APG Disclosure: Tab navigation (flow mode)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: DOM Projection (attrs)", () => {
-  it("items have role=button", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1").role).toBe("button");
+  it("items have role=button", async () => {
+    await expect(page.locator(FIRST)).toHaveAttribute("role", "button");
   });
 
-  it("collapsed button: aria-expanded=false", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+  it("expanded button: aria-expanded=true", async () => {
+    // disc-faq-1 expanded from click
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("expanded button: aria-expanded=true", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.keyboard.press("Enter");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+  it("collapsed button: aria-expanded=false after toggle", async () => {
+    // disc-faq-1 expanded from click, collapse it
+    page.keyboard.press("Enter");
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("focused button: tabIndex=0", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1").tabIndex).toBe(0);
+  it("focused button: tabindex=0", async () => {
+    await expect(page.locator(FIRST)).toHaveAttribute("tabindex", "0");
   });
 
-  it("focused button: data-focused=true", () => {
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["data-focused"]).toBe(true);
+  it("focused button: data-focused=true", async () => {
+    await expect(page.locator(FIRST)).toHaveAttribute("data-focused", "true");
   });
 
-  it("unfocused buttons: tabIndex=0 (flow mode, all buttons tabbable)", () => {
+  it("unfocused buttons: tabindex=0 (flow mode, all buttons tabbable)", async () => {
     // In flow mode, all items should remain tabIndex=0 (unlike roving tabindex
     // where only the focused item gets tabIndex=0 and others get tabIndex=-1).
-    // However, the OS may implement this as roving tabindex even in flow mode.
     // We verify the focused item at minimum.
-    const t = disclosureFactory("disc-faq-1");
-    expect(t.attrs("disc-faq-1").tabIndex).toBe(0);
+    await expect(page.locator(FIRST)).toHaveAttribute("tabindex", "0");
   });
 });
 
@@ -204,36 +216,33 @@ describe("APG Disclosure: DOM Projection (attrs)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: Click interaction", () => {
-  it("click on disclosure button: focuses and toggles expand", () => {
-    const t = disclosureFactory("disc-faq-1");
+  it("click on another disclosure button: focuses and toggles expand", async () => {
+    // disc-faq-2 is collapsed initially
+    page.click("disc-faq-2");
 
-    t.click("disc-faq-2");
-    expect(t.focusedItemId()).toBe("disc-faq-2");
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+    await expect(page.locator(SECOND)).toHaveAttribute("data-focused", "true");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("click on expanded button: collapses it", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.click("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
+  it("click on expanded button: collapses it", async () => {
+    // disc-faq-1 expanded from beforeEach click
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
 
-    t.click("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
+    page.click("disc-faq-1");
+
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("click does not affect other disclosures", () => {
-    const t = disclosureFactory("disc-faq-1");
-
-    // Expand faq-1 and faq-2
-    t.click("disc-faq-1");
-    t.click("disc-faq-2");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(true);
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+  it("click does not affect other disclosures", async () => {
+    // disc-faq-1 expanded from click. Expand faq-2 too.
+    page.click("disc-faq-2");
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
 
     // Collapse faq-1 only
-    t.click("disc-faq-1");
-    expect(t.attrs("disc-faq-1")["aria-expanded"]).toBe(false);
-    expect(t.attrs("disc-faq-2")["aria-expanded"]).toBe(true);
+    page.click("disc-faq-1");
+    await expect(page.locator(FIRST)).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(SECOND)).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -242,10 +251,13 @@ describe("APG Disclosure: Click interaction", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Disclosure: No selection", () => {
-  it("navigation does not create selection", () => {
-    const t = disclosureFactory("disc-faq-1");
-    t.keyboard.press("Tab");
-    t.keyboard.press("Tab");
-    expect(t.selection()).toEqual([]);
+  it("navigation does not create selection", async () => {
+    page.keyboard.press("Tab");
+    page.keyboard.press("Tab");
+
+    // No item should have aria-selected
+    await expect(page.locator(FIRST)).not.toHaveAttribute("aria-selected");
+    await expect(page.locator(SECOND)).not.toHaveAttribute("aria-selected");
+    await expect(page.locator(THIRD)).not.toHaveAttribute("aria-selected");
   });
 });

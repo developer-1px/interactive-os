@@ -1,5 +1,5 @@
 /**
- * APG Tooltip Pattern — Contract Test (Tier 1: pressKey → attrs)
+ * APG Tooltip Pattern — Headless Test (Playwright-subset API)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/
  *
  * W3C Tooltip Pattern:
@@ -22,42 +22,89 @@
  *   - CSS shows tooltip when data-focused=true
  *   - Escape exits the zone, removing data-focused (tooltip hides)
  *
- * Config: horizontal toolbar with multiple buttons, each having a tooltip
+ * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
+ * Same code runs in vitest headless, browser TestBot, and Playwright E2E.
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { TooltipApp } from "@/pages/apg-showcase/patterns/TooltipPattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
 import {
-  assertHomeEnd,
-  assertHorizontalNav,
-  assertNoSelection,
-} from "./helpers/contracts";
+  TooltipApp,
+  TooltipPattern,
+} from "@/pages/apg-showcase/patterns/TooltipPattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup (goto + click — Playwright isomorphic) ───
 
 const BUTTONS = ["btn-cut", "btn-copy", "btn-paste", "btn-bold", "btn-italic"];
 
-function tooltipFactory(focusedItem = "btn-cut") {
-  const page = createHeadlessPage(TooltipApp);
-  page.setupZone("apg-tooltip-toolbar", {
-    items: BUTTONS,
-    focusedItemId: focusedItem,
-  });
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
+
+beforeEach(() => {
+  ({ page, cleanup } = createPage(TooltipApp, TooltipPattern));
+  page.goto("/");
+  page.click("btn-cut");
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════
 // Navigation: Toolbar with tooltips uses standard horizontal nav
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Navigation (toolbar context)", () => {
-  assertHorizontalNav(tooltipFactory);
-  assertHomeEnd(tooltipFactory, {
-    firstId: "btn-cut",
-    lastId: "btn-italic",
+  it("Right Arrow: moves focus to next item", async () => {
+    await expect(page.locator("#btn-cut")).toBeFocused();
+
+    page.keyboard.press("ArrowRight");
+
+    await expect(page.locator("#btn-copy")).toBeFocused();
+    await expect(page.locator("#btn-copy")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#btn-cut")).toHaveAttribute("tabindex", "-1");
   });
-  assertNoSelection(tooltipFactory);
+
+  it("Left Arrow: moves focus to previous item", async () => {
+    page.keyboard.press("ArrowRight");
+    page.keyboard.press("ArrowLeft");
+
+    await expect(page.locator("#btn-cut")).toBeFocused();
+    await expect(page.locator("#btn-cut")).toHaveAttribute("tabindex", "0");
+  });
+
+  it("Home: moves to first item", async () => {
+    page.keyboard.press("ArrowRight");
+    page.keyboard.press("ArrowRight");
+    page.keyboard.press("Home");
+
+    await expect(page.locator("#btn-cut")).toBeFocused();
+    await expect(page.locator("#btn-cut")).toHaveAttribute("tabindex", "0");
+  });
+
+  it("End: moves to last item", async () => {
+    page.keyboard.press("End");
+
+    await expect(page.locator("#btn-italic")).toBeFocused();
+    await expect(page.locator("#btn-italic")).toHaveAttribute("tabindex", "0");
+  });
+
+  it("navigation does not create selection", async () => {
+    page.keyboard.press("ArrowRight");
+    page.keyboard.press("ArrowRight");
+
+    // No item should have aria-selected after navigation
+    for (const id of BUTTONS) {
+      await expect(page.locator(`#${id}`)).not.toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    }
+  });
 });
 
 // ═══════════════════════════════════════════════════
@@ -65,44 +112,63 @@ describe("APG Tooltip: Navigation (toolbar context)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Visibility via data-focused", () => {
-  it("focused item has data-focused=true (tooltip should be visible)", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut")["data-focused"]).toBe(true);
+  it("focused item has data-focused=true (tooltip should be visible)", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 
-  it("unfocused items have no data-focused (tooltip should be hidden)", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-copy")["data-focused"]).toBeUndefined();
-    expect(t.attrs("btn-paste")["data-focused"]).toBeUndefined();
+  it("unfocused items have no data-focused (tooltip should be hidden)", async () => {
+    await expect(page.locator("#btn-copy")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+    await expect(page.locator("#btn-paste")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 
-  it("moving focus: old item loses data-focused, new item gains it", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut")["data-focused"]).toBe(true);
+  it("moving focus: old item loses data-focused, new item gains it", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
 
-    t.keyboard.press("ArrowRight");
+    page.keyboard.press("ArrowRight");
 
-    expect(t.attrs("btn-cut")["data-focused"]).toBeUndefined();
-    expect(t.attrs("btn-copy")["data-focused"]).toBe(true);
+    await expect(page.locator("#btn-cut")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+    await expect(page.locator("#btn-copy")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 
-  it("each button only has data-focused when it is the focused item", () => {
-    const t = tooltipFactory("btn-cut");
-
-    // Navigate through all buttons, check each one becomes focused
+  it("each button only has data-focused when it is the focused item", async () => {
     for (let i = 0; i < BUTTONS.length; i++) {
-      const currentId = t.focusedItemId()!;
-      expect(t.attrs(currentId)["data-focused"]).toBe(true);
+      // Current focused button should have data-focused=true
+      const currentId = BUTTONS[i]!;
+      await expect(page.locator(`#${currentId}`)).toHaveAttribute(
+        "data-focused",
+        "true",
+      );
 
       // All other buttons should not have data-focused
       for (const otherId of BUTTONS) {
         if (otherId !== currentId) {
-          expect(t.attrs(otherId)["data-focused"]).toBeUndefined();
+          await expect(page.locator(`#${otherId}`)).not.toHaveAttribute(
+            "data-focused",
+            "true",
+          );
         }
       }
 
       if (i < BUTTONS.length - 1) {
-        t.keyboard.press("ArrowRight");
+        page.keyboard.press("ArrowRight");
       }
     }
   });
@@ -113,16 +179,19 @@ describe("APG Tooltip: Visibility via data-focused", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Escape dismisses", () => {
-  it("Escape: exits zone (no active zone, no data-focused, tooltip hidden)", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut")["data-focused"]).toBe(true);
+  it("Escape: exits zone (no data-focused, tooltip hidden)", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
 
-    t.keyboard.press("Escape");
+    page.keyboard.press("Escape");
 
-    // Zone is no longer active — no item has data-focused
-    expect(t.activeZoneId()).toBeNull();
     // Item loses data-focused when zone is inactive
-    expect(t.attrs("btn-cut")["data-focused"]).toBeUndefined();
+    await expect(page.locator("#btn-cut")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });
 
@@ -131,16 +200,14 @@ describe("APG Tooltip: Escape dismisses", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: DOM Projection (attrs)", () => {
-  it("items have role=button (toolbar child role)", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut").role).toBe("button");
+  it("items have role=button (toolbar child role)", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute("role", "button");
   });
 
-  it("focused item: tabIndex=0, others: tabIndex=-1", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut").tabIndex).toBe(0);
-    expect(t.attrs("btn-copy").tabIndex).toBe(-1);
-    expect(t.attrs("btn-paste").tabIndex).toBe(-1);
+  it("focused item: tabIndex=0, others: tabIndex=-1", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#btn-copy")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#btn-paste")).toHaveAttribute("tabindex", "-1");
   });
 });
 
@@ -149,27 +216,45 @@ describe("APG Tooltip: DOM Projection (attrs)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Tooltip: Loop navigation", () => {
-  it("ArrowRight at last item: wraps to first (tooltip moves)", () => {
-    const t = tooltipFactory("btn-italic");
-    expect(t.attrs("btn-italic")["data-focused"]).toBe(true);
+  it("ArrowRight at last item: wraps to first (tooltip moves)", async () => {
+    // Navigate to last item
+    page.keyboard.press("End");
+    await expect(page.locator("#btn-italic")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
 
-    t.keyboard.press("ArrowRight");
+    page.keyboard.press("ArrowRight");
 
     // Focus wrapped to first item — tooltip now on first button
-    expect(t.focusedItemId()).toBe("btn-cut");
-    expect(t.attrs("btn-cut")["data-focused"]).toBe(true);
-    expect(t.attrs("btn-italic")["data-focused"]).toBeUndefined();
+    await expect(page.locator("#btn-cut")).toBeFocused();
+    await expect(page.locator("#btn-cut")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+    await expect(page.locator("#btn-italic")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 
-  it("ArrowLeft at first item: wraps to last (tooltip moves)", () => {
-    const t = tooltipFactory("btn-cut");
-    expect(t.attrs("btn-cut")["data-focused"]).toBe(true);
+  it("ArrowLeft at first item: wraps to last (tooltip moves)", async () => {
+    await expect(page.locator("#btn-cut")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
 
-    t.keyboard.press("ArrowLeft");
+    page.keyboard.press("ArrowLeft");
 
     // Focus wrapped to last item — tooltip now on last button
-    expect(t.focusedItemId()).toBe("btn-italic");
-    expect(t.attrs("btn-italic")["data-focused"]).toBe(true);
-    expect(t.attrs("btn-cut")["data-focused"]).toBeUndefined();
+    await expect(page.locator("#btn-italic")).toBeFocused();
+    await expect(page.locator("#btn-italic")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
+    await expect(page.locator("#btn-cut")).not.toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });

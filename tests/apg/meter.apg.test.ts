@@ -1,62 +1,93 @@
 /**
- * APG Meter Pattern — Contract Test (Tier 1: headless)
+ * APG Meter Pattern — Headless Test (Playwright-subset API)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/meter/
  *
- * Uses the ACTUAL MeterApp config from MeterPattern.tsx
- * (not a synthetic factory) to ensure headless ≡ browser.
+ * W3C APG Meter:
+ *   - role="meter" — read-only numeric display within a defined range
+ *   - aria-valuenow: current value (required)
+ *   - aria-valuemin: minimum value (required)
+ *   - aria-valuemax: maximum value (required)
+ *   - Keyboard interaction: NOT APPLICABLE (read-only)
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
+ * Same code runs in vitest headless, browser TestBot, and Playwright E2E.
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { METERS, MeterApp } from "@/pages/apg-showcase/patterns/MeterPattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import {
+  MeterApp,
+  MeterPattern,
+} from "@/pages/apg-showcase/patterns/MeterPattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup (goto + click — Playwright isomorphic) ───
 
-const METER_IDS = METERS.map((m) => m.id);
+let page: Page;
+let cleanup: () => void;
 
-function meterFactory(focusedItem = "meter-cpu") {
-  const page = createHeadlessPage(MeterApp);
-  page.setupZone("apg-meter-zone", {
-    items: METER_IDS,
-    focusedItemId: focusedItem,
-  });
-  return page;
-}
+beforeEach(() => {
+  ({ page, cleanup } = createPage(MeterApp, MeterPattern));
+  page.goto("/");
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════
 // ARIA Projection
 // ═══════════════════════════════════════════════════
 
 describe("APG Meter: ARIA Projection", () => {
-  it("items have role=meter", () => {
-    const t = meterFactory();
-    for (const id of METER_IDS) {
-      expect(t.attrs(id).role).toBe("meter");
-    }
+  it("items have role=meter", async () => {
+    await expect(page.locator("#meter-cpu")).toHaveAttribute("role", "meter");
+    await expect(page.locator("#meter-memory")).toHaveAttribute(
+      "role",
+      "meter",
+    );
+    await expect(page.locator("#meter-disk")).toHaveAttribute("role", "meter");
   });
 
-  it("focused item has tabIndex=0, others have tabIndex=-1", () => {
-    const t = meterFactory();
-    expect(t.attrs("meter-cpu").tabIndex).toBe(0);
-    expect(t.attrs("meter-memory").tabIndex).toBe(-1);
-    expect(t.attrs("meter-disk").tabIndex).toBe(-1);
+  it("focused item has tabindex=0, others have tabindex=-1", async () => {
+    // Click first item to establish focus
+    await page.locator("#meter-cpu").click();
+    await expect(page.locator("#meter-cpu")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#meter-memory")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
+    await expect(page.locator("#meter-disk")).toHaveAttribute("tabindex", "-1");
   });
 
-  it("focused item has data-focused=true", () => {
-    const t = meterFactory();
-    expect(t.attrs("meter-cpu")["data-focused"]).toBe(true);
+  it("focused item has data-focused=true", async () => {
+    await page.locator("#meter-cpu").click();
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 
-  it("aria-valuemin and aria-valuemax are projected from config", () => {
-    const t = meterFactory();
-    expect(t.attrs("meter-cpu")["aria-valuemin"]).toBe(0);
-    expect(t.attrs("meter-cpu")["aria-valuemax"]).toBe(100);
+  it("aria-valuemin and aria-valuemax are projected from config", async () => {
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuemin",
+      "0",
+    );
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuemax",
+      "100",
+    );
   });
 
-  it("initial value is projected as aria-valuenow", () => {
-    const t = meterFactory();
+  it("initial value is projected as aria-valuenow", async () => {
     // Actual showcase initial: meter-cpu = 42
-    expect(t.attrs("meter-cpu")["aria-valuenow"]).toBe(42);
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuenow",
+      "42",
+    );
   });
 });
 
@@ -65,16 +96,16 @@ describe("APG Meter: ARIA Projection", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Meter: Navigation", () => {
-  it("ArrowDown moves focus to next meter", () => {
-    const t = meterFactory("meter-cpu");
-    t.keyboard.press("ArrowDown");
-    expect(t.focusedItemId()).toBe("meter-memory");
+  it("ArrowDown moves focus to next meter", async () => {
+    await page.locator("#meter-cpu").click();
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("#meter-memory")).toBeFocused();
   });
 
-  it("ArrowUp moves focus to previous meter", () => {
-    const t = meterFactory("meter-memory");
-    t.keyboard.press("ArrowUp");
-    expect(t.focusedItemId()).toBe("meter-cpu");
+  it("ArrowUp moves focus to previous meter", async () => {
+    await page.locator("#meter-memory").click();
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("#meter-cpu")).toBeFocused();
   });
 });
 
@@ -83,18 +114,35 @@ describe("APG Meter: Navigation", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Meter: Read-only (no value change)", () => {
-  it("ArrowUp does not change meter value", () => {
-    const t = meterFactory();
-    const before = t.attrs("meter-cpu")["aria-valuenow"];
-    t.keyboard.press("ArrowUp");
+  it("ArrowUp does not change meter value", async () => {
+    await page.locator("#meter-cpu").click();
+    // Record initial value
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuenow",
+      "42",
+    );
+
+    await page.keyboard.press("ArrowUp");
+
     // Focus moves, but value should not change
-    expect(t.attrs("meter-cpu")["aria-valuenow"]).toBe(before);
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuenow",
+      "42",
+    );
   });
 
-  it("ArrowDown does not change meter value", () => {
-    const t = meterFactory();
-    const before = t.attrs("meter-cpu")["aria-valuenow"];
-    t.keyboard.press("ArrowDown");
-    expect(t.attrs("meter-cpu")["aria-valuenow"]).toBe(before);
+  it("ArrowDown does not change meter value", async () => {
+    await page.locator("#meter-cpu").click();
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuenow",
+      "42",
+    );
+
+    await page.keyboard.press("ArrowDown");
+
+    await expect(page.locator("#meter-cpu")).toHaveAttribute(
+      "aria-valuenow",
+      "42",
+    );
   });
 });
