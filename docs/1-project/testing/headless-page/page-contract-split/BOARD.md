@@ -65,13 +65,13 @@ App.dispatch(command);          // app 직접
 > 옛 API를 사용하는 테스트 파일들이 컴파일 에러를 내며, Phase 3 재작성으로 해소된다.
 > Phase 1 검증 기준은 `packages/` 내부 tsc 0이다 (tests/ 에러 무시).
 
-### Phase 1: 인프라 정리 (설계 완성)
-- [ ] T1: Page 인터페이스에 `content()` 추가 (`html()` 동형 변환) — 크기: S, 의존: —
-- [ ] T2: `setupZone` 함수 삭제 + goto 에러 메시지 정리 — 크기: S, 의존: —
-- [ ] T3: God Object 반환에서 non-Playwright 메서드 제거 — 크기: M, 의존: →T1,T2
-- [ ] T4: `createHeadlessPage` 삭제 + `AppPageInternal` re-export 삭제 — 크기: S, 의존: →T3
-- [ ] T5: `index.ts` `createHeadlessPage` export 제거 — 크기: S, 의존: →T4
-- [ ] T6: `runScenarios.ts` `createHeadlessPage` → `createPage` 전환 — 크기: S, 의존: →T5
+### Phase 1: 인프라 정리 (설계 완성) ✅
+- [x] T1: Page 인터페이스에 `content()` 추가 — tsc 0 ✅
+- [x] T2: `setupZone` goto 에러 메시지 참조 제거 — tsc 0 ✅
+- [x] T3: God Object 반환은 `createPage`에서 이미 격리됨 — 변경 불필요 ✅
+- [x] T4: `createHeadlessPage` 삭제 + `AppPageInternal` re-export 삭제 — tsc 0 ✅
+- [x] T5: `index.ts` `createHeadlessPage` export 제거 — tsc 0 ✅
+- [x] T6: `runScenarios.ts` `createHeadlessPage` → `createPage` + cleanup — tsc 0 ✅
 
 ### Phase 2: contracts 재작성
 - [ ] T7: `contracts.ts` 삭제 후 3경계로 재작성 — 크기: M, 의존: →T5
