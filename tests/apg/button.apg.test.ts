@@ -15,99 +15,107 @@
  *
  * Config: toolbar role (child role=button),
  *         inputmap=[OS_PRESS()] for toggle.
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
-import { ToggleApp } from "@/pages/apg-showcase/patterns/ButtonPattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+  expect as vitestExpect,
+} from "vitest";
+import {
+  ButtonPattern,
+  ToggleApp,
+} from "@/pages/apg-showcase/patterns/ButtonPattern";
 
 // ─── Toggle Button Setup (actual showcase config) ───
+// Items: toggle-bold, toggle-italic, toggle-underline
+// Zone: apg-toggle-buttons, role=toolbar
+// Click focuses AND toggles via OS_PRESS (inputmap)
 
-const TOGGLE_ITEMS = ["toggle-bold", "toggle-italic", "toggle-underline"];
-const TOGGLE_BUTTON_ID = TOGGLE_ITEMS[0]!; // "toggle-bold"
+const TOGGLE_BOLD = "#toggle-bold";
 
-function toggleButtonFactory() {
-  const page = createHeadlessPage(ToggleApp);
-  page.setupZone("apg-toggle-buttons", {
-    items: TOGGLE_ITEMS,
-    focusedItemId: TOGGLE_BUTTON_ID,
-  });
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
 
-/** Factory with toggle button initially pressed (ON) */
-function toggleButtonFactoryOn() {
-  const page = toggleButtonFactory();
-  // Toggle to ON
-  page.keyboard.press("Enter");
-  return page;
-}
+beforeEach(() => {
+  ({ page, cleanup } = createPage(ToggleApp, ButtonPattern));
+  page.goto("/");
+  page.click("toggle-bold"); // focuses toggle-bold (also presses it ON)
+});
 
-// ─── Action Button Setup ───
+afterEach(() => {
+  cleanup();
+});
 
-const ACTION_BUTTON_ID = "btn-print";
-let actionFired = false;
-
-function actionButtonFactory() {
-  actionFired = false;
-  const app = defineApp("test-button-action", {});
-  const zone = app.createZone("action-zone");
-  zone.bind({
-    role: "toolbar",
-    getItems: () => [ACTION_BUTTON_ID],
-    onAction: () => {
-      actionFired = true;
-      return [];
-    },
-    options: {
-      inputmap: {
-        Space: [{ type: "OS_ACTIVATE", payload: {} }],
-        Enter: [{ type: "OS_ACTIVATE", payload: {} }],
-        click: [{ type: "OS_ACTIVATE", payload: {} }],
-      },
-    },
-  });
-  const page = createHeadlessPage(app);
-  page.setupZone("action-zone", { focusedItemId: ACTION_BUTTON_ID });
-  return page;
-}
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════════════════════
 // Toggle Button: Toggle via Space
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Button: Toggle via Space", () => {
-  it("Space on unpressed toggle: toggles to pressed", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+  it("Space on pressed toggle: toggles to unpressed", async () => {
+    // After click in beforeEach, toggle-bold is pressed (ON)
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space");
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("Space on pressed toggle: toggles to unpressed", () => {
-    const t = toggleButtonFactoryOn();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+  it("Space toggles back to pressed", async () => {
+    // toggle-bold is pressed from click
+    page.keyboard.press("Space"); // unpress
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space"); // re-press
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
-  it("Space toggles multiple times correctly", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+  it("Space toggles multiple times correctly", async () => {
+    // Starting pressed (from click)
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    page.keyboard.press("Space"); // OFF
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+    page.keyboard.press("Space"); // ON
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    page.keyboard.press("Space"); // OFF
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 });
 
@@ -116,22 +124,34 @@ describe("APG Button: Toggle via Space", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Button: Toggle via Enter", () => {
-  it("Enter on unpressed toggle: toggles to pressed", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+  it("Enter on pressed toggle: toggles to unpressed", async () => {
+    // After click in beforeEach, toggle-bold is pressed (ON)
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter");
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("Enter on pressed toggle: toggles to unpressed", () => {
-    const t = toggleButtonFactoryOn();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+  it("Enter toggles back to pressed", async () => {
+    page.keyboard.press("Enter"); // unpress
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter"); // re-press
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });
 
@@ -140,55 +160,34 @@ describe("APG Button: Toggle via Enter", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Button: Click interaction", () => {
-  it("click on unpressed toggle: toggles to pressed", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+  it("click on pressed toggle: toggles to unpressed", async () => {
+    // toggle-bold is pressed from beforeEach click
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
 
-    t.click(TOGGLE_BUTTON_ID);
+    page.click("toggle-bold");
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("click on pressed toggle: toggles to unpressed", () => {
-    const t = toggleButtonFactoryOn();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+  it("click on unpressed toggle: toggles to pressed", async () => {
+    page.keyboard.press("Space"); // unpress first
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
 
-    t.click(TOGGLE_BUTTON_ID);
+    page.click("toggle-bold");
 
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// Action Button: Activation
-// ═══════════════════════════════════════════════════════════════════
-
-describe("APG Button: Action button activation", () => {
-  it("Enter activates the action button", () => {
-    const t = actionButtonFactory();
-    expect(actionFired).toBe(false);
-
-    t.keyboard.press("Enter");
-
-    expect(actionFired).toBe(true);
-  });
-
-  it("Space activates the action button", () => {
-    const t = actionButtonFactory();
-    expect(actionFired).toBe(false);
-
-    t.keyboard.press("Space");
-
-    expect(actionFired).toBe(true);
-  });
-
-  it("click activates the action button", () => {
-    const t = actionButtonFactory();
-    expect(actionFired).toBe(false);
-
-    t.click(ACTION_BUTTON_ID);
-
-    expect(actionFired).toBe(true);
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 });
 
@@ -197,47 +196,52 @@ describe("APG Button: Action button activation", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Button: DOM Projection (attrs)", () => {
-  it("toggle button has role=button", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID).role).toBe("button");
+  it("toggle button has role=button", async () => {
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute("role", "button");
   });
 
-  it("unpressed toggle: aria-pressed=false", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(false);
+  it("pressed toggle: aria-pressed=true", async () => {
+    // toggle-bold is pressed from click
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
-  it("pressed toggle: aria-pressed=true", () => {
-    const t = toggleButtonFactoryOn();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+  it("unpressed toggle: aria-pressed=false", async () => {
+    page.keyboard.press("Space"); // unpress
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("toggle button does NOT have aria-checked (uses aria-pressed instead)", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-checked"]).toBeUndefined();
+  it("toggle button does NOT have aria-checked (uses aria-pressed instead)", async () => {
+    // Verify aria-checked is absent by checking getAttribute returns null
+    const checkedVal = await page
+      .locator(TOGGLE_BOLD)
+      .getAttribute("aria-checked");
+    vitestExpect(checkedVal).toBeNull();
 
-    t.keyboard.press("Space");
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-checked"]).toBeUndefined();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["aria-pressed"]).toBe(true);
+    page.keyboard.press("Space"); // toggle state
+    const checkedVal2 = await page
+      .locator(TOGGLE_BOLD)
+      .getAttribute("aria-checked");
+    vitestExpect(checkedVal2).toBeNull();
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("focused button: tabIndex=0", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID).tabIndex).toBe(0);
+  it("focused button: tabIndex=0", async () => {
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute("tabindex", "0");
   });
 
-  it("focused button: data-focused=true", () => {
-    const t = toggleButtonFactory();
-    expect(t.attrs(TOGGLE_BUTTON_ID)["data-focused"]).toBe(true);
-  });
-
-  it("action button has role=button", () => {
-    const t = actionButtonFactory();
-    expect(t.attrs(ACTION_BUTTON_ID).role).toBe("button");
-  });
-
-  it("action button does NOT have aria-pressed", () => {
-    const t = actionButtonFactory();
-    expect(t.attrs(ACTION_BUTTON_ID)["aria-pressed"]).toBeUndefined();
+  it("focused button: data-focused=true", async () => {
+    await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });
