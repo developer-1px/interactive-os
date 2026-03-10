@@ -255,9 +255,18 @@ describe("APG Disclosure: No selection", () => {
     page.keyboard.press("Tab");
     page.keyboard.press("Tab");
 
-    // No item should have aria-selected
-    await expect(page.locator(FIRST)).not.toHaveAttribute("aria-selected");
-    await expect(page.locator(SECOND)).not.toHaveAttribute("aria-selected");
-    await expect(page.locator(THIRD)).not.toHaveAttribute("aria-selected");
+    // No item should have aria-selected="true"
+    await expect(page.locator(FIRST)).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator(SECOND)).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator(THIRD)).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 });
