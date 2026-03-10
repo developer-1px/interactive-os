@@ -1,3 +1,6 @@
+# Agent session logs (PostToolUse hook output)
+.claude/session-logs/
+
 # Logs
 logs
 *.log

@@ -18,3 +18,14 @@ declare module "virtual:docs-meta" {
   const meta: Record<string, { mtime: number }>;
   export default meta;
 }
+
+declare module "virtual:agent-activity" {
+  interface AgentActivityEntry {
+    ts: string;
+    session: string;
+    tool: string;
+    detail: string;
+  }
+  const entries: AgentActivityEntry[];
+  export default entries;
+}

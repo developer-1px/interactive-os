@@ -233,6 +233,70 @@ export function getRecentFiles(
     .slice(0, limit);
 }
 
+// --------------- Agent Recent Files ---------------
+
+export interface AgentRecentFile {
+  /** Display name (filename without path) */
+  name: string;
+  /** Relative path from project root */
+  path: string;
+  /** File extension (e.g. "ts", "md") */
+  ext: string;
+  /** Last tool used: "Read", "Edit", "Write", "Bash" */
+  tool: string;
+  /** ISO timestamp of last access */
+  ts: string;
+}
+
+/**
+ * Transform agent activity log entries into a recent files list.
+ * Filters to file operations only, normalizes paths, deduplicates.
+ */
+export function getAgentRecentFiles(
+  entries: Array<{ ts: string; session: string; tool: string; detail: string }>,
+  projectRoot: string,
+  limit = 20,
+): AgentRecentFile[] {
+  const fileTools = new Set(["Read", "Edit", "Write"]);
+  const result: AgentRecentFile[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of entries) {
+    if (result.length >= limit) break;
+    if (!fileTools.has(entry.tool)) continue;
+
+    const detail = entry.detail;
+    if (!detail || detail === "—") continue;
+
+    // Normalize: absolute path → relative path from project root
+    let relativePath = detail;
+    if (detail.startsWith(projectRoot)) {
+      relativePath = detail.slice(projectRoot.length);
+      if (relativePath.startsWith("/")) relativePath = relativePath.slice(1);
+    }
+
+    // Skip if already seen (entries are newest-first, keep first occurrence)
+    if (seen.has(relativePath)) continue;
+    seen.add(relativePath);
+
+    // Extract filename and extension
+    const parts = relativePath.split("/");
+    const filename = parts[parts.length - 1] ?? relativePath;
+    const extMatch = filename.match(/\.(\w+)$/);
+    const ext = extMatch ? extMatch[1]! : "";
+
+    result.push({
+      name: filename,
+      path: relativePath,
+      ext,
+      tool: entry.tool,
+      ts: entry.ts,
+    });
+  }
+
+  return result;
+}
+
 // --------------- Favorites ---------------
 
 const FAVORITES_KEY = "docs-viewer-favorites";

@@ -59,6 +59,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/audit-log.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

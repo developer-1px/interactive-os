@@ -46,6 +46,36 @@ import { MarkdownRenderer } from "./MarkdownRenderer";
 import { TableOfContents } from "./TableOfContents";
 
 // ═══════════════════════════════════════════════════════════════════
+// Project File Helpers — for agent activity log files
+// ═══════════════════════════════════════════════════════════════════
+
+/** Non-docs paths from agent activity (e.g. "src/apps/todo/app.ts") */
+function isProjectFile(filePath: string): boolean {
+  // Docs paths look like "0-inbox/foo" or "2-area/bar" — no file extension
+  // Project files have extensions like .ts, .tsx, .json, .sh
+  return /\.\w+$/.test(filePath) && !filePath.endsWith(".md");
+}
+
+/** Fetch a project file via Vite's dev server transform pipeline */
+async function fetchProjectFile(relativePath: string): Promise<string> {
+  // Use ?raw to get untransformed content
+  const res = await fetch(`/${relativePath}?raw`);
+  if (!res.ok) throw new Error(`Failed to load ${relativePath}`);
+  // Vite wraps ?raw in export default — extract the string
+  const text = await res.text();
+  // ?raw response is a JS module: export default "..."
+  const match = text.match(/export default "([\s\S]*)"/);
+  if (match) {
+    return match[1]!
+      .replace(/\\n/g, "\n")
+      .replace(/\\t/g, "\t")
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, "\\");
+  }
+  return text;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // FolderIndexView — shows direct children of a folder
 // ═══════════════════════════════════════════════════════════════════
 
@@ -208,10 +238,10 @@ export function DocsViewer() {
 
   // --- Core: load content for a path ---
   const loadContent = useCallback(
-    (path: string, source: ExternalFolderSource | null) => {
+    (filePath: string, source: ExternalFolderSource | null) => {
       if (source) {
         // External: synchronous lookup from in-memory map
-        const fileContent = source.files.get(path);
+        const fileContent = source.files.get(filePath);
         if (fileContent != null) {
           setContent(fileContent);
           setError(null);
@@ -219,9 +249,21 @@ export function DocsViewer() {
           setContent("");
           setError("Document not found in external folder");
         }
+      } else if (isProjectFile(filePath)) {
+        // Project source file (from agent activity log) — fetch via Vite dev server
+        fetchProjectFile(filePath)
+          .then((raw) => {
+            setContent(raw);
+            setError(null);
+          })
+          .catch((err) => {
+            console.error(err);
+            setError(err.message ?? "Failed to load file");
+            setContent("");
+          });
       } else {
-        // Built-in: async glob loader
-        loadDocContent(path)
+        // Built-in docs: async glob loader
+        loadDocContent(filePath)
           .then((raw) => {
             setContent(raw);
             setError(null);
@@ -236,7 +278,8 @@ export function DocsViewer() {
     [],
   );
 
-  // --- Derived: is current path a folder or STATUS? ---
+  // --- Derived: is current path a folder, STATUS, or project file? ---
+  const isProjectFileView = activePath ? isProjectFile(activePath) : false;
   const isStatusView = activePath?.endsWith("STATUS") ?? false;
   const isFolderView = activePath?.startsWith("folder:") ?? false;
   const folderPath = isFolderView ? activePath?.slice("folder:".length) : null;
@@ -461,6 +504,33 @@ export function DocsViewer() {
                 <FolderIndexView folder={folderNode} />
               ) : isStatusView && content ? (
                 <StatusDashboard content={content} />
+              ) : isProjectFileView && content ? (
+                <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">
+                  <div className="flex items-center gap-2 mb-6 border-b border-slate-50 pb-4 max-w-4xl mx-auto">
+                    {activePath?.split("/").map((part, i, arr) => (
+                      <div
+                        key={`${part}-${i}`}
+                        className="flex items-center gap-2"
+                      >
+                        {i > 0 && <span className="text-slate-300">/</span>}
+                        <span
+                          className={clsx(
+                            "text-sm font-medium font-mono",
+                            i === arr.length - 1
+                              ? "text-slate-900"
+                              : "text-slate-400",
+                          )}
+                        >
+                          {part}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <pre className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-[13px] leading-relaxed font-mono text-slate-800 overflow-x-auto max-w-4xl mx-auto whitespace-pre">
+                    {content}
+                  </pre>
+                  <div className="h-40" />
+                </article>
               ) : (
                 <>
                   <article className="animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out w-full">

@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { agentActivityPlugin } from "./src/docs-viewer/vite-plugin-agent-activity";
 import { docsMetaPlugin } from "./src/docs-viewer/vite-plugin-docs-meta";
 import inspectorBabelPlugin from "./vite-plugins/babel-inspector";
 import { inspectorPlugin } from "./vite-plugins/inspector";
@@ -20,6 +21,7 @@ export default defineConfig({
     tailwindcss(),
     inspectorPlugin(),
     docsMetaPlugin(),
+    agentActivityPlugin(),
   ],
   optimizeDeps: {
     esbuildOptions: {

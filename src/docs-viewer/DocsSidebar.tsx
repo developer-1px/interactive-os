@@ -1,8 +1,17 @@
-import docsMeta from "virtual:docs-meta";
+import agentActivity from "virtual:agent-activity";
 import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
 import { Item } from "@os-react/internal";
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, Clock, FileText, Star } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Code,
+  Edit3,
+  Eye,
+  FileText,
+  Star,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
@@ -10,9 +19,8 @@ import {
   type DocItem,
   type FlatTreeNode,
   flattenVisibleTree,
-  formatRelativeTime,
+  getAgentRecentFiles,
   getFavoriteFiles,
-  getRecentFiles,
 } from "./docsUtils";
 
 /** DocsSidebar flatten: level 0 folders = section headers */
@@ -27,10 +35,25 @@ export interface DocsSidebarProps {
   header?: React.ReactNode;
 }
 
-// --------------- Recent Section (OS-managed) ---------------
+// --------------- Recent Section (Agent activity log) ---------------
+
+/** Project root for path normalization — stripped from absolute paths */
+const PROJECT_ROOT = "/Users/user/Desktop/interactive-os/";
+
+function FileIcon({ ext, className }: { ext: string; className?: string }) {
+  if (ext === "ts" || ext === "tsx")
+    return <Code size={12} className={className} />;
+  return <FileText size={12} className={className} />;
+}
+
+function ToolBadge({ tool }: { tool: string }) {
+  if (tool === "Read") return <Eye size={9} className="text-slate-300" />;
+  if (tool === "Edit" || tool === "Write")
+    return <Edit3 size={9} className="text-amber-400" />;
+  return null;
+}
 
 function RecentSection({
-  allFiles,
   activePath,
 }: {
   allFiles: DocItem[];
@@ -38,8 +61,8 @@ function RecentSection({
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const recentFiles = useMemo(
-    () => getRecentFiles(allFiles, docsMeta, 7),
-    [allFiles],
+    () => getAgentRecentFiles(agentActivity, PROJECT_ROOT, 15),
+    [],
   );
 
   if (recentFiles.length === 0) return null;
@@ -53,7 +76,10 @@ function RecentSection({
       >
         <Clock size={12} className="text-blue-400" />
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
-          Recent
+          Agent Activity
+        </span>
+        <span className="text-[9px] text-slate-300 tabular-nums mr-1">
+          {recentFiles.length}
         </span>
         <span className="text-slate-300 transition-transform">
           {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
@@ -66,7 +92,7 @@ function RecentSection({
             const isActive = file.path === activePath;
             return (
               <DocsRecentUI.Item key={file.path} id={file.path}>
-                {({ isFocused }) => (
+                {({ isFocused }: { isFocused: boolean }) => (
                   <div
                     className={clsx(
                       "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
@@ -79,24 +105,17 @@ function RecentSection({
                     )}
                     style={{ paddingLeft: "20px" }}
                   >
-                    <FileText
-                      size={12}
+                    <FileIcon
+                      ext={file.ext}
                       className={clsx(
                         "shrink-0",
                         isActive ? "text-blue-400" : "text-slate-300",
                       )}
                     />
-                    <span className="truncate flex-1">
-                      {cleanLabel(file.name)}
+                    <span className="truncate flex-1" title={file.path}>
+                      {file.name}
                     </span>
-                    <span
-                      className={clsx(
-                        "text-[9px] tabular-nums shrink-0",
-                        isActive ? "text-blue-400" : "text-slate-300",
-                      )}
-                    >
-                      {formatRelativeTime(file.mtime)}
-                    </span>
+                    <ToolBadge tool={file.tool} />
                   </div>
                 )}
               </DocsRecentUI.Item>
