@@ -18,36 +18,38 @@ vi.mock("@/docs-viewer/docsUtils", () => import("./__mocks__/docsUtils"));
 
 // ── Now safe to import app modules ──
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
+import { os } from "@os-core/engine/kernel";
 import { DocsApp, selectDoc } from "@/docs-viewer/app";
 import { DocsViewer } from "@/docs-viewer/DocsViewer";
 
 describe("DocsViewer Headless", () => {
   it("T1: DocsViewer can be imported and page created", () => {
-    const page = createHeadlessPage(DocsApp, DocsViewer);
+    const { page, cleanup } = createPage(DocsApp, DocsViewer);
     page.goto("/");
 
     // Basic sanity: page was created and HTML can be rendered
-    const html = page.html();
+    const html = page.content();
     expect(html).toContain("data-zone");
+    cleanup();
   });
 
   it("T2: Tab cycle visits docs zones in order", () => {
-    const page = createHeadlessPage(DocsApp, DocsViewer);
+    const { page, cleanup } = createPage(DocsApp, DocsViewer);
     page.goto("/");
 
     // Select a doc so docs-reader has items
-    page.dispatch(selectDoc({ id: "STATUS" }));
+    os.dispatch(selectDoc({ id: "STATUS" }));
 
     // Click on navbar button to bootstrap into a zone
     page.click("docs-btn-back");
-    expect(page.activeZoneId()).toBe("docs-navbar");
+    expect(os.getState().os.focus.activeZoneId).toBe("docs-navbar");
 
     // Tab through zones — collect zone IDs we visit
-    const visited: string[] = [page.activeZoneId()!];
+    const visited: string[] = [os.getState().os.focus.activeZoneId!];
     for (let i = 0; i < 15; i++) {
       page.keyboard.press("Tab");
-      const zone = page.activeZoneId();
+      const zone = os.getState().os.focus.activeZoneId;
       if (zone && !visited.includes(zone)) {
         visited.push(zone);
       }
@@ -57,24 +59,27 @@ describe("DocsViewer Headless", () => {
     expect(visited).toContain("docs-navbar");
     expect(visited).toContain("docs-reader");
     expect(visited.length).toBeGreaterThanOrEqual(2);
+    cleanup();
   });
 
   it("T2: docs-reader items reflect active document", () => {
-    const page = createHeadlessPage(DocsApp, DocsViewer);
+    const { page, cleanup } = createPage(DocsApp, DocsViewer);
     page.goto("/");
 
     // Select STATUS doc
-    page.dispatch(selectDoc({ id: "STATUS" }));
+    os.dispatch(selectDoc({ id: "STATUS" }));
 
     // Navigate to docs-reader zone via Tab
     page.click("docs-btn-back");
     for (let i = 0; i < 15; i++) {
-      if (page.activeZoneId() === "docs-reader") break;
+      if (os.getState().os.focus.activeZoneId === "docs-reader") break;
       page.keyboard.press("Tab");
     }
 
     // docs-reader should be reachable and have a focused item
-    expect(page.activeZoneId()).toBe("docs-reader");
-    expect(page.focusedItemId()).toBeTruthy();
+    expect(os.getState().os.focus.activeZoneId).toBe("docs-reader");
+    const focusedId = os.getState().os.focus.zones["docs-reader"]?.focusedItemId;
+    expect(focusedId).toBeTruthy();
+    cleanup();
   });
 });
