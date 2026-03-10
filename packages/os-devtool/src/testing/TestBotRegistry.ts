@@ -1,17 +1,12 @@
 /**
- * TestBotRegistry — Zone & Route-reactive TestBot script registration
+ * TestBotRegistry — Eager manifest loading + manual script registration
  *
- * Three modes (can coexist, priority: manual > route > zone):
- *   1. Manual:  register(scripts) — legacy, still works for custom scripts
- *   2. Auto:    initZoneReactive(manifest, getCurrentRoute?) — subscribes to
- *              ZoneRegistry + route changes, lazy-loads matching scripts
+ * Two modes (can coexist, priority: manual > manifest):
+ *   1. Manual:  register(scripts) — page-specific overrides
+ *   2. Auto:    initZoneReactive(manifest) — eagerly loads ALL manifest
+ *              entries to display the complete test list immediately
  *
- * Filtering logic:
- *   - If entry has `route` and `getCurrentRoute` is provided:
- *     match by `currentRoute.startsWith(entry.route)` (route-first)
- *   - Otherwise: match by zone overlap (zone-fallback)
- *
- * TestBotPanel reads getScripts() via useSyncExternalStore — all modes
+ * TestBotPanel reads getScripts() via useSyncExternalStore — both modes
  * feed into the same snapshot, so the panel works transparently.
  */
 
@@ -20,14 +15,15 @@ import type { TestScript } from "@os-testing/scripts";
 // ─── State ───────────────────────────────────────────────────────
 
 let manualScripts: TestScript[] = [];
-let zoneScripts: TestScript[] = [];
+let manifestScripts: TestScript[] = [];
 let snapshot: TestScript[] = [];
 const listeners = new Set<() => void>();
 
 function rebuildSnapshot() {
   // Manual scripts take priority (backward compat: if a page explicitly
-  // registers, those override zone-reactive scripts)
-  snapshot = manualScripts.length > 0 ? [...manualScripts] : [...zoneScripts];
+  // registers, those override manifest-loaded scripts)
+  snapshot =
+    manualScripts.length > 0 ? [...manualScripts] : [...manifestScripts];
 }
 
 function notify() {
@@ -35,7 +31,7 @@ function notify() {
   for (const fn of listeners) fn();
 }
 
-// ─── Zone-reactive internals ─────────────────────────────────────
+// ─── Manifest loading internals ──────────────────────────────────
 
 interface ManifestEntry {
   zones: string[];
@@ -47,35 +43,17 @@ interface ManifestEntry {
 /** Cache: once loaded, entries don't reload */
 const loadedCache = new Map<ManifestEntry, TestScript[]>();
 let activeManifest: ManifestEntry[] = [];
-let routeGetter: (() => string) | null = null;
-let zoneUnsubscribe: (() => void) | null = null;
 
 /**
- * Check if a manifest entry matches the current context.
- * Route matching takes priority when both route and getCurrentRoute exist.
- * Falls back to zone matching otherwise.
+ * Eagerly load ALL manifest entries to populate the complete test list.
+ * Cached entries resolve synchronously; uncached entries trigger async load
+ * and re-invoke loadAllEntries on completion.
  */
-function isEntryMatched(
-  entry: ManifestEntry,
-  mountedZones: Set<string>,
-): boolean {
-  // Route-first: if entry declares a route and we have a route getter
-  if (entry.route != null && routeGetter != null) {
-    const currentRoute = routeGetter();
-    return currentRoute.startsWith(entry.route);
-  }
-  // Zone-fallback: match if any of entry's zones are mounted
-  return entry.zones.some((z) => mountedZones.has(z));
-}
-
-function onZoneChange(mountedZoneIds: readonly string[]) {
-  const mounted = new Set(mountedZoneIds);
+function loadAllEntries() {
   const nextScripts: TestScript[] = [];
   let pendingLoads = 0;
 
   for (const entry of activeManifest) {
-    if (!isEntryMatched(entry, mounted)) continue;
-
     const cached = loadedCache.get(entry);
     if (cached) {
       nextScripts.push(...cached.map((s) => ({ ...s, group: entry.group })));
@@ -86,12 +64,7 @@ function onZoneChange(mountedZoneIds: readonly string[]) {
         .then((scripts) => {
           loadedCache.set(entry, scripts);
           // Re-trigger after lazy load completes
-          // Import ZoneRegistry lazily to avoid circular deps at module init
-          import("@os-core/engine/registries/zoneRegistry").then(
-            ({ ZoneRegistry }) => {
-              onZoneChange(ZoneRegistry.getSnapshot());
-            },
-          );
+          loadAllEntries();
         })
         .catch((err) => {
           console.warn("[TestBotRegistry] Failed to load manifest entry:", err);
@@ -101,7 +74,7 @@ function onZoneChange(mountedZoneIds: readonly string[]) {
 
   // Only update if we've resolved all entries (no pending loads)
   if (pendingLoads === 0) {
-    zoneScripts = nextScripts;
+    manifestScripts = nextScripts;
     notify();
   }
 }
@@ -112,7 +85,7 @@ export const TestBotRegistry = {
   /**
    * Manual registration — page-specific TestBot scripts.
    * Returns an `unregister` function — call it on component unmount.
-   * Takes priority over zone-reactive scripts when active.
+   * Takes priority over manifest-loaded scripts when active.
    */
   register(pageScripts: TestScript[]): () => void {
     manualScripts = pageScripts;
@@ -124,40 +97,24 @@ export const TestBotRegistry = {
   },
 
   /**
-   * Initialize zone & route-reactive mode.
-   * Subscribes to ZoneRegistry and auto-activates scripts from the manifest.
-   * Optionally accepts a route getter for route-based primary filtering.
+   * Initialize manifest-based mode.
+   * Eagerly loads ALL manifest entries to display the complete test list
+   * immediately on panel mount (no zone matching required for display).
    * Call once at app init (e.g., Inspector mount).
-   * Returns an unsubscribe function.
+   * Returns a cleanup function.
    */
   initZoneReactive(
     manifest: ManifestEntry[],
-    getCurrentRoute?: () => string,
+    _getCurrentRoute?: () => string,
   ): () => void {
-    // Cleanup previous subscription if any
-    zoneUnsubscribe?.();
     activeManifest = manifest;
-    routeGetter = getCurrentRoute ?? null;
 
-    // Import ZoneRegistry lazily to avoid circular deps at module init
-    import("@os-core/engine/registries/zoneRegistry").then(
-      ({ ZoneRegistry }) => {
-        // Process current state immediately
-        onZoneChange(ZoneRegistry.getSnapshot());
-
-        // Subscribe to future changes
-        zoneUnsubscribe = ZoneRegistry.subscribe(() => {
-          onZoneChange(ZoneRegistry.getSnapshot());
-        });
-      },
-    );
+    // Eagerly load ALL entries for immediate display
+    loadAllEntries();
 
     return () => {
-      zoneUnsubscribe?.();
-      zoneUnsubscribe = null;
       activeManifest = [];
-      routeGetter = null;
-      zoneScripts = [];
+      manifestScripts = [];
       notify();
     };
   },
@@ -167,7 +124,7 @@ export const TestBotRegistry = {
     return snapshot;
   },
 
-  /** Returns true if any scripts (manual or zone-reactive) are registered */
+  /** Returns true if any scripts (manual or manifest) are registered */
   hasScripts(): boolean {
     return snapshot.length > 0;
   },
