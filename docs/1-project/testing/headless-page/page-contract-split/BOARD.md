@@ -41,10 +41,12 @@ App.dispatch(command);          // app 직접
 ## Now
 - [x] T1: `createPage` 팩토리 — `{ page, cleanup }` 반환 — tsc 0 | 회귀 0 ✅
 - [x] T2a: Clean 테스트 마이그레이션 (16/16파일) — tsc 0 | 734 PASS | 회귀 0 ✅
-- [ ] T2b: Complex 테스트 마이그레이션 (**21/46** 완료, 25 remaining) — 크기: L
+- [ ] T2b: Complex 테스트 마이그레이션 (**27/46** 완료, 19 remaining) — 크기: L
   - ✅ Easy (AppPageInternal→Page): keyboard-input-isomorphism
   - ✅ Medium (dispatch→os.dispatch): field-lifecycle, projection-items, testbot-panel
-  - 🔲 Hard (19 APG setupZone): defineApp 기반 재작성 필요
+  - ✅ Batch 1 (6 APG locator 전환): checkbox, switch, radiogroup, disclosure, tooltip, meter — 81 tests PASS
+  - 🔲 Batch 2 (contracts.ts 마이그레이션): contracts.ts의 Factory type이 `AppPageInternal` 의존 → `Page` + locator 기반으로 재설계 필요. 의존 파일 9개: carousel, combobox, dialog, feed, listbox, menu, toolbar, tree, treegrid
+  - 🔲 Batch 3 (나머지 6개): button, disallow-empty-initial, dropdown-menu, menu-button, navtree, window-splitter — custom defineApp 테스트 fixture 사용
   - 🔲 Critical (todo 3파일): dispatch(74)+state(115) 대량 사용, page.html()
   - 🔲 docs-viewer-headless: page.html() — Page 인터페이스 확장 필요
 - [ ] T3: `AppPage`/`AppPageInternal` 타입 정리 + `createHeadlessPage` 삭제 — 크기: S, 의존: →T2b
