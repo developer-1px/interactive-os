@@ -334,9 +334,7 @@ export function defineApp<S>(
       } {
         // Extract role name from Role object or string
         const roleName = (
-          typeof role === "object" && role !== null && "__brand" in role
-            ? (role as Role).name
-            : role
+          typeof role === "string" ? role : (role as Role).name
         ) as import("@os-core/engine/registries/roleRegistry").ZoneRole;
         // Normalize triggers: object map → TriggerBinding[] + prop-getter map
         let triggerBindings: TriggerBinding[] | undefined;
