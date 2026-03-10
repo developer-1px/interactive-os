@@ -44,29 +44,18 @@
 
 ## Now
 
-### Phase 3: 레거시 식별자 청산 (packages/) ← **제 1목표**
+### Phase 3: 레거시 식별자 청산 (packages/) ✅
 
-> **목표**: `packages/` 소스 코드에서 God Object 이름을 완전히 제거한다.
-> 외부 API(`Page`, `createPage`)는 이미 깨끗하다. 내부 구현체의 이름이 문제다.
+> **완료**: God Object 해체. page.ts 927줄→96줄. lib/ 5모듈 분리.
 
-**현황** (잔존 위치):
-
-| 식별자 | 위치 | 문제 |
-|--------|------|------|
-| `AppPage<_S>` | `os-sdk/app/defineApp/types.ts:280` | God Object 타입. Playwright에 없는 메서드 포함 |
-| `AppPageInternal<S>` | `os-sdk/app/defineApp/types.ts:362` | AppPage 확장. dispatch/state/setupZone 포함 |
-| `AppLocatorAssertions` | `os-sdk/app/defineApp/types.ts:272` | "App" 접두사 불필요 |
-| `createAppPage` | `os-devtool/testing/page.ts:149` | God Object 팩토리 함수 이름 |
-| `createHeadlessPage` | `.agent/rules.md:82`, 주석 다수 | 삭제된 함수의 유령 참조 |
-
-| # | Task | 크기 | 의존 | 검증 | 상태 |
-|---|------|------|------|------|------|
-| T1 | `types.ts`에서 `AppPage`/`AppPageInternal`/`AppLocatorAssertions` 삭제 | S | — | tsc -b | ⬜ |
-| T2 | `page.ts` 반환부에서 14개 non-Playwright 멤버 + `setupZone` 함수 삭제 | S | →T1 | tsc -b | ⬜ |
-| T3 | projection 추출 → `lib/projection.ts` (`createProjection`) | M | — | tsc -b | ⬜ |
-| T4 | locator 추출 → `lib/locator.ts` (`createLocator`) | M | →T3 | tsc -b | ⬜ |
-| T5 | env setup 추출 → `lib/setupHeadlessEnv.ts` | M | — | tsc -b | ⬜ |
-| T6 | zone setup 추출 → `lib/zoneSetup.ts` (`registerZones` + `seedInitialState`) | M | — | tsc -b | ⬜ |
+| # | Task | 크기 | 검증 | 상태 |
+|---|------|------|------|------|
+| T1 | `types.ts`에서 `AppPage`/`AppPageInternal`/`AppLocatorAssertions` 삭제 | S | tsc -b 0 | ✅ |
+| T2 | `page.ts` 반환부에서 14개 non-Playwright 멤버 + `setupZone` 함수 삭제 | S | tsc -b 0 | ✅ |
+| T3 | projection 추출 → `lib/projection.ts` (`createProjection`) | M | tsc -b 0 | ✅ |
+| T4 | locator 추출 → `lib/locator.ts` (`createLocator`) | M | tsc -b 0 | ✅ |
+| T5 | env setup 추출 → `lib/setupHeadlessEnv.ts` | M | tsc -b 0 | ✅ |
+| T6 | zone setup 추출 → `lib/zoneSetup.ts` (`registerZones` + `seedInitialState`) | M | tsc -b 0 | ✅ |
 | T7 | typeIntoField 추출 → `lib/typeIntoField.ts` | S | — | tsc -b | ⬜ |
 | T8 | `createPage` 재조합 + `createAppPage` 삭제 (page.ts 927줄→~60줄) | S | →T1-T7 | tsc -b + vitest PASS 유지 | ⬜ |
 | T9 | 유령 참조 정리 (rules.md, knowledge/ 7파일, workflows/, 주석) | M | →T8 | grep 결과 0 | ⬜ |
@@ -79,11 +68,7 @@
 
 ## Unresolved
 
-| # | Question | Impact |
-|---|----------|--------|
-| 1 | `AppPage` → 어떤 이름? 내부 구현 타입이므로 "Page" 제거 필요. 후보: `HeadlessRuntime`, `TestEngine`, 또는 타입 삭제 후 인라인 | 리네이밍 범위 결정 |
-| 2 | `AppPageInternal` → 유지할 메서드 범위? `dispatch`/`state`는 unit test에서 필요. 타입명만 바꿀지, 구조도 분리할지 | Phase 3 스코프 결정 |
-| 3 | `AppLocatorAssertions` → `LocatorAssertions`(types.ts)과 중복? 통합 가능한지 | 타입 정리 범위 |
+(Phase 3에서 전부 해소 — 타입 자체를 삭제. 리네이밍 불필요.)
 
 ## Done
 
