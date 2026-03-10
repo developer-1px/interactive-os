@@ -764,6 +764,14 @@ export function createAppPage<S>(
     },
 
     locator(selector: string) {
+      // :focus pseudo-selector — resolve to currently focused element
+      if (selector === ":focus") {
+        const focusedId = readFocusedItemId(os);
+        if (!focusedId) {
+          throw new Error("locator(\":focus\"): no element is currently focused");
+        }
+        return this.locator("#" + focusedId);
+      }
       // Strip # prefix if present (Playwright uses #id, we use bare id)
       const elementId = selector.startsWith("#") ? selector.slice(1) : selector;
       // When Component is provided, verify element exists in rendered output

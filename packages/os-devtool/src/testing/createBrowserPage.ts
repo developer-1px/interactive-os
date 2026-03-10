@@ -653,6 +653,15 @@ export function createBrowserPage(
     },
 
     locator(selector: string): Locator {
+      // :focus pseudo-selector — resolve to currently focused element
+      if (selector === ":focus") {
+        const activeEl = document.activeElement;
+        const focusedId = activeEl?.id || activeEl?.getAttribute("data-item") || "";
+        if (!focusedId) {
+          throw new Error("locator(\":focus\"): no element is currently focused");
+        }
+        return createBrowserLocator(focusedId);
+      }
       const id = selector.startsWith("#") ? selector.slice(1) : selector;
       return createBrowserLocator(id);
     },

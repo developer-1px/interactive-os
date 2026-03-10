@@ -73,8 +73,8 @@ App.dispatch(command);          // app 직접
 - [x] T5: `index.ts` `createHeadlessPage` export 제거 — tsc 0 ✅
 - [x] T6: `runScenarios.ts` `createHeadlessPage` → `createPage` + cleanup — tsc 0 ✅
 
-### Phase 2: contracts 재작성
-- [ ] T7: `contracts.ts` 삭제 후 3경계로 재작성 — 크기: M, 의존: →T5
+### Phase 2: contracts 재작성 ✅
+- [x] T7: `contracts.ts` 삭제 후 3경계로 재작성 — tsc 0 ✅
 
 ### Phase 3: 테스트 삭제→재작성
 - [ ] T8: APG contracts 의존 9파일 (combobox, dialog, listbox, menu, toolbar, tree, treegrid, carousel, feed) — 크기: M, 의존: →T7
