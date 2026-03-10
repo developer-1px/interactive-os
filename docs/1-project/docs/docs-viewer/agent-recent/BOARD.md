@@ -13,12 +13,7 @@ PostToolUse 훅으로 파일 접근 로그를 자동 수집하고, 이를 docsVi
 
 ## Now
 
-- [ ] T1: PostToolUse 훅 스크립트 생성 — S, 의존: —
-- [ ] T2: settings.local.json에 PostToolUse 훅 등록 — S, 의존: →T1
-- [ ] T3: Vite plugin `vite-plugin-agent-activity.ts` 생성 — S, 의존: →T1
-- [ ] T4: `docsUtils.ts`에 `getAgentRecentFiles()` 추가 — S, 의존: →T3
-- [ ] T5: `RecentSection` UI 데이터 소스 교체 — S, 의존: →T4
-- [ ] T6: 비-md 파일 raw 텍스트 뷰어 — M, 의존: →T5
+(없음)
 
 ## Unresolved
 
@@ -26,4 +21,9 @@ PostToolUse 훅으로 파일 접근 로그를 자동 수집하고, 이를 docsVi
 
 ## Done
 
-(없음)
+- [x] T1: PostToolUse 훅 스크립트 생성 — `.claude/hooks/audit-log.sh` ✅
+- [x] T2: settings.local.json에 PostToolUse 훅 등록 ✅
+- [x] T3: Vite plugin `vite-plugin-agent-activity.ts` 생성 — tsc 0 ✅
+- [x] T4: `docsUtils.ts`에 `getAgentRecentFiles()` 추가 — tsc 0 ✅
+- [x] T5: `RecentSection` UI 데이터 소스 교체 — tsc 0 ✅
+- [x] T6: 비-md 파일 raw 텍스트 뷰어 — tsc 0 ✅
