@@ -30,6 +30,7 @@
 | OG-024 | 2026-03-08 | os-core | Dynamic item initial expand | 동적으로 발견된 아이템의 초기 aria-expanded 상태를 선언적으로 설정하는 메커니즘 없음. `expand.initial`은 정적 아이템만 지원. | `useEffect` + `os.setState` workaround |
 | OG-025 | 2026-03-08 | os-core | Trigger focus drift (Zero Drift) | 브라우저에서 trigger 클릭 시 `<Item>` 래핑으로 trigger 자체가 zone item으로 인식 → focusedItemId가 trigger ID로 변경 → `onActivate(triggerId)` 호출 (의도: 이전 focused data item ID). Headless `simulateClick`은 standalone fast path로 정확한 focusId 전달. | Trigger click = headless only 테스트 |
 | OG-026 | 2026-03-08 | os-core | aria-checked binding | `OS_CHECK` → `toggleTodo` 실행 → `completed` 상태 변경되나, zone의 `aria-checked` ARIA 속성에 반영 안 됨. TestBot §1f 실패. | headless에서 `page.state` 직접 검증 |
+| OG-027 | 2026-03-10 | os-core | Dialog Arrow key leak | Dialog role에 inputmap이 없어 ArrowDown/Up이 OS global keybinding(`OS_NAVIGATE`)으로 leak → `activeZoneId`가 dialog에서 외부 zone으로 변경됨. 브라우저에서는 React `onKeyDown` + `preventDefault`가 보호하지만, headless에는 React 없어 leak 발생. T7 테스트(`docs-search-overlay.test.ts`)로 증명. 해소안: dialog role preset inputmap에 Arrow key noop 추가, 또는 dialog 내부를 nested zone(listbox 등)으로 구성. | React `onKeyDown` + `e.preventDefault()` |
 
 ## 해결됨
 
