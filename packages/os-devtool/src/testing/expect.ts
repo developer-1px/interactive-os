@@ -30,7 +30,7 @@ export function expect(locator: LocatorLike): LocatorAssertions {
   const assertable = locator as Locator & {
     _toHaveAttribute?: (
       name: string,
-      value: string | RegExp,
+      value: string | RegExp | undefined,
       negated?: boolean,
     ) => Promise<void>;
     _toBeFocused?: (negated?: boolean) => Promise<void>;
@@ -38,12 +38,25 @@ export function expect(locator: LocatorLike): LocatorAssertions {
 
   function createAssertions(negated: boolean): LocatorAssertions {
     const assertions: LocatorAssertions = {
-      async toHaveAttribute(name: string, value: string | RegExp) {
+      async toHaveAttribute(name: string, value?: string | RegExp) {
         if (assertable._toHaveAttribute) {
           return assertable._toHaveAttribute(name, value, negated);
         }
         // Fallback: use getAttribute
         const actual = await locator.getAttribute(name);
+        if (value === undefined) {
+          // 1-arg: check attribute existence (positive) or absence (negated)
+          const exists = actual !== null;
+          const passed = negated ? !exists : exists;
+          if (!passed) {
+            throw new Error(
+              negated
+                ? `Expected [${name}] to be absent but got "${actual}"`
+                : `Expected [${name}] to exist but it was absent`,
+            );
+          }
+          return;
+        }
         const expected = typeof value === "string" ? value : undefined;
         const matches = actual === expected;
         const passed = negated ? !matches : matches;

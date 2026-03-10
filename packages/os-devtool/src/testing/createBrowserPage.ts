@@ -428,7 +428,7 @@ export function createBrowserPage(
     // ── Assertion logic (standalone, supports negation) ──────────
     async function assertAttribute(
       name: string,
-      value: string | RegExp,
+      value: string | RegExp | undefined,
       negated: boolean,
     ) {
       await delay(50);
@@ -440,10 +440,15 @@ export function createBrowserPage(
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const el = findEl(elementId);
         actual = el?.getAttribute(name) ?? null;
-        rawMatch =
-          typeof value === "string"
-            ? actual === value
-            : actual !== null && value.test(actual);
+        if (value === undefined) {
+          // 1-arg: check existence
+          rawMatch = actual !== null;
+        } else {
+          rawMatch =
+            typeof value === "string"
+              ? actual === value
+              : actual !== null && value.test(actual);
+        }
         const matched = negated ? !rawMatch : rawMatch;
         if (matched) break;
         if (attempt < maxAttempts - 1) {
@@ -452,16 +457,15 @@ export function createBrowserPage(
       }
 
       const el = findEl(elementId);
-      const expected = typeof value === "string" ? value : undefined;
       const passed = negated ? !rawMatch : rawMatch;
 
       const displayActual = actual === null ? "(absent)" : `"${actual}"`;
       const displayExpected =
-        expected === undefined
-          ? String(value)
-          : expected === null
-            ? "(absent)"
-            : `"${expected}"`;
+        value === undefined
+          ? "(exists)"
+          : typeof value === "string"
+            ? `"${value}"`
+            : String(value);
       const op = negated ? (passed ? "!=" : "==") : passed ? "==" : "!=";
 
       if (el) fx.showStamp(el, passed);
@@ -521,7 +525,7 @@ export function createBrowserPage(
       LocatorAssertions & {
         _toHaveAttribute: (
           name: string,
-          value: string | RegExp,
+          value: string | RegExp | undefined,
           negated?: boolean,
         ) => Promise<void>;
         _toBeFocused: (negated?: boolean) => Promise<void>;
@@ -589,7 +593,7 @@ export function createBrowserPage(
 
       // ── Assertion implementations ──
 
-      async toHaveAttribute(name: string, value: string | RegExp) {
+      async toHaveAttribute(name: string, value?: string | RegExp) {
         return assertAttribute(name, value, false);
       },
 
@@ -616,7 +620,7 @@ export function createBrowserPage(
       },
 
       // Internal assertion hooks for expect() wrapper (with negation support)
-      _toHaveAttribute(name: string, value: string | RegExp, negated = false) {
+      _toHaveAttribute(name: string, value: string | RegExp | undefined, negated = false) {
         return assertAttribute(name, value, negated);
       },
       _toBeFocused(negated = false) {
@@ -626,7 +630,7 @@ export function createBrowserPage(
       // Playwright-compatible .not
       get not(): LocatorAssertions {
         return {
-          toHaveAttribute: (name: string, value: string | RegExp) =>
+          toHaveAttribute: (name: string, value?: string | RegExp) =>
             assertAttribute(name, value, true),
           toBeFocused: () => assertFocused(true),
           toBeChecked: () => assertAttribute("aria-checked", "true", true),

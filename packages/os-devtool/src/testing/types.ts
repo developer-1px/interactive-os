@@ -37,8 +37,8 @@ export interface Locator extends LocatorAssertions {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface LocatorAssertions {
-  /** Assert: has attribute with value. */
-  toHaveAttribute(name: string, value: string | RegExp): void | Promise<void>;
+  /** Assert: has attribute with value, or just exists (1-arg). */
+  toHaveAttribute(name: string, value?: string | RegExp): void | Promise<void>;
 
   /** Assert: element is focused. */
   toBeFocused(): void | Promise<void>;

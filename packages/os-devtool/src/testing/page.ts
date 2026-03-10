@@ -59,7 +59,7 @@ interface ZoneOrderEntry {
 
 /** Assertion subset with recursive .not — Playwright locator compatibility */
 interface LocatorAssertionResult {
-  toHaveAttribute(name: string, value: string | boolean | RegExp): boolean;
+  toHaveAttribute(name: string, value?: string | boolean | RegExp): boolean;
   toBeFocused(): boolean;
   toBeChecked(): boolean;
   toBeDisabled(): boolean;
@@ -71,7 +71,7 @@ interface LocatorResult {
   readonly attrs: import("@os-core/3-inject/headless.types").ElementAttrs;
   getAttribute(name: string): string | null;
   click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
-  toHaveAttribute(name: string, value: string | boolean | RegExp): boolean;
+  toHaveAttribute(name: string, value?: string | boolean | RegExp): boolean;
   toBeFocused(): boolean;
   toBeChecked(): boolean;
   toBeDisabled(): boolean;
@@ -80,7 +80,7 @@ interface LocatorResult {
   _toBeFocused(negated?: boolean): void;
   _toHaveAttribute(
     name: string,
-    value: string | RegExp,
+    value?: string | RegExp,
     negated?: boolean,
   ): void;
 }
@@ -91,7 +91,11 @@ function createNegatedLocator(
   elementId: string,
 ): LocatorAssertionResult {
   return {
-    toHaveAttribute(name: string, value: string | boolean) {
+    toHaveAttribute(name: string, value?: string | boolean) {
+      if (value === undefined) {
+        // 1-arg negated: attribute should be absent
+        return resolveElement(os, elementId)[name] == null;
+      }
       return resolveElement(os, elementId)[name] !== value;
     },
     toBeFocused() {
@@ -116,7 +120,11 @@ function createPositiveLocator(
   elementId: string,
 ): LocatorAssertionResult {
   return {
-    toHaveAttribute(name: string, value: string | boolean) {
+    toHaveAttribute(name: string, value?: string | boolean) {
+      if (value === undefined) {
+        // 1-arg positive: attribute should exist
+        return resolveElement(os, elementId)[name] != null;
+      }
       return resolveElement(os, elementId)[name] === value;
     },
     toBeFocused() {
@@ -783,7 +791,10 @@ export function createAppPage<S>(
             ctrl: mods.includes("Control"),
           });
         },
-        toHaveAttribute(name: string, value: string | boolean) {
+        toHaveAttribute(name: string, value?: string | boolean) {
+          if (value === undefined) {
+            return resolveElement(os, elementId)[name] != null;
+          }
           return resolveElement(os, elementId)[name] === value;
         },
         toBeFocused() {
@@ -820,11 +831,24 @@ export function createAppPage<S>(
         },
         _toHaveAttribute(
           name: string,
-          value: string | RegExp,
+          value?: string | RegExp,
           negated?: boolean,
         ) {
           const attrKey = name === "tabindex" ? "tabIndex" : name;
           const raw = resolveElement(os, elementId)[attrKey];
+          // 1-arg: check existence/absence
+          if (value === undefined) {
+            const exists = raw != null;
+            const passed = negated ? !exists : exists;
+            if (!passed) {
+              throw new Error(
+                negated
+                  ? `Expected [${name}] to be absent but it exists (value: "${raw}")`
+                  : `Expected [${name}] to exist but it was absent`,
+              );
+            }
+            return;
+          }
           // Coerce to string for Playwright compatibility
           const actual =
             raw === true

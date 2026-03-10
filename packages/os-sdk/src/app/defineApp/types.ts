@@ -270,7 +270,7 @@ export interface TestInstance<S> {
 
 /** Locator assertion subset — recursive via .not for Playwright compatibility */
 export interface AppLocatorAssertions {
-  toHaveAttribute(name: string, value: string | boolean | RegExp): void;
+  toHaveAttribute(name: string, value?: string | boolean | RegExp): void;
   toBeFocused(): void;
   toBeChecked(): void;
   toBeDisabled(): void;
@@ -331,7 +331,7 @@ export interface AppPage<_S> {
   locator(elementId: string): {
     getAttribute(name: string): string | null;
     click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }): void;
-    toHaveAttribute(name: string, value: string | boolean | RegExp): void;
+    toHaveAttribute(name: string, value?: string | boolean | RegExp): void;
     toBeFocused(): void;
     toBeChecked(): void;
     toBeDisabled(): void;

@@ -22,13 +22,7 @@
 import type { Page } from "@os-devtool/testing";
 import { expect as osExpect } from "@os-devtool/testing/expect";
 import { createPage } from "@os-devtool/testing/page";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  it,
-  expect as vitestExpect,
-} from "vitest";
+import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   ButtonPattern,
   ToggleApp,
@@ -217,17 +211,14 @@ describe("APG Button: DOM Projection (attrs)", () => {
   });
 
   it("toggle button does NOT have aria-checked (uses aria-pressed instead)", async () => {
-    // Verify aria-checked is absent by checking getAttribute returns null
-    const checkedVal = await page
-      .locator(TOGGLE_BOLD)
-      .getAttribute("aria-checked");
-    vitestExpect(checkedVal).toBeNull();
+    await expect(page.locator(TOGGLE_BOLD)).not.toHaveAttribute(
+      "aria-checked",
+    );
 
     page.keyboard.press("Space"); // toggle state
-    const checkedVal2 = await page
-      .locator(TOGGLE_BOLD)
-      .getAttribute("aria-checked");
-    vitestExpect(checkedVal2).toBeNull();
+    await expect(page.locator(TOGGLE_BOLD)).not.toHaveAttribute(
+      "aria-checked",
+    );
     await expect(page.locator(TOGGLE_BOLD)).toHaveAttribute(
       "aria-pressed",
       "false",
