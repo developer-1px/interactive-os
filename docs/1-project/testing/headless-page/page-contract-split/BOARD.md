@@ -73,8 +73,14 @@ App.dispatch(command);          // app 직접
 - [x] T5: `index.ts` `createHeadlessPage` export 제거 — tsc 0 ✅
 - [x] T6: `runScenarios.ts` `createHeadlessPage` → `createPage` + cleanup — tsc 0 ✅
 
-### Phase 2: contracts 재작성 ✅
-- [x] T7: `contracts.ts` 삭제 후 3경계로 재작성 — tsc 0 ✅
+### Phase 2: contracts + 인프라 ✅
+- [x] T7: `contracts.ts` locator 기반 재작성 (os import 0줄) — tsc 0 ✅
+- [x] T7a: `locator(":focus")` 지원 추가 (headless + browser) — tsc 0 ✅
+- [x] T7b: `expect()` Playwright 동형 확장 (locator + value 통합) — tsc 0 ✅
+
+> 📐 **원칙 변경**: 3경계 → **2경계** (page + app). os는 인프라 세부사항.
+> - 테스트에서 os import 금지. 모든 assertion은 `page.locator()` 경유.
+> - 설계 문서: `notes/2026-0310-1907-analysis-naming-apg-fixture.md`
 
 ### Phase 3: 테스트 삭제→재작성
 - [ ] T8: APG contracts 의존 9파일 (combobox, dialog, listbox, menu, toolbar, tree, treegrid, carousel, feed) — 크기: M, 의존: →T7
