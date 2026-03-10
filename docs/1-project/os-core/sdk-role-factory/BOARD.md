@@ -8,20 +8,25 @@
 | Size | Heavy |
 | Risk | 27개 role별 config 타입 정의 비용. 기존 bind() 호출처 71건 마이그레이션. defineRole schema 설계가 ARIA 순수성과 OS 고유 관심사를 분리해야 함 |
 
-## Tasks
+## Tasks (Phase 1: bind 시그니처 + role별 타입)
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
+| T1 | `Role<TConfig>` 타입 + `defineRole()` 함수 생성 | Role phantom type, defineRole(name, ariaSchema, preset) → Role<TConfig> | ⬜ | |
+| T2 | role별 config 인터페이스 정의 (카테고리별) | Collection/Overlay/Expansion/Value/Toggle 등 카테고리별 config 타입, 잘못된 조합 tsc 거부 | ⬜ | |
+| T3 | 27개 role preset을 `defineRole()`로 재정의 | rolePresets → defineRole() 호출로 전환, resolveRole() 호환 | ⬜ | |
+| T4 | `bind()` 시그니처 변경 — role을 첫 인자로 | `bind<R>(role: Role<R>, config: R & {field?, triggers?})` | ⬜ | |
+| T5 | `bind.ts` 구현 업데이트 | createBoundComponents가 role을 별도 인자로 수신 | ⬜ | |
+| T6 | src/ 앱 코드 bind() 마이그레이션 | `bind({ role: "listbox", ...})` → `bind(listboxRole, {...})` | ⬜ | |
+| T7 | packages/ bind() 마이그레이션 | APG showcase + os-devtool 내 bind() 전환 | ⬜ | |
+| T8 | tests/ bind() 마이그레이션 | 테스트 파일 내 bind() 전환 | ⬜ | |
+| T9 | 최종 검증 | tsc 0 + lint 0 + 전체 테스트 PASS | ⬜ | |
 
-<!-- /plan이 Task Map으로 채운다. /project는 비워둔다. -->
-
-## Unresolved
+## Unresolved (Phase 2 — 현재 범위 밖)
 
 | # | Question | Impact |
 |---|----------|--------|
-| U1 | `defineRole`의 ARIA schema 구체 형태 — containerRole, itemRole, attrs 외에 orientation, ownership 등 무엇을 포함? | defineRole API 설계의 블로커 |
 | U2 | role 팩토리 내부에서 Zone/Item을 어떻게 숨기나? renderItem이 받는 인자의 형태는? | Phase 2 설계의 블로커 |
-| U3 | 기존 bind() 71건 마이그레이션 전략 — 호환 레이어? 일괄 전환? | 실행 순서 결정 |
 | U4 | `getItems` 제거 후 headless test의 items 접근 경로 — role 팩토리 내부에서 관리하면 headless page.goto()는 어떻게 items를 아나? | headless 아키텍처 영향 |
 | U5 | 기존 ZIFT props-spread blueprint(discussions/)와의 관계 — 선행? 병렬? 흡수? | 실행 순서 결정 |
 | U6 | C3(OCP vs Pit of Success) — `defineRole`을 os-core 내부 API로 제한하면 서드파티 확장은 어떻게? | 장기 확장성 |
