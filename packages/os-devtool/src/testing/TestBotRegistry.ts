@@ -103,10 +103,7 @@ export const TestBotRegistry = {
    * Call once at app init (e.g., Inspector mount).
    * Returns a cleanup function.
    */
-  initZoneReactive(
-    manifest: ManifestEntry[],
-    _getCurrentRoute?: () => string,
-  ): () => void {
+  initZoneReactive(manifest: ManifestEntry[]): () => void {
     activeManifest = manifest;
 
     // Eagerly load ALL entries for immediate display

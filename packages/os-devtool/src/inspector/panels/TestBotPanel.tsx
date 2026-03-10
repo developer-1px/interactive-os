@@ -38,7 +38,6 @@ import {
 import type { BrowserStep } from "@os-devtool/testing";
 import { TestBotRegistry } from "@os-devtool/testing";
 import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
-import { useRouter } from "@tanstack/react-router";
 import { TESTBOT_MANIFEST } from "@/testing/testbot-manifest";
 import {
   registerTestBotGlobalApi,
@@ -380,22 +379,15 @@ export function TestBotPanel() {
     [isRunning],
   );
 
-  // ── Route getter for route-based script filtering ──
-  const router = useRouter();
-  const getRoute = useCallback(() => router.state.location.pathname, [router]);
-
-  // ── Global API + zone & route-reactive init ──
+  // ── Global API + manifest-based init ──
   useEffect(() => {
     registerTestBotGlobalApi(runAll, runSuite);
-    const teardown = TestBotRegistry.initZoneReactive(
-      TESTBOT_MANIFEST,
-      getRoute,
-    );
+    const teardown = TestBotRegistry.initZoneReactive(TESTBOT_MANIFEST);
     return () => {
       unregisterTestBotGlobalApi();
       teardown();
     };
-  }, [runAll, runSuite, getRoute]);
+  }, [runAll, runSuite]);
 
   // ═══════════════════════════════════════════════════════════════════
   // Render
