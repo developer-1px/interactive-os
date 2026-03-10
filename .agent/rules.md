@@ -55,10 +55,10 @@
 ```
 
 ### ZIFT — 4개 개념으로 모든 UI를 선언
-- **Zone** = 상호작용 영역. **27개 role preset**: listbox, menu, menubar, radiogroup, tablist, toolbar, grid, treegrid, tree, dialog, alertdialog, combobox, feed, accordion, disclosure, slider, meter, spinbutton, switch, checkbox, separator, textbox, group, application, builderBlock
+- **Zone** = 상호작용 영역. **27개 role**: `defineRole(name, ariaSchema, preset)` → `Role` 객체. `listboxRole`, `treeRole` 등 export. `resolveRole()`이 Role 객체 수용
 - **Item** = Zone 안의 개별 요소. 포커스·선택·확장 상태를 가짐
 - **Field** = 편집 가능한 속성. **8개 type**: inline, tokens, block, editor, number, boolean, enum, enum[]
-- **Trigger** = 포인터 액션 발동기. `bind({ triggers: { Name: (payload) => BaseCommand } })` → prop-getter `(payload?: string) => data-attributes`. Focus와 독립 — 키보드는 keybinding, 포인터는 trigger. Overlay는 `zone.overlay()`로 분리.
+- **Trigger** = 포인터 액션 발동기. `bind(role, { triggers: { Name: (payload) => BaseCommand } })` → prop-getter `(payload?: string) => data-attributes`. Focus와 독립 — 키보드는 keybinding, 포인터는 trigger. Overlay는 `zone.overlay()`로 분리.
 
 ### OS Commands — 17개 모듈
 `OS_NAVIGATE`, `OS_ACTIVATE`, `OS_CHECK`, `OS_PRESS`, `OS_ESCAPE`, `OS_TAB`,
@@ -72,15 +72,16 @@
 
 ### App SDK (`packages/os-sdk/`)
 - `defineApp(id, initialState, options?)` → condition, selector, createZone, createCommand, createKeybinding
-- `ZoneHandle.bind(bindings)` → role, callbacks(onAction/onDelete/onCopy...), getItems, triggers
+- `ZoneHandle.bind(role, config)` → role은 첫 인자(string 또는 Role 객체), config에 callbacks(onAction/onDelete/onCopy...), getItems, triggers
 - **App Modules**: `history()`, `persistence()`, `router()`, `deleteToast()`
 - **Collection Library**: `createCollectionZone()` + `collectionBindings()` + `fromEntities()` — 4 패턴 CRUD
 - **상태 변경은 Immer `produce()`** — 모든 커맨드 핸들러가 사용. spread 대신 draft 직접 수정
 - **네이밍 2-tier**: OS 커맨드 = `SCREAMING_CASE` (`OS_DELETE`), 앱 커맨드 = `camelCase` (`toggleTodo`)
 
-### Testing (`packages/os-devtool/`)
-- `createPage(app, Component?)` — Playwright subset API, DOM 없이 <1ms 실행. `{ page, cleanup }` 반환
-- `createTestBench()` — OS 내부 테스트용 (앱 테스트는 createPage)
+### Testing (`packages/os-testing/` headless + `packages/os-devtool/` browser)
+- `createPage(app, Component?)` — Playwright subset API, DOM 없이 <1ms 실행. `{ page, cleanup }` 반환 (`@os-testing/page`)
+- `createTestBench()` — OS 내부 테스트용 (`@os-devtool/test-bench/`)
+- `createBrowserPage()` — 브라우저 전용, 실제 DOM 이벤트 (`@os-devtool/testing`)
 - **Zero Drift**: headless 테스트 통과 = DOM 동일 동작. 이것이 아키텍처 보장
 - **테스트 setup**: `const { page, cleanup } = createPage(app, Component)` → `page.goto("/")` → `page.keyboard.press()` / `page.click()`
 - **1경계 원칙**: 테스트 시나리오의 API는 `page`뿐. `os`/`app` import 금지. 관찰은 `page.locator()`만.
