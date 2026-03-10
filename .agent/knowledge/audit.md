@@ -152,6 +152,7 @@
 | [data-inspector] 가드 제거 | 이벤트 차단 → scope 필터 전환 | ✅ 해결 | 임시 조치(로그 노이즈)를 과도한 수단(이벤트 전면 차단)으로 구현. 트랜잭션 scope 필터로 대체 | 2026-03-08 |
 | ZiftMonitor useEffect expand-all | 동적 아이템 초기 확장 | 🟡 OS 갭 (OG-024) | expand.initial은 정적 아이템만 지원. 동적 getItems의 초기 expand 선언 메커니즘 부재 | 2026-03-08 |
 | Inspector focus 경쟁 | Inspector zone 클릭 시 activeZoneId 전환 | ⚪ 정당한 예외 | DevTools 패턴: 동일 브라우저 내 개발도구는 focus를 빼앗는 것이 정상. Chrome DevTools도 동일 | 2026-03-08 |
+| Combobox overlay type "listbox" | `OS_OVERLAY_OPEN({ type: "listbox" })` tsc error | 🔴 LLM 실수 → ✅ 수정 | ARIA role과 overlay type 혼동. combobox popup = `"popover"`. 유효 타입: dialog/alertdialog/menu/popover/tooltip | 2026-03-10 |
 
 ---
 

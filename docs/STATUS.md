@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-10T13:40
+> Last updated: 2026-03-11T00:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -13,7 +13,7 @@
 
 ## 🔥 Active Focus
 
-**testing / headless-page / page-contract-split** — AppPage 삭제 + Page·os·TestInstance 삼각 분리
+(없음 — 다음 프로젝트 선택 필요)
 
 ---
 
@@ -25,13 +25,14 @@
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
 | ban-os-from-tsx ⚠️ | Scaffold (T1-T8) | 03-09 |
+| condition-auto-disabled ⚠️ | — | — |
+| sdk-role-factory ⚠️ | — | — |
 
 ### testing
 > `packages/os-devtool/` · `tests/`
 
 | Project | Phase | Last Activity |
 |---------|-------|---------------|
-| **headless-page/page-contract-split** 🔥 | Scaffold (Heavy) | 03-10 |
 | headless-page/headless-simulator ⚠️ | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
 | test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
 | replay ⚠️ | Scaffold, T1 | 03-05 |
@@ -51,6 +52,14 @@
 |---------|-------|---------------|
 | apg-suite ⚠️ | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
 
+### docs
+> `docs/` 관리
+
+| Project | Phase | Last Activity |
+|---------|-------|---------------|
+| archive-cleanup ⚠️ | — | — |
+| docs-viewer/os-migration ⚠️ | — | — |
+
 ---
 
 ## ⚠️ Active Migrations
@@ -63,11 +72,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Domains | 4 |
-| Active Projects | 8 |
+| Domains | 5 |
+| Active Projects | 10 |
 | Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 1 (page-contract-split) |
-| Stale (4d+) | 6 |
+| Active Focus | 0 |
+| Stale (4d+) | 10 |
 | Active Migrations | 0 |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
