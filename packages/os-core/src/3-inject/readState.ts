@@ -30,3 +30,18 @@ export function readSelected(
 ): boolean {
   return readZone(kernel, zoneId)?.items[itemId]?.["aria-selected"] ?? false;
 }
+
+/**
+ * Read all selected item IDs in a zone.
+ * Returns IDs where aria-selected or aria-checked is true.
+ */
+export function readSelection(
+  kernel: HeadlessKernel,
+  zoneId?: string,
+): string[] {
+  const zone = readZone(kernel, zoneId);
+  if (!zone) return [];
+  return Object.entries(zone.items ?? {})
+    .filter(([, s]) => s?.["aria-selected"] || s?.["aria-checked"])
+    .map(([id]) => id);
+}
