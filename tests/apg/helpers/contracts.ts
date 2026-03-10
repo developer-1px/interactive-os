@@ -1,82 +1,81 @@
 /**
- * APG Contract Test Factory — Shared Axis Tests (3경계)
+ * APG Contract Test — Shared Axis Tests (Playwright 동형)
  *
  * Each function below tests one "axis" of keyboard behavior.
  * APG pattern files assemble these axes into W3C-compliant test suites.
  *
- * 3경계 원칙:
- *   page: Playwright subset (goto, click, keyboard.press, locator)
- *   os:   @os-core/engine/kernel 싱글턴 직접 import
- *   app:  defineApp 반환값 직접 사용
+ * 원칙:
+ *   - os import 0줄. 모든 assertion은 page.locator() 경유.
+ *   - page.locator(":focus") 로 현재 포커스 요소를 발견.
+ *   - 이 코드는 headless / browser / Playwright 3환경에서 동일하게 실행된다.
  *
  * Testing Trophy Tier 1:
- *   Input:  keyboard.press / click (user action simulation)
- *   Assert: computeAttrs(os) → tabIndex, aria-selected, data-focused (ARIA contract)
+ *   Input:  keyboard.press / click (user action)
+ *   Assert: locator → toBeFocused, toHaveAttribute (ARIA contract)
  */
 
-import { os } from "@os-core/engine/kernel";
-import { readActiveZoneId, readFocusedItemId } from "@os-core/3-inject/readState";
-import { computeAttrs } from "@os-core/3-inject/compute";
-import { readSelection } from "@os-core/3-inject/readState";
-import { OS_STACK_POP } from "@os-core/4-command/focus/stack";
 import type { Page } from "@os-devtool/testing/types";
-import { expect, it } from "vitest";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { it } from "vitest";
+
+const expect = osExpect;
 
 type Factory = (...args: string[]) => { page: Page; cleanup: () => void };
 
 // ─── Axis: Linear Navigation ───
 
-/** Tests vertical Down/Up navigation via pressKey (orientation=vertical) */
+/** Tests vertical Down/Up navigation (orientation=vertical) */
 export function assertVerticalNav(factory: Factory) {
-  it("Down Arrow: moves focus to next item", () => {
+  it("Down Arrow: moves focus to next item", async () => {
     const { page, cleanup } = factory();
-    const first = readFocusedItemId(os)!;
+    const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowDown");
-    const next = readFocusedItemId(os)!;
-    expect(next).not.toBe(first);
-    expect(computeAttrs(os, next).tabIndex).toBe(0);
-    expect(computeAttrs(os, first).tabIndex).toBe(-1);
+    const nextId = page.locator(":focus").getAttribute("id");
+    expect(nextId).not.toBe(firstId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + firstId)).toHaveAttribute("tabindex", "-1");
     cleanup();
   });
 
-  it("Up Arrow: moves focus to previous item", () => {
+  it("Up Arrow: moves focus to previous item", async () => {
     const { page, cleanup } = factory();
-    const first = readFocusedItemId(os)!;
+    const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowUp");
-    expect(readFocusedItemId(os)).toBe(first);
-    expect(computeAttrs(os, first).tabIndex).toBe(0);
+    await expect(page.locator(":focus")).toBeFocused();
+    expect(page.locator(":focus").getAttribute("id")).toBe(firstId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
 
-/** Tests horizontal Left/Right navigation via pressKey (orientation=horizontal) */
+/** Tests horizontal Left/Right navigation (orientation=horizontal) */
 export function assertHorizontalNav(factory: Factory) {
-  it("Right Arrow: moves focus to next item", () => {
+  it("Right Arrow: moves focus to next item", async () => {
     const { page, cleanup } = factory();
-    const first = readFocusedItemId(os)!;
+    const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowRight");
-    const next = readFocusedItemId(os)!;
-    expect(next).not.toBe(first);
-    expect(computeAttrs(os, next).tabIndex).toBe(0);
-    expect(computeAttrs(os, first).tabIndex).toBe(-1);
+    const nextId = page.locator(":focus").getAttribute("id");
+    expect(nextId).not.toBe(firstId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + firstId)).toHaveAttribute("tabindex", "-1");
     cleanup();
   });
 
-  it("Left Arrow: moves focus to previous item", () => {
+  it("Left Arrow: moves focus to previous item", async () => {
     const { page, cleanup } = factory();
-    const first = readFocusedItemId(os)!;
+    const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowRight");
     page.keyboard.press("ArrowLeft");
-    expect(readFocusedItemId(os)).toBe(first);
-    expect(computeAttrs(os, first).tabIndex).toBe(0);
+    expect(page.locator(":focus").getAttribute("id")).toBe(firstId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
 
 // ─── Axis: Boundary ───
 
-/** Tests that focus does NOT move at edges via pressKey (loop=false) */
+/** Tests that focus does NOT move at edges (loop=false) */
 export function assertBoundaryClamp(
   factory: Factory,
   opts: { firstId: string; lastId: string; axis: "vertical" | "horizontal" },
@@ -86,28 +85,28 @@ export function assertBoundaryClamp(
       ? { fwd: "ArrowDown", bwd: "ArrowUp" }
       : { fwd: "ArrowRight", bwd: "ArrowLeft" };
 
-  it(`${key.fwd} at last item: focus stays (clamp)`, () => {
+  it(`${key.fwd} at last item: focus stays (clamp)`, async () => {
     const { page, cleanup } = factory();
     for (let i = 0; i < 20; i++) page.keyboard.press(key.fwd);
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
-    expect(computeAttrs(os, opts.lastId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
     page.keyboard.press(key.fwd);
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
     cleanup();
   });
 
-  it(`${key.bwd} at first item: focus stays (clamp)`, () => {
+  it(`${key.bwd} at first item: focus stays (clamp)`, async () => {
     const { page, cleanup } = factory();
     for (let i = 0; i < 20; i++) page.keyboard.press(key.bwd);
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
-    expect(computeAttrs(os, opts.firstId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
     page.keyboard.press(key.bwd);
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
     cleanup();
   });
 }
 
-/** Tests that focus wraps at edges via pressKey (loop=true) */
+/** Tests that focus wraps at edges (loop=true) */
 export function assertLoop(opts: {
   firstId: string;
   lastId: string;
@@ -120,21 +119,21 @@ export function assertLoop(opts: {
       ? { fwd: "ArrowDown", bwd: "ArrowUp" }
       : { fwd: "ArrowRight", bwd: "ArrowLeft" };
 
-  it(`${key.fwd} at last item: wraps to first`, () => {
+  it(`${key.fwd} at last item: wraps to first`, async () => {
     const { page, cleanup } = opts.factoryAtLast();
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
     page.keyboard.press(key.fwd);
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
-    expect(computeAttrs(os, opts.firstId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 
-  it(`${key.bwd} at first item: wraps to last`, () => {
+  it(`${key.bwd} at first item: wraps to last`, async () => {
     const { page, cleanup } = opts.factoryAtFirst();
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
     page.keyboard.press(key.bwd);
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
-    expect(computeAttrs(os, opts.lastId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
@@ -145,26 +144,26 @@ export function assertHomeEnd(
   factory: Factory,
   opts: { firstId: string; lastId: string },
 ) {
-  it("Home: moves to first item", () => {
+  it("Home: moves to first item", async () => {
     const { page, cleanup } = factory();
     page.keyboard.press("Home");
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
-    expect(computeAttrs(os, opts.firstId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 
-  it("End: moves to last item", () => {
+  it("End: moves to last item", async () => {
     const { page, cleanup } = factory();
     page.keyboard.press("End");
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
-    expect(computeAttrs(os, opts.lastId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
 
 // ─── Axis: Orthogonal Ignored ───
 
-/** Tests that orthogonal axis keys have no effect via pressKey */
+/** Tests that orthogonal axis keys have no effect */
 export function assertOrthogonalIgnored(
   factory: Factory,
   axis: "vertical" | "horizontal",
@@ -174,21 +173,21 @@ export function assertOrthogonalIgnored(
       ? (["ArrowRight", "ArrowLeft"] as const)
       : (["ArrowDown", "ArrowUp"] as const);
 
-  it(`${k1}: no effect`, () => {
+  it(`${k1}: no effect`, async () => {
     const { page, cleanup } = factory();
-    const before = readFocusedItemId(os)!;
+    const beforeId = page.locator(":focus").getAttribute("id");
     page.keyboard.press(k1);
-    expect(readFocusedItemId(os)).toBe(before);
-    expect(computeAttrs(os, before).tabIndex).toBe(0);
+    expect(page.locator(":focus").getAttribute("id")).toBe(beforeId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 
-  it(`${k2}: no effect`, () => {
+  it(`${k2}: no effect`, async () => {
     const { page, cleanup } = factory();
-    const before = readFocusedItemId(os)!;
+    const beforeId = page.locator(":focus").getAttribute("id");
     page.keyboard.press(k2);
-    expect(readFocusedItemId(os)).toBe(before);
-    expect(computeAttrs(os, before).tabIndex).toBe(0);
+    expect(page.locator(":focus").getAttribute("id")).toBe(beforeId);
+    await expect(page.locator(":focus")).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
@@ -197,13 +196,12 @@ export function assertOrthogonalIgnored(
 
 /** Tests that selection (aria-selected) follows focus on navigation */
 export function assertFollowFocus(factory: Factory) {
-  it("selection follows focus on navigation (aria-selected)", () => {
+  it("selection follows focus on navigation (aria-selected)", async () => {
     const { page, cleanup } = factory();
-    const first = readFocusedItemId(os)!;
+    const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowDown");
-    const next = readFocusedItemId(os)!;
-    expect(computeAttrs(os, next)["aria-selected"]).toBe(true);
-    expect(computeAttrs(os, first)["aria-selected"]).toBe(false);
+    await expect(page.locator(":focus")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#" + firstId)).toHaveAttribute("aria-selected", "false");
     cleanup();
   });
 }
@@ -211,40 +209,29 @@ export function assertFollowFocus(factory: Factory) {
 // ─── Axis: No Selection ───
 
 /** Tests that navigation does not create selection (mode=none) */
-export function assertNoSelection(factory: Factory) {
-  it("navigation does not create selection", () => {
+export function assertNoSelection(factory: Factory, itemIds: string[]) {
+  it("navigation does not create selection", async () => {
     const { page, cleanup } = factory();
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowDown");
-    const zoneId = readActiveZoneId(os) ?? "";
-    expect(readSelection(os, zoneId)).toEqual([]);
+    for (const id of itemIds) {
+      await expect(page.locator("#" + id)).not.toHaveAttribute("aria-selected", "true");
+    }
     cleanup();
   });
 }
 
 // ─── Axis: Popup Lifecycle ───
 
-/** Tests Escape closes the popup zone */
-export function assertEscapeClose(factory: Factory) {
-  it("Escape: closes popup (clears active zone)", () => {
-    const { page, cleanup } = factory();
-    page.keyboard.press("Escape");
-    expect(readActiveZoneId(os)).toBeNull();
-    cleanup();
-  });
-}
-
-/** Tests Escape + stack pop restores focus to invoker */
+/** Tests Escape restores focus to invoker */
 export function assertFocusRestore(
   factory: Factory,
-  opts: { invokerZoneId: string; invokerItemId: string },
+  opts: { invokerItemId: string },
 ) {
-  it("Escape + stack pop: restores focus to invoker", () => {
+  it("Escape: restores focus to invoker", async () => {
     const { page, cleanup } = factory();
     page.keyboard.press("Escape");
-    os.dispatch(OS_STACK_POP());
-    expect(readActiveZoneId(os)).toBe(opts.invokerZoneId);
-    expect(readFocusedItemId(os, opts.invokerZoneId)).toBe(opts.invokerItemId);
+    await expect(page.locator("#" + opts.invokerItemId)).toBeFocused();
     cleanup();
   });
 }
@@ -261,21 +248,21 @@ export function assertTabTrap(
     factoryAtLast?: Factory;
   },
 ) {
-  it("Tab at last: wraps to first (focus trap)", () => {
+  it("Tab at last: wraps to first (focus trap)", async () => {
     const { page, cleanup } = (opts.factoryAtLast ?? factory)();
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
     page.keyboard.press("Tab");
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
-    expect(computeAttrs(os, opts.firstId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 
-  it("Shift+Tab at first: wraps to last (focus trap)", () => {
+  it("Shift+Tab at first: wraps to last (focus trap)", async () => {
     const { page, cleanup } = (opts.factoryAtFirst ?? factory)();
-    expect(readFocusedItemId(os)).toBe(opts.firstId);
+    await expect(page.locator("#" + opts.firstId)).toBeFocused();
     page.keyboard.press("Shift+Tab");
-    expect(readFocusedItemId(os)).toBe(opts.lastId);
-    expect(computeAttrs(os, opts.lastId).tabIndex).toBe(0);
+    await expect(page.locator("#" + opts.lastId)).toBeFocused();
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
     cleanup();
   });
 }
