@@ -12,21 +12,23 @@
  */
 
 import { TodoApp } from "@apps/todo/app";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { os } from "@os-core/engine/kernel";
+import type { Page } from "@os-devtool/testing";
+import { createPage } from "@os-devtool/testing/page";
 import { buildKeyboardInput } from "@os-devtool/testing/simulate";
-import type { AppPageInternal } from "@os-sdk/app/defineApp/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import TodoPage from "../../../src/pages/TodoPage";
 
-let page: AppPageInternal<unknown>;
+let page: Page;
+let cleanup: () => void;
 
 beforeEach(() => {
-  page = createHeadlessPage(TodoApp, TodoPage);
+  ({ page, cleanup } = createPage(TodoApp, TodoPage));
   page.goto("/");
 });
 
 afterEach(() => {
-  page.cleanup();
+  cleanup();
 });
 
 /** Helper: focus first item in list zone */
@@ -46,7 +48,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("ArrowDown produces correct core fields", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
 
       expect(input.canonicalKey).toBe("ArrowDown");
       expect(input.key).toBe("ArrowDown");
@@ -59,17 +61,17 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("cursor is populated when item is focused", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
 
       expect(input.cursor).not.toBeNull();
-      expect(input.cursor!.focusId).toBe("todo_1");
-      expect(input.cursor!.selection).toEqual(expect.any(Array));
+      expect(input.cursor?.focusId).toBe("todo_1");
+      expect(input.cursor?.selection).toEqual(expect.any(Array));
     });
 
     it("Space in navigating state: isFieldActive is false", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "Space");
+      const input = buildKeyboardInput(os, "Space");
 
       expect(input.isEditing).toBe(false);
       expect(input.isFieldActive).toBe(false);
@@ -78,7 +80,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("guard fields default to safe values", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
 
       expect(input.isComposing).toBe(false);
       expect(input.isDefaultPrevented).toBe(false);
@@ -88,7 +90,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("trigger fields are null in headless", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
 
       expect(input.focusedTriggerId).toBeNull();
       expect(input.focusedTriggerRole).toBeNull();
@@ -104,7 +106,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
       setupListFocus();
       enterEditing();
 
-      const input = buildKeyboardInput(page.kernel, "Enter");
+      const input = buildKeyboardInput(os, "Enter");
 
       expect(input.isEditing).toBe(true);
       expect(input.editingFieldId).toBe("todo_1");
@@ -117,7 +119,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
       setupListFocus();
       enterEditing();
 
-      const input = buildKeyboardInput(page.kernel, "a");
+      const input = buildKeyboardInput(os, "a");
 
       expect(input.isEditing).toBe(true);
       // Letter keys are NOT delegated to OS → field absorbs → isFieldActive = true
@@ -128,7 +130,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
       setupListFocus();
       enterEditing();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
 
       expect(input.isEditing).toBe(true);
       // ArrowDown IS delegated to OS for inline fields
@@ -139,7 +141,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
       setupListFocus();
       enterEditing();
 
-      const input = buildKeyboardInput(page.kernel, "Escape");
+      const input = buildKeyboardInput(os, "Escape");
 
       expect(input.isEditing).toBe(true);
       // Escape is NOT in INLINE_ZONE_PASSTHROUGH → field absorbs it
@@ -154,7 +156,7 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("KeyboardInput has exactly 18 fields (dead fields removed)", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(page.kernel, "ArrowDown");
+      const input = buildKeyboardInput(os, "ArrowDown");
       const keys = Object.keys(input);
 
       // 21 original - 3 dead (focusedItemRole, focusedItemExpanded, isInspector) = 18
@@ -164,10 +166,10 @@ describe("KeyboardInput isomorphism: buildKeyboardInput contract", () => {
     it("does NOT contain removed dead fields", () => {
       setupListFocus();
 
-      const input = buildKeyboardInput(
-        page.kernel,
-        "ArrowDown",
-      ) as unknown as Record<string, unknown>;
+      const input = buildKeyboardInput(os, "ArrowDown") as unknown as Record<
+        string,
+        unknown
+      >;
 
       expect(input).not.toHaveProperty("focusedItemRole");
       expect(input).not.toHaveProperty("focusedItemExpanded");
