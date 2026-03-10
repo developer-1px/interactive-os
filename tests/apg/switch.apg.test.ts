@@ -9,74 +9,101 @@
  *   - Enter: toggle checked state
  *   - Focusable (tabIndex=0 when focused)
  *
- * Config: switch role, single-select + followFocus, check.mode="check",
- *         onCheck toggles selection (→ aria-checked)
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
+ *
+ * Note: click triggers onAction → OS_CHECK, so the initial page.click()
+ * in beforeEach both focuses AND checks (toggles to true).
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
 import {
-  SWITCHES,
   SwitchApp,
+  SwitchPattern,
 } from "@/pages/apg-showcase/patterns/SwitchPattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup ───
+// click focuses AND checks the switch (onAction → OS_CHECK)
+// So initial state after beforeEach: switch-notifications is focused + checked (true)
 
-const SWITCH_IDS = SWITCHES.map((s) => s.id);
-const SWITCH_ID = SWITCH_IDS[0]!; // "switch-notifications"
+const SWITCH_ID = "#switch-notifications";
 
-function switchFactory() {
-  const page = createHeadlessPage(SwitchApp);
-  page.setupZone("apg-switch", {
-    items: SWITCH_IDS,
-    focusedItemId: SWITCH_ID,
-  });
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
 
-/** Factory with switch initially ON (checked) */
-function switchFactoryOn() {
-  const page = switchFactory();
-  // Toggle to ON
-  page.keyboard.press("Enter");
-  return page;
-}
+beforeEach(() => {
+  ({ page, cleanup } = createPage(SwitchApp, SwitchPattern));
+  page.goto("/");
+  page.click("switch-notifications");
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════════════════════
 // Toggle via Space
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Switch: Toggle via Space", () => {
-  it("Space on unchecked switch: toggles to checked", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+  it("Space on checked switch: toggles to unchecked", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("Space on checked switch: toggles to unchecked", () => {
-    const t = switchFactoryOn();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+  it("Space on unchecked switch: toggles to checked", async () => {
+    // Uncheck first
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 
-  it("Space toggles multiple times correctly", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+  it("Space toggles multiple times correctly", async () => {
+    // starts checked (from beforeEach click)
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Space");
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 });
 
@@ -85,22 +112,34 @@ describe("APG Switch: Toggle via Space", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Switch: Toggle via Enter", () => {
-  it("Enter on unchecked switch: toggles to checked", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+  it("Enter on checked switch: toggles to unchecked", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("Enter on checked switch: toggles to unchecked", () => {
-    const t = switchFactoryOn();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+  it("Enter on unchecked switch: toggles to checked", async () => {
+    // Uncheck first
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -109,22 +148,34 @@ describe("APG Switch: Toggle via Enter", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Switch: Click interaction", () => {
-  it("click on unchecked switch: toggles to checked", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+  it("click on checked switch: toggles to unchecked", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.click(SWITCH_ID);
+    page.click("switch-notifications");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("click on checked switch: toggles to unchecked", () => {
-    const t = switchFactoryOn();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+  it("click on unchecked switch: toggles to checked", async () => {
+    // Uncheck first
+    page.keyboard.press("Space");
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
-    t.click(SWITCH_ID);
+    page.click("switch-notifications");
 
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -133,28 +184,34 @@ describe("APG Switch: Click interaction", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Switch: DOM Projection (attrs)", () => {
-  it("item has role=switch", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID).role).toBe("switch");
+  it("item has role=switch", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute("role", "switch");
   });
 
-  it("unchecked switch: aria-checked=false", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(false);
+  it("checked switch: aria-checked=true", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 
-  it("checked switch: aria-checked=true", () => {
-    const t = switchFactoryOn();
-    expect(t.attrs(SWITCH_ID)["aria-checked"]).toBe(true);
+  it("unchecked switch: aria-checked=false", async () => {
+    page.keyboard.press("Space"); // uncheck
+
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("focused switch: tabIndex=0", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID).tabIndex).toBe(0);
+  it("focused switch: tabindex=0", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute("tabindex", "0");
   });
 
-  it("focused switch: data-focused=true", () => {
-    const t = switchFactory();
-    expect(t.attrs(SWITCH_ID)["data-focused"]).toBe(true);
+  it("focused switch: data-focused=true", async () => {
+    await expect(page.locator(SWITCH_ID)).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
   });
 });

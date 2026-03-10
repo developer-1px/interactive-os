@@ -8,59 +8,72 @@
  *   - Space: toggle checked state
  *   - Enter: does NOT toggle state (per APG spec)
  *   - Focusable (tabIndex=0 when focused)
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { CheckboxApp } from "@/pages/apg-showcase/patterns/CheckboxPattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import {
+  CheckboxApp,
+  CheckboxPattern,
+} from "@/pages/apg-showcase/patterns/CheckboxPattern";
 
-// ─── Test Setup (actual showcase config) ───
+// ─── Test Setup ───
+// click focuses AND checks the checkbox (onAction → OS_CHECK)
+// So initial state after beforeEach: cond-lettuce is focused + checked
 
-// Condiment IDs match the showcase exactly
-const CONDIMENT_IDS = [
-  "cond-lettuce",
-  "cond-tomato",
-  "cond-mustard",
-  "cond-sprouts",
-];
-const CHECKBOX_ID = CONDIMENT_IDS[0]!; // "cond-lettuce"
+const CHECKBOX_ID = "#cond-lettuce";
 
-function checkboxFactory() {
-  const page = createHeadlessPage(CheckboxApp);
-  page.setupZone("apg-checkbox", {
-    items: CONDIMENT_IDS,
-    focusedItemId: CHECKBOX_ID,
-  });
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
 
-function checkboxFactoryOn() {
-  const page = checkboxFactory();
-  page.keyboard.press("Space");
-  return page;
-}
+beforeEach(() => {
+  ({ page, cleanup } = createPage(CheckboxApp, CheckboxPattern));
+  page.goto("/");
+  page.click("cond-lettuce");
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+const expect = osExpect;
 
 // ═══════════════════════════════════════════════════════════════════
 // Toggle via Space (K1)
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Checkbox: Toggle via Space (K1)", () => {
-  it("Space on unchecked checkbox: toggles to checked", () => {
-    const t = checkboxFactory();
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(false);
+  it("Space on checked checkbox: toggles to unchecked", async () => {
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space");
 
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(true);
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("Space on checked checkbox: toggles to unchecked", () => {
-    const t = checkboxFactoryOn();
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(true);
+  it("Space toggles back to checked", async () => {
+    page.keyboard.press("Space"); // uncheck
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
 
-    t.keyboard.press("Space");
+    page.keyboard.press("Space"); // re-check
 
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(false);
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -69,14 +82,19 @@ describe("APG Checkbox: Toggle via Space (K1)", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Checkbox: Enter should not toggle", () => {
-  it("Enter on unchecked checkbox: remains unchecked", () => {
-    const t = checkboxFactory();
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(false);
+  it("Enter on checked checkbox: remains checked", async () => {
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
-    t.keyboard.press("Enter");
+    page.keyboard.press("Enter");
 
     // Fails here if Enter incorrectly triggers OS_CHECK
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(false);
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -87,24 +105,28 @@ describe("APG Checkbox: Enter should not toggle", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe("APG Checkbox: DOM Projection (attrs)", () => {
-  it("item has role=checkbox (A1)", () => {
-    const t = checkboxFactory();
-    expect(t.attrs(CHECKBOX_ID).role).toBe("checkbox");
+  it("item has role=checkbox (A1)", async () => {
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute("role", "checkbox");
   });
 
-  it("unchecked checkbox: aria-checked=false (A3)", () => {
-    const t = checkboxFactory();
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(false);
+  it("checked checkbox: aria-checked=true (A2)", async () => {
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 
-  it("checked checkbox: aria-checked=true (A2)", () => {
-    const t = checkboxFactoryOn();
-    expect(t.attrs(CHECKBOX_ID)["aria-checked"]).toBe(true);
+  it("unchecked checkbox: aria-checked=false (A3)", async () => {
+    page.keyboard.press("Space"); // uncheck
+
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("focused checkbox: tabIndex=0", () => {
-    const t = checkboxFactory();
-    expect(t.attrs(CHECKBOX_ID).tabIndex).toBe(0);
+  it("focused checkbox: tabIndex=0", async () => {
+    await expect(page.locator(CHECKBOX_ID)).toHaveAttribute("tabindex", "0");
   });
 
   // Note: Tri-state (mixed) testing will require OS level support for explicit value

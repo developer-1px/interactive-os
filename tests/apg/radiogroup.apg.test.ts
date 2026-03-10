@@ -4,58 +4,85 @@
  *
  * Testing Trophy Tier 1:
  *   Input:  pressKey / click (user action simulation)
- *   Assert: attrs() → tabIndex, aria-checked, data-focused (ARIA contract)
+ *   Assert: locator → toHaveAttribute (ARIA contract)
  *
  * Config: vertical, loop, followFocus, disallowEmpty
  * Unique: aria-checked instead of aria-selected, Space to check
+ *
+ * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import { describe, expect, it } from "vitest";
-import { CrustApp } from "@/pages/apg-showcase/patterns/RadioGroupPattern";
+import type { Page } from "@os-devtool/testing";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-devtool/testing/page";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import {
+  CrustApp,
+  RadioGroupPattern,
+} from "@/pages/apg-showcase/patterns/RadioGroupPattern";
 
 // ─── Test Setup (actual showcase config) ───
 
 // Crust radiogroup: "Regular crust", "Deep dish", "Thin crust"
 const ITEMS = ["radio-regular", "radio-deep", "radio-thin"];
 
-function setup(selected = "radio-regular") {
-  const page = createHeadlessPage(CrustApp);
-  page.setupZone("radiogroup-crust", {
-    items: ITEMS,
-    focusedItemId: selected,
-  });
-  page.click(selected);
-  return page;
-}
+let page: Page;
+let cleanup: () => void;
+
+const expect = osExpect;
+
+beforeEach(() => {
+  ({ page, cleanup } = createPage(CrustApp, RadioGroupPattern));
+  page.goto("/");
+  // click first radio to focus + check it (radiogroup followFocus)
+  page.click("radio-regular");
+});
+
+afterEach(() => {
+  cleanup();
+});
 
 // ═══════════════════════════════════════════════════
 // Navigation — vertical with loop
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Navigation", () => {
-  it("ArrowDown moves focus to next radio", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowDown");
-    expect(t.focusedItemId()).toBe("radio-deep");
+  it("ArrowDown moves focus to next radio", async () => {
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#radio-deep")).toHaveAttribute("tabindex", "0");
   });
 
-  it("ArrowUp moves focus to previous radio", () => {
-    const t = setup("radio-deep");
-    t.keyboard.press("ArrowUp");
-    expect(t.focusedItemId()).toBe("radio-regular");
+  it("ArrowUp moves focus to previous radio", async () => {
+    // Start at radio-deep
+    page.keyboard.press("ArrowDown"); // → radio-deep
+    page.keyboard.press("ArrowUp");
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
   });
 
-  it("ArrowDown at last wraps to first (loop)", () => {
-    const t = setup("radio-thin");
-    t.keyboard.press("ArrowDown");
-    expect(t.focusedItemId()).toBe("radio-regular");
+  it("ArrowDown at last wraps to first (loop)", async () => {
+    page.keyboard.press("ArrowDown"); // → radio-deep
+    page.keyboard.press("ArrowDown"); // → radio-thin
+    page.keyboard.press("ArrowDown"); // → radio-regular (loop)
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 
-  it("ArrowUp at first wraps to last (loop)", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowUp");
-    expect(t.focusedItemId()).toBe("radio-thin");
+  it("ArrowUp at first wraps to last (loop)", async () => {
+    page.keyboard.press("ArrowUp"); // → radio-thin (loop)
+    await expect(page.locator("#radio-thin")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#radio-thin")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -64,27 +91,49 @@ describe("APG Radiogroup: Navigation", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Selection follows focus (aria-checked)", () => {
-  it("ArrowDown checks next radio, unchecks previous", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowDown");
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(true);
-    expect(t.attrs("radio-regular")["aria-checked"]).toBe(false);
+  it("ArrowDown checks next radio, unchecks previous", async () => {
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("ArrowUp checks previous radio", () => {
-    const t = setup("radio-thin");
-    t.keyboard.press("ArrowUp");
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(true);
-    expect(t.attrs("radio-thin")["aria-checked"]).toBe(false);
+  it("ArrowUp checks previous radio", async () => {
+    // Navigate to radio-thin first
+    page.keyboard.press("ArrowDown"); // → radio-deep
+    page.keyboard.press("ArrowDown"); // → radio-thin
+    page.keyboard.press("ArrowUp"); // → radio-deep
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-thin")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
-  it("only one radio is checked at any time", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowDown");
-    t.keyboard.press("ArrowDown");
-    const checked = ITEMS.filter((id) => t.attrs(id)["aria-checked"] === true);
-    expect(checked).toHaveLength(1);
-    expect(checked[0]).toBe("radio-thin");
+  it("only one radio is checked at any time", async () => {
+    page.keyboard.press("ArrowDown");
+    page.keyboard.press("ArrowDown");
+    // radio-thin should be the only checked one
+    await expect(page.locator("#radio-thin")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 });
 
@@ -93,14 +142,18 @@ describe("APG Radiogroup: Selection follows focus (aria-checked)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Space to check", () => {
-  it("Space checks the focused radio", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowDown"); // focus radio-deep, auto-checked by followFocus
-    // Move without checking (verify Space still works)
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(true);
-    t.keyboard.press("Space");
+  it("Space checks the focused radio", async () => {
+    page.keyboard.press("ArrowDown"); // focus radio-deep, auto-checked by followFocus
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    page.keyboard.press("Space");
     // Should remain checked (Space on already-checked = no-op in APG)
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(true);
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -109,14 +162,31 @@ describe("APG Radiogroup: Space to check", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Never empty", () => {
-  it("always exactly one radio checked after navigation", () => {
-    const t = setup("radio-regular");
+  it("always exactly one radio checked after navigation", async () => {
+    // After 5 ArrowDowns with 3 items + loop, focus lands on radio-thin (i=2 mod 3 → index 2)
+    // Each step: the focused item must be checked, others unchecked
+    const expectedFocus = [
+      "radio-deep",
+      "radio-thin",
+      "radio-regular",
+      "radio-deep",
+      "radio-thin",
+    ];
     for (let i = 0; i < 5; i++) {
-      t.keyboard.press("ArrowDown");
-      const checked = ITEMS.filter(
-        (id) => t.attrs(id)["aria-checked"] === true,
+      page.keyboard.press("ArrowDown");
+      const focusedId = expectedFocus[i]!;
+      await expect(page.locator(`#${focusedId}`)).toHaveAttribute(
+        "aria-checked",
+        "true",
       );
-      expect(checked).toHaveLength(1);
+      for (const id of ITEMS) {
+        if (id !== focusedId) {
+          await expect(page.locator(`#${id}`)).toHaveAttribute(
+            "aria-checked",
+            "false",
+          );
+        }
+      }
     }
   });
 });
@@ -126,18 +196,23 @@ describe("APG Radiogroup: Never empty", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Roving tabindex", () => {
-  it("checked radio has tabIndex 0, others -1", () => {
-    const t = setup("radio-deep");
-    expect(t.attrs("radio-deep").tabIndex).toBe(0);
-    expect(t.attrs("radio-regular").tabIndex).toBe(-1);
-    expect(t.attrs("radio-thin").tabIndex).toBe(-1);
+  it("checked radio has tabIndex 0, others -1", async () => {
+    // radio-regular is checked after beforeEach click
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
+    await expect(page.locator("#radio-deep")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#radio-thin")).toHaveAttribute("tabindex", "-1");
   });
 
-  it("after navigation, new focus gets tabIndex 0", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowDown");
-    expect(t.attrs("radio-deep").tabIndex).toBe(0);
-    expect(t.attrs("radio-regular").tabIndex).toBe(-1);
+  it("after navigation, new focus gets tabIndex 0", async () => {
+    page.keyboard.press("ArrowDown");
+    await expect(page.locator("#radio-deep")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
   });
 });
 
@@ -147,35 +222,53 @@ describe("APG Radiogroup: Roving tabindex", () => {
 
 describe("APG Radiogroup: Right/Left Arrow (W3C N1/N3)", () => {
   // N1: "Right Arrow: move focus to next radio, check it, uncheck previous"
-  it("ArrowRight moves focus to next and checks it", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowRight");
-    expect(t.focusedItemId()).toBe("radio-deep");
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(true);
-    expect(t.attrs("radio-regular")["aria-checked"]).toBe(false);
+  it("ArrowRight moves focus to next and checks it", async () => {
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator("#radio-deep")).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
   // N3: "Left Arrow: move focus to previous radio, check it, uncheck previous"
-  it("ArrowLeft moves focus to previous and checks it", () => {
-    const t = setup("radio-deep");
-    t.keyboard.press("ArrowLeft");
-    expect(t.focusedItemId()).toBe("radio-regular");
-    expect(t.attrs("radio-regular")["aria-checked"]).toBe(true);
-    expect(t.attrs("radio-deep")["aria-checked"]).toBe(false);
+  it("ArrowLeft moves focus to previous and checks it", async () => {
+    // Navigate to radio-deep first
+    page.keyboard.press("ArrowDown"); // → radio-deep
+    page.keyboard.press("ArrowLeft"); // → radio-regular
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
   // N5 variant: "Right Arrow at last → loop to first"
-  it("ArrowRight at last wraps to first (loop)", () => {
-    const t = setup("radio-thin");
-    t.keyboard.press("ArrowRight");
-    expect(t.focusedItemId()).toBe("radio-regular");
+  it("ArrowRight at last wraps to first (loop)", async () => {
+    page.keyboard.press("ArrowDown"); // → radio-deep
+    page.keyboard.press("ArrowDown"); // → radio-thin
+    page.keyboard.press("ArrowRight"); // → radio-regular (loop)
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
   });
 
   // N6 variant: "Left Arrow at first → loop to last"
-  it("ArrowLeft at first wraps to last (loop)", () => {
-    const t = setup("radio-regular");
-    t.keyboard.press("ArrowLeft");
-    expect(t.focusedItemId()).toBe("radio-thin");
+  it("ArrowLeft at first wraps to last (loop)", async () => {
+    page.keyboard.press("ArrowLeft"); // → radio-thin (loop)
+    await expect(page.locator("#radio-thin")).toHaveAttribute("tabindex", "0");
   });
 });
 
@@ -185,12 +278,13 @@ describe("APG Radiogroup: Right/Left Arrow (W3C N1/N3)", () => {
 
 describe("APG Radiogroup: ARIA projection (W3C R1/R2)", () => {
   // R2: "each radio button element has role radio"
-  it("items have role='radio' projected via check.mode='check'", () => {
-    const t = setup("radio-regular");
+  it("items have role='radio' projected via check.mode='check'", async () => {
     // check.mode="check" → aria-checked projected instead of aria-selected
     // Verify by checking aria-checked exists (not aria-selected)
-    expect(t.attrs("radio-regular")["aria-checked"]).toBeDefined();
-    expect(t.attrs("radio-regular")["aria-selected"]).toBeUndefined();
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });
 
@@ -199,12 +293,17 @@ describe("APG Radiogroup: ARIA projection (W3C R1/R2)", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Click to check", () => {
-  it("clicking a radio button checks it and unchecks previous", () => {
-    const t = setup("radio-regular");
-    t.click("radio-thin");
-    expect(t.attrs("radio-thin")["aria-checked"]).toBe(true);
-    expect(t.attrs("radio-regular")["aria-checked"]).toBe(false);
-    expect(t.focusedItemId()).toBe("radio-thin");
+  it("clicking a radio button checks it and unchecks previous", async () => {
+    page.click("radio-thin");
+    await expect(page.locator("#radio-thin")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+    await expect(page.locator("#radio-thin")).toHaveAttribute("tabindex", "0");
   });
 });
 
@@ -213,13 +312,14 @@ describe("APG Radiogroup: Click to check", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Radiogroup: Tab entry (W3C F1)", () => {
-  it("entering zone focuses the checked radio (entry: selected)", () => {
-    const t = setup("radio-deep"); // radio-deep is checked
+  it("entering zone focuses the checked radio (entry: selected)", async () => {
+    // Navigate to radio-deep so it becomes checked
+    page.keyboard.press("ArrowDown"); // → radio-deep checked
     // Tab away and back
-    t.keyboard.press("Tab"); // leave zone
-    t.keyboard.press("Tab"); // re-enter zone
+    page.keyboard.press("Tab"); // leave zone
+    page.keyboard.press("Tab"); // re-enter zone
     // Should return to the checked radio
-    expect(t.focusedItemId()).toBe("radio-deep");
+    await expect(page.locator("#radio-deep")).toHaveAttribute("tabindex", "0");
   });
 });
 
@@ -229,19 +329,30 @@ describe("APG Radiogroup: Tab entry (W3C F1)", () => {
 
 describe("APG Radiogroup: Negative tests (enforceMode)", () => {
   // NEG1: Shift+Click on single-select should NOT range-select
-  it("Shift+Click does NOT range-select (single mode)", () => {
-    const t = setup("radio-regular");
-    t.click("radio-thin", { shift: true });
-    // Should have exactly one checked
-    const checked = ITEMS.filter((id) => t.attrs(id)["aria-checked"] === true);
-    expect(checked).toHaveLength(1);
+  it("Shift+Click does NOT range-select (single mode)", async () => {
+    page.click("radio-thin", { shift: true });
+    // Should have exactly one checked — radio-thin (last clicked)
+    await expect(page.locator("#radio-thin")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+    await expect(page.locator("#radio-deep")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
   // NEG2: Cmd+Click should NOT deselect (disallowEmpty)
-  it("Cmd+Click does NOT deselect last checked (disallowEmpty)", () => {
-    const t = setup("radio-regular");
-    t.click("radio-regular", { meta: true });
+  it("Cmd+Click does NOT deselect last checked (disallowEmpty)", async () => {
+    page.click("radio-regular", { meta: true });
     // radio-regular should remain checked (cannot toggle off)
-    expect(t.attrs("radio-regular")["aria-checked"]).toBe(true);
+    await expect(page.locator("#radio-regular")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
   });
 });

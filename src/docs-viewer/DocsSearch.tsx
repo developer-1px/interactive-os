@@ -2,14 +2,18 @@
  * DocsSearch — docs-viewer internal search overlay.
  *
  * Triggered by `/` key (OS keybinding → OPEN_SEARCH).
- * Controlled by DocsApp.searchOpen state.
+ * Controlled by OS overlay system (docs-search dialog).
  * Fuzzy matches file names from allFiles.
  */
 import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
+import {
+  closeOverlay,
+  useOverlay,
+} from "@os-react/6-project/accessors/useOverlay";
 import clsx from "clsx";
 import { FileText, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { closeSearch, DocsApp, selectDoc } from "./app";
+import { selectDoc } from "./app";
 import { cleanLabel, type DocItem } from "./docsUtils";
 
 /** Simple fuzzy match: all query chars appear in order */
@@ -25,7 +29,7 @@ function fuzzyMatch(query: string, text: string): boolean {
 
 export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
   const dispatch = useDispatch();
-  const searchOpen = DocsApp.useComputed((s) => s.searchOpen);
+  const searchOpen = useOverlay("docs-search");
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,7 +71,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
   const handleSelect = useCallback(
     (path: string) => {
       dispatch(selectDoc({ id: path }));
-      dispatch(closeSearch());
+      closeOverlay("docs-search");
     },
     [dispatch],
   );
@@ -76,7 +80,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        dispatch(closeSearch());
+        closeOverlay("docs-search");
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -89,7 +93,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
         if (selected) handleSelect(selected.path);
       }
     },
-    [results, selectedIndex, handleSelect, dispatch],
+    [results, selectedIndex, handleSelect],
   );
 
   if (!searchOpen) return null;
@@ -98,7 +102,7 @@ export function DocsSearch({ allFiles }: { allFiles: DocItem[] }) {
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/30 backdrop-blur-sm"
       onClick={(e) => {
-        if (e.target === e.currentTarget) dispatch(closeSearch());
+        if (e.target === e.currentTarget) closeOverlay("docs-search");
       }}
       onKeyDown={() => {}}
       role="presentation"
