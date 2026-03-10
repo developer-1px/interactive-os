@@ -854,14 +854,41 @@ export type { ItemAttrs };
 export type { AppPage, AppPageInternal } from "@os-sdk/app/defineApp/types";
 
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
+import type { Page } from "./types";
 
 /**
- * Create a headless integration test page.
+ * Create a headless test page — Playwright sanctum.
+ *
+ * Returns ONLY the Page interface (goto, click, keyboard, locator).
+ * OS state inspection uses `os` singleton directly:
+ *   import { os } from "@os-core/engine/kernel";
+ *   import { readFocusedItemId } from "@os-core/3-inject/readState";
  *
  * Usage:
- *   const page = createHeadlessPage(TodoApp, ListView);
+ *   const page = createPage(TodoApp, TodoPage);
  *   page.goto("/");
  *   page.keyboard.press("ArrowDown");
+ *   readFocusedItemId(os);  // os 직접
+ */
+export function createPage<S>(app: AppHandle<S>, Component?: FC): Page {
+  const internal = createAppPage<S>(
+    app.__appId,
+    app.__zoneBindings,
+    Component ?? null,
+    app.__appKeybindings,
+  );
+
+  return {
+    goto: internal.goto,
+    click: internal.click,
+    keyboard: internal.keyboard,
+    locator: internal.locator,
+  };
+}
+
+/**
+ * @deprecated Use createPage() instead.
+ * Returns the mixed AppPageInternal (anti-pattern: page + os + app 혼합).
  */
 export function createHeadlessPage<S>(
   app: AppHandle<S>,

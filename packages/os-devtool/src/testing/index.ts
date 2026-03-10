@@ -1,18 +1,21 @@
 /**
  * @os-devtool/testing — Playwright-compatible testing interface.
  *
- * Same 6-method API runs in 3 environments:
- *   1. Headless:  createHeadlessPage() — vitest, pure functions, <1ms
- *   2. Browser:   createBrowserPage()  — Inspector, PointerEvent + animation
- *   3. Playwright: native page         — E2E, shim 0 lines
+ * 3경계 원칙: page (Playwright sanctum) · os (싱글턴) · app (defineApp)
+ *
+ *   1. Headless:  createPage()        — vitest, pure functions, <1ms
+ *   2. Browser:   createBrowserPage() — Inspector, PointerEvent + animation
+ *   3. Playwright: native page        — E2E, shim 0 lines
  *
  * Usage:
- *   import { createHeadlessPage, expect } from "@os-devtool/testing";
+ *   import { createPage } from "@os-devtool/testing";
+ *   import { os } from "@os-core/engine/kernel";
+ *   import { readFocusedItemId } from "@os-core/3-inject/readState";
  *
- *   const page = createHeadlessPage();
- *   page.setupZone("zone", { items: ["a", "b", "c"], role: "listbox" });
- *   await page.keyboard.press("ArrowDown");
- *   await expect(page.locator("b")).toBeFocused();
+ *   const page = createPage(TodoApp, TodoPage);
+ *   page.goto("/");
+ *   page.keyboard.press("ArrowDown");
+ *   readFocusedItemId(os); // os 직접
  */
 
 export {
@@ -23,7 +26,7 @@ export {
   resetFocusState,
 } from "./createBrowserPage";
 export { expect } from "./expect";
-export { createHeadlessPage } from "./page";
+export { createHeadlessPage, createPage } from "./page";
 export {
   accordionScript,
   allAriaScripts,
