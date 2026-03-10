@@ -14,12 +14,12 @@ Risks:
 - DocsSearch 마이그레이션이 기존 동작을 깨뜨릴 수 있음 → headless 테스트로 보호
 
 ## Now
-- [ ] T1: app.ts overlay 선언 + searchOpen/openSearch/closeSearch 제거 — 크기: S, 의존: —
-- [ ] T2: DocsSearch.tsx를 ModalPortal 기반으로 전환 (내부 키보드는 React 유지) — 크기: M, 의존: →T1
-- [ ] T3: "/" 키바인딩을 OS_OVERLAY_OPEN으로 연결 — 크기: S, 의존: →T1
 - [ ] T4: headless 테스트 — overlay lifecycle (열기/닫기/재열기) — 크기: S, 의존: →T2,T3
 
 ## Done
+- [x] T1: app.ts overlay 선언 + searchOpen/openSearch/closeSearch 제거 — tsc 0 | 13e0bfa8 ✅
+- [x] T2: DocsSearch.tsx useOverlay + closeOverlay 전환 (이미 커밋 상태) — tsc 0 ✅
+- [x] T3: "/" 키바인딩 → OS_OVERLAY_OPEN dispatch — tsc 0 | 13e0bfa8 ✅
 
 ## Unresolved
 - 콘텐츠 로딩(content/error useState)은 OS 관심사인가, 앱 고유 책임인가?
