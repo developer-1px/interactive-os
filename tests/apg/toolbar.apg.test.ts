@@ -1,20 +1,17 @@
 /**
- * APG Toolbar Pattern — Contract Test (Tier 1: pressKey → attrs)
+ * APG Toolbar Pattern — Contract Test (Playwright 동형)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
- *        + Tabs variant: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
  *
- * Testing Trophy Tier 1:
- *   Input:  pressKey (user action simulation)
- *   Assert: attrs() → tabIndex, aria-selected (ARIA contract)
- *
- * Config: horizontal, loop, Tab=escape, select=none
- * Unique: Tab escape to next zone, vertical keys ignored
- * Tabs variant: same axis + followFocus (automatic activation)
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it, vi } from "vitest";
+import { describe, it, vi, expect as vitestExpect } from "vitest";
 import {
   assertHomeEnd,
   assertHorizontalNav,
@@ -23,7 +20,9 @@ import {
   assertOrthogonalIgnored,
 } from "./helpers/contracts";
 
-// ─── Toolbar Config ───
+const expect = osExpect;
+
+// ─── Constants ───
 
 const TOOLBAR_ITEMS = ["bold-btn", "italic-btn", "underline-btn", "link-btn"];
 
@@ -46,7 +45,9 @@ const TOOLBAR_CONFIG = {
   tab: { behavior: "escape" as const, restoreFocus: false },
 };
 
-function createToolbar(focusedItem = "bold-btn") {
+// ─── Factories ───
+
+function createToolbar(focusedItem = "bold-btn"): { page: Page; cleanup: () => void } {
   const app = defineApp("test-toolbar", {});
   const zone = app.createZone("toolbar");
   zone.bind({
@@ -54,13 +55,14 @@ function createToolbar(focusedItem = "bold-btn") {
     getItems: () => TOOLBAR_ITEMS,
     options: TOOLBAR_CONFIG,
   });
-  const page = createHeadlessPage(app);
-  page.setupZone("toolbar", { focusedItemId: focusedItem });
-  return page;
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
+  page.click(focusedItem);
+  return { page, cleanup };
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts (pressKey via contracts.ts)
+// Shared contracts
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Navigation", () => {
@@ -77,15 +79,15 @@ describe("APG Toolbar: Navigation", () => {
     lastId: "link-btn",
   });
   assertOrthogonalIgnored(createToolbar, "horizontal");
-  assertNoSelection(createToolbar);
+  assertNoSelection(createToolbar, TOOLBAR_ITEMS);
 });
 
 // ═══════════════════════════════════════════════════
-// Unique: Tab Escape (pressKey)
+// Click Activate
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Click Activate", () => {
-  it("click on toolbar item triggers onAction", () => {
+  it("click on toolbar item triggers onAction", async () => {
     const actionSpy = vi.fn();
     const app = defineApp("test-toolbar-click", {});
     const zone = app.createZone("toolbar");
@@ -95,16 +97,21 @@ describe("APG Toolbar: Click Activate", () => {
       options: TOOLBAR_CONFIG,
       onAction: actionSpy,
     });
-    const page = createHeadlessPage(app);
-    page.setupZone("toolbar", { focusedItemId: "bold-btn" });
+    const { page, cleanup } = createPage(app);
+    page.goto("/");
 
-    page.click("bold-btn");
-    expect(actionSpy).toHaveBeenCalled();
+    await page.locator("#bold-btn").click();
+    vitestExpect(actionSpy).toHaveBeenCalled();
+    cleanup();
   });
 });
 
+// ═══════════════════════════════════════════════════
+// Tab Escape
+// ═══════════════════════════════════════════════════
+
 describe("APG Toolbar: Tab Escape", () => {
-  it("Tab: moves focus out to next zone", () => {
+  it("Tab: moves focus out to next zone", async () => {
     const app = defineApp("test-toolbar-escape", {});
     const toolbar = app.createZone("toolbar");
     toolbar.bind({
@@ -115,39 +122,32 @@ describe("APG Toolbar: Tab Escape", () => {
     const editor = app.createZone("editor");
     editor.bind({
       role: "group",
-      getItems: () => [
-        "line-1",
-        "line-2",
-        "line-3",
-        "line-4",
-        "line-5",
-        "line-6",
-        "line-7",
-        "line-8",
-        "line-9",
-        "line-10",
-      ],
+      getItems: () => ["line-1"],
     });
-    const page = createHeadlessPage(app);
-    // Register both zones — order determines Tab navigation
-    page.setupZone("editor", { focusedItemId: "line-1" });
-    page.setupZone("toolbar", { focusedItemId: "italic-btn" });
+
+    const { page, cleanup } = createPage(app);
+    page.goto("/");
+
+    // Start at toolbar
+    page.click("italic-btn");
+    await expect(page.locator("#italic-btn")).toBeFocused();
 
     page.keyboard.press("Tab");
-    expect(page.activeZoneId()).toBe("editor");
+
+    // Focus should move to next zone (editor, which has line-1 as first item)
+    await expect(page.locator("#line-1")).toBeFocused();
+    cleanup();
   });
 });
 
 // ═══════════════════════════════════════════════════
-// Tabs Variant (horizontal + loop + followFocus)
-// Source: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
-// Config delta: select.mode="single", followFocus=true, disallowEmpty=true
+// Tabs Variant
 // ═══════════════════════════════════════════════════
 
 describe("APG Toolbar: Tabs Variant", () => {
   const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
-  function createTabs(focusedTab = "tab-general") {
+  function createTabs(focusedTab = "tab-general"): { page: Page; cleanup: () => void } {
     const app = defineApp("test-toolbar-tabs", {});
     const zone = app.createZone("tablist");
     zone.bind({
@@ -165,27 +165,33 @@ describe("APG Toolbar: Tabs Variant", () => {
         },
       },
     });
-    const page = createHeadlessPage(app);
-    page.setupZone("tablist", { focusedItemId: focusedTab });
+    const { page, cleanup } = createPage(app);
+    page.goto("/");
     page.click(focusedTab);
-    return page;
+    return { page, cleanup };
   }
 
-  it("auto-activation: navigation selects tab (aria-selected)", () => {
-    const t = createTabs("tab-general");
-    t.keyboard.press("ArrowRight");
-    expect(t.focusedItemId()).toBe("tab-security");
-    expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
-    expect(t.attrs("tab-general")["aria-selected"]).toBe(false);
+  it("auto-activation: navigation selects tab (aria-selected)", async () => {
+    const { page, cleanup } = createTabs("tab-general");
+    page.keyboard.press("ArrowRight");
+
+    await expect(page.locator("#tab-security")).toBeFocused();
+    await expect(page.locator("#tab-security")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-general")).toHaveAttribute("aria-selected", "false");
+    cleanup();
   });
 
-  it("full cycle: selection follows each navigation", () => {
-    const t = createTabs("tab-general");
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs("tab-security")["aria-selected"]).toBe(true);
-    t.keyboard.press("ArrowRight");
-    expect(t.attrs("tab-advanced")["aria-selected"]).toBe(true);
-    t.keyboard.press("ArrowRight"); // loop back
-    expect(t.attrs("tab-general")["aria-selected"]).toBe(true);
+  it("full cycle: selection follows each navigation", async () => {
+    const { page, cleanup } = createTabs("tab-general");
+
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tab-security")).toHaveAttribute("aria-selected", "true");
+
+    page.keyboard.press("ArrowRight");
+    await expect(page.locator("#tab-advanced")).toHaveAttribute("aria-selected", "true");
+
+    page.keyboard.press("ArrowRight"); // loop back
+    await expect(page.locator("#tab-general")).toHaveAttribute("aria-selected", "true");
+    cleanup();
   });
 });

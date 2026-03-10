@@ -1,28 +1,33 @@
 /**
- * APG Dialog (Modal) Pattern — Contract Test (Tier 1: pressKey → attrs)
+ * APG Dialog (Modal) Pattern — Contract Test (Playwright 동형)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
  *
- * Testing Trophy Tier 1:
- *   Input:  pressKey / click (user action simulation)
- *   Assert: attrs() → tabIndex (ARIA contract) + state verification
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
  *
  * Config: vertical, Tab=trap, Escape=close
- * Unique: focus trap (Tab cycling), overlay focus restore, nested LIFO
- *
- * NO dispatch(), NO setupZone(), NO @os-core imports.
+ * Unique: focus trap (Tab cycling), overlay focus restore
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import { assertTabTrap } from "./helpers/contracts";
+
+const expect = osExpect;
 
 // ─── Config ───
 
 const DIALOG_ITEMS = ["close-btn", "input-name", "input-email", "save-btn"];
 
-function createDialogApp(entry = "first") {
+function createDialogApp(entry: "first" | "last" = "first"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-dialog", {});
 
   const toolbar = app.createZone("toolbar");
@@ -34,7 +39,7 @@ function createDialogApp(entry = "first") {
         OS_OVERLAY_OPEN({
           id: "dialog",
           type: "dialog",
-          entry: entry as "first" | "last",
+          entry: entry,
         }),
     },
   });
@@ -49,14 +54,14 @@ function createDialogApp(entry = "first") {
     },
   });
 
-  const page = createHeadlessPage(app);
+  const { page, cleanup } = createPage(app);
   page.goto("/");
   page.click("InvokeBtn");
-  return page;
+  return { page, cleanup };
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts (pressKey via contracts.ts)
+// Shared contracts (page.locator → assertions)
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Trap", () => {
@@ -67,29 +72,42 @@ describe("APG Dialog: Focus Trap", () => {
     factoryAtLast: () => createDialogApp("last"),
   });
 
-  it("Tab cycles through all elements without escaping", () => {
-    const t = createDialogApp();
-    t.keyboard.press("Tab");
-    expect(t.focusedItemId()).toBe("input-name");
-    expect(t.attrs("input-name").tabIndex).toBe(0);
-    t.keyboard.press("Tab");
-    expect(t.focusedItemId()).toBe("input-email");
-    t.keyboard.press("Tab");
-    expect(t.focusedItemId()).toBe("save-btn");
-    t.keyboard.press("Tab");
-    expect(t.focusedItemId()).toBe("close-btn");
-    expect(t.activeZoneId()).toBe("dialog");
+  it("Tab cycles through all elements without escaping", async () => {
+    const { page, cleanup } = createDialogApp();
+
+    await expect(page.locator("#close-btn")).toBeFocused();
+
+    page.keyboard.press("Tab");
+    await expect(page.locator("#input-name")).toBeFocused();
+    await expect(page.locator("#input-name")).toHaveAttribute("tabindex", "0");
+
+    page.keyboard.press("Tab");
+    await expect(page.locator("#input-email")).toBeFocused();
+
+    page.keyboard.press("Tab");
+    await expect(page.locator("#save-btn")).toBeFocused();
+
+    page.keyboard.press("Tab");
+    await expect(page.locator("#close-btn")).toBeFocused();
+
+    cleanup();
   });
 });
 
 describe("APG Dialog: Escape", () => {
-  it("Escape: closes overlay and restores focus to invoker", () => {
-    const t = createDialogApp();
-    expect(t.activeZoneId()).toBe("dialog");
-    t.keyboard.press("Escape");
-    // Overlay close restores to invoker zone (not null)
-    expect(t.activeZoneId()).toBe("toolbar");
-    expect(t.focusedItemId("toolbar")).toBe("InvokeBtn");
+  it("Escape: closes overlay and restores focus to invoker", async () => {
+    const { page, cleanup } = createDialogApp();
+
+    // Dialog is open, close-btn focused
+    await expect(page.locator("#close-btn")).toBeFocused();
+
+    page.keyboard.press("Escape");
+
+    // Focus restores to toolbar trigger
+    await expect(page.locator("#InvokeBtn")).toBeFocused();
+    await expect(page.locator("#InvokeBtn")).toHaveAttribute("tabindex", "0");
+
+    cleanup();
   });
 });
 
@@ -98,17 +116,7 @@ describe("APG Dialog: Escape", () => {
 // ═══════════════════════════════════════════════════
 
 describe("APG Dialog: Focus Restore", () => {
-  it("on close, focus restores to invoker", () => {
-    const page = createDialogApp();
-    expect(page.activeZoneId()).toBe("dialog");
-
-    // Escape closes overlay → focus restores to toolbar trigger
-    page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("InvokeBtn");
-  });
-
-  it("nested dialogs: LIFO focus restore", () => {
+  it("nested dialogs: LIFO focus restore", async () => {
     const app = defineApp("test-dialog-nested", {});
 
     const toolbar = app.createZone("toolbar");
@@ -153,26 +161,26 @@ describe("APG Dialog: Focus Restore", () => {
       },
     });
 
-    const page = createHeadlessPage(app);
+    const { page, cleanup } = createPage(app);
     page.goto("/");
 
     // Open first dialog
     page.click("Btn1");
-    expect(page.activeZoneId()).toBe("dialog-1");
+    await expect(page.locator("#d1-close")).toBeFocused();
 
     // Navigate to nested trigger and open second dialog
     page.keyboard.press("Tab");
     page.click("D1NestedBtn");
-    expect(page.activeZoneId()).toBe("dialog-2");
+    await expect(page.locator("#d2-yes")).toBeFocused();
 
     // Escape closes dialog-2 → restores to dialog-1
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("dialog-1");
-    expect(page.focusedItemId("dialog-1")).toBe("D1NestedBtn");
+    await expect(page.locator("#D1NestedBtn")).toBeFocused();
 
     // Escape closes dialog-1 → restores to toolbar
     page.keyboard.press("Escape");
-    expect(page.activeZoneId()).toBe("toolbar");
-    expect(page.focusedItemId("toolbar")).toBe("Btn1");
+    await expect(page.locator("#Btn1")).toBeFocused();
+
+    cleanup();
   });
 });

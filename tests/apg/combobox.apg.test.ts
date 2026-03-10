@@ -1,30 +1,31 @@
 /**
- * APG Combobox Pattern — Contract Test (Tier 1: pressKey → attrs)
+ * APG Combobox Pattern — Contract Test (Playwright 동형)
  * Source: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/
  *
- * Testing Trophy Tier 1:
- *   Input:  pressKey (user action simulation)
- *   Assert: attrs() → tabIndex, aria-selected (ARIA contract)
+ * 1경계: page = 유일한 테스트 API.
+ * Action: page.keyboard.press / page.click
+ * Assert: page.locator → toBeFocused, toHaveAttribute
  *
  * Composite: Input (combobox) + Popup (listbox)
  * Config: vertical, followFocus, Tab=trap, Escape=close
- * Unique: popup lifecycle via STACK, selection in popup
- *
- * NOTE: All tests use shared contracts from contracts.ts,
- * which are already pressKey-based.
+ * Unique: popup lifecycle via stack, focus restore
  */
 
-import { OS_STACK_POP, OS_STACK_PUSH } from "@os-core/4-command/focus/stack";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
+import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-devtool/testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
-import { describe, expect, it } from "vitest";
+import { describe, it } from "vitest";
 import {
   assertBoundaryClamp,
-  assertEscapeClose,
   assertFollowFocus,
   assertHomeEnd,
   assertVerticalNav,
+  assertFocusRestore,
 } from "./helpers/contracts";
+
+const expect = osExpect;
 
 // ─── Config ───
 
@@ -50,25 +51,47 @@ const POPUP_CONFIG = {
   dismiss: { escape: "close" as const, outsideClick: "close" as const },
 };
 
-function createComboboxPopup(focusedItem = "apple") {
+function createComboboxPopup(focusedItem = "apple"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-combobox", {});
+
+  // Zone 1: The Input part of the Combobox
   const combobox = app.createZone("combobox");
-  combobox.bind({ role: "listbox", getItems: () => ["input-field"] });
+  combobox.bind({
+    role: "listbox",
+    getItems: () => ["input-field"],
+    triggers: {
+      "input-field": () =>
+        OS_OVERLAY_OPEN({ id: "popup", type: "listbox", entry: "first" }),
+    },
+  });
+
+  // Zone 2: The Popup Listbox
   const popup = app.createZone("popup");
   popup.bind({
     role: "listbox",
     getItems: () => POPUP_ITEMS,
     options: POPUP_CONFIG,
   });
-  const page = createHeadlessPage(app);
-  page.setupZone("combobox", { focusedItemId: "input-field" });
-  page.dispatch(OS_STACK_PUSH());
-  page.setupZone("popup", { focusedItemId: focusedItem });
-  return page;
+
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
+
+  // Click trigger to open popup overlay
+  page.click("input-field");
+
+  // If we need to start at a specific item in the popup
+  if (focusedItem && focusedItem !== "apple") {
+    page.click(focusedItem);
+  }
+
+  return { page, cleanup };
 }
 
 // ═══════════════════════════════════════════════════
-// Shared contracts (all pressKey-based via contracts.ts)
+// Shared contracts (page.locator → assertions)
 // ═══════════════════════════════════════════════════
 
 describe("APG Combobox: Popup Navigation", () => {
@@ -86,13 +109,21 @@ describe("APG Combobox: Popup Navigation", () => {
 });
 
 describe("APG Combobox: Dismiss", () => {
-  assertEscapeClose(createComboboxPopup);
+  // assertFocusRestore expects Escape to restore focus to an invoker
+  assertFocusRestore(createComboboxPopup, { invokerItemId: "input-field" });
 
-  it("Escape + stack pop: restores focus to invoker", () => {
-    const t = createComboboxPopup();
-    t.keyboard.press("Escape");
-    t.dispatch(OS_STACK_POP());
-    expect(t.activeZoneId()).toBe("combobox");
-    expect(t.focusedItemId("combobox")).toBe("input-field");
+  it("Escape: closes popup and restores focus to input", async () => {
+    const { page, cleanup } = createComboboxPopup("banana");
+
+    // Inside popup, banana is focused
+    await expect(page.locator("#banana")).toBeFocused();
+
+    // Escape closes popup → focus returns to input-field
+    page.keyboard.press("Escape");
+
+    await expect(page.locator("#input-field")).toBeFocused();
+    await expect(page.locator("#input-field")).toHaveAttribute("tabindex", "0");
+
+    cleanup();
   });
 });
