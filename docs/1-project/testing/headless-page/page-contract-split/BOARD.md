@@ -56,15 +56,19 @@
 | T4 | locator 추출 → `lib/locator.ts` (`createLocator`) | M | tsc -b 0 | ✅ |
 | T5 | env setup 추출 → `lib/setupHeadlessEnv.ts` | M | tsc -b 0 | ✅ |
 | T6 | zone setup 추출 → `lib/zoneSetup.ts` (`registerZones` + `seedInitialState`) | M | tsc -b 0 | ✅ |
-| T7 | typeIntoField 추출 → `lib/typeIntoField.ts` | S | — | tsc -b | ⬜ |
-| T8 | `createPage` 재조합 + `createAppPage` 삭제 (page.ts 927줄→~60줄) | S | →T1-T7 | tsc -b + vitest PASS 유지 | ⬜ |
-| T9 | 유령 참조 정리 (rules.md, knowledge/ 7파일, workflows/, 주석) | M | →T8 | grep 결과 0 | ⬜ |
+| T7 | typeIntoField 추출 → `lib/typeIntoField.ts` | S | tsc -b 0 | ✅ |
+| T8 | `createPage` 재조합 + `createAppPage` 삭제 (page.ts 927→96줄) | S | tsc -b 0 + 506 tests PASS | ✅ |
+| T9 | 유령 참조 정리 (rules.md, knowledge/ 7파일, workflows/, 주석) | M | grep 0 | ✅ |
 
-### Phase 4: 테스트 삭제→재작성 (후순위)
-- [ ] T8: APG contracts 의존 9파일 (combobox, dialog, listbox, menu, toolbar, tree, treegrid, carousel, feed)
-- [ ] T9: APG setupZone 의존 4파일 (disallow-empty-initial, dropdown-menu, menu-button, navtree)
-- [ ] T10: Todo 3파일 (todo.test, todo-bug-hunt, todo-trigger-click)
-- [ ] T11: docs-viewer 2파일 (docs-viewer-headless, docs-search-overlay)
+### Phase 4: 테스트 삭제→재작성
+
+| # | Task | 크기 | 검증 | 상태 |
+|---|------|------|------|------|
+| T8a | APG 6파일 1경계 재작성 (combobox, dialog, menu, toolbar, tree + listbox) | M | 64 PASS, 2 skip | ✅ |
+| T8b | APG 3파일 1경계 재작성 (treegrid, carousel, feed) | M | vitest PASS | ⬜ |
+| T9 | APG setupZone 의존 4파일 (disallow-empty-initial, dropdown-menu, menu-button, navtree) | M | vitest PASS | ⬜ |
+| T10 | Todo 3파일 (todo.test, todo-bug-hunt, todo-trigger-click) | M | vitest PASS + tsc 0 | ⬜ |
+| T11 | docs-viewer 2파일 (docs-viewer-headless, docs-search-overlay) | S | vitest PASS | ⬜ |
 
 ## Unresolved
 
