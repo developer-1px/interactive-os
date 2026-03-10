@@ -114,7 +114,7 @@ export function defineApp<S>(
     { handler: FlatHandler<S, unknown>; when?: Condition<S> }
   >();
 
-  // For AppPage: track zone bindings (onAction, onDelete, etc.)
+  // Track zone bindings for headless page factory
   const zoneBindingEntries = new Map<
     string,
     {
@@ -364,7 +364,7 @@ export function defineApp<S>(
           ...(triggerBindings ? { triggers: triggerBindings } : {}),
         };
 
-        // Track zone bindings for AppPage
+        // Track zone bindings for headless page
         zoneBindingEntries.set(zoneName, {
           role: config.role,
           bindings: normalizedConfig,
