@@ -31,16 +31,10 @@
 
 | 동사 | 의미 | 입력 → 출력 | 순수 | 실제 사용 예 |
 |------|------|------------|------|------------|
-| `read` | 커널 상태를 읽는다 (헤드리스) | `HeadlessKernel → T` | ✅ | `readActiveZoneId(kernel)`, `readSelection(kernel)` |
-| `get` | 레지스트리 / 컬렉션에서 꺼낸다 | `Id → T \| undefined` | ✅ | `ZoneRegistry.get(id)`, `getChildren(collection, parentId)` |
-
-**`read` vs `get` 구분 기준**:
-- 🟡 커널(상태) 접근이면 → `read` (헤드리스 맥락)
-- 🟡 맵/레지스트리/컬렉션 조회이면 → `get`
+| `get` | 저장소(상태/레지스트리/컬렉션)에서 꺼낸다 | `Id → T \| undefined` | ✅ | `getState()`, `ZoneRegistry.get(id)`, `getChildren(collection, parentId)` |
 
 **사용 금지 패턴**:
-- ❌ `readEntry()` — registry 조회는 `get`. `ZoneRegistry.get(id)`
-- ❌ `getState()` — 커널 API가 이미 쓰므로 헤드리스 함수에선 `readXxx()`로
+- ❌ `readXxx()` — FE 관용어가 아님. `get`으로 통일. `read*`는 locator 내부 구현에만 잔존 (외부 API 아님)
 
 ---
 
@@ -190,7 +184,7 @@ grep -rn "비슷한키워드" src/ --include="*.ts"
 | ❌ 잘못된 이름 | ✅ 올바른 이름 | 이유 |
 |--------------|--------------|------|
 | `resolveItem()` | `computeItem()` | item 속성 계산 = compute |
-| `getActiveZoneId()` | `readActiveZoneId()` | 커널 상태 접근 = read |
+| `readActiveZoneId()` | `getActiveZoneId()` 또는 locator 내부 전용 | `read`는 FE 관용어 아님. 외부 API는 `get` 통일 |
 | `getAllIds()` | → 이게 맞음 (`allIds()`가 ⚠️) | get 접두사 누락 버그 |
 | `useFieldHooks()` | `useField()` / `useFieldState()` | Hook 이름에 "Hooks" 금지 |
 | `handleActivate()` | `activate.ts` 또는 `OS_ACTIVATE` | 커맨드는 핸들러가 아니라 커맨드 |

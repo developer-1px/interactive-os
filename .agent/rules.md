@@ -79,11 +79,11 @@
 - **네이밍 2-tier**: OS 커맨드 = `SCREAMING_CASE` (`OS_DELETE`), 앱 커맨드 = `camelCase` (`toggleTodo`)
 
 ### Testing (`packages/os-devtool/`)
-- `createHeadlessPage(app?, component?)` — Playwright subset API, DOM 없이 <1ms 실행. `{ page, cleanup }` 반환
-- `createTestBench()` — OS 내부 테스트용 (앱 테스트는 headlessPage)
+- `createPage(app, Component?)` — Playwright subset API, DOM 없이 <1ms 실행. `{ page, cleanup }` 반환
+- `createTestBench()` — OS 내부 테스트용 (앱 테스트는 createPage)
 - **Zero Drift**: headless 테스트 통과 = DOM 동일 동작. 이것이 아키텍처 보장
-- **테스트 setup**: `const { page, cleanup } = createHeadlessPage(App, Component)` → `page.goto("/")` → `page.keyboard.press()` / `page.click()`
-- **OS 상태 읽기**: `import { os } from "@os-core/engine/kernel"` + `readFocusedItemId(os)` / `computeAttrs(os, id)` / `readSelection(os)`
+- **테스트 setup**: `const { page, cleanup } = createPage(app, Component)` → `page.goto("/")` → `page.keyboard.press()` / `page.click()`
+- **1경계 원칙**: 테스트 시나리오의 API는 `page`뿐. `os`/`app` import 금지. 관찰은 `page.locator()`만.
 - **Isomorphism 원칙**: 모든 테스트는 vitest headless와 Playwright e2e를 **동일 스크립트**로 돌릴 수 있어야 한다. 돌릴 수 없으면 잘못된 테스트다.
   - `setupZone`, `page.dispatch()`, `page.state` — headless-only API를 쓴 테스트는 전부 잘못된 전제 위의 테스트
   - 테스트의 유일한 진리 = 유저 행위 경로. `bind()`로 선언 → `goto()`로 초기화 → 사용자 행위(click/keyboard)로 상태 도달 → assert
