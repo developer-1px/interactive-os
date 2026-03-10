@@ -465,29 +465,248 @@ const rolePresets: Record<ZoneRole, RolePreset> = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
+// defineRole — Role object factory
+// ═══════════════════════════════════════════════════════════════════
+
+/** ARIA schema metadata for a role */
+export interface RoleSchema {
+  containerRole: string;
+  itemRole: string;
+  attrs: string[];
+}
+
+/** Role object — carries name, ARIA schema, and preset */
+export interface Role<_TConfig = unknown> {
+  readonly name: string;
+  readonly schema: RoleSchema;
+  readonly preset: RolePreset;
+  /** Brand to distinguish Role objects from plain strings */
+  readonly __brand: "Role";
+}
+
+/** Create a Role object with name, ARIA schema, and preset */
+export function defineRole<TConfig = unknown>(
+  name: string,
+  schema: RoleSchema,
+  preset: RolePreset,
+): Role<TConfig> {
+  return { name, schema, preset, __brand: "Role" as const };
+}
+
+/** Type guard: is this a Role object? */
+function isRole(value: unknown): value is Role {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as Role).__brand === "Role"
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Preset Role objects (defineRole-based)
+// ═══════════════════════════════════════════════════════════════════
+
+export const listboxRole = defineRole(
+  "listbox",
+  { containerRole: "listbox", itemRole: "option", attrs: ["aria-selected"] },
+  rolePresets.listbox,
+);
+
+export const menuRole = defineRole(
+  "menu",
+  { containerRole: "menu", itemRole: "menuitem", attrs: [] },
+  rolePresets.menu,
+);
+
+export const menubarRole = defineRole(
+  "menubar",
+  { containerRole: "menubar", itemRole: "menuitem", attrs: [] },
+  rolePresets.menubar,
+);
+
+export const radiogroupRole = defineRole(
+  "radiogroup",
+  { containerRole: "radiogroup", itemRole: "radio", attrs: ["aria-checked"] },
+  rolePresets.radiogroup,
+);
+
+export const tablistRole = defineRole(
+  "tablist",
+  { containerRole: "tablist", itemRole: "tab", attrs: ["aria-selected"] },
+  rolePresets.tablist,
+);
+
+export const toolbarRole = defineRole(
+  "toolbar",
+  { containerRole: "toolbar", itemRole: "button", attrs: [] },
+  rolePresets.toolbar,
+);
+
+export const gridRole = defineRole(
+  "grid",
+  {
+    containerRole: "grid",
+    itemRole: "gridcell",
+    attrs: ["aria-selected"],
+  },
+  rolePresets.grid,
+);
+
+export const treegridRole = defineRole(
+  "treegrid",
+  {
+    containerRole: "treegrid",
+    itemRole: "row",
+    attrs: ["aria-selected", "aria-expanded"],
+  },
+  rolePresets.treegrid,
+);
+
+export const treeRole = defineRole(
+  "tree",
+  {
+    containerRole: "tree",
+    itemRole: "treeitem",
+    attrs: ["aria-selected", "aria-expanded"],
+  },
+  rolePresets.tree,
+);
+
+export const dialogRole = defineRole(
+  "dialog",
+  { containerRole: "dialog", itemRole: "", attrs: [] },
+  rolePresets.dialog,
+);
+
+export const alertdialogRole = defineRole(
+  "alertdialog",
+  { containerRole: "alertdialog", itemRole: "", attrs: [] },
+  rolePresets.alertdialog,
+);
+
+export const comboboxRole = defineRole(
+  "combobox",
+  {
+    containerRole: "combobox",
+    itemRole: "option",
+    attrs: ["aria-selected", "aria-expanded"],
+  },
+  rolePresets.combobox,
+);
+
+export const feedRole = defineRole(
+  "feed",
+  { containerRole: "feed", itemRole: "article", attrs: [] },
+  rolePresets.feed,
+);
+
+export const accordionRole = defineRole(
+  "accordion",
+  {
+    containerRole: "group",
+    itemRole: "button",
+    attrs: ["aria-expanded"],
+  },
+  rolePresets.accordion,
+);
+
+export const disclosureRole = defineRole(
+  "disclosure",
+  {
+    containerRole: "group",
+    itemRole: "button",
+    attrs: ["aria-expanded"],
+  },
+  rolePresets.disclosure,
+);
+
+export const sliderRole = defineRole(
+  "slider",
+  { containerRole: "slider", itemRole: "slider", attrs: ["aria-valuenow"] },
+  rolePresets.slider,
+);
+
+export const meterRole = defineRole(
+  "meter",
+  { containerRole: "meter", itemRole: "meter", attrs: ["aria-valuenow"] },
+  rolePresets.meter,
+);
+
+export const spinbuttonRole = defineRole(
+  "spinbutton",
+  {
+    containerRole: "spinbutton",
+    itemRole: "spinbutton",
+    attrs: ["aria-valuenow"],
+  },
+  rolePresets.spinbutton,
+);
+
+export const separatorRole = defineRole(
+  "separator",
+  {
+    containerRole: "separator",
+    itemRole: "separator",
+    attrs: ["aria-valuenow"],
+  },
+  rolePresets.separator,
+);
+
+export const switchRole = defineRole(
+  "switch",
+  { containerRole: "switch", itemRole: "switch", attrs: ["aria-checked"] },
+  rolePresets.switch,
+);
+
+export const checkboxRole = defineRole(
+  "checkbox",
+  { containerRole: "checkbox", itemRole: "checkbox", attrs: ["aria-checked"] },
+  rolePresets.checkbox,
+);
+
+export const groupRole = defineRole(
+  "group",
+  { containerRole: "group", itemRole: "", attrs: [] },
+  rolePresets.group,
+);
+
+export const builderBlockRole = defineRole(
+  "builderBlock",
+  { containerRole: "group", itemRole: "", attrs: [] },
+  rolePresets.builderBlock,
+);
+
+export const applicationRole = defineRole(
+  "application",
+  { containerRole: "application", itemRole: "", attrs: [] },
+  rolePresets.application,
+);
+
+export const textboxRole = defineRole(
+  "textbox",
+  { containerRole: "textbox", itemRole: "", attrs: [] },
+  rolePresets.textbox,
+);
+
+// ═══════════════════════════════════════════════════════════════════
 // Resolver
 // ═══════════════════════════════════════════════════════════════════
 
-export function resolveRole(
-  role: ZoneRole | string | undefined,
-  overrides: {
-    navigate?: Partial<NavigateConfig> | undefined;
-    tab?: Partial<TabConfig> | undefined;
-    select?: Partial<SelectConfig> | undefined;
-    dismiss?: Partial<DismissConfig> | undefined;
-    project?: Partial<ProjectConfig> | undefined;
-    expand?: Partial<ExpandConfig> | undefined;
-    value?: Partial<ValueConfig> | undefined;
-    inputmap?: InputMap | undefined;
-  } = {},
-): FocusGroupConfig {
-  if (role && !rolePresets[role as ZoneRole]) {
-    console.warn(
-      `[Zone] Unknown role: '${role}'. Using default config. Valid roles: ${Object.keys(rolePresets).join(", ")}`,
-    );
-  }
-  const basePreset = role ? (rolePresets[role as ZoneRole] ?? {}) : {};
+type RoleOverrides = {
+  navigate?: Partial<NavigateConfig> | undefined;
+  tab?: Partial<TabConfig> | undefined;
+  select?: Partial<SelectConfig> | undefined;
+  dismiss?: Partial<DismissConfig> | undefined;
+  project?: Partial<ProjectConfig> | undefined;
+  expand?: Partial<ExpandConfig> | undefined;
+  value?: Partial<ValueConfig> | undefined;
+  inputmap?: InputMap | undefined;
+};
 
+function mergePreset(
+  basePreset: RolePreset,
+  overrides: RoleOverrides,
+): FocusGroupConfig {
   return {
     navigate: {
       ...DEFAULT_NAVIGATE,
@@ -526,4 +745,21 @@ export function resolveRole(
       ...(overrides.inputmap ?? {}),
     },
   };
+}
+
+export function resolveRole(
+  role: ZoneRole | string | Role | undefined,
+  overrides: RoleOverrides = {},
+): FocusGroupConfig {
+  if (isRole(role)) {
+    return mergePreset(role.preset, overrides);
+  }
+
+  if (role && !rolePresets[role as ZoneRole]) {
+    console.warn(
+      `[Zone] Unknown role: '${role}'. Using default config. Valid roles: ${Object.keys(rolePresets).join(", ")}`,
+    );
+  }
+  const basePreset = role ? (rolePresets[role as ZoneRole] ?? {}) : {};
+  return mergePreset(basePreset, overrides);
 }

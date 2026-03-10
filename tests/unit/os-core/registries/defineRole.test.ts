@@ -4,28 +4,29 @@
  * Tests for:
  * T1: Role<TConfig> type + defineRole() function
  * T2: role-specific config interfaces — invalid combos rejected by tsc
- *
- * These tests will FAIL until defineRole is implemented.
  */
 
-import * as roleRegistryExports from "@os-core/engine/registries/roleRegistry";
+import {
+  accordionRole,
+  comboboxRole,
+  defineRole,
+  dialogRole,
+  gridRole,
+  listboxRole,
+  menuRole,
+  resolveRole,
+  tablistRole,
+  toolbarRole,
+  treeRole,
+} from "@os-core/engine/registries/roleRegistry";
 import { describe, expect, it } from "vitest";
-
-// Cast to access not-yet-exported members
-const registry = roleRegistryExports as unknown as Record<string, unknown>;
 
 describe("T1: defineRole — Role object creation", () => {
   it("defineRole is exported from roleRegistry", () => {
-    expect(typeof registry.defineRole).toBe("function");
+    expect(typeof defineRole).toBe("function");
   });
 
   it("defineRole creates a Role object with name and schema", () => {
-    const defineRole = registry.defineRole as (
-      name: string,
-      schema: { containerRole: string; itemRole: string; attrs: string[] },
-      preset: Record<string, unknown>,
-    ) => { name: string; schema: unknown; preset: unknown };
-
     const role = defineRole(
       "listbox",
       {
@@ -43,53 +44,35 @@ describe("T1: defineRole — Role object creation", () => {
   });
 
   it("resolveRole accepts Role object", () => {
-    const defineRole = registry.defineRole as (
-      name: string,
-      schema: { containerRole: string; itemRole: string; attrs: string[] },
-      preset: Record<string, unknown>,
-    ) => { name: string };
-
-    const listboxRole = defineRole(
+    const role = defineRole(
       "listbox",
       {
         containerRole: "listbox",
         itemRole: "option",
         attrs: ["aria-selected"],
       },
-      {},
+      { navigate: { orientation: "vertical" } },
     );
 
-    // resolveRole should accept Role object
-    const config = roleRegistryExports.resolveRole(
-      listboxRole as unknown as string,
-    );
+    const config = resolveRole(role);
     expect(config.navigate.orientation).toBe("vertical");
   });
 
   it("27 preset roles are exported as Role objects", () => {
-    expect(registry.listboxRole).toBeDefined();
-    expect(registry.treeRole).toBeDefined();
-    expect(registry.dialogRole).toBeDefined();
-    expect(registry.menuRole).toBeDefined();
-    expect(registry.toolbarRole).toBeDefined();
-    expect(registry.gridRole).toBeDefined();
-    expect(registry.comboboxRole).toBeDefined();
-    expect(registry.tablistRole).toBeDefined();
-    expect(registry.accordionRole).toBeDefined();
+    expect(listboxRole).toBeDefined();
+    expect(treeRole).toBeDefined();
+    expect(dialogRole).toBeDefined();
+    expect(menuRole).toBeDefined();
+    expect(toolbarRole).toBeDefined();
+    expect(gridRole).toBeDefined();
+    expect(comboboxRole).toBeDefined();
+    expect(tablistRole).toBeDefined();
+    expect(accordionRole).toBeDefined();
   });
 });
 
 describe("T2: Role carries ARIA schema metadata", () => {
   it("Role object has schema with containerRole, itemRole, attrs", () => {
-    const defineRole = registry.defineRole as (
-      name: string,
-      schema: { containerRole: string; itemRole: string; attrs: string[] },
-      preset: Record<string, unknown>,
-    ) => {
-      name: string;
-      schema: { containerRole: string; itemRole: string; attrs: string[] };
-    };
-
     const role = defineRole(
       "listbox",
       {
@@ -107,14 +90,6 @@ describe("T2: Role carries ARIA schema metadata", () => {
   });
 
   it("tree role has aria-expanded in attrs", () => {
-    const defineRole = registry.defineRole as (
-      name: string,
-      schema: { containerRole: string; itemRole: string; attrs: string[] },
-      preset: Record<string, unknown>,
-    ) => {
-      schema: { attrs: string[] };
-    };
-
     const role = defineRole(
       "tree",
       {
