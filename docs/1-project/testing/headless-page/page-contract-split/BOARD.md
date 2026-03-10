@@ -39,16 +39,18 @@ App.dispatch(command);          // app 직접
 ```
 
 ## Now
-- [x] T1: `createPage` 팩토리 — `Page`만 반환 — tsc 0 | 회귀 0 ✅
-- [ ] T2: 테스트 마이그레이션 — `page.{os method}` → `os` 싱글턴 + readState 헬퍼 직접 호출 — 크기: M
-- [ ] T3: `AppPage`/`AppPageInternal` 타입 정리 + `createHeadlessPage` 삭제 — 크기: S, 의존: →T2
+- [x] T1: `createPage` 팩토리 — `{ page, cleanup }` 반환 — tsc 0 | 회귀 0 ✅
+- [x] T2a: Clean 테스트 마이그레이션 (16/16파일) — tsc 0 | 734 PASS | 회귀 0 ✅
+- [ ] T2b: Complex 테스트 마이그레이션 (29파일 — setupZone/dispatch/state 사용) — 크기: L
+- [ ] T3: `AppPage`/`AppPageInternal` 타입 정리 + `createHeadlessPage` 삭제 — 크기: S, 의존: →T2b
 
 ## Done
 - [x] Page 인터페이스 (`types.ts`)에 `goto`/`click` 추가 — tsc 0 ✅
 - [x] `BrowserPage`에 `goto`/`click` 구현 — tsc 0 ✅
+- [x] `readSelection()` standalone 함수 추출 (`@os-core/3-inject/readState`) ✅
 
 ## Unresolved
-- `page.state` → `app.state` 마이그레이션 시 `app` 인스턴스의 `state` accessor 존재 여부 확인 필요
-- os 싱글턴의 convenience 메서드 (`focusedItemId`, `attrs` 등) 현재 커널에 부재 → 헬퍼 or 커널 확장 결정
+- [x] ~~os convenience 메서드~~ → 해소: `readFocusedItemId`, `readActiveZoneId`, `computeAttrs`, `readSelection` 이미 `@os-core`에 standalone 함수로 존재
+- [ ] T2b의 29개 COMPLEX 파일은 `setupZone` 삭제 정책에 따라 defineApp 기반 재작성 필요 — 대규모 리팩토링
 
 ## Ideas
