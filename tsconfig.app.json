@@ -33,6 +33,7 @@
       "@os-react/*": ["./packages/os-react/src/*"],
       "@os-sdk/*": ["./packages/os-sdk/src/*"],
       "@os-devtool/*": ["./packages/os-devtool/src/*"],
+      "@os-testing/*": ["./packages/os-testing/src/*"],
       "@inspector": ["./src/inspector/index.ts"],
       "@inspector/*": ["./src/inspector/*"],
       "@apps/*": ["./src/apps/*"],
@@ -46,6 +47,7 @@
     "packages/os-react/src",
     "packages/os-sdk/src",
     "packages/os-devtool/src",
+    "packages/os-testing/src",
     "tests"
   ],
   "exclude": ["src/tests/e2e", "tests/e2e"]

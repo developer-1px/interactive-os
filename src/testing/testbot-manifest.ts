@@ -83,7 +83,7 @@ const STATIC_ENTRIES: ManifestEntry[] = [
   {
     zones: ["apg-sidebar"],
     group: "APG Showcase",
-    load: () => import("@os-devtool/testing").then((m) => m.apgShowcaseScripts),
+    load: () => import("@os-testing/scripts").then((m) => m.apgShowcaseScripts),
   },
   {
     zones: ["nav-list", "sel-range", "tree-widget", "nav-grid"],

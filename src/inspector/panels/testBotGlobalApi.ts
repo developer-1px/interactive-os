@@ -13,10 +13,10 @@ import { getTestBotState, type SuiteState } from "@apps/testbot/app";
 import {
   type BrowserStep,
   createBrowserPage,
-  expect,
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
+import { expect } from "@os-testing/expect";
 import type { TestScript } from "@os-testing/scripts";
 
 // ═══════════════════════════════════════════════════════════════════

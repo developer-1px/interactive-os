@@ -12,7 +12,7 @@
 
 import { TodoApp } from "@apps/todo/app";
 import { scenarios } from "@apps/todo/testbot-todo";
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import TodoPage from "../../../../src/pages/TodoPage";
 
 runScenarios(scenarios, TodoApp, TodoPage);

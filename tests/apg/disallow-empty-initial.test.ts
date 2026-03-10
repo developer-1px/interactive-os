@@ -9,8 +9,8 @@
  * at zone registration time (page.goto), not at React mount.
  */
 
-import { createPage } from "@os-devtool/testing/page";
-import { expect as osExpect } from "@os-devtool/testing/expect";
+import { createPage } from "@os-testing/page";
+import { expect as osExpect } from "@os-testing/expect";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, it } from "vitest";
 

@@ -16,7 +16,7 @@ vi.mock("@/docs-viewer/docsUtils", () => import("./__mocks__/docsUtils"));
 
 // ── Now safe to import app modules ──
 
-import { runScenarios } from "@os-devtool/testing/runScenarios";
+import { runScenarios } from "@os-testing/runScenarios";
 import { DocsApp } from "@/docs-viewer/app";
 import { DocsViewer } from "@/docs-viewer/DocsViewer";
 import { scenarios } from "@/docs-viewer/testbot-docs";

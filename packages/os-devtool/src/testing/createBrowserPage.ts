@@ -14,7 +14,7 @@
 
 import { os } from "@os-core/engine/kernel";
 import { initialOSState } from "@os-core/schema/state/initial";
-import type { Locator, LocatorAssertions, Page } from "./types";
+import type { Locator, LocatorAssertions, Page } from "@os-testing/types";
 
 // ═══════════════════════════════════════════════════════════════════
 // Test Isolation — reset kernel focus state between tests

@@ -12,13 +12,13 @@
 import type { BrowserStep } from "@os-devtool/testing";
 import {
   createBrowserPage,
-  expect,
-  getZoneItems,
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
-import type { TestScript } from "@os-testing/scripts";
+import { expect } from "@os-testing/expect";
 import { formatDiagnostics } from "@os-testing/page";
+import type { TestScript } from "@os-testing/scripts";
+import { getZoneItems } from "@os-testing/zoneItems";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { os } from "@os-sdk/os";
 import { produce } from "immer";

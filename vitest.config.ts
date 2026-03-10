@@ -8,6 +8,7 @@ export default defineConfig({
       "@os-react": "/packages/os-react/src",
       "@os-sdk": "/packages/os-sdk/src",
       "@os-devtool": "/packages/os-devtool/src",
+      "@os-testing": "/packages/os-testing/src",
       "@apps": "/src/apps",
       "@inspector": "/src/inspector",
       "@": "/src",

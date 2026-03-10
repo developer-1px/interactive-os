@@ -21,12 +21,12 @@ import {
   undoCommand,
   updateTodoText,
 } from "@apps/todo/app";
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { os } from "@os-core/engine/kernel";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AppState } from "../../../../src/apps/todo/model/appState";
-import type { Page } from "@os-devtool/testing/types";
+import type { Page } from "@os-testing/types";
 
 import TodoPage from "../../../../src/pages/TodoPage";
 

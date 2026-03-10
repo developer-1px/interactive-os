@@ -15,7 +15,7 @@
  * feed into the same snapshot, so the panel works transparently.
  */
 
-import type { TestScript } from "./scripts";
+import type { TestScript } from "@os-testing/scripts";
 
 // ─── State ───────────────────────────────────────────────────────
 

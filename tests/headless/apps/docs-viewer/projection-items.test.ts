@@ -13,7 +13,7 @@ import {
   readActiveZoneId,
   readFocusedItemId,
 } from "@os-core/3-inject/readState";
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE, os } from "@os-sdk/os";
 import { produce } from "immer";

@@ -14,8 +14,8 @@
  *   Assert: locator → toBeFocused, toHaveAttribute (ARIA contract)
  */
 
-import type { Page } from "@os-devtool/testing/types";
-import { expect as osExpect } from "@os-devtool/testing/expect";
+import type { Page } from "@os-testing/types";
+import { expect as osExpect } from "@os-testing/expect";
 import { it } from "vitest";
 
 const expect = osExpect;

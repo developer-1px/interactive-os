@@ -6,7 +6,7 @@
 
 import { computeAttrs } from "@os-core/3-inject/compute";
 import { os } from "@os-core/engine/kernel";
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { describe, expect, it } from "vitest";
 import { ExpandApp } from "@/pages/os-test-suite/patterns/ExpandPattern";
 

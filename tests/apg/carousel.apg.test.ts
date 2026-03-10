@@ -27,8 +27,8 @@
  *   - tab: escape (Tab exits tablist)
  */
 
-import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createPage } from "@os-devtool/testing/page";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   CarouselApp,

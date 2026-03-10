@@ -9,11 +9,11 @@
 
 import { TodoApp } from "@apps/todo/app";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { os } from "@os-core/engine/kernel";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AppState } from "../../../../src/apps/todo/model/appState";
-import type { Page } from "@os-devtool/testing/types";
+import type { Page } from "@os-testing/types";
 
 import TodoPage from "../../../../src/pages/TodoPage";
 

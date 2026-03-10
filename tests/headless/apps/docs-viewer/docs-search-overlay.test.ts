@@ -11,7 +11,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/docs-viewer/docsUtils", () => import("./__mocks__/docsUtils"));
 
 // ── Now safe to import app modules ──
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 import { DocsApp, selectDoc } from "@/docs-viewer/app";
 import { DocsViewer } from "@/docs-viewer/DocsViewer";

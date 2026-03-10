@@ -14,9 +14,9 @@
  *   - ArrowLeft on expanded → collapses
  */
 
-import { createPage } from "@os-devtool/testing/page";
-import { expect as osExpect } from "@os-devtool/testing/expect";
-import type { Page } from "@os-devtool/testing/types";
+import { createPage } from "@os-testing/page";
+import { expect as osExpect } from "@os-testing/expect";
+import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
 import { describe, it } from "vitest";
 

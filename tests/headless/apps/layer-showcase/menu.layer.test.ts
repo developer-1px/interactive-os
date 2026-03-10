@@ -17,7 +17,7 @@ import {
   readFocusedItemId,
 } from "@os-core/3-inject/readState";
 import { os } from "@os-core/engine/kernel";
-import { createPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-testing/page";
 import { describe, expect, it } from "vitest";
 import { MenuShowcaseApp } from "@/pages/layer-showcase/patterns/MenuPattern";
 
