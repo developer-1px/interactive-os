@@ -259,7 +259,7 @@ export const favoritesScripts: TestScript[] = [
 // ═══════════════════════════════════════════════════════════════════
 // §4 Tab Navigation — Zone 간 전환 (cross-zone)
 //
-// Tier 2 auto-runner (createHeadlessPage(app) + goto("/"))에서
+// Tier 2 auto-runner (createPage(app) + goto("/"))에서
 // 모든 zone이 등록되므로 cross-zone Tab도 auto-runner 대상.
 // ═══════════════════════════════════════════════════════════════════
 
