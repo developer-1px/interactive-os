@@ -559,7 +559,7 @@ export function DocsViewer() {
         </DocsReaderUI.Zone>
       </div>
 
-      {/* Search overlay — controlled by DocsApp.searchOpen */}
+      {/* Search overlay — controlled by OS overlay stack (docs-search) */}
       <DocsSearch allFiles={allFiles} />
     </div>
   );
