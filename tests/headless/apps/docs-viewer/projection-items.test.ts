@@ -9,7 +9,11 @@
  * not the real DocsViewer (which depends on virtual:docs-meta).
  */
 
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import {
+  readActiveZoneId,
+  readFocusedItemId,
+} from "@os-core/3-inject/readState";
+import { createPage } from "@os-devtool/testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { OS_ACTIVATE, os } from "@os-sdk/os";
 import { produce } from "immer";
@@ -93,39 +97,39 @@ const FixtureComponent: FC = () => {
 
 describe("Projection Items: projection-only item discovery", () => {
   it("list mode: detail zone has no rendered items → Tab skips it", () => {
-    const page = createHeadlessPage(FixtureApp, FixtureComponent);
+    const { page } = createPage(FixtureApp, FixtureComponent);
     page.goto("/");
 
     // Bootstrap in list zone
     page.click("item-a");
-    expect(page.activeZoneId()).toBe("fixture-list");
+    expect(readActiveZoneId(os)).toBe("fixture-list");
 
     // Tab forward — detail zone has NO items (not rendered in list mode)
     // Projection finds 0 items → Tab should skip fixture-detail
     page.keyboard.press("Tab");
     // Should wrap back to fixture-list (only zone with items)
-    expect(page.activeZoneId()).not.toBe("fixture-detail");
+    expect(readActiveZoneId(os)).not.toBe("fixture-detail");
   });
 
   it("detail mode: detail zone has 1 rendered item → Tab enters it", () => {
-    const page = createHeadlessPage(FixtureApp, FixtureComponent);
+    const { page } = createPage(FixtureApp, FixtureComponent);
     page.goto("/");
 
     // Switch to detail mode
-    page.dispatch(switchMode({ mode: "detail" }));
+    os.dispatch(switchMode({ mode: "detail" }));
 
     // Bootstrap in list zone
     page.click("item-a");
-    expect(page.activeZoneId()).toBe("fixture-list");
+    expect(readActiveZoneId(os)).toBe("fixture-list");
 
     // Tab forward — detail zone now has 1 item (rendered via projection)
     page.keyboard.press("Tab");
-    expect(page.activeZoneId()).toBe("fixture-detail");
-    expect(page.focusedItemId()).toBe("detail-content");
+    expect(readActiveZoneId(os)).toBe("fixture-detail");
+    expect(readFocusedItemId(os)).toBe("detail-content");
   });
 
   it("locator catches phantom elements not in rendered output", () => {
-    const page = createHeadlessPage(FixtureApp, FixtureComponent);
+    const { page } = createPage(FixtureApp, FixtureComponent);
     page.goto("/");
 
     // item-a exists in rendered output
@@ -136,15 +140,15 @@ describe("Projection Items: projection-only item discovery", () => {
   });
 
   it("projection provides items for navigation (ArrowDown)", () => {
-    const page = createHeadlessPage(FixtureApp, FixtureComponent);
+    const { page } = createPage(FixtureApp, FixtureComponent);
     page.goto("/");
 
     // All items come from projection, not getItems()
     page.click("item-a");
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("item-b");
+    expect(readFocusedItemId(os)).toBe("item-b");
 
     page.keyboard.press("ArrowDown");
-    expect(page.focusedItemId()).toBe("item-c");
+    expect(readFocusedItemId(os)).toBe("item-c");
   });
 });

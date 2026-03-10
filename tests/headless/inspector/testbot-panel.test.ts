@@ -8,32 +8,30 @@
  * OS gap discovery is an explicit goal.
  */
 
-import type { TestBotState } from "@apps/testbot/app";
 import { initSuites, TestBotApp } from "@apps/testbot/app";
 import { TestBotPanelV2 } from "@inspector/panels/TestBotPanelV2";
-import { createHeadlessPage } from "@os-devtool/testing/page";
-import type { AppPage } from "@os-sdk/app/defineApp/types";
+import { os } from "@os-core/engine/kernel";
+import type { Page } from "@os-devtool/testing";
+import { createPage } from "@os-devtool/testing/page";
 import { beforeEach, describe, it, expect as vitestExpect } from "vitest";
 
 // Ensure zones are registered by importing the module
 import "@apps/testbot/zones";
 
-describe("Feature: TestBot Panel ZIFT", () => {
-  let page: AppPage<TestBotState>;
+const SUITES = [
+  { name: "Listbox Nav", group: "APG" },
+  { name: "Toolbar Loop", group: "APG" },
+  { name: "Grid Select", group: "APG" },
+];
 
-  const SUITES = [
-    { name: "Listbox Nav", group: "APG" },
-    { name: "Toolbar Loop", group: "APG" },
-    { name: "Grid Select", group: "APG" },
-  ];
+describe("Feature: TestBot Panel ZIFT", () => {
+  let page: Page;
 
   beforeEach(() => {
-    page = createHeadlessPage(TestBotApp, TestBotPanelV2);
+    ({ page } = createPage(TestBotApp, TestBotPanelV2));
 
     // Seed suites into kernel state
-    (page as unknown as { dispatch: (cmd: unknown) => void }).dispatch(
-      initSuites({ scripts: SUITES }),
-    );
+    os.dispatch(initSuites({ scripts: SUITES }));
 
     page.goto("/");
   });
@@ -54,10 +52,10 @@ describe("Feature: TestBot Panel ZIFT", () => {
   // ═══════════════════════════════════════════════════════════════
 
   it("S2 — ArrowDown moves focus to next suite", () => {
-    page.locator(`#${cssId(SUITES[0]!.name)}`).click();
+    page.locator(suiteId(0)).click();
     page.keyboard.press("ArrowDown");
 
-    const focused = page.locator(`#${cssId(SUITES[1]!.name)}`);
+    const focused = page.locator(suiteId(1));
     vitestExpect(focused.getAttribute("data-focused")).toBe("true");
   });
 
@@ -69,17 +67,17 @@ describe("Feature: TestBot Panel ZIFT", () => {
 
   it("S3 — Enter expands focused suite", () => {
     // Click first item (toggles expand ON), then collapse via Enter
-    page.locator(`#${cssId(SUITES[0]!.name)}`).click();
+    page.locator(suiteId(0)).click();
     page.keyboard.press("Enter"); // collapse (click already expanded)
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[0]!.name)}`).getAttribute("aria-expanded"),
-    ).toBe("false");
+    vitestExpect(page.locator(suiteId(0)).getAttribute("aria-expanded")).toBe(
+      "false",
+    );
 
     // Now Enter should expand it again
     page.keyboard.press("Enter");
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[0]!.name)}`).getAttribute("aria-expanded"),
-    ).toBe("true");
+    vitestExpect(page.locator(suiteId(0)).getAttribute("aria-expanded")).toBe(
+      "true",
+    );
   });
 
   // ═══════════════════════════════════════════════════════════════
@@ -88,16 +86,16 @@ describe("Feature: TestBot Panel ZIFT", () => {
 
   it("S4 — Enter collapses expanded suite", () => {
     // Click expands
-    page.locator(`#${cssId(SUITES[0]!.name)}`).click();
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[0]!.name)}`).getAttribute("aria-expanded"),
-    ).toBe("true");
+    page.locator(suiteId(0)).click();
+    vitestExpect(page.locator(suiteId(0)).getAttribute("aria-expanded")).toBe(
+      "true",
+    );
 
     // Enter collapses
     page.keyboard.press("Enter");
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[0]!.name)}`).getAttribute("aria-expanded"),
-    ).toBe("false");
+    vitestExpect(page.locator(suiteId(0)).getAttribute("aria-expanded")).toBe(
+      "false",
+    );
   });
 
   // ═══════════════════════════════════════════════════════════════
@@ -105,10 +103,10 @@ describe("Feature: TestBot Panel ZIFT", () => {
   // ═══════════════════════════════════════════════════════════════
 
   it("S5 — ArrowDown at last item stays at last", () => {
-    page.locator(`#${cssId(SUITES[2]!.name)}`).click();
+    page.locator(suiteId(2)).click();
     page.keyboard.press("ArrowDown");
 
-    const focused = page.locator(`#${cssId(SUITES[2]!.name)}`);
+    const focused = page.locator(suiteId(2));
     vitestExpect(focused.getAttribute("data-focused")).toBe("true");
   });
 
@@ -117,17 +115,17 @@ describe("Feature: TestBot Panel ZIFT", () => {
   // ═══════════════════════════════════════════════════════════════
 
   it("S6 — Home goes to first, End goes to last", () => {
-    page.locator(`#${cssId(SUITES[1]!.name)}`).click();
+    page.locator(suiteId(1)).click();
 
     page.keyboard.press("Home");
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[0]!.name)}`).getAttribute("data-focused"),
-    ).toBe("true");
+    vitestExpect(page.locator(suiteId(0)).getAttribute("data-focused")).toBe(
+      "true",
+    );
 
     page.keyboard.press("End");
-    vitestExpect(
-      page.locator(`#${cssId(SUITES[2]!.name)}`).getAttribute("data-focused"),
-    ).toBe("true");
+    vitestExpect(page.locator(suiteId(2)).getAttribute("data-focused")).toBe(
+      "true",
+    );
   });
 });
 
@@ -144,4 +142,9 @@ describe("Feature: TestBot Toolbar", () => {
 /** Convert suite name to a valid CSS ID */
 function cssId(name: string): string {
   return `tb-${name.replace(/\s+/g, "-").toLowerCase()}`;
+}
+
+/** Get CSS selector for suite at index */
+function suiteId(i: number): string {
+  return `#${cssId(SUITES[i]?.name ?? "")}`;
 }
