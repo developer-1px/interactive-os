@@ -47,8 +47,7 @@ export const CheckboxApp = defineApp<Record<string, never>>(
   {},
 );
 const checkboxZone = CheckboxApp.createZone("apg-checkbox");
-const CheckboxUI = checkboxZone.bind({
-  role: "checkbox",
+const CheckboxUI = checkboxZone.bind("checkbox", {
   // Click → OS_ACTIVATE → onAction → OS_CHECK (built-in toggle)
   onAction: (cursor) => OS_CHECK({ targetId: cursor.focusId }),
 });

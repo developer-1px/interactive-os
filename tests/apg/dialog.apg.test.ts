@@ -31,8 +31,7 @@ function createDialogApp(entry: "first" | "last" = "first"): {
   const app = defineApp("test-dialog", {});
 
   const toolbar = app.createZone("toolbar");
-  toolbar.bind({
-    role: "toolbar",
+  toolbar.bind("toolbar", {
     getItems: () => ["InvokeBtn"],
     triggers: {
       InvokeBtn: () =>
@@ -45,8 +44,7 @@ function createDialogApp(entry: "first" | "last" = "first"): {
   });
 
   const dialog = app.createZone("dialog");
-  dialog.bind({
-    role: "group",
+  dialog.bind("group", {
     getItems: () => DIALOG_ITEMS,
     options: {
       tab: { behavior: "trap" as const },
@@ -120,8 +118,7 @@ describe("APG Dialog: Focus Restore", () => {
     const app = defineApp("test-dialog-nested", {});
 
     const toolbar = app.createZone("toolbar");
-    toolbar.bind({
-      role: "toolbar",
+    toolbar.bind("toolbar", {
       getItems: () => ["Btn1"],
       triggers: {
         Btn1: () =>
@@ -134,8 +131,7 @@ describe("APG Dialog: Focus Restore", () => {
     });
 
     const d1 = app.createZone("dialog-1");
-    d1.bind({
-      role: "group",
+    d1.bind("group", {
       getItems: () => ["d1-close", "D1NestedBtn"],
       options: {
         tab: { behavior: "trap" as const },
@@ -152,8 +148,7 @@ describe("APG Dialog: Focus Restore", () => {
     });
 
     const d2 = app.createZone("dialog-2");
-    d2.bind({
-      role: "group",
+    d2.bind("group", {
       getItems: () => ["d2-yes", "d2-no"],
       options: {
         tab: { behavior: "trap" as const },

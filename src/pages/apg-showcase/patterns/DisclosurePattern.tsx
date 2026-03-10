@@ -69,7 +69,7 @@ export const DisclosureApp = defineApp<Record<string, never>>(
   {},
 );
 const disclosureZone = DisclosureApp.createZone("apg-disclosure");
-const DisclosureUI = disclosureZone.bind({ role: "disclosure" });
+const DisclosureUI = disclosureZone.bind("disclosure", {});
 
 // ─── Disclosure Row ───
 // Zero render-prop. Zero JS state.

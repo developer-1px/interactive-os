@@ -50,8 +50,7 @@ const TOOLBAR_CONFIG = {
 function createToolbar(focusedItem = "bold-btn"): { page: Page; cleanup: () => void } {
   const app = defineApp("test-toolbar", {});
   const zone = app.createZone("toolbar");
-  zone.bind({
-    role: "toolbar",
+  zone.bind("toolbar", {
     getItems: () => TOOLBAR_ITEMS,
     options: TOOLBAR_CONFIG,
   });
@@ -91,8 +90,7 @@ describe("APG Toolbar: Click Activate", () => {
     const actionSpy = vi.fn();
     const app = defineApp("test-toolbar-click", {});
     const zone = app.createZone("toolbar");
-    zone.bind({
-      role: "toolbar",
+    zone.bind("toolbar", {
       getItems: () => TOOLBAR_ITEMS,
       options: TOOLBAR_CONFIG,
       onAction: actionSpy,
@@ -114,14 +112,12 @@ describe("APG Toolbar: Tab Escape", () => {
   it("Tab: moves focus out to next zone", async () => {
     const app = defineApp("test-toolbar-escape", {});
     const toolbar = app.createZone("toolbar");
-    toolbar.bind({
-      role: "toolbar",
+    toolbar.bind("toolbar", {
       getItems: () => TOOLBAR_ITEMS,
       options: TOOLBAR_CONFIG,
     });
     const editor = app.createZone("editor");
-    editor.bind({
-      role: "group",
+    editor.bind("group", {
       getItems: () => ["line-1"],
     });
 
@@ -150,8 +146,7 @@ describe("APG Toolbar: Tabs Variant", () => {
   function createTabs(focusedTab = "tab-general"): { page: Page; cleanup: () => void } {
     const app = defineApp("test-toolbar-tabs", {});
     const zone = app.createZone("tablist");
-    zone.bind({
-      role: "toolbar",
+    zone.bind("toolbar", {
       getItems: () => TAB_ITEMS,
       options: {
         ...TOOLBAR_CONFIG,

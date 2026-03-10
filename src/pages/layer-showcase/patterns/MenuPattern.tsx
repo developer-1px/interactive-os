@@ -19,8 +19,7 @@ import { Icon } from "@/components/Icon";
 export const MenuShowcaseApp = defineApp("layer-menu-showcase", {});
 
 const triggerZone = MenuShowcaseApp.createZone("menu-trigger-zone");
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenMenuBtn"],
   triggers: {
     OpenMenuBtn: () =>
@@ -33,8 +32,7 @@ triggerZone.bind({
 });
 
 const menuZone = MenuShowcaseApp.createZone("layer-menu");
-menuZone.bind({
-  role: "menu",
+menuZone.bind("menu", {
   getItems: () => ["menu-cut", "menu-copy", "menu-paste", "menu-delete"],
 });
 

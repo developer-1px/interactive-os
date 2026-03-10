@@ -48,8 +48,7 @@ export const clearSearchQuery = searchZone.command(
   }),
 );
 
-export const InspectorSearchUI = searchZone.bind({
-  role: "textbox",
+export const InspectorSearchUI = searchZone.bind("textbox", {
   field: {
     onCommit: updateSearchQuery,
     trigger: "change",
@@ -80,8 +79,7 @@ export const toggleGroup = filtersZone.command(
   }),
 );
 
-export const InspectorFiltersUI = filtersZone.bind({
-  role: "toolbar",
+export const InspectorFiltersUI = filtersZone.bind("toolbar", {
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: {
     "groupBtn-kernel": () => toggleGroup({ group: "kernel" }),
@@ -117,13 +115,11 @@ export const setScrollState = scrollZone.command(
 // ─── Zift Monitor Zone ───
 const ziftZone = InspectorApp.createZone("inspector-zift");
 
-export const InspectorZiftUI = ziftZone.bind({
-  role: "disclosure",
+export const InspectorZiftUI = ziftZone.bind("disclosure", {
   getItems: () => [...ZoneRegistry.keys()],
 });
 
-export const InspectorScrollUI = scrollZone.bind({
-  role: "toolbar",
+export const InspectorScrollUI = scrollZone.bind("toolbar", {
   options: { inputmap: { click: [OS_ACTIVATE()] } },
   triggers: {
     ScrollToBottom: () => INSPECTOR_SCROLL_TO_BOTTOM(),

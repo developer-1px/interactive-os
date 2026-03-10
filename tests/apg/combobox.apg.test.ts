@@ -59,8 +59,7 @@ function createComboboxPopup(focusedItem = "apple"): {
 
   // Zone 1: The Input part of the Combobox
   const combobox = app.createZone("combobox");
-  combobox.bind({
-    role: "listbox",
+  combobox.bind("listbox", {
     getItems: () => ["input-field"],
     triggers: {
       "input-field": () =>
@@ -70,8 +69,7 @@ function createComboboxPopup(focusedItem = "apple"): {
 
   // Zone 2: The Popup Listbox
   const popup = app.createZone("popup");
-  popup.bind({
-    role: "listbox",
+  popup.bind("listbox", {
     getItems: () => POPUP_ITEMS,
     options: POPUP_CONFIG,
   });

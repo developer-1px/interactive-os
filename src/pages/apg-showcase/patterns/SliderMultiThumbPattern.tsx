@@ -50,8 +50,7 @@ export const MultiThumbApp = defineApp<Record<string, never>>(
 const ZONE_ID = "apg-slider-multithumb-zone";
 
 const sliderZone = MultiThumbApp.createZone(ZONE_ID);
-const SliderUI = sliderZone.bind({
-  role: "group",
+const SliderUI = sliderZone.bind("group", {
   options: {
     tab: { behavior: "flow" },
     value: {

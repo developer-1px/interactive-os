@@ -13,8 +13,7 @@ const TEST_ACTION = triggerZone.command("TEST_ACTION", (ctx) => ({
   state: ctx.state,
 }));
 
-const TriggerUI = triggerZone.bind({
-  role: "toolbar",
+const TriggerUI = triggerZone.bind("toolbar", {
   triggers: {
     TestButton: () => TEST_ACTION(),
   },

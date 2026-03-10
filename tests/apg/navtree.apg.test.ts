@@ -45,8 +45,7 @@ const TREE_LEVELS = new Map([
 function createNavTreeApp() {
   const app = defineApp("test-navtree", {});
   const zone = app.createZone("nav-tree");
-  zone.bind({
-    role: "tree",
+  zone.bind("tree", {
     getItems: () => NAV_ITEMS,
     getExpandableItems: () => EXPANDABLE,
     getTreeLevels: () => TREE_LEVELS,

@@ -39,8 +39,7 @@ const ARTICLES = [
 function createFeed(focusedItem = "article-1"): { page: Page; cleanup: () => void } {
   const app = defineApp("test-feed", {});
   const zone = app.createZone("feed");
-  zone.bind({
-    role: "feed",
+  zone.bind("feed", {
     getItems: () => ARTICLES,
   });
   const { page, cleanup } = createPage(app);

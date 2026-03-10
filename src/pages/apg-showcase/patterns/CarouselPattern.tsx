@@ -111,8 +111,7 @@ const isRotating = CarouselApp.selector(
 );
 
 const carouselZone = CarouselApp.createZone("carousel-tabs");
-const CarouselUI = carouselZone.bind({
-  role: "tablist",
+const CarouselUI = carouselZone.bind("tablist", {
   options: { select: { followFocus: true } },
   triggers: {
     ToggleRotation: () => TOGGLE_ROTATION(),

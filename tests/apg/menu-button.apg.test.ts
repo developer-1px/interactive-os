@@ -41,8 +41,7 @@ function createMenuButton(focusedItem = "action-cut"): { page: Page; cleanup: ()
   const app = defineApp("test-menu-button", {});
 
   const trigger = app.createZone("trigger-bar");
-  trigger.bind({
-    role: "toolbar",
+  trigger.bind("toolbar", {
     getItems: () => ["menu-trigger"],
     triggers: {
       "menu-trigger": () =>
@@ -55,8 +54,7 @@ function createMenuButton(focusedItem = "action-cut"): { page: Page; cleanup: ()
   });
 
   const menu = app.createZone("popup-menu");
-  menu.bind({
-    role: "menu",
+  menu.bind("menu", {
     getItems: () => MENU_ITEMS,
     options: {
       tab: { behavior: "trap" as const },

@@ -73,8 +73,7 @@ export const TooltipApp = defineApp<Record<string, never>>(
   {},
 );
 const tooltipZone = TooltipApp.createZone("apg-tooltip-toolbar");
-const ToolbarUI = tooltipZone.bind({
-  role: "toolbar",
+const ToolbarUI = tooltipZone.bind("toolbar", {
   options: {
     dismiss: { escape: "close", outsideClick: "none" },
   },

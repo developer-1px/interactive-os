@@ -41,8 +41,7 @@ const MENU_ITEMS = [
 function createMenubar(focusedItem = "mb-file"): { page: Page; cleanup: () => void } {
   const app = defineApp("test-menubar", {});
   const zone = app.createZone("menubar");
-  zone.bind({
-    role: "menubar",
+  zone.bind("menubar", {
     getItems: () => MENUBAR_ITEMS,
     options: { navigate: { loop: true } }
   });
@@ -55,8 +54,7 @@ function createMenubar(focusedItem = "mb-file"): { page: Page; cleanup: () => vo
 function createMenu(focusedItem = "cmd-new"): { page: Page; cleanup: () => void } {
   const app = defineApp("test-menu", {});
   const menubar = app.createZone("menubar");
-  menubar.bind({
-    role: "menubar",
+  menubar.bind("menubar", {
     getItems: () => MENUBAR_ITEMS,
     triggers: {
       "mb-file": () =>
@@ -64,8 +62,7 @@ function createMenu(focusedItem = "cmd-new"): { page: Page; cleanup: () => void 
     },
   });
   const menu = app.createZone("menu");
-  menu.bind({
-    role: "menu",
+  menu.bind("menu", {
     getItems: () => MENU_ITEMS,
     options: {
       navigate: { orientation: "vertical", loop: true },

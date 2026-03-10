@@ -84,8 +84,7 @@ const expandableIds = collectExpandable(fileTree);
 
 export const TreeApp = defineApp<Record<string, never>>("apg-tree-app", {});
 const explorerZone = TreeApp.createZone("apg-explorer");
-const ExplorerUI = explorerZone.bind({
-  role: "tree",
+const ExplorerUI = explorerZone.bind("tree", {
   getExpandableItems: () => expandableIds,
   options: {
     select: { mode: "multiple", followFocus: false, range: true, toggle: true },

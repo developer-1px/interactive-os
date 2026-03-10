@@ -40,8 +40,7 @@ const TREE_LEVELS = new Map([
 function createTreeApp() {
   const app = defineApp("test-tree", {});
   const zone = app.createZone("tree");
-  zone.bind({
-    role: "tree",
+  zone.bind("tree", {
     getItems: () => ALL_ITEMS,
     getExpandableItems: () => EXPANDABLE,
     getTreeLevels: () => TREE_LEVELS,
@@ -85,8 +84,7 @@ function createMultiSelectTree(focusedItem = "child-1a"): {
 } {
   const app = defineApp("test-tree-multi", {});
   const zone = app.createZone("tree");
-  zone.bind({
-    role: "tree",
+  zone.bind("tree", {
     getItems: () => ALL_ITEMS,
     getExpandableItems: () => EXPANDABLE,
     getTreeLevels: () => TREE_LEVELS,

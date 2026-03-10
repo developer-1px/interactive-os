@@ -15,8 +15,7 @@ export function suiteItemId(name: string): string {
 
 const suitesZone = TestBotApp.createZone("testbot-suites");
 
-export const SuitesUI = suitesZone.bind({
-  role: "accordion",
+export const SuitesUI = suitesZone.bind("accordion", {
   getItems: () => getTestBotState().suites.map((s) => suiteItemId(s.name)),
 });
 
@@ -24,7 +23,6 @@ export const SuitesUI = suitesZone.bind({
 
 const toolbarZone = TestBotApp.createZone("testbot-toolbar");
 
-export const ToolbarUI = toolbarZone.bind({
-  role: "toolbar",
+export const ToolbarUI = toolbarZone.bind("toolbar", {
   getItems: () => ["tb-run-all", "tb-quick"],
 });

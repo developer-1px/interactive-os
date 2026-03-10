@@ -184,8 +184,7 @@ export const reorderBlockCommand = sidebarCollection.command(
 // Bind with auto-wired CRUD + custom options
 const collectionBindings = sidebarCollection.collectionBindings();
 
-export const BuilderSidebarUI = sidebarCollection.bind({
-  role: "tree",
+export const BuilderSidebarUI = sidebarCollection.bind("tree", {
   ...collectionBindings,
   onUndo: undoCommand(),
   onRedo: redoCommand(),
@@ -228,8 +227,7 @@ export const localeMenu = sidebarCollection.overlay("locale-menu", {
 
 const panelZone = BuilderApp.createZone("panel");
 
-export const BuilderPanelUI = panelZone.bind({
-  role: "tree",
+export const BuilderPanelUI = panelZone.bind("tree", {
   options: {
     navigate: { orientation: "vertical", typeahead: false },
     tab: { behavior: "flow" },
@@ -432,8 +430,7 @@ const canvasBindings = canvasCollection.collectionBindings({
 const { getItems: _dataModelGetItems, ...canvasBindingsWithoutGetItems } =
   canvasBindings;
 
-export const BuilderCanvasUI = canvasCollection.bind({
-  role: "grid",
+export const BuilderCanvasUI = canvasCollection.bind("grid", {
   onAction: createDrillDown(CANVAS_ZONE_ID),
   onUndo: undoCommand(),
   onRedo: redoCommand(),

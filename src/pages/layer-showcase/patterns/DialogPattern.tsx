@@ -22,8 +22,7 @@ export const DialogShowcaseApp = defineApp("layer-dialog-showcase", {});
 
 // Trigger zone: toolbar with a button that opens dialog
 const triggerZone = DialogShowcaseApp.createZone("dialog-trigger-zone");
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenDialog"],
   triggers: {
     OpenDialog: () =>
@@ -37,8 +36,7 @@ triggerZone.bind({
 
 // Dialog zone: focus trap + escape dismiss
 const dialogZone = DialogShowcaseApp.createZone("layer-dialog");
-dialogZone.bind({
-  role: "group",
+dialogZone.bind("group", {
   getItems: () => [
     "dialog-close",
     "dialog-name",

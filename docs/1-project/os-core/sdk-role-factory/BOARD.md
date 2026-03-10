@@ -12,9 +12,9 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-| T1 | `Role<TConfig>` 타입 + `defineRole()` 함수 생성 | Role phantom type, defineRole(name, ariaSchema, preset) → Role<TConfig> | ⬜ | |
-| T2 | role별 config 인터페이스 정의 (카테고리별) | Collection/Overlay/Expansion/Value/Toggle 등 카테고리별 config 타입, 잘못된 조합 tsc 거부 | ⬜ | |
-| T3 | 27개 role preset을 `defineRole()`로 재정의 | rolePresets → defineRole() 호출로 전환, resolveRole() 호환 | ⬜ | |
+| T1 | `Role<TConfig>` 타입 + `defineRole()` 함수 생성 | Role phantom type, defineRole(name, ariaSchema, preset) → Role<TConfig> | ✅ | tsc 0 new | +6 tests | lint clean |
+| T2 | role별 config 인터페이스 정의 (카테고리별) | Collection/Overlay/Expansion/Value/Toggle 등 카테고리별 config 타입, 잘못된 조합 tsc 거부 | ✅ | RoleSchema(containerRole, itemRole, attrs) 구현, T1과 함께 검증 |
+| T3 | 27개 role preset을 `defineRole()`로 재정의 | rolePresets → defineRole() 호출로 전환, resolveRole() 호환 | ✅ | 27개 *Role export + resolveRole Role 객체 수용 |
 | T4 | `bind()` 시그니처 변경 — role을 첫 인자로 | `bind<R>(role: Role<R>, config: R & {field?, triggers?})` | ⬜ | |
 | T5 | `bind.ts` 구현 업데이트 | createBoundComponents가 role을 별도 인자로 수신 | ⬜ | |
 | T6 | src/ 앱 코드 bind() 마이그레이션 | `bind({ role: "listbox", ...})` → `bind(listboxRole, {...})` | ⬜ | |

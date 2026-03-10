@@ -25,8 +25,7 @@ export const AlertDialogShowcaseApp = defineApp(
 const triggerZone = AlertDialogShowcaseApp.createZone(
   "alertdialog-trigger-zone",
 );
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenAlertDialog"],
   triggers: {
     OpenAlertDialog: () =>
@@ -40,8 +39,7 @@ triggerZone.bind({
 
 // AlertDialog zone: focus trap, NO escape dismiss
 const alertZone = AlertDialogShowcaseApp.createZone("layer-alertdialog");
-alertZone.bind({
-  role: "group",
+alertZone.bind("group", {
   getItems: () => ["alert-cancel", "alert-confirm"],
   options: {
     tab: { behavior: "trap" as const },

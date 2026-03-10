@@ -19,8 +19,7 @@ import { Icon } from "@/components/Icon";
 export const PopoverShowcaseApp = defineApp("layer-popover-showcase", {});
 
 const triggerZone = PopoverShowcaseApp.createZone("popover-trigger-zone");
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenPopoverBtn"],
   triggers: {
     OpenPopoverBtn: () =>
@@ -33,8 +32,7 @@ triggerZone.bind({
 });
 
 const popoverZone = PopoverShowcaseApp.createZone("layer-popover");
-popoverZone.bind({
-  role: "group",
+popoverZone.bind("group", {
   getItems: () => ["popover-item-1", "popover-item-2", "popover-item-3"],
   options: {
     dismiss: { escape: "close" as const },

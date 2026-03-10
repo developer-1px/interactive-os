@@ -29,8 +29,7 @@ export const crossZoneTests: TestCase[] = [
 export const CrossZoneApp = defineApp("os-test-cross-zone", {});
 
 const toolbarZone = CrossZoneApp.createZone("cross-toolbar");
-const ToolbarUI = toolbarZone.bind({
-  role: "toolbar",
+const ToolbarUI = toolbarZone.bind("toolbar", {
   getItems: () => ["btn-bold", "btn-italic", "btn-underline"],
   options: {
     inputmap: { click: [OS_ACTIVATE()] },
@@ -38,8 +37,7 @@ const ToolbarUI = toolbarZone.bind({
 });
 
 const listZone = CrossZoneApp.createZone("cross-list");
-const ListUI = listZone.bind({
-  role: "listbox",
+const ListUI = listZone.bind("listbox", {
   getItems: () => ["file-1", "file-2", "file-3"],
   options: {
     inputmap: { click: [OS_ACTIVATE()] },

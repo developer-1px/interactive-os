@@ -32,8 +32,7 @@ function openDropdown(): { page: Page; cleanup: () => void } {
   const app = defineApp("test-dropdown", {});
 
   const toolbar = app.createZone("toolbar");
-  toolbar.bind({
-    role: "toolbar",
+  toolbar.bind("toolbar", {
     getItems: () => ["LocaleTrigger"],
     triggers: {
       LocaleTrigger: () =>
@@ -46,8 +45,7 @@ function openDropdown(): { page: Page; cleanup: () => void } {
   });
 
   const menu = app.createZone("locale-menu");
-  menu.bind({
-    role: "menu",
+  menu.bind("menu", {
     getItems: () => LOCALE_ITEMS,
     options: {
       tab: { behavior: "trap" as const },

@@ -164,8 +164,7 @@ export const TreegridApp = defineApp<Record<string, never>>(
   {},
 );
 const treegridZone = TreegridApp.createZone("apg-treegrid");
-const TreegridUI = treegridZone.bind({
-  role: "treegrid",
+const TreegridUI = treegridZone.bind("treegrid", {
   getExpandableItems: () => expandableIds,
   options: {
     select: {

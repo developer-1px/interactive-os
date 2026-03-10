@@ -89,8 +89,7 @@ export const SORT_BY_COLUMN = tableZone.command(
 
 // ─── Bind (triggers declared here — one per sortable column) ───
 
-const TableUI = tableZone.bind({
-  role: "toolbar",
+const TableUI = tableZone.bind("toolbar", {
   options: { navigate: { orientation: "horizontal" } },
   triggers: {
     SortFirstName: () => SORT_BY_COLUMN({ column: "firstName" }),

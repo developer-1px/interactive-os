@@ -57,8 +57,7 @@ export const expandTests: TestCase[] = [
 export const ExpandApp = defineApp("os-test-expand", {});
 
 const disclosureZone = ExpandApp.createZone("expand-disclosure");
-const DisclosureUI = disclosureZone.bind({
-  role: "disclosure",
+const DisclosureUI = disclosureZone.bind("disclosure", {
   getItems: () => ["section-a", "section-b", "section-c"],
   options: {
     expand: { mode: "all", initial: ["section-a"] },

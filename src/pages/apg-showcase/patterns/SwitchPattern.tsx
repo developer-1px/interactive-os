@@ -49,8 +49,7 @@ export const SWITCHES: SwitchDef[] = [
 
 export const SwitchApp = defineApp<Record<string, never>>("apg-switch-app", {});
 const switchZone = SwitchApp.createZone("apg-switch");
-const SwitchUI = switchZone.bind({
-  role: "switch",
+const SwitchUI = switchZone.bind("switch", {
   onAction: (cursor: ZoneCursor) => OS_CHECK({ targetId: cursor.focusId }),
 });
 

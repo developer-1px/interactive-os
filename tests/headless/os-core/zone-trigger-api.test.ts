@@ -28,8 +28,7 @@ describe("Feature: bind() with triggers object map", () => {
       state: { ...ctx.state, count: ctx.state.count + 1 },
     }));
 
-    const UI = zone.bind({
-      role: "toolbar",
+    const UI = zone.bind("toolbar", {
       triggers: {
         DoIncrement: () => increment(),
       },
@@ -56,8 +55,7 @@ describe("Feature: bind() with triggers object map", () => {
       }),
     );
 
-    const UI = zone.bind({
-      role: "listbox",
+    const UI = zone.bind("listbox", {
       triggers: {
         ActivateItem: (fid: string) => activate({ id: fid }),
       },

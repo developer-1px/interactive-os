@@ -44,16 +44,14 @@ const switchMode = FixtureApp.command(
 );
 
 const listZone = FixtureApp.createZone("fixture-list");
-const ListUI = listZone.bind({
-  role: "listbox",
+const ListUI = listZone.bind("listbox", {
   options: {
     inputmap: { click: [OS_ACTIVATE()] },
   },
 });
 
 const detailZone = FixtureApp.createZone("fixture-detail");
-const DetailUI = detailZone.bind({
-  role: "feed",
+const DetailUI = detailZone.bind("feed", {
   options: {
     inputmap: { click: [OS_ACTIVATE()] },
   },

@@ -22,7 +22,7 @@
  *   const canUndo = TodoApp.condition("canUndo", s => s.history.past.length > 0);
  *   const listZone = TodoApp.createZone("list");
  *   const toggleTodo = listZone.command("TOGGLE", handler);
- *   const { Zone, Item } = listZone.bind({ role: "listbox", onCheck: toggleTodo });
+ *   const { Zone, Item } = listZone.bind("listbox", { onCheck: toggleTodo });
  */
 
 import { defineScope } from "@kernel";
@@ -30,6 +30,7 @@ import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import { registerAppSlice } from "@os-core/engine/appState";
 import { createHistoryMiddleware } from "@os-core/engine/middlewares/historyKernelMiddleware";
+import type { Role } from "@os-core/engine/registries/roleRegistry";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type React from "react";
@@ -311,7 +312,8 @@ export function defineApp<S>(
           (focusId: string) => import("@kernel/core/tokens").BaseCommand
         > = Record<string, never>,
       >(
-        config: Omit<ZoneBindings, "triggers"> & {
+        role: import("@os-core/engine/registries/roleRegistry").ZoneRole | Role,
+        config: Omit<ZoneBindings, "triggers" | "role"> & {
           field?: FieldBindings;
           keybindings?: {
             key: string;
@@ -330,6 +332,12 @@ export function defineApp<S>(
           ) => React.HTMLAttributes<T>;
         };
       } {
+        // Extract role name from Role object or string
+        const roleName = (
+          typeof role === "object" && role !== null && "__brand" in role
+            ? (role as Role).name
+            : role
+        ) as import("@os-core/engine/registries/roleRegistry").ZoneRole;
         // Normalize triggers: object map → TriggerBinding[] + prop-getter map
         let triggerBindings: TriggerBinding[] | undefined;
         const triggerGetters: Record<
@@ -366,8 +374,8 @@ export function defineApp<S>(
 
         // Track zone bindings for headless page
         zoneBindingEntries.set(zoneName, {
-          role: config.role,
-          bindings: normalizedConfig,
+          role: roleName,
+          bindings: { ...normalizedConfig, role: roleName },
           keybindings: config.keybindings ?? [],
           ...(config.field !== undefined ? { field: config.field } : {}),
           ...(triggerBindings !== undefined
@@ -377,7 +385,7 @@ export function defineApp<S>(
 
         const components = createBoundComponents(
           { appId, zoneName, useComputed: slice.useComputed },
-          normalizedConfig,
+          { ...normalizedConfig, role: roleName },
         );
 
         // Return components + trigger prop-getters

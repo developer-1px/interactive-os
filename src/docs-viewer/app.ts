@@ -167,8 +167,7 @@ export const searchOverlay = navbarZone.overlay("docs-search", {
   role: "dialog",
 });
 
-export const DocsNavbarUI = navbarZone.bind({
-  role: "toolbar",
+export const DocsNavbarUI = navbarZone.bind("toolbar", {
   onAction: (cursor) => {
     switch (cursor.focusId) {
       case "docs-btn-back":
@@ -199,8 +198,7 @@ export const DocsNavbarUI = navbarZone.bind({
 
 const favoritesZone = DocsApp.createZone("docs-favorites");
 
-export const DocsFavoritesUI = favoritesZone.bind({
-  role: "listbox",
+export const DocsFavoritesUI = favoritesZone.bind("listbox", {
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
   getItems: () => getFavoriteFiles(allFiles).map((f) => f.path),
@@ -216,8 +214,7 @@ export const DocsFavoritesUI = favoritesZone.bind({
 
 const recentZone = DocsApp.createZone("docs-recent");
 
-export const DocsRecentUI = recentZone.bind({
-  role: "listbox",
+export const DocsRecentUI = recentZone.bind("listbox", {
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
   options: {
@@ -232,8 +229,7 @@ export const DocsRecentUI = recentZone.bind({
 
 const sidebarZone = DocsApp.createZone("docs-sidebar");
 
-export const DocsSidebarUI = sidebarZone.bind({
-  role: "tree",
+export const DocsSidebarUI = sidebarZone.bind("tree", {
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   onSelect: (cursor) => selectDoc({ id: cursor.focusId }),
   getExpandableItems: () => expandableIds,
@@ -271,8 +267,7 @@ export const PREV_SECTION = readerZone.command(
   { key: "Shift+Space" },
 );
 
-export const DocsReaderUI = readerZone.bind({
-  role: "feed",
+export const DocsReaderUI = readerZone.bind("feed", {
   onAction: (cursor) => selectDoc({ id: cursor.focusId }),
   getItems: () => {
     const rid = (id: string) => zoneItemId("docs-reader", id);

@@ -76,8 +76,7 @@ export const SpinbuttonApp = defineApp<Record<string, never>>(
 );
 
 const spinbuttonZone = SpinbuttonApp.createZone("apg-spinbutton-zone");
-const SpinUI = spinbuttonZone.bind({
-  role: "spinbutton",
+const SpinUI = spinbuttonZone.bind("spinbutton", {
   options: {
     navigate: { orientation: "vertical" },
     value: {

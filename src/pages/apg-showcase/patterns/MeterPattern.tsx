@@ -85,8 +85,7 @@ export const METERS: MeterDef[] = [
 export const MeterApp = defineApp<Record<string, never>>("apg-meter-app", {});
 
 const meterZone = MeterApp.createZone("apg-meter-zone");
-const MeterUI = meterZone.bind({
-  role: "meter",
+const MeterUI = meterZone.bind("meter", {
   options: {
     navigate: { orientation: "vertical" },
     value: {

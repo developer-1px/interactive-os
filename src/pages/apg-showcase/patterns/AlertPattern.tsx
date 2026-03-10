@@ -39,8 +39,7 @@ export const RESET_ALERTS = alertZone.command("RESET_ALERTS", () => ({
 
 // ─── Bind (triggers declared here) ───
 
-const AlertUI = alertZone.bind({
-  role: "toolbar",
+const AlertUI = alertZone.bind("toolbar", {
   triggers: {
     ShowAlert: () => SHOW_ALERT(),
   },

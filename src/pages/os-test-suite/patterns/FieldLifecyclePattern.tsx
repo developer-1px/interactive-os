@@ -63,8 +63,7 @@ export const setEnterValue = enterZone.command(
   }),
 );
 
-const EnterFieldUI = enterZone.bind({
-  role: "textbox",
+const EnterFieldUI = enterZone.bind("textbox", {
   field: {
     fieldName: "enterField",
     onCommit: setEnterValue,
@@ -85,8 +84,7 @@ export const setChangeValue = changeZone.command(
   }),
 );
 
-const ChangeFieldUI = changeZone.bind({
-  role: "textbox",
+const ChangeFieldUI = changeZone.bind("textbox", {
   field: {
     fieldName: "changeField",
     onCommit: setChangeValue,

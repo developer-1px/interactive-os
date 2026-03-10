@@ -41,8 +41,7 @@ const TREE_LEVELS = new Map([
 function createTreegridApp() {
   const app = defineApp("test-treegrid", {});
   const zone = app.createZone("treegrid");
-  zone.bind({
-    role: "treegrid",
+  zone.bind("treegrid", {
     getItems: () => ALL_ROWS,
     getExpandableItems: () => EXPANDABLE,
     getTreeLevels: () => TREE_LEVELS,

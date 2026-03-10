@@ -46,14 +46,14 @@ export const CrustApp = defineApp<Record<string, never>>(
   {},
 );
 const crustZone = CrustApp.createZone("radiogroup-crust");
-const CrustUI = crustZone.bind({ role: "radiogroup" });
+const CrustUI = crustZone.bind("radiogroup", {});
 
 export const DeliveryApp = defineApp<Record<string, never>>(
   "apg-radiogroup-delivery",
   {},
 );
 const deliveryZone = DeliveryApp.createZone("radiogroup-delivery");
-const DeliveryUI = deliveryZone.bind({ role: "radiogroup" });
+const DeliveryUI = deliveryZone.bind("radiogroup", {});
 
 // ─── Radio Button Component ───
 

@@ -36,8 +36,7 @@ export const overlayTests: TestCase[] = [
 export const OverlayApp = defineApp("os-test-overlay", {});
 
 const triggerZone = OverlayApp.createZone("overlay-trigger");
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenBtn"],
   triggers: {
     OpenBtn: () =>
@@ -50,8 +49,7 @@ triggerZone.bind({
 });
 
 const dialogZone = OverlayApp.createZone("test-dialog");
-dialogZone.bind({
-  role: "group",
+dialogZone.bind("group", {
   getItems: () => ["dialog-a", "dialog-b", "dialog-c"],
   options: {
     tab: { behavior: "trap" as const },

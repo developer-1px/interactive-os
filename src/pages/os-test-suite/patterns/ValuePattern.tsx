@@ -72,8 +72,7 @@ export const valueTests: TestCase[] = [
 export const ValueApp = defineApp("os-test-value", {});
 
 const spinZone = ValueApp.createZone("value-spin");
-const SpinUI = spinZone.bind({
-  role: "spinbutton",
+const SpinUI = spinZone.bind("spinbutton", {
   getItems: () => ["spin-item"],
   options: {
     value: {
@@ -88,8 +87,7 @@ const SpinUI = spinZone.bind({
 });
 
 const sliderZone = ValueApp.createZone("value-slider");
-const SliderUI = sliderZone.bind({
-  role: "slider",
+const SliderUI = sliderZone.bind("slider", {
   getItems: () => ["slider-item"],
   options: {
     value: {

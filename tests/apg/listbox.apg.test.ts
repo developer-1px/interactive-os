@@ -66,8 +66,7 @@ function createListbox(focusedItem = "apple"): {
 } {
   const app = defineApp("test-listbox", {});
   const zone = app.createZone("listbox");
-  zone.bind({
-    role: "listbox",
+  zone.bind("listbox", {
     getItems: () => ITEMS,
     options: SINGLE_SELECT,
   });
@@ -83,8 +82,7 @@ function createMultiListbox(focusedItem = "apple"): {
 } {
   const app = defineApp("test-listbox", {});
   const zone = app.createZone("listbox");
-  zone.bind({
-    role: "listbox",
+  zone.bind("listbox", {
     getItems: () => ITEMS,
     options: MULTI_SELECT,
   });
@@ -524,8 +522,7 @@ describe.skip("APG Listbox: Focus Initialization", () => {
   it("single-select, no selection: focus goes to first option", async () => {
     const app = defineApp("test-listbox", {});
     const zone = app.createZone("listbox");
-    zone.bind({
-      role: "listbox",
+    zone.bind("listbox", {
       getItems: () => ITEMS,
       options: SINGLE_SELECT,
     });
@@ -540,8 +537,7 @@ describe.skip("APG Listbox: Focus Initialization", () => {
   it("multi-select, no selection: focus first, no auto-select", async () => {
     const app = defineApp("test-listbox", {});
     const zone = app.createZone("listbox");
-    zone.bind({
-      role: "listbox",
+    zone.bind("listbox", {
       getItems: () => ITEMS,
       options: MULTI_SELECT,
     });
@@ -569,8 +565,7 @@ describe("APG Listbox: Horizontal Orientation", () => {
   } {
     const app = defineApp("test-listbox", {});
     const zone = app.createZone("listbox");
-    zone.bind({
-      role: "listbox",
+    zone.bind("listbox", {
       getItems: () => ITEMS,
       options: {
         navigate: { ...SINGLE_SELECT.navigate, orientation: "horizontal" },
@@ -618,8 +613,7 @@ describe("APG Listbox: RadioGroup Variant", () => {
   } {
     const app = defineApp("test-listbox", {});
     const zone = app.createZone("radiogroup");
-    zone.bind({
-      role: "listbox",
+    zone.bind("listbox", {
       getItems: () => ["radio-sm", "radio-md", "radio-lg"],
       options: {
         navigate: {

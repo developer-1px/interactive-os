@@ -34,8 +34,7 @@ const SPLITTER_ID = "main-splitter";
 const INITIAL_VALUE = 50;
 
 const splitterZone = SplitterApp.createZone("apg-splitter-zone");
-const SplitterUI = splitterZone.bind({
-  role: "separator",
+const SplitterUI = splitterZone.bind("separator", {
   options: {
     value: {
       min: 0,

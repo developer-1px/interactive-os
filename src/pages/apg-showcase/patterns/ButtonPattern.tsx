@@ -44,8 +44,7 @@ export const PERFORM_ACTION = actionZone.command("PERFORM_ACTION", (ctx) => ({
 
 // ─── Bind (triggers declared here — single declaration point) ───
 
-const ActionUI = actionZone.bind({
-  role: "toolbar",
+const ActionUI = actionZone.bind("toolbar", {
   options: {
     navigate: { orientation: "horizontal" },
   },
@@ -133,8 +132,7 @@ export const ToggleApp = defineApp<Record<string, never>>(
   {},
 );
 const toggleZone = ToggleApp.createZone("apg-toggle-buttons");
-const ToggleUI = toggleZone.bind({
-  role: "toolbar",
+const ToggleUI = toggleZone.bind("toolbar", {
   options: {
     navigate: { orientation: "horizontal", loop: true },
     inputmap: {

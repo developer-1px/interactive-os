@@ -261,8 +261,7 @@ function getSelectedIds(zoneId: string): string[] {
     : [];
 }
 
-export const TodoListUI = listCollection.bind({
-  role: "listbox",
+export const TodoListUI = listCollection.bind("listbox", {
   options: {
     dismiss: { escape: "deselect" },
     select: { mode: "multiple", range: true, toggle: true, followFocus: false },
@@ -323,8 +322,7 @@ export const selectCategory = sidebarCollection.command(
 );
 
 const sidebarBindings = sidebarCollection.collectionBindings();
-export const TodoSidebarUI = sidebarCollection.bind({
-  role: "listbox",
+export const TodoSidebarUI = sidebarCollection.bind("listbox", {
   onAction: (cursor) => selectCategory({ id: cursor.focusId }),
   onSelect: (cursor) => selectCategory({ id: cursor.focusId }),
   onMoveUp: sidebarBindings.onMoveUp,
@@ -346,8 +344,7 @@ const draftZone = TodoApp.createZone("draft");
 
 export const addTodo = listCollection.add!;
 
-export const TodoDraftUI = draftZone.bind({
-  role: "textbox",
+export const TodoDraftUI = draftZone.bind("textbox", {
   field: {
     fieldName: "DRAFT",
     onCommit: addTodo,
@@ -392,8 +389,7 @@ export const cancelEdit = editZone.command(
   { when: isEditing },
 );
 
-export const TodoEditUI = editZone.bind({
-  role: "textbox",
+export const TodoEditUI = editZone.bind("textbox", {
   field: {
     fieldName: "EDIT",
     onCommit: updateTodoText,
@@ -425,8 +421,7 @@ export const clearSearch = searchZone.command("clearSearch", (ctx) => ({
   }),
 }));
 
-export const TodoSearchUI = searchZone.bind({
-  role: "textbox",
+export const TodoSearchUI = searchZone.bind("textbox", {
   field: {
     fieldName: "SEARCH",
     onCommit: setSearchQuery,
@@ -475,8 +470,7 @@ export const clearCompleted = toolbarZone.command("clearCompleted", (ctx) => {
   };
 });
 
-export const TodoToolbarUI = toolbarZone.bind({
-  role: "toolbar",
+export const TodoToolbarUI = toolbarZone.bind("toolbar", {
   triggers: {
     ToggleView: () => toggleView(),
     Undo: () => undoCommand(),

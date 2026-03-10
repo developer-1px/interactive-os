@@ -44,8 +44,7 @@ export const selectionTests: TestCase[] = [
 export const SelectionApp = defineApp("os-test-selection", {});
 
 const singleZone = SelectionApp.createZone("select-single");
-const SingleUI = singleZone.bind({
-  role: "listbox",
+const SingleUI = singleZone.bind("listbox", {
   getItems: () => ["s-alpha", "s-bravo", "s-charlie", "s-delta"],
   options: {
     select: { mode: "single", followFocus: false },
@@ -54,8 +53,7 @@ const SingleUI = singleZone.bind({
 });
 
 const multiZone = SelectionApp.createZone("select-multi");
-const MultiUI = multiZone.bind({
-  role: "listbox",
+const MultiUI = multiZone.bind("listbox", {
   getItems: () => ["m-alpha", "m-bravo", "m-charlie", "m-delta", "m-echo"],
   options: {
     select: { mode: "multiple" },

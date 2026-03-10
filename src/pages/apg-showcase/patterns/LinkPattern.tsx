@@ -40,8 +40,7 @@ export const NAVIGATE_LINK = linkZone.command(
 
 // ─── Bind (triggers declared here) ───
 
-const LinkUI = linkZone.bind({
-  role: "toolbar",
+const LinkUI = linkZone.bind("toolbar", {
   options: {
     navigate: { orientation: "vertical" },
   },

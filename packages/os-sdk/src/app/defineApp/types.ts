@@ -9,7 +9,10 @@
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
-import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
+import type {
+  Role,
+  ZoneRole,
+} from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldMode } from "@os-react/6-project/field/Field";
@@ -96,7 +99,7 @@ export interface TriggerBinding {
 }
 
 export interface ZoneBindings {
-  role: ZoneRole;
+  role?: ZoneRole;
   onCheck?: ZoneCallback;
   onAction?: ZoneCallback;
   onSelect?: ZoneCallback;
@@ -231,7 +234,8 @@ export interface ZoneHandle<S> {
       (focusId: string) => BaseCommand
     > = Record<string, never>,
   >(
-    config: Omit<ZoneBindings, "triggers"> & {
+    role: ZoneRole | Role,
+    config: Omit<ZoneBindings, "triggers" | "role"> & {
       field?: FieldBindings;
       keybindings?: {
         key: string;

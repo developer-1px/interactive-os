@@ -27,8 +27,7 @@ export const clickFocusTests: TestCase[] = [
 export const ClickFocusApp = defineApp("os-test-click-focus", {});
 
 const listZone = ClickFocusApp.createZone("click-focus-list");
-const ListUI = listZone.bind({
-  role: "listbox",
+const ListUI = listZone.bind("listbox", {
   getItems: () => ["item-a", "item-b", "item-c", "item-d", "item-e"],
   options: {
     inputmap: { click: [OS_ACTIVATE()] },

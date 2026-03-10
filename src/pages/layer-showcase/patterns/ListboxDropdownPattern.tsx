@@ -24,8 +24,7 @@ export const ListboxDropdownShowcaseApp = defineApp(
 const triggerZone = ListboxDropdownShowcaseApp.createZone(
   "listbox-trigger-zone",
 );
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenListboxBtn"],
   triggers: {
     OpenListboxBtn: () =>
@@ -38,8 +37,7 @@ triggerZone.bind({
 });
 
 const listboxZone = ListboxDropdownShowcaseApp.createZone("layer-listbox");
-listboxZone.bind({
-  role: "listbox",
+listboxZone.bind("listbox", {
   getItems: () => ["opt-red", "opt-green", "opt-blue", "opt-yellow"],
 });
 

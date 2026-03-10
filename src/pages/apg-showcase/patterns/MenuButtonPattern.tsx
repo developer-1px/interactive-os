@@ -42,7 +42,7 @@ export const MenuButtonApp = defineApp<Record<string, never>>(
 
 // Trigger zone: toolbar with a single menu button
 const triggerZone = MenuButtonApp.createZone("mb-trigger-zone");
-const TriggerUI = triggerZone.bind({ role: "toolbar" });
+const TriggerUI = triggerZone.bind("toolbar", {});
 
 // Menu trigger: zone.overlay with role="menu" — pure prop-getter
 const actionsMenu = triggerZone.overlay("apg-menu-button-popup", {

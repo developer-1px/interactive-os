@@ -21,8 +21,7 @@ export const NestedShowcaseApp = defineApp("layer-nested-showcase", {});
 
 // Trigger zone
 const triggerZone = NestedShowcaseApp.createZone("nested-trigger-zone");
-triggerZone.bind({
-  role: "toolbar",
+triggerZone.bind("toolbar", {
   getItems: () => ["OpenNestedBtn"],
   triggers: {
     OpenNestedBtn: () =>
@@ -36,8 +35,7 @@ triggerZone.bind({
 
 // Dialog 1
 const dialog1Zone = NestedShowcaseApp.createZone("nested-dialog-1");
-dialog1Zone.bind({
-  role: "group",
+dialog1Zone.bind("group", {
   getItems: () => ["d1-close", "D1OpenNested"],
   options: {
     tab: { behavior: "trap" as const },
@@ -61,8 +59,7 @@ dialog1Zone.bind({
 
 // Dialog 2
 const dialog2Zone = NestedShowcaseApp.createZone("nested-dialog-2");
-dialog2Zone.bind({
-  role: "group",
+dialog2Zone.bind("group", {
   getItems: () => ["d2-ok", "d2-cancel"],
   options: {
     tab: { behavior: "trap" as const },
