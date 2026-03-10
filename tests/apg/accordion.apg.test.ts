@@ -15,8 +15,9 @@
  * Same code runs in vitest headless, browser TestBot, and Playwright E2E.
  */
 
+import type { Page } from "@os-devtool/testing";
 import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   AccordionApp,
@@ -25,15 +26,16 @@ import {
 
 // ─── Test Setup (goto + click — Playwright isomorphic) ───
 
-let page: ReturnType<typeof createHeadlessPage>;
+let page: Page;
+let cleanup: () => void;
 
 beforeEach(() => {
-  page = createHeadlessPage(AccordionApp, AccordionPattern);
+  ({ page, cleanup } = createPage(AccordionApp, AccordionPattern));
   page.goto("/");
 });
 
 afterEach(() => {
-  page.cleanup();
+  cleanup();
 });
 
 const expect = osExpect;

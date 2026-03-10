@@ -7,8 +7,9 @@
  * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
  */
 
+import type { Page } from "@os-devtool/testing";
 import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   TabsManualApp,
@@ -17,15 +18,16 @@ import {
 
 // ─── Test Setup ───
 
-let page: ReturnType<typeof createHeadlessPage>;
+let page: Page;
+let cleanup: () => void;
 
 beforeEach(() => {
-  page = createHeadlessPage(TabsManualApp, TabsManualPattern);
+  ({ page, cleanup } = createPage(TabsManualApp, TabsManualPattern));
   page.goto("/");
 });
 
 afterEach(() => {
-  page.cleanup();
+  cleanup();
 });
 
 const expect = osExpect;

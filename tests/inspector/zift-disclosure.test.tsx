@@ -2,13 +2,16 @@
  * InspectorZiftUI Disclosure — Headless Test
  *
  * Proves: click on zone card header toggles aria-expanded.
- * Uses page.attrs() API (not locator) since inspector items
+ * Uses computeAttrs() API since inspector items
  * are cross-zone (zone-a is an item OF inspector-zift zone).
  */
 
 import { InspectorApp, InspectorZiftUI } from "@inspector/app";
+import { computeAttrs } from "@os-core/3-inject/compute";
+import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import type { Page } from "@os-devtool/testing";
+import { createPage } from "@os-devtool/testing/page";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const FAKE_ZONES = ["zone-a", "zone-b", "zone-c"];
@@ -31,10 +34,11 @@ function ZiftTestFixture() {
   );
 }
 
-let page: ReturnType<typeof createHeadlessPage>;
+let page: Page;
+let cleanup: () => void;
 
 beforeEach(() => {
-  page = createHeadlessPage(InspectorApp, ZiftTestFixture);
+  ({ page, cleanup } = createPage(InspectorApp, ZiftTestFixture));
   page.goto("/");
 
   // Register fake zones AFTER goto (goto clears ZoneRegistry)
@@ -48,15 +52,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  page.cleanup();
+  cleanup();
 });
 
 function attrs(itemId: string) {
-  return (
-    page as unknown as {
-      attrs: (itemId: string, zoneId: string) => Record<string, unknown>;
-    }
-  ).attrs(itemId, ZIFT_ZONE);
+  return computeAttrs(os, itemId, ZIFT_ZONE);
 }
 
 describe("InspectorZiftUI Disclosure", () => {
