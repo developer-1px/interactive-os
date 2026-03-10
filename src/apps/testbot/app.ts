@@ -9,7 +9,7 @@
  *     └── Runner: executeAll (async effect, dispatches commands)
  */
 
-import type { BrowserStep, TestScript } from "@os-devtool/testing";
+import type { BrowserStep } from "@os-devtool/testing";
 import {
   createBrowserPage,
   expect,
@@ -17,7 +17,8 @@ import {
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
-import { formatDiagnostics } from "@os-devtool/testing/page";
+import type { TestScript } from "@os-testing/scripts";
+import { formatDiagnostics } from "@os-testing/page";
 import { defineApp } from "@os-sdk/app/defineApp";
 import { os } from "@os-sdk/os";
 import { produce } from "immer";

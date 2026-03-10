@@ -7,9 +7,9 @@
  * API: page.locator / page.keyboard.press / expect(loc).toBeFocused / toHaveAttribute
  */
 
-import type { Page } from "@os-devtool/testing";
-import { expect as osExpect } from "@os-devtool/testing/expect";
-import { createPage } from "@os-devtool/testing/page";
+import type { Page } from "@os-testing/types";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   TabsManualApp,

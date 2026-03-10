@@ -13,7 +13,7 @@
  * zone-reactive initializer, which itself lives in os-devtool.
  */
 
-import type { TestScript } from "@os-devtool/testing";
+import type { TestScript } from "@os-testing/scripts";
 
 export interface ManifestEntry {
   /** Zone IDs that trigger this entry's scripts when mounted */

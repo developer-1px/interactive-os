@@ -10,7 +10,7 @@
  * Item IDs are resolved dynamically from ZoneRegistry — no hardcoded items.
  */
 
-import type { TestScenario, TestScript } from "@os-devtool/testing";
+import type { TestScenario, TestScript } from "@os-testing/scripts";
 import { OS_CHECK } from "@os-sdk/os";
 
 // ═══════════════════════════════════════════════════════════════════

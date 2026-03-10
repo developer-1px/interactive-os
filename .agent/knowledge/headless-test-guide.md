@@ -202,7 +202,7 @@ expect(page.activeZoneId()).not.toBe("stuck-zone"); // 실패 = 버그 재현!
 
 ```ts
 // testbot-myapp.ts
-import type { TestScenario, TestScript } from "@os-devtool/testing";
+import type { TestScenario, TestScript } from "@os-testing/scripts";
 
 export const zones = ["my-zone-a", "my-zone-b"];  // 필수: 트리거 zone
 export const group = "My App";                      // 필수: UI 표시 이름

@@ -17,7 +17,7 @@
  * no hardcoded fixture IDs. Scripts receive items as 3rd parameter.
  */
 
-import type { TestScenario, TestScript } from "@os-devtool/testing";
+import type { TestScenario, TestScript } from "@os-testing/scripts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Auto-discovery metadata — testbot-manifest.ts reads these eagerly

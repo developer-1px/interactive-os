@@ -32,7 +32,7 @@
 **testbot-myapp.ts** (본체):
 
 ```ts
-import type { TestScenario, TestScript } from "@os-devtool/testing";
+import type { TestScenario, TestScript } from "@os-testing/scripts";
 
 export const zones = ["my-zone-a", "my-zone-b"];
 export const group = "My App";

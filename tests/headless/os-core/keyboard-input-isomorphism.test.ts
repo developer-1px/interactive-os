@@ -13,9 +13,9 @@
 
 import { TodoApp } from "@apps/todo/app";
 import { os } from "@os-core/engine/kernel";
-import type { Page } from "@os-devtool/testing";
-import { createPage } from "@os-devtool/testing/page";
-import { buildKeyboardInput } from "@os-devtool/testing/simulate";
+import type { Page } from "@os-testing/types";
+import { createPage } from "@os-testing/page";
+import { buildKeyboardInput } from "@os-testing/simulate";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import TodoPage from "../../../src/pages/TodoPage";
 

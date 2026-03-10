@@ -8,7 +8,7 @@
  *   3. Playwright E2E  — run(nativePage, playwrightExpect)
  *
  * The expect parameter is injected, so each engine passes its own:
- *   - Headless/Browser: import { expect } from "@os-devtool/testing"
+ *   - Headless/Browser: import { expect } from "@os-testing/expect"
  *   - Playwright E2E:   import { expect } from "@playwright/test"
  */
 

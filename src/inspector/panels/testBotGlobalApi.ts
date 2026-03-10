@@ -16,8 +16,8 @@ import {
   expect,
   resetFocusState,
   TestBotRegistry,
-  type TestScript,
 } from "@os-devtool/testing";
+import type { TestScript } from "@os-testing/scripts";
 
 // ═══════════════════════════════════════════════════════════════════
 // Snapshot Types (for external consumers)

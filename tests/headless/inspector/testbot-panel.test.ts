@@ -11,8 +11,8 @@
 import { initSuites, TestBotApp } from "@apps/testbot/app";
 import { TestBotPanelV2 } from "@inspector/panels/TestBotPanelV2";
 import { os } from "@os-core/engine/kernel";
-import type { Page } from "@os-devtool/testing";
-import { createPage } from "@os-devtool/testing/page";
+import type { Page } from "@os-testing/types";
+import { createPage } from "@os-testing/page";
 import { beforeEach, describe, it, expect as vitestExpect } from "vitest";
 
 // Ensure zones are registered by importing the module

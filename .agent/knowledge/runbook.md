@@ -186,7 +186,7 @@ TodoApp (defineApp)
 ### createPage — DOM 없는 Playwright 동형 테스트
 
 ```typescript
-import { createPage } from "@os-devtool/testing";
+import { createPage } from "@os-testing/page";
 
 test("Arrow Down moves focus", () => {
   const { page, cleanup } = createPage(app);
