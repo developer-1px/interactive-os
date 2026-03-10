@@ -171,7 +171,7 @@ TodoApp (defineApp)
 | `onClick` 핸들러 | Zone의 `onAction`, `onCheck`, `onDelete` 콜백 |
 | `document.querySelector` | 커맨드 ctx.inject() 또는 커널 state |
 | `addEventListener("keydown")` | OS KeyboardListener → 커맨드 파이프라인 |
-| Testing Library `render()` | `createHeadlessPage()` headless 테스트 |
+| Testing Library `render()` | `createPage(app)` headless 테스트 |
 
 **판단 기준**: "이것을 순수 React로 만들 수 있는가?"
 - **YES** → OS가 부족하다. OS에 뭘 추가해야 하는지 먼저 고민
@@ -183,17 +183,18 @@ TodoApp (defineApp)
 
 > 공식 문서: `docs/2-area/official/os/headless-page.md`
 
-### createHeadlessPage — DOM 없는 Playwright 동형 테스트
+### createPage — DOM 없는 Playwright 동형 테스트
 
 ```typescript
-import { createHeadlessPage } from "@os-devtool/testing";
+import { createPage } from "@os-devtool/testing";
 
 test("Arrow Down moves focus", () => {
-  const page = createHeadlessPage();
-  page.setupZone("my-zone", { items: ["a", "b", "c"], role: "listbox" });
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
 
   page.keyboard.press("ArrowDown");
-  expect(page.focusedItemId()).toBe("b");
+  expect(page.locator(":focus")).toBeFocused();
+  cleanup();
 });
 ```
 
@@ -202,11 +203,12 @@ test("Arrow Down moves focus", () => {
 ```typescript
 // 1. Red — 기대 동작을 먼저 테스트로 작성
 test("Enter activates item", () => {
-  const page = createHeadlessPage();
-  page.setupZone("zone", { items: ["a", "b"], role: "listbox" });
+  const { page, cleanup } = createPage(app);
+  page.goto("/");
 
   page.keyboard.press("Enter");
   // 🔴 Red — onAction 동작 검증
+  cleanup();
 });
 
 // 2. Green — OS 커맨드/설정을 구현하여 통과

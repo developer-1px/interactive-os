@@ -92,10 +92,10 @@ URL: https://www.w3.org/WAI/ARIA/apg/patterns/{pattern}/examples/{example}/
 **API (Playwright-subset)**:
 
 ```typescript
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
 import { expect as osExpect } from "@os-devtool/testing/expect";
 
-const page = createHeadlessPage(App, Component);
+const page = createPage(App, Component);
 page.goto("/");
 
 // Interaction

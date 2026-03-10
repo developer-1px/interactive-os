@@ -9,7 +9,7 @@
  *   - PASS!/FAIL! stamps (.testbot-stamp) with pop + rotation
  *
  * This is the "Inspector" engine — human verification with animation.
- * Same Page interface as createHeadlessPage(), same code runs in both.
+ * Same Page interface as createPage(), same code runs in both.
  */
 
 import { os } from "@os-core/engine/kernel";

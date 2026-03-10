@@ -317,9 +317,9 @@ zone.bind({
 | 용어 | 문제 | 대체 |
 |------|------|------|
 | ~~AppPage~~ | Playwright + OS 메서드 혼합 → 동형 파괴 | `Page` |
-| ~~AppPageInternal~~ | AppPage에 dispatch/state 부착 | fixture에서 `app` 직접 |
-| ~~setupZone~~ | defineApp zone 선언 우회하는 백도어 | `defineApp.bind()` + `page.goto("/")` |
-| ~~createHeadlessPage~~ | God Object 반환 | `createPage()` |
+| ~~AppPageInternal~~ | 삭제됨. dispatch/state를 page에 부착하는 타입 | fixture에서 `app` 직접 |
+| ~~setupZone~~ | 삭제됨. defineApp zone 선언 우회하는 백도어 | `bind()` + `goto()` |
+| ~~createHeadlessPage~~ | 삭제됨. `createPage(app, Component?)`로 대체 | `createPage()` |
 | ~~os import in tests~~ | Playwright에 없다 → 동형 파괴 | `page.locator()` |
 | ~~app.dispatch() in scenario~~ | Playwright에 없다 → 동형 파괴 | 사용자 행동을 `page`로 시뮬레이트 |
 | ~~readFocusedItemId(os)~~ | Playwright에 없다 | `page.locator(":focus")` |
@@ -369,7 +369,7 @@ zone.bind({
 | `packages/os-react/src/1-listen/` | React 어댑터 (Listeners) |
 | `packages/os-react/src/6-project/` | React 컴포넌트 (ZIFT 프리미티브) |
 | `packages/os-sdk/src/app/` | App Framework (defineApp, modules) |
-| `packages/os-devtool/src/testing/` | Testing (createHeadlessPage, createTestBench) |
+| `packages/os-devtool/src/testing/` | Testing (createPage, createTestBench) |
 
 ---
 

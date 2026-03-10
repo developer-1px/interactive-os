@@ -9,25 +9,25 @@
 
 ## 1. 두 가지 생성 패턴
 
-### Tier 1: OS 커널 테스트 (zone을 수동 설정)
+### Tier 1: OS 커널 테스트 (bind + goto)
 
 ```ts
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
 
-const page = createHeadlessPage();
-page.setupZone("my-list", { items: ["a", "b", "c"], role: "listbox" });
+const { page, cleanup } = createPage(app);
+page.goto("/");
 ```
 
-- zone/items/role을 직접 지정. 앱 코드 불필요.
+- defineApp의 bind()로 zone 선언, goto()로 초기화.
 - 용도: OS 커맨드 파이프라인 자체를 검증.
 
 ### Tier 2: 앱 통합 테스트 (defineApp 기반)
 
 ```ts
-import { createHeadlessPage } from "@os-devtool/testing/page";
+import { createPage } from "@os-devtool/testing/page";
 import { MyApp } from "@/my-app/app";
 
-const page = createHeadlessPage(MyApp);
+const { page, cleanup } = createPage(MyApp);
 page.goto("/");
 ```
 
@@ -39,8 +39,8 @@ page.goto("/");
 
 | 상황 | 선택 |
 |------|------|
-| 버그가 특정 앱에서 발생 | **Tier 2** `createHeadlessPage(App)` |
-| OS 커맨드 자체의 문제 | **Tier 1** `createHeadlessPage()` + `setupZone()` |
+| 버그가 특정 앱에서 발생 | **Tier 2** `createPage(app)` |
+| OS 커맨드 자체의 문제 | **Tier 1** `createPage(app)` + `bind()` + `goto()` |
 | 여러 zone 간 Tab 순환 | **Tier 2** (앱의 zone 등록 순서가 중요) |
 
 ---
@@ -59,14 +59,11 @@ page.locator("#id").click()          // locator 경유 클릭
 page.locator("#id").getAttribute("aria-selected")
 ```
 
-### ✅ 상태 조회 (AppPageInternal — type assertion 필요)
+### ✅ 상태 조회 (page API — Playwright subset)
 
 ```ts
-page.focusedItemId()                // 현재 포커스된 아이템
-page.activeZoneId()                 // 현재 활성 zone
-page.selection()                    // 선택된 아이템 목록
-page.attrs("item-id")              // ARIA 속성 전체
-page.state                          // 앱 상태 (Tier 2)
+page.locator(":focus")              // 현재 포커스된 요소 (Playwright 동형)
+page.locator("#id").getAttribute()  // ARIA 속성 조회
 ```
 
 ### ❌ 금지
@@ -109,7 +106,7 @@ import { getSidebarItems } from "@/docs-viewer/testbot-docs";
 `page.goto("/")`후 `activeZoneId()`는 `null`이다. Tab을 누르기 전에 **아무 아이템이나 클릭해서 zone을 활성화**해야 한다.
 
 ```ts
-const page = createHeadlessPage(MyApp);
+const { page, cleanup } = createPage(MyApp);
 page.goto("/");
 
 // ❌ 바로 Tab → activeZoneId가 null이라 아무 일도 안 일어남
@@ -117,7 +114,6 @@ page.keyboard.press("Tab");
 
 // ✅ 먼저 클릭으로 bootstrap
 page.click(items[0]);
-expect(page.activeZoneId()).toBe("my-zone");
 page.keyboard.press("Tab");
 ```
 
@@ -129,7 +125,7 @@ Zone 간 Tab 순환을 검증하는 표준 패턴:
 
 ```ts
 it("Tab cycles through all zones", () => {
-  const page = createHeadlessPage(MyApp);
+  const { page, cleanup } = createPage(MyApp);
   page.goto("/");
   page.click(firstItemOfZoneA);  // bootstrap
 
@@ -176,7 +172,7 @@ import { getItems } from "@/my-app/utils";
 const items = getItems();
 
 // 3. page 생성 + bootstrap
-const page = createHeadlessPage(MyApp);
+const { page, cleanup } = createPage(MyApp);
 page.goto("/");
 page.click(items[0]);
 
@@ -254,6 +250,6 @@ src/pages/**/testbot-*.ts
 | 패턴 | 파일 | 핵심 |
 |------|------|------|
 | Cross-zone Tab | `tests/headless/apps/os-test-suite/cross-zone.test.ts` | bootstrap → Tab → activeZoneId 확인 |
-| 앱 통합 (todo) | `tests/headless/apps/todo/` | createHeadlessPage(TodoApp, TodoView) |
+| 앱 통합 (todo) | `tests/headless/apps/todo/` | createPage(TodoApp, TodoView) |
 | TestScript ONE | `src/docs-viewer/testbot-docs.ts` | scenarios export + items 계산 함수 |
 | 버그 재현 | `tests/headless/apps/docs-viewer/docs-tab-cycle.test.ts` | Tab no-op 재현 |

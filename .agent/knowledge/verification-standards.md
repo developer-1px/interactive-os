@@ -51,7 +51,7 @@ tests/                         ← 유일한 테스트 루트
 ### Headless 전환 원칙
 
 - **Headless로 전환 가능하면 이동한다. 불가능하면 삭제한다.**
-- `dispatch()` 기반 테스트는 headless 전환 대상이다. `createHeadlessPage()` + `keyboard.press()` → ARIA 검증으로 재작성한다.
+- `dispatch()` 기반 테스트는 headless 전환 대상이다. `createPage(app)` + `keyboard.press()` → ARIA 검증으로 재작성한다.
 - `__tests__/` 안의 `.tsx` 파일이 반드시 테스트는 아니다 — showcase 컴포넌트가 혼재할 수 있다. 분리 필요.
 
 ## 테스트 도구
@@ -63,8 +63,8 @@ tests/                         ← 유일한 테스트 루트
    - **끝**: `locator().toBeFocused()`, `locator().toHaveAttribute()` — ARIA 속성 검증
    - **`page.goto(url)` = Playwright 동형. URL만 받는다.** zone setup은 `page.setupZone()`으로 분리. `goto`에 zoneId를 넘기는 것은 금지.
    - `dispatch()`, `getState()`, `setState()` — OS 내부 우회이므로 테스트 코드에서 금지. 예외 없음.
-   - `createHeadlessPage()` = OS 테스트 팩토리 (유일)
-   - `createHeadlessPage(app, component)` = 앱 통합 테스트 (Builder, Todo)
+   - `createPage(app)` = OS 테스트 팩토리 (유일)
+   - `createPage(app, Component)` = 앱 통합 테스트 (Builder, Todo)
    - **순수 함수 테스트는 page 불필요.** `findBlockInfo`, `parseHashToPath`, `i18n` 등 상태·상호작용이 없는 순수 함수는 직접 호출이 정당하다. `tests/unit/`에 배치.
    - **위배 시**: dispatch를 쓰면 OS Pipeline(listen→resolve→inject→command→project)을 건너뛰어 "vitest에서 통과하지만 브라우저에서 실패"하는 거짓 GREEN이 된다.
 
@@ -97,8 +97,8 @@ import { MyView } from "@apps/myapp/MyView";
 runScenarios(scenarios, { app: MyApp, component: MyView });
 ```
 
-- `runScenarios(scenarios)` — OS-level: `createHeadlessPage()` + 수동 zone setup
-- `runScenarios(scenarios, { app, component })` — App-level: `createPage(app, component)` + zone bindings 자동 해석
+- `runScenarios(scenarios)` — OS-level: `createPage(app)` + bind() + goto()
+- `runScenarios(scenarios, { app, component })` — App-level: `createPage(app, Component)` + zone bindings 자동 해석
 - **3-engine 호환**: 같은 `run(page, expect, items?)` 함수가 (1) vitest headless, (2) browser TestBot, (3) Playwright E2E에서 동작
 - **모범 사례**: `todo-interaction.test.ts`, `docs-testbot.test.ts`
 - **Playwright Strict Subset (K2)**: `page.locator("#id").click()`, `page.keyboard.press()`, `expect(loc).toHaveAttribute()`, `expect(loc).toBeFocused()` — 이 API만 사용

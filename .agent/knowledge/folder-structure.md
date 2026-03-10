@@ -46,7 +46,7 @@ packages/
 │   ├── app/            defineApp, modules
 │   └── library/        collection 등
 └── os-devtool/src/     테스트·디버그
-    └── testing/        createHeadlessPage, createTestBench
+    └── testing/        createPage, createTestBench
 ```
 
 ## 4-Lens Stack (충돌 해소)

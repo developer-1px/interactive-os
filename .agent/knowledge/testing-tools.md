@@ -14,7 +14,7 @@
 
 | 질문 | 예 → | 아니오 → |
 |------|------|----------|
-| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createHeadlessPage(App)` | **Tier 1** `createHeadlessPage()` + `setupZone()` |
+| 앱의 Zone/bind/keybinding을 검증하는가? | **Tier 2** `createPage(app)` | **Tier 1** `createPage(app)` + `bind()` + `goto()` |
 
 ### TestScript ONE — Write Once, Run Anywhere
 
