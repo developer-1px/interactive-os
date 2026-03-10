@@ -22,7 +22,6 @@ import {
   updateTodoText,
 } from "@apps/todo/app";
 import { createPage } from "@os-devtool/testing/page";
-import { expect as osExpect } from "@os-devtool/testing/expect";
 import { os } from "@os-core/engine/kernel";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";

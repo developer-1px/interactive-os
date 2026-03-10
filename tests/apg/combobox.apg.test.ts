@@ -64,7 +64,7 @@ function createComboboxPopup(focusedItem = "apple"): {
     getItems: () => ["input-field"],
     triggers: {
       "input-field": () =>
-        OS_OVERLAY_OPEN({ id: "popup", type: "listbox", entry: "first" }),
+        OS_OVERLAY_OPEN({ id: "popup", type: "popover", entry: "first" }),
     },
   });
 

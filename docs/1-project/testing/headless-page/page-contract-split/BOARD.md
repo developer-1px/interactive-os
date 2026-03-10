@@ -65,10 +65,10 @@
 | # | Task | 크기 | 검증 | 상태 |
 |---|------|------|------|------|
 | T8a | APG 6파일 1경계 재작성 (combobox, dialog, menu, toolbar, tree + listbox) | M | 64 PASS, 2 skip | ✅ |
-| T8b | APG 3파일 1경계 재작성 (treegrid, carousel, feed) | M | vitest PASS | ⬜ |
-| T9 | APG setupZone 의존 4파일 (disallow-empty-initial, dropdown-menu, menu-button, navtree) | M | vitest PASS | ⬜ |
-| T10 | Todo 3파일 (todo.test, todo-bug-hunt, todo-trigger-click) | M | vitest PASS + tsc 0 | ⬜ |
-| T11 | docs-viewer 2파일 (docs-viewer-headless, docs-search-overlay) | S | vitest PASS | ⬜ |
+| T8b | APG 3파일 1경계 재작성 (treegrid, carousel, feed) | M | 42 PASS (treegrid 26 + feed 16) + carousel 26 PASS | ✅ |
+| T9 | APG setupZone 의존 4파일 (disallow-empty-initial, dropdown-menu, menu-button, navtree) | M | 40 PASS | ✅ |
+| T10 | Todo 3파일 (todo.test, todo-bug-hunt, todo-trigger-click) | M | 96 PASS, 1 skip | ✅ |
+| T11 | docs-viewer 2파일 (docs-viewer-headless, docs-search-overlay) | S | 9 PASS | ✅ |
 
 ## Unresolved
 
