@@ -116,25 +116,28 @@ Cynefin = 🟢 Clear 도달 시:
 ```markdown
 ## /divide Report — [Goal 1문장]
 
-### Problem Frame
-
-| | 내용 |
-|---|------|
-| **Objective** | ... |
-| **Constraints** | ... |
-| **Variables** | ... |
+> **Background**: 왜 이 분해가 필요한가 (1-2문장)
+> **Constraints**: 지켜야 할 제약 (불릿)
+> **Goal**: 달성할 목표 (1문장)
 
 ### Backward Chain
 
-| Depth | Subgoal | 판정 | Evidence |
-|-------|---------|------|----------|
-| ...
+Goal에서 역추적하여 전제조건을 분해한다.
+
+Goal
+└─ SubGoal A ✅ (충족: `file:L42`)
+└─ SubGoal B ❌
+   └─ B1 ✅ (`file:L100`)
+   └─ B2 ❌ → 🔨 WP1
+└─ SubGoal C ❓ (Gap: 확인 필요)
 
 ### Work Packages
 
-| WP | Subgoal | Chain (왜 필요한가) | Evidence |
-|----|---------|-------------------|----------|
-| ...
+Gap(❌)별로 묶어 의존성 순으로 나열한다.
+
+| WP | Gap | 무엇을 | 왜 (역추론) | Evidence |
+|----|-----|-------|------------|----------|
+| 1  | B2  | ...   | Goal ← B ← B2 | `file:L200` |
 
 ### Residual Uncertainty
 
