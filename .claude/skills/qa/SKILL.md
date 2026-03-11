@@ -1,0 +1,26 @@
+---
+description: 독립 QA agent를 실행한다. fresh context에서 4게이트 판정 (spec-drift, code-review, contract, simplicity).
+---
+
+## /qa → Agent 위임
+
+> 이 스킬은 런처다. 실제 로직은 `.claude/agents/qa/AGENT.md`에 있다.
+
+### 실행
+
+`/go` 파이프라인 #12에서 자동 호출되거나, 사용자가 `/qa`를 직접 호출하면:
+
+1. 대상 프로젝트의 BOARD.md 경로를 확인한다
+2. Agent tool로 위임한다:
+
+```
+Agent tool:
+  subagent_type: "general-purpose"
+  isolation: "worktree"
+  prompt: |
+    프로젝트 BOARD.md: [path]
+    .claude/agents/qa/AGENT.md를 읽고 실행하라.
+    결과를 PASS/FAIL + 리포트로 반환하라.
+```
+
+3. 반환된 판정을 호출자에게 전달한다
