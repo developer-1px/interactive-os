@@ -98,7 +98,7 @@ export function agentActivityPlugin(): Plugin {
 
         // Resolve to absolute, then enforce project root boundary
         const absolute = path.resolve(projectRoot, filePath);
-        if (!absolute.startsWith(projectRoot)) {
+        if (!absolute.startsWith(`${projectRoot}/`)) {
           res.statusCode = 403;
           res.end("Access denied: outside project root");
           return;
