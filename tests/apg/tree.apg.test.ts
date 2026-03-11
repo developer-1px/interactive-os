@@ -10,10 +10,10 @@
  * Clicking an expandable item toggles aria-expanded.
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -59,7 +59,10 @@ function createTreeApp() {
  * Factory: creates tree, focuses on a leaf item (no side effects).
  * For expandable items, click triggers OS_EXPAND — use focusExpandable().
  */
-function createTree(focusedItem = "child-1a"): { page: Page; cleanup: () => void } {
+function createTree(focusedItem = "child-1a"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = createTreeApp();
   const { page, cleanup } = createPage(app);
   page.goto("/");
@@ -70,7 +73,10 @@ function createTree(focusedItem = "child-1a"): { page: Page; cleanup: () => void
 /**
  * Factory: focuses expandable item (which also expands it via click).
  */
-function createTreeExpanded(itemId = "section-1"): { page: Page; cleanup: () => void } {
+function createTreeExpanded(itemId = "section-1"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = createTreeApp();
   const { page, cleanup } = createPage(app);
   page.goto("/");
@@ -128,38 +134,58 @@ describe("APG Tree: Expansion (pressKey pipeline)", () => {
   it("ArrowRight on collapsed node: expands", async () => {
     // Start expanded (click triggers OS_EXPAND), then collapse first
     const { page, cleanup } = createTreeExpanded("section-1");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     // Collapse
     page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     // Now expand via ArrowRight
     page.keyboard.press("ArrowRight");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     cleanup();
   });
 
   it("ArrowLeft on expanded node: collapses", async () => {
     const { page, cleanup } = createTreeExpanded("section-1");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     cleanup();
   });
 
   it("ArrowRight on leaf: does NOT expand", async () => {
     const { page, cleanup } = createTree("child-1a");
     page.keyboard.press("ArrowRight");
-    await expect(page.locator("#child-1a")).not.toHaveAttribute("aria-expanded");
+    await expect(page.locator("#child-1a")).not.toHaveAttribute(
+      "aria-expanded",
+    );
     await expect(page.locator("#child-1a")).toBeFocused();
     cleanup();
   });
 
   it("ArrowRight on an open node: moves focus to the first child node", async () => {
     const { page, cleanup } = createTreeExpanded("section-1");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("ArrowRight"); // On open node -> move to child
     await expect(page.locator("#child-1a")).toBeFocused();
@@ -182,15 +208,24 @@ describe("APG Tree: Selection (Space key)", () => {
   it("Space on item: toggles selection state", async () => {
     const { page, cleanup } = createTree("child-1a");
     // click selects the item (resolveMouse)
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     // Space toggles OFF
     page.keyboard.press("Space");
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
 
     // Space toggles ON
     page.keyboard.press("Space");
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     cleanup();
   });
 });
@@ -203,21 +238,32 @@ describe("APG Tree: Activation (Enter key)", () => {
   it("Enter on leaf: does NOT expand (activate only)", async () => {
     const { page, cleanup } = createTree("child-1a");
     page.keyboard.press("Enter");
-    await expect(page.locator("#child-1a")).not.toHaveAttribute("aria-expanded");
+    await expect(page.locator("#child-1a")).not.toHaveAttribute(
+      "aria-expanded",
+    );
     cleanup();
   });
 
   it("Enter on section: toggles expand", async () => {
     // Start expanded, Enter should collapse
     const { page, cleanup } = createTreeExpanded("section-1");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("Enter");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     // Enter again to expand
     page.keyboard.press("Enter");
-    await expect(page.locator("#section-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#section-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     cleanup();
   });
 });
@@ -242,7 +288,10 @@ describe("APG Tree: DOM Projection", () => {
 
   it("focused item has data-focused=true", async () => {
     const { page, cleanup } = createTree("child-1a");
-    await expect(page.locator("#child-1a")).toHaveAttribute("data-focused", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
     cleanup();
   });
 });
@@ -255,11 +304,20 @@ describe("APG Tree: Multi-Selection (Shift+Arrow)", () => {
   it("Shift+ArrowDown: expands selection to the next visible node", async () => {
     const { page, cleanup } = createMultiSelectTree("child-1a");
     // click already selects child-1a
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("Shift+ArrowDown");
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#child-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#child-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(page.locator("#child-1b")).toBeFocused();
     cleanup();
   });
@@ -267,11 +325,20 @@ describe("APG Tree: Multi-Selection (Shift+Arrow)", () => {
   it("Shift+ArrowUp: expands selection to the previous visible node", async () => {
     const { page, cleanup } = createMultiSelectTree("child-1b");
     // click already selects child-1b
-    await expect(page.locator("#child-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("Shift+ArrowUp");
-    await expect(page.locator("#child-1a")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#child-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#child-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#child-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(page.locator("#child-1a")).toBeFocused();
     cleanup();
   });

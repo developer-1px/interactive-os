@@ -5,22 +5,22 @@
  * No OS methods exposed — all observation goes through page.locator().
  */
 
-import type { FC } from "react";
 import { os } from "@os-core/engine/kernel";
-import { simulateClick, simulateKeyPress } from "./simulate";
-import { setupHeadlessEnv } from "./lib/setupHeadlessEnv";
-import { registerZones, seedInitialState } from "./lib/zoneSetup";
-import { createProjection, type Projection } from "./lib/projection";
-import { createLocator } from "./lib/locator";
-import { typeIntoField } from "./lib/typeIntoField";
 import type { AppHandle } from "@os-sdk/app/defineApp/types";
+import type { FC } from "react";
+import { createLocator } from "./lib/locator";
+import { createProjection, type Projection } from "./lib/projection";
+import { setupHeadlessEnv } from "./lib/setupHeadlessEnv";
+import { typeIntoField } from "./lib/typeIntoField";
+import { registerZones, seedInitialState } from "./lib/zoneSetup";
+import { simulateClick, simulateKeyPress } from "./simulate";
 import type { Page } from "./types";
 
 // Ensure OS defaults are registered
 import "@os-core/2-resolve/osDefaults";
 
-export { formatDiagnostics } from "./diagnostics";
 export type { ItemAttrs } from "@os-core/3-inject/headless.types";
+export { formatDiagnostics } from "./diagnostics";
 
 /**
  * Create a headless test page — Playwright isomorphic.

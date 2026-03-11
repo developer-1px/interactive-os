@@ -18,8 +18,8 @@ vi.mock("@/docs-viewer/docsUtils", () => import("./__mocks__/docsUtils"));
 
 // ── Now safe to import app modules ──
 
-import { createPage } from "@os-testing/page";
 import { os } from "@os-core/engine/kernel";
+import { createPage } from "@os-testing/page";
 import { DocsApp, selectDoc } from "@/docs-viewer/app";
 import { DocsViewer } from "@/docs-viewer/DocsViewer";
 
@@ -78,7 +78,8 @@ describe("DocsViewer Headless", () => {
 
     // docs-reader should be reachable and have a focused item
     expect(os.getState().os.focus.activeZoneId).toBe("docs-reader");
-    const focusedId = os.getState().os.focus.zones["docs-reader"]?.focusedItemId;
+    const focusedId =
+      os.getState().os.focus.zones["docs-reader"]?.focusedItemId;
     expect(focusedId).toBeTruthy();
     cleanup();
   });

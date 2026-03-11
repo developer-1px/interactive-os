@@ -7,10 +7,10 @@
  * Assert: page.locator → toBeFocused, toHaveAttribute
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it, vi, expect as vitestExpect } from "vitest";
 import {
   assertHomeEnd,
@@ -47,7 +47,10 @@ const TOOLBAR_CONFIG = {
 
 // ─── Factories ───
 
-function createToolbar(focusedItem = "bold-btn"): { page: Page; cleanup: () => void } {
+function createToolbar(focusedItem = "bold-btn"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-toolbar", {});
   const zone = app.createZone("toolbar");
   zone.bind("toolbar", {
@@ -143,7 +146,10 @@ describe("APG Toolbar: Tab Escape", () => {
 describe("APG Toolbar: Tabs Variant", () => {
   const TAB_ITEMS = ["tab-general", "tab-security", "tab-advanced"];
 
-  function createTabs(focusedTab = "tab-general"): { page: Page; cleanup: () => void } {
+  function createTabs(focusedTab = "tab-general"): {
+    page: Page;
+    cleanup: () => void;
+  } {
     const app = defineApp("test-toolbar-tabs", {});
     const zone = app.createZone("tablist");
     zone.bind("toolbar", {
@@ -171,8 +177,14 @@ describe("APG Toolbar: Tabs Variant", () => {
     page.keyboard.press("ArrowRight");
 
     await expect(page.locator("#tab-security")).toBeFocused();
-    await expect(page.locator("#tab-security")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#tab-general")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#tab-security")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#tab-general")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     cleanup();
   });
 
@@ -180,13 +192,22 @@ describe("APG Toolbar: Tabs Variant", () => {
     const { page, cleanup } = createTabs("tab-general");
 
     page.keyboard.press("ArrowRight");
-    await expect(page.locator("#tab-security")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-security")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("ArrowRight");
-    await expect(page.locator("#tab-advanced")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-advanced")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("ArrowRight"); // loop back
-    await expect(page.locator("#tab-general")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-general")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     cleanup();
   });
 });

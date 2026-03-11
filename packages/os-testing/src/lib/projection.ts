@@ -5,9 +5,9 @@
  * Invalidation clears caches and re-syncs projection-backed getItems to ZoneRegistry.
  */
 
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 
 export interface Projection {
   render(): string;

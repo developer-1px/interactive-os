@@ -6,14 +6,14 @@
  * Returns cleanup function and shared state.
  */
 
+import type { BaseCommand } from "@kernel/core/tokens";
 import { Keybindings } from "@os-core/2-resolve/keybindings";
+import { initialAppState, os } from "@os-core/engine/kernel";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import {
   DEFAULT_CONFIG,
   type FocusGroupConfig,
 } from "@os-core/schema/types/focus/config/FocusGroupConfig";
-import { initialAppState, os } from "@os-core/engine/kernel";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import type { BaseCommand } from "@kernel/core/tokens";
 import { formatDiagnostics } from "../diagnostics";
 
 interface ZoneOrderEntry {

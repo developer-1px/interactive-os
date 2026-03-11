@@ -15,9 +15,9 @@
  * in beforeEach both focuses AND checks (toggles to true).
  */
 
-import type { Page } from "@os-testing/types";
 import { expect as osExpect } from "@os-testing/expect";
 import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   SwitchApp,

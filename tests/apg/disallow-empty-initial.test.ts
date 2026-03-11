@@ -9,9 +9,9 @@
  * at zone registration time (page.goto), not at React mount.
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
 import { describe, it } from "vitest";
 
 const expect = osExpect;
@@ -30,7 +30,10 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
     const { page, cleanup } = createPage(app);
     page.goto("/");
 
-    await expect(page.locator("#tab-1")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     cleanup();
   });
 
@@ -43,8 +46,14 @@ describe("T1-S1: tablist disallowEmpty auto-selects first tab", () => {
     const { page, cleanup } = createPage(app);
     page.goto("/");
 
-    await expect(page.locator("#tab-2")).toHaveAttribute("aria-selected", "false");
-    await expect(page.locator("#tab-3")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#tab-2")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+    await expect(page.locator("#tab-3")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     cleanup();
   });
 });
@@ -82,7 +91,10 @@ describe("T1-S3: listbox (disallowEmpty=false) does NOT auto-select", () => {
     const { page, cleanup } = createPage(app);
     page.goto("/");
 
-    await expect(page.locator("#opt-2")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#opt-2")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     cleanup();
   });
 });
@@ -102,12 +114,21 @@ describe("T1-S4: disallowEmpty respects user selection change", () => {
     page.goto("/");
 
     // disallowEmpty auto-selected tab-1
-    await expect(page.locator("#tab-1")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tab-1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     // User clicks tab-2
     page.click("tab-2");
-    await expect(page.locator("#tab-2")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#tab-1")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#tab-2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#tab-1")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     cleanup();
   });
 });

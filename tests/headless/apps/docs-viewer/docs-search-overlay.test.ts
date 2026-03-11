@@ -10,9 +10,9 @@ import { describe, expect, it, vi } from "vitest";
 // ── Mock docsUtils before any app imports ──
 vi.mock("@/docs-viewer/docsUtils", () => import("./__mocks__/docsUtils"));
 
+import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 // ── Now safe to import app modules ──
 import { createPage } from "@os-testing/page";
-import { OS_OVERLAY_CLOSE, os } from "@os-sdk/os";
 import { DocsApp, selectDoc } from "@/docs-viewer/app";
 import { DocsViewer } from "@/docs-viewer/DocsViewer";
 

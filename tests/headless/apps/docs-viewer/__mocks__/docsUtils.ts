@@ -167,6 +167,14 @@ export const getRecentFiles = (
   const files = allFiles ?? _allFiles;
   return files.map((f, i) => ({ ...f, mtime: Date.now() - i * 1000 }));
 };
+export const getAgentRecentFiles = () =>
+  _allFiles.map((f, i) => ({
+    name: f.name,
+    path: f.path,
+    ext: "md",
+    tool: i % 2 === 0 ? "Read" : "Edit",
+    ts: new Date(Date.now() - i * 60000).toISOString(),
+  }));
 export const loadDocContent = async (path: string) => {
   const map: Record<string, string> = {
     STATUS: "# STATUS\n\nDashboard content",

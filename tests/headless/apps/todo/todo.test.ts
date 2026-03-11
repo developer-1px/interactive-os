@@ -7,13 +7,13 @@
  */
 
 import { confirmDeleteTodo, TodoApp } from "@apps/todo/app";
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
 import { os } from "@os-core/engine/kernel";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AppState } from "../../../../src/apps/todo/model/appState";
-import type { Page } from "@os-testing/types";
 
 import TodoPage from "../../../../src/pages/TodoPage";
 
@@ -86,32 +86,56 @@ describe("§1 List: navigation", () => {
 describe("§2 List: selection", () => {
   it("click selects item", async () => {
     page.click("todo_1");
-    await osExpect(page.locator("#todo_1")).toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#todo_1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   it("Shift+ArrowDown extends selection", async () => {
     page.click("todo_1");
     page.keyboard.press("Shift+ArrowDown");
-    await osExpect(page.locator("#todo_1")).toHaveAttribute("aria-selected", "true");
-    await osExpect(page.locator("#todo_2")).toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#todo_1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await osExpect(page.locator("#todo_2")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   it("Meta+Click toggles individual selection", async () => {
     page.click("todo_1");
     page.locator("#todo_3").click({ modifiers: ["Meta"] });
-    await osExpect(page.locator("#todo_1")).toHaveAttribute("aria-selected", "true");
-    await osExpect(page.locator("#todo_3")).toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#todo_1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await osExpect(page.locator("#todo_3")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     // Toggle off
     page.locator("#todo_1").click({ modifiers: ["Meta"] });
-    await osExpect(page.locator("#todo_1")).not.toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#todo_1")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   it("Escape deselects all", async () => {
     page.click("todo_1");
     page.keyboard.press("Shift+ArrowDown");
     page.keyboard.press("Escape");
-    await osExpect(page.locator("#todo_1")).not.toHaveAttribute("aria-selected", "true");
-    await osExpect(page.locator("#todo_2")).not.toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#todo_1")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await osExpect(page.locator("#todo_2")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 });
 
@@ -247,15 +271,24 @@ describe("§8 Sidebar: navigation + selection", () => {
   it("click focuses and selects category", async () => {
     page.click("cat_inbox");
     await osExpect(page.locator("#cat_inbox")).toBeFocused();
-    await osExpect(page.locator("#cat_inbox")).toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#cat_inbox")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   it("ArrowDown moves focus with followFocus selection", async () => {
     page.click("cat_inbox");
     page.keyboard.press("ArrowDown");
     await osExpect(page.locator("#cat_work")).toBeFocused();
-    await osExpect(page.locator("#cat_work")).toHaveAttribute("aria-selected", "true");
-    await osExpect(page.locator("#cat_inbox")).not.toHaveAttribute("aria-selected", "true");
+    await osExpect(page.locator("#cat_work")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await osExpect(page.locator("#cat_inbox")).not.toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
   });
 
   it("ArrowUp moves focus backwards", async () => {

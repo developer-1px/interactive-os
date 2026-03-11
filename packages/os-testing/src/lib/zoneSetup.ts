@@ -5,14 +5,14 @@
  */
 
 import { Keybindings } from "@os-core/2-resolve/keybindings";
+import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { type AppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
 import { ensureZone } from "@os-core/schema/state/utils";
-import { produce } from "immer";
 import type { ZoneBindingEntry } from "@os-sdk/app/defineApp/types";
+import { produce } from "immer";
 import type { HeadlessEnv } from "./setupHeadlessEnv";
 
 export function registerZones(
@@ -56,8 +56,7 @@ function registerZoneFromBinding(
   }
   if (bindings.getExpandableItems)
     entry.getExpandableItems = bindings.getExpandableItems;
-  if (bindings.getTreeLevels)
-    entry.getTreeLevels = bindings.getTreeLevels;
+  if (bindings.getTreeLevels) entry.getTreeLevels = bindings.getTreeLevels;
   ZoneRegistry.register(zoneName, entry);
 
   if (bindingEntry.triggers) {
@@ -122,9 +121,7 @@ export function seedInitialState(zoneName: string): void {
         ? Object.values(zoneConfig.inputmap)
         : [];
       const hasCheckCmd = inputmapValues.some((cmds: unknown[]) =>
-        cmds.some(
-          (c: unknown) => (c as { type: string }).type === "OS_CHECK",
-        ),
+        cmds.some((c: unknown) => (c as { type: string }).type === "OS_CHECK"),
       );
       os.setState((s: AppState) =>
         produce(s, (draft) => {

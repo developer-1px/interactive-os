@@ -21,12 +21,12 @@ import {
   undoCommand,
   updateTodoText,
 } from "@apps/todo/app";
-import { createPage } from "@os-testing/page";
 import { os } from "@os-core/engine/kernel";
 import { _resetClipboardStore } from "@os-sdk/library/collection/createCollectionZone";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AppState } from "../../../../src/apps/todo/model/appState";
-import type { Page } from "@os-testing/types";
 
 import TodoPage from "../../../../src/pages/TodoPage";
 
@@ -323,12 +323,16 @@ describe("§14b Delete dialog: overlay interaction flow", () => {
 
   it("Delete key opens overlay and overlay stack has dialog entry", () => {
     openDeleteDialog();
-    expect(overlayStack().some((e: { id: string }) => e.id === "todo-delete-dialog")).toBe(true);
+    expect(
+      overlayStack().some((e: { id: string }) => e.id === "todo-delete-dialog"),
+    ).toBe(true);
   });
 
   it("after dialog opens, Escape should close it", () => {
     openDeleteDialog();
-    expect(overlayStack().some((e: { id: string }) => e.id === "todo-delete-dialog")).toBe(true);
+    expect(
+      overlayStack().some((e: { id: string }) => e.id === "todo-delete-dialog"),
+    ).toBe(true);
 
     page.keyboard.press("Escape");
 

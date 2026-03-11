@@ -10,10 +10,10 @@
  * Unique: followFocus on/off, Shift+Arrow range, horizontal variant
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
   assertBoundaryClamp,

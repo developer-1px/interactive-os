@@ -12,9 +12,9 @@
  * API: page.locator / page.keyboard.press / expect(loc).toHaveAttribute
  */
 
-import type { Page } from "@os-testing/types";
 import { expect as osExpect } from "@os-testing/expect";
 import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { afterEach, beforeEach, describe, it } from "vitest";
 import {
   CrustApp,

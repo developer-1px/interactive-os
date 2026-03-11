@@ -10,10 +10,10 @@
  * Clicking an expandable row toggles aria-expanded.
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -50,7 +50,10 @@ function createTreegridApp() {
 }
 
 /** Focus a non-expandable item (no click side effects) */
-function createTreegrid(focusedItem = "msg-1a"): { page: Page; cleanup: () => void } {
+function createTreegrid(focusedItem = "msg-1a"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = createTreegridApp();
   const { page, cleanup } = createPage(app);
   page.goto("/");
@@ -59,7 +62,10 @@ function createTreegrid(focusedItem = "msg-1a"): { page: Page; cleanup: () => vo
 }
 
 /** Focus an expandable item (click also expands it) */
-function createTreegridExpanded(itemId = "msg-1"): { page: Page; cleanup: () => void } {
+function createTreegridExpanded(itemId = "msg-1"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = createTreegridApp();
   const { page, cleanup } = createPage(app);
   page.goto("/");
@@ -92,20 +98,32 @@ describe("APG Treegrid: Right Arrow Expand/Navigate (N3-N4)", () => {
   it("N3: Right Arrow on collapsed parent row -- expands", async () => {
     // Start expanded (click triggers expand), then collapse first
     const { page, cleanup } = createTreegridExpanded("msg-1");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("ArrowLeft"); // collapse
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     page.keyboard.press("ArrowRight"); // expand
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     await expect(page.locator("#msg-1")).toBeFocused();
     cleanup();
   });
 
   it("N4: Right Arrow on expanded parent row -- moves to first child", async () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("ArrowRight"); // navigate to first child
     await expect(page.locator("#msg-1a")).toBeFocused();
@@ -128,10 +146,16 @@ describe("APG Treegrid: Right Arrow Expand/Navigate (N3-N4)", () => {
 describe("APG Treegrid: Left Arrow Collapse/Navigate (N5-N6)", () => {
   it("N5: Left Arrow on expanded parent row -- collapses", async () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("ArrowLeft");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     await expect(page.locator("#msg-1")).toBeFocused();
     cleanup();
   });
@@ -158,10 +182,16 @@ describe("APG Treegrid: Left Arrow Collapse/Navigate (N5-N6)", () => {
 describe("APG Treegrid: Enter toggles expansion (E1)", () => {
   it("Enter on expanded parent -- collapses", async () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     page.keyboard.press("Enter");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     cleanup();
   });
 
@@ -169,10 +199,16 @@ describe("APG Treegrid: Enter toggles expansion (E1)", () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
     // Already expanded after click
     page.keyboard.press("Enter"); // collapse
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
 
     page.keyboard.press("Enter"); // expand
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     cleanup();
   });
 
@@ -192,13 +228,22 @@ describe("APG Treegrid: Selection (Space)", () => {
   it("Space toggles selection on focused row", async () => {
     const { page, cleanup } = createTreegrid("msg-1a");
     // click selects in treegrid (multiple mode)
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("Space"); // toggle off
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
 
     page.keyboard.press("Space"); // toggle on
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     cleanup();
   });
 });
@@ -211,22 +256,40 @@ describe("APG Treegrid: Shift+Arrow selection range (S2)", () => {
   it("Shift+ArrowDown extends selection to next row", async () => {
     const { page, cleanup } = createTreegrid("msg-1a");
     // click already selects msg-1a
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("Shift+ArrowDown");
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#msg-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#msg-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(page.locator("#msg-1b")).toBeFocused();
     cleanup();
   });
 
   it("Shift+ArrowUp extends selection to previous row", async () => {
     const { page, cleanup } = createTreegrid("msg-1b");
-    await expect(page.locator("#msg-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     page.keyboard.press("Shift+ArrowUp");
-    await expect(page.locator("#msg-1a")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#msg-1b")).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#msg-1b")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(page.locator("#msg-1a")).toBeFocused();
     cleanup();
   });
@@ -254,20 +317,29 @@ describe("APG Treegrid: ARIA Projection (A1-A2)", () => {
 
   it("A3: focused item has data-focused=true", async () => {
     const { page, cleanup } = createTreegrid("msg-1a");
-    await expect(page.locator("#msg-1a")).toHaveAttribute("data-focused", "true");
+    await expect(page.locator("#msg-1a")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
     cleanup();
   });
 
   it("A4: collapsed parent -- aria-expanded=false (after click→expand→collapse)", async () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
     page.keyboard.press("ArrowLeft"); // collapse
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
     cleanup();
   });
 
   it("A5: expanded parent -- aria-expanded=true", async () => {
     const { page, cleanup } = createTreegridExpanded("msg-1");
-    await expect(page.locator("#msg-1")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-1")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     cleanup();
   });
 
@@ -295,7 +367,10 @@ describe("APG Treegrid: Click interaction (C1)", () => {
     // msg-2 starts without expand state; click expands it
     page.click("msg-2");
     await expect(page.locator("#msg-2")).toBeFocused();
-    await expect(page.locator("#msg-2")).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator("#msg-2")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     cleanup();
   });
 });

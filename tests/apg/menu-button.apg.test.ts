@@ -11,17 +11,17 @@
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
+  assertFocusRestore,
   assertHomeEnd,
   assertLoop,
   assertNoSelection,
   assertVerticalNav,
-  assertFocusRestore,
 } from "./helpers/contracts";
 
 const expect = osExpect;
@@ -37,7 +37,10 @@ const MENU_ITEMS = [
 
 // ─── Factory ───
 
-function createMenuButton(focusedItem = "action-cut"): { page: Page; cleanup: () => void } {
+function createMenuButton(focusedItem = "action-cut"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-menu-button", {});
 
   const trigger = app.createZone("trigger-bar");
@@ -164,15 +167,27 @@ describe("APG Menu Button: ARIA Projection", () => {
   it("focused item tabIndex=0, others -1", async () => {
     const { page, cleanup } = createMenuButton("action-cut");
     await expect(page.locator("#action-cut")).toHaveAttribute("tabindex", "0");
-    await expect(page.locator("#action-copy")).toHaveAttribute("tabindex", "-1");
-    await expect(page.locator("#action-paste")).toHaveAttribute("tabindex", "-1");
-    await expect(page.locator("#action-delete")).toHaveAttribute("tabindex", "-1");
+    await expect(page.locator("#action-copy")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
+    await expect(page.locator("#action-paste")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
+    await expect(page.locator("#action-delete")).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
     cleanup();
   });
 
   it("focused item has data-focused=true", async () => {
     const { page, cleanup } = createMenuButton("action-copy");
-    await expect(page.locator("#action-copy")).toHaveAttribute("data-focused", "true");
+    await expect(page.locator("#action-copy")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
     cleanup();
   });
 });

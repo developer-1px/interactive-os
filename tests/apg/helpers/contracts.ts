@@ -14,8 +14,8 @@
  *   Assert: locator → toBeFocused, toHaveAttribute (ARIA contract)
  */
 
-import type { Page } from "@os-testing/types";
 import { expect as osExpect } from "@os-testing/expect";
+import type { Page } from "@os-testing/types";
 import { it } from "vitest";
 
 const expect = osExpect;
@@ -89,7 +89,10 @@ export function assertBoundaryClamp(
     const { page, cleanup } = factory();
     for (let i = 0; i < 20; i++) page.keyboard.press(key.fwd);
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
-    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     page.keyboard.press(key.fwd);
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
     cleanup();
@@ -99,7 +102,10 @@ export function assertBoundaryClamp(
     const { page, cleanup } = factory();
     for (let i = 0; i < 20; i++) page.keyboard.press(key.bwd);
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
-    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     page.keyboard.press(key.bwd);
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
     cleanup();
@@ -124,7 +130,10 @@ export function assertLoop(opts: {
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
     page.keyboard.press(key.fwd);
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
-    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 
@@ -133,7 +142,10 @@ export function assertLoop(opts: {
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
     page.keyboard.press(key.bwd);
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
-    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 }
@@ -148,7 +160,10 @@ export function assertHomeEnd(
     const { page, cleanup } = factory();
     page.keyboard.press("Home");
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
-    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 
@@ -156,7 +171,10 @@ export function assertHomeEnd(
     const { page, cleanup } = factory();
     page.keyboard.press("End");
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
-    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 }
@@ -200,8 +218,14 @@ export function assertFollowFocus(factory: Factory) {
     const { page, cleanup } = factory();
     const firstId = page.locator(":focus").getAttribute("id");
     page.keyboard.press("ArrowDown");
-    await expect(page.locator(":focus")).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#" + firstId)).toHaveAttribute("aria-selected", "false");
+    await expect(page.locator(":focus")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await expect(page.locator("#" + firstId)).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     cleanup();
   });
 }
@@ -215,7 +239,10 @@ export function assertNoSelection(factory: Factory, itemIds: string[]) {
     page.keyboard.press("ArrowDown");
     page.keyboard.press("ArrowDown");
     for (const id of itemIds) {
-      await expect(page.locator("#" + id)).not.toHaveAttribute("aria-selected", "true");
+      await expect(page.locator("#" + id)).not.toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
     }
     cleanup();
   });
@@ -253,7 +280,10 @@ export function assertTabTrap(
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
     page.keyboard.press("Tab");
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
-    await expect(page.locator("#" + opts.firstId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.firstId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 
@@ -262,7 +292,10 @@ export function assertTabTrap(
     await expect(page.locator("#" + opts.firstId)).toBeFocused();
     page.keyboard.press("Shift+Tab");
     await expect(page.locator("#" + opts.lastId)).toBeFocused();
-    await expect(page.locator("#" + opts.lastId)).toHaveAttribute("tabindex", "0");
+    await expect(page.locator("#" + opts.lastId)).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
     cleanup();
   });
 }

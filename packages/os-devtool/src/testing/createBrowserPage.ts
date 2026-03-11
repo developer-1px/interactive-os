@@ -146,11 +146,11 @@ function createHeadlessEffects(): VisualEffects {
   return {
     STEP_DELAY: 0,
     ANIM_DURATION: 0,
-    moveCursorTo() { },
-    showRipple() { },
-    showKeyBadge() { },
-    showStamp() { },
-    hideCursor() { },
+    moveCursorTo() {},
+    showRipple() {},
+    showKeyBadge() {},
+    showStamp() {},
+    hideCursor() {},
   };
 }
 
@@ -476,10 +476,10 @@ export function createBrowserPage(
         ...(passed
           ? {}
           : {
-            error: negated
-              ? `Expected NOT ${displayExpected}, but got ${displayActual}`
-              : `Expected ${displayExpected}, got ${displayActual}`,
-          }),
+              error: negated
+                ? `Expected NOT ${displayExpected}, but got ${displayActual}`
+                : `Expected ${displayExpected}, got ${displayActual}`,
+            }),
         timestamp: timestamp(),
       });
       await delay(fx.STEP_DELAY / 2);
@@ -620,7 +620,11 @@ export function createBrowserPage(
       },
 
       // Internal assertion hooks for expect() wrapper (with negation support)
-      _toHaveAttribute(name: string, value: string | RegExp | undefined, negated = false) {
+      _toHaveAttribute(
+        name: string,
+        value: string | RegExp | undefined,
+        negated = false,
+      ) {
         return assertAttribute(name, value, negated);
       },
       _toBeFocused(negated = false) {
@@ -656,9 +660,10 @@ export function createBrowserPage(
       // :focus pseudo-selector — resolve to currently focused element
       if (selector === ":focus") {
         const activeEl = document.activeElement;
-        const focusedId = activeEl?.id || activeEl?.getAttribute("data-item") || "";
+        const focusedId =
+          activeEl?.id || activeEl?.getAttribute("data-item") || "";
         if (!focusedId) {
-          throw new Error("locator(\":focus\"): no element is currently focused");
+          throw new Error('locator(":focus"): no element is currently focused');
         }
         return createBrowserLocator(focusedId);
       }

@@ -9,10 +9,7 @@
 
 import type { BaseCommand, CommandFactory } from "@kernel/core/tokens";
 import type { FieldType } from "@os-core/engine/registries/fieldRegistry";
-import type {
-  Role,
-  ZoneRole,
-} from "@os-core/engine/registries/roleRegistry";
+import type { Role, ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import type { ZoneCallback } from "@os-core/engine/registries/zoneRegistry";
 import type { FieldCommandFactory } from "@os-core/schema/types/command/BaseCommand";
 import type { FieldMode } from "@os-react/6-project/field/Field";

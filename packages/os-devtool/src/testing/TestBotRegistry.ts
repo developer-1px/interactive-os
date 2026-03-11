@@ -102,25 +102,21 @@ function isEntryMatched(
  */
 function filterAndNotify() {
   // Import ZoneRegistry lazily to avoid circular deps at module init
-  import("@os-core/engine/registries/zoneRegistry").then(
-    ({ ZoneRegistry }) => {
-      const mounted = new Set(ZoneRegistry.getSnapshot());
-      const nextScripts: TestScript[] = [];
+  import("@os-core/engine/registries/zoneRegistry").then(({ ZoneRegistry }) => {
+    const mounted = new Set(ZoneRegistry.getSnapshot());
+    const nextScripts: TestScript[] = [];
 
-      for (const entry of activeManifest) {
-        if (!isEntryMatched(entry, mounted)) continue;
-        const cached = loadedCache.get(entry);
-        if (cached) {
-          nextScripts.push(
-            ...cached.map((s) => ({ ...s, group: entry.group })),
-          );
-        }
+    for (const entry of activeManifest) {
+      if (!isEntryMatched(entry, mounted)) continue;
+      const cached = loadedCache.get(entry);
+      if (cached) {
+        nextScripts.push(...cached.map((s) => ({ ...s, group: entry.group })));
       }
+    }
 
-      matchedScripts = nextScripts;
-      notify();
-    },
-  );
+    matchedScripts = nextScripts;
+    notify();
+  });
 }
 
 // ─── API ─────────────────────────────────────────────────────────

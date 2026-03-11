@@ -8,17 +8,17 @@
  */
 
 import { OS_OVERLAY_OPEN } from "@os-core/4-command/overlay/overlay";
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
   assertHomeEnd,
   assertHorizontalNav,
+  assertLoop,
   assertNoSelection,
   assertVerticalNav,
-  assertLoop,
 } from "./helpers/contracts";
 
 const expect = osExpect;
@@ -38,12 +38,15 @@ const MENU_ITEMS = [
 
 // ─── Factories ───
 
-function createMenubar(focusedItem = "mb-file"): { page: Page; cleanup: () => void } {
+function createMenubar(focusedItem = "mb-file"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-menubar", {});
   const zone = app.createZone("menubar");
   zone.bind("menubar", {
     getItems: () => MENUBAR_ITEMS,
-    options: { navigate: { loop: true } }
+    options: { navigate: { loop: true } },
   });
   const { page, cleanup } = createPage(app);
   page.goto("/");
@@ -51,7 +54,10 @@ function createMenubar(focusedItem = "mb-file"): { page: Page; cleanup: () => vo
   return { page, cleanup };
 }
 
-function createMenu(focusedItem = "cmd-new"): { page: Page; cleanup: () => void } {
+function createMenu(focusedItem = "cmd-new"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-menu", {});
   const menubar = app.createZone("menubar");
   menubar.bind("menubar", {
@@ -150,18 +156,30 @@ describe("APG Menu: Toggles (ARIA contract)", () => {
   // which simple zone.bind() doesn't support. Needs per-item role mapping.
   it.skip("Space: toggles checked state for checkbox item", async () => {
     const { page, cleanup } = createMenu("check-ruler");
-    await expect(page.locator("#check-ruler")).toHaveAttribute("aria-checked", "false");
+    await expect(page.locator("#check-ruler")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
     page.keyboard.press("Space");
-    await expect(page.locator("#check-ruler")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("#check-ruler")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
     page.keyboard.press("Space");
-    await expect(page.locator("#check-ruler")).toHaveAttribute("aria-checked", "false");
+    await expect(page.locator("#check-ruler")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
     cleanup();
   });
 
   it.skip("Space: checks radio item and unchecks others in group", async () => {
     const { page, cleanup } = createMenu("radio-left");
     page.keyboard.press("Space");
-    await expect(page.locator("#radio-left")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("#radio-left")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
     cleanup();
   });
 });
@@ -192,7 +210,10 @@ describe("APG Menu: ARIA Projection", () => {
 
   it("focused item has data-focused=true", async () => {
     const { page, cleanup } = createMenu("cmd-open");
-    await expect(page.locator("#cmd-open")).toHaveAttribute("data-focused", "true");
+    await expect(page.locator("#cmd-open")).toHaveAttribute(
+      "data-focused",
+      "true",
+    );
     cleanup();
   });
 });

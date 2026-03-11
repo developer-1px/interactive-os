@@ -10,8 +10,8 @@ import { InspectorApp, InspectorZiftUI } from "@inspector/app";
 import { computeAttrs } from "@os-core/3-inject/compute";
 import { os } from "@os-core/engine/kernel";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
-import type { Page } from "@os-testing/types";
 import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const FAKE_ZONES = ["zone-a", "zone-b", "zone-c"];

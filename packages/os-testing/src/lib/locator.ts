@@ -5,15 +5,12 @@
  * Supports :focus pseudo-selector and #id selectors.
  */
 
-import {
-  readFocusedItemId,
-  resolveElement,
-} from "@os-core/3-inject/compute";
+import { readFocusedItemId, resolveElement } from "@os-core/3-inject/compute";
 import { os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { simulateClick } from "../simulate";
-import type { Projection } from "./projection";
 import type { Locator, LocatorAssertions } from "../types";
+import type { Projection } from "./projection";
 
 /**
  * Extended locator with internal expect() hooks.
@@ -66,7 +63,7 @@ export function createLocator(
   if (selector === ":focus") {
     const focusedId = readFocusedItemId(os);
     if (!focusedId) {
-      throw new Error("locator(\":focus\"): no element is currently focused");
+      throw new Error('locator(":focus"): no element is currently focused');
     }
     return createLocator("#" + focusedId, projection);
   }
@@ -119,11 +116,7 @@ export function createLocator(
         );
       }
     },
-    _toHaveAttribute(
-      name: string,
-      value?: string | RegExp,
-      negated?: boolean,
-    ) {
+    _toHaveAttribute(name: string, value?: string | RegExp, negated?: boolean) {
       const attrKey = name === "tabindex" ? "tabIndex" : name;
       const raw = resolveElement(os, elementId)[attrKey];
       if (value === undefined) {

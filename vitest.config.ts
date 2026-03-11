@@ -14,6 +14,8 @@ export default defineConfig({
       "@": "/src",
       "virtual:docs-meta":
         "/tests/headless/apps/docs-viewer/__mocks__/docs-meta.ts",
+      "virtual:agent-activity":
+        "/tests/headless/apps/docs-viewer/__mocks__/agent-activity.ts",
     },
   },
   test: {

@@ -10,10 +10,10 @@
  * Config: vertical, no-loop, no-selection
  */
 
-import { createPage } from "@os-testing/page";
-import { expect as osExpect } from "@os-testing/expect";
-import type { Page } from "@os-testing/types";
 import { defineApp } from "@os-sdk/app/defineApp/index";
+import { expect as osExpect } from "@os-testing/expect";
+import { createPage } from "@os-testing/page";
+import type { Page } from "@os-testing/types";
 import { describe, it } from "vitest";
 import {
   assertBoundaryClamp,
@@ -36,7 +36,10 @@ const ARTICLES = [
 
 // ─── Factory ───
 
-function createFeed(focusedItem = "article-1"): { page: Page; cleanup: () => void } {
+function createFeed(focusedItem = "article-1"): {
+  page: Page;
+  cleanup: () => void;
+} {
   const app = defineApp("test-feed", {});
   const zone = app.createZone("feed");
   zone.bind("feed", {
