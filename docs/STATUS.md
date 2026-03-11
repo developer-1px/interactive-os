@@ -72,6 +72,7 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
+| **docs-viewer** | hmr-activity: ✅ Archived (W11) | Archive | 03-12 |
 | activity-feed | — | — | — |
 | dashboard | — | — | — |
 
@@ -91,7 +92,7 @@
 | Epics (confirmed) | 21 |
 | Active Projects | 1 (sdk-role-factory Phase 2) |
 | Hold Projects | 7 |
-| Archived (this session) | 4 (devtool-split, agent-recent, archive-cleanup, qa-agent) |
+| Archived (this session) | 5 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
