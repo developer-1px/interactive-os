@@ -1,71 +1,85 @@
 # Project Dashboard
 
-> Last updated: 2026-03-11T20:30
+> Last updated: 2026-03-11T22:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
 >
-> **구조**: 도메인(상설 범주) > epic(확정 컨셉) > 프로젝트(작업 단위) > 태스크(BOARD 내 항목)
+> **구조**: 도메인(제품 레이어) > epic(확정 컨셉, 영구) > 프로젝트(작업 단위) > 태스크(BOARD 내 항목)
 > **원본**: `docs/1-project/[domain]/[epic]/[project]/` 폴더 구조가 SSOT. 이 파일은 투영.
 > **이름 규칙**: epic 이름 = 코드 canonical name (kebab-case). 모든 문서에서 통일.
+> **상태 4분류**: Active(진행) · Hold(멈춤, epic 유지) · Archive(완료·폐기) · Backlog(컨셉 미확정)
 
 ---
 
 ## 🔥 Active Focus
 
-**os-core / sdk-role-factory** — Phase 1 완료 (defineRole + bind 시그니처). Phase 2 미착수
+**os / sdk-role-factory** — Phase 1 완료. Phase 2 미착수
 
 ---
 
 ## 📋 Domains
 
-### os-core
-> `packages/kernel/` · `packages/os-core/` · `packages/os-react/` · `packages/os-sdk/`
+### kernel
+> `packages/kernel/`
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| ban-os-from-tsx ⚠️ | Scaffold (T1-T8) | 03-09 |
-| **sdk-role-factory** 🔥 | Phase 1 ✅ (T1-T9), Phase 2 미착수 | 03-11 |
+| Epic | Project | Status | Last Activity |
+|------|---------|--------|---------------|
+| (프로젝트 생길 때 epic 발견) | — | — | — |
 
-### testing
-> `packages/os-testing/` · `packages/os-devtool/` · `tests/`
+### os
+> `packages/os-core/` · `packages/os-sdk/` · `packages/os-react/` · `packages/os-testing/` · `packages/os-devtool/`
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| devtool-split 🔥 | ✅ 완료 (T1-T8, 미아카이브) | 03-11 |
-| headless-page/headless-simulator ⚠️ | Phase 7 Done, Phase 1-6 미착수 | 03-07 |
-| test-observability ⚠️ | Scaffold, T1~T4 | 03-05 |
-| replay ⚠️ | Scaffold, T1 | 03-05 |
+| Epic | Project | Status | Last Activity |
+|------|---------|--------|---------------|
+| **sdk-role-factory** | Phase 1 ✅, Phase 2 미착수 | 🔥 Active | 03-11 |
+| **ban-os-from-tsx** | T1-T8 scaffold | ⚠️ Hold | 03-09 |
+| **apg** | apg-suite: WP0 Done, WP1-2 미착수 | ⚠️ Hold | 03-07 |
+| **headless-page** | headless-simulator: P7 Done, P1-6 미착수 | ⚠️ Hold | 03-07 |
+| **headless-page** | headless-test-gaps | ⚠️ Hold | 03-11 |
+| **testbot** | testbot-e2e | ⚠️ Hold | 03-11 |
+| collection | — | — | — |
+| command | — | — | — |
+| devtool-split | ✅ Archived (W11) | Archive | 03-11 |
+| field | — | — | — |
+| inspector | — | — | — |
+| navigate | — | — | — |
+| overlay | — | — | — |
+| trigger | — | — | — |
+| zift | — | — | — |
 
-### builder
-> `src/` builder 관련
+### apps
+> `src/apps/`
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| builder-v2 ⚠️ | T12, T13, T20 | 03-05 |
-| builder-v3 ⚠️ | 기획 완료. 개발 보류 | 03-05 |
+| Epic | Project | Status | Last Activity |
+|------|---------|--------|---------------|
+| **builder** | builder-v2: T12, T13, T20 | ⚠️ Hold | 03-05 |
+| **builder** | builder-v3: 기획 완료, 개발 보류 | ⚠️ Hold | 03-05 |
+| todo | — | — | — |
 
-### apg
-> `tests/apg/` · `src/pages/apg-showcase/` · `packages/os-core/` headless role support
+### harness
+> LLM 자율 실행 프레임워크 (`.claude/skills/`, hooks, pipelines)
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| apg-suite ⚠️ | WP0 Done (331→0 fail), WP1-WP2 Backlog | 03-07 |
+| Epic | Project | Status | Last Activity |
+|------|---------|--------|---------------|
+| skill | — | — | — |
+| agent | — | — | — |
+| pipeline | — | — | — |
 
-### docs
-> `docs/` 관리
+### agent-activity
+> 에이전트 활동 관리 도구 (`src/apps/docs-viewer/` → 진화 중)
 
-| Project | Phase | Last Activity |
-|---------|-------|---------------|
-| archive-cleanup ⚠️ | — | — |
-| docs-viewer/agent-recent 🔥 | ✅ 완료 (T1-T6, 미아카이브) | 03-11 |
-| docs-viewer/os-migration ⚠️ | — | — |
+| Epic | Project | Status | Last Activity |
+|------|---------|--------|---------------|
+| **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
+| activity-feed | — | — | — |
+| dashboard | — | — | — |
 
 ---
 
 ## ⚠️ Active Migrations
 
-(없음)
+1-project 구조 재편 진행 중 (os/project-restructure)
 
 ---
 
@@ -73,11 +87,11 @@
 
 | Metric | Count |
 |--------|-------|
-| Domains | 5 |
-| Active Projects | 12 |
-| Epics (confirmed) | 1 (headless-page) |
-| Active Focus | 3 (sdk-role-factory, devtool-split, agent-recent) |
-| Stale (4d+) | 7 |
-| Active Migrations | 0 |
+| Domains | 5 (kernel, os, apps, harness, agent-activity) |
+| Epics (confirmed) | 21 |
+| Active Projects | 1 (sdk-role-factory Phase 2) |
+| Hold Projects | 7 |
+| Archived (this session) | 3 (devtool-split, agent-recent, archive-cleanup) |
+| Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
