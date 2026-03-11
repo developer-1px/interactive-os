@@ -133,7 +133,7 @@ Agent tool:
   prompt: |
     프로젝트 BOARD.md: [BOARD 경로]
 
-    .claude/skills/qa/SKILL.md를 읽고 /qa를 실행하라.
+    .claude/agents/qa/AGENT.md를 읽고 실행하라.
     결과를 PASS/FAIL + 리포트로 반환하라.
 ```
 
