@@ -1,46 +1,24 @@
-# BOARD — apg-suite
+# apg-suite
 
-> 목표: Playwright 동형 테스트 아키텍처. setupZone(과도기) → goto(url) + App 자동 등록(최종).
-> 선행 프로젝트: [apg-test-fidelity](../../../4-archive/2026/03/W10/apg-test-fidelity/BOARD.md), [apg-test-fix-18](../../../4-archive/2026/03/W10/apg-test-fix-18/BOARD.md)
+| Key | Value |
+|-----|-------|
+| Claim | Playwright 동형 테스트 아키텍처. setupZone(과도기) → goto(url) + App 자동 등록(최종) |
+| Before | 22 files, 396 tests, 331 fail / 65 pass |
+| After | WP0 완료: 22 files, 396 tests, 0 fail / 396 pass (전체 30 files 532 tests 0 fail) |
+| Size | Heavy |
+| Risk | 7개 showcase App export 미전환, setupZone 제거 시 WP1 완료 필요 |
 
-## Baseline
+## Tasks
 
-- Before (2026-03-07 12:33): 22 files, 396 tests, **331 fail / 65 pass**
-- After WP0 (2026-03-07 13:21): 22 files, 396 tests, **0 fail / 396 pass** + 전체 30 files 532 tests 0 fail
-
-## 3-Stage Transition
-
-| Stage | 내용 | 상태 |
-|-------|------|------|
-| 1. 환경 정비 | goto(zoneId) → setupZone(zoneId) 리네임 + 전수 치환 | Done |
-| 2. App 표준화 | APG showcase 22개 패턴에 App export 추가 | 미착수 |
-| 3. setupZone 제거 | setupZone 삭제, goto(url) + App mount → zone 자동 등록 | 미착수 |
-
----
-
-## Now
-
-(Stage 1 완료. Stage 2는 별도 세션에서 진행)
-
-## Backlog (Stage 2-3)
-
-- [ ] **WP1: APG showcase App export 표준화**
-  - 7 patterns need App export: listbox, toolbar, menu, dialog, dropdown-menu, combobox, navtree
-  - 나머지 15 patterns: App export 존재 확인 + testConfig 표준화
-  - Success: 모든 22 showcase가 defineApp() 기반 App export
-
-- [ ] **WP2: setupZone 제거 + goto(url) 전환**
-  - setupZone 삭제, goto(url) + App mount → zone 자동 등록
-  - WP1 완료 후 착수
-
-## Done
-
-- [x] WP0: goto → setupZone 리네임 — API 4파일 + infra 3파일 + APG 22파일 + knowledge 2파일 전수 치환 — tsc 0 | 532 tests 0 fail ✅
-  - Plan: `notes/2026-0307-1300-[plan]-goto-to-setupZone.md`
-  - Root cause: basePage.goto(zoneId) 이중 등록이 role config를 덮어쓰고 있었음. setupZone은 os.setState 직접 호출로 교체하여 이중 등록 제거
+| # | Task | AC | Status | Evidence |
+|---|------|----|--------|----------|
+| WP0 | goto → setupZone 리네임 | API 4파일 + infra 3파일 + APG 22파일 전수 치환, tsc 0, 532 tests 0 fail | ✅ | basePage.goto 이중 등록 → os.setState 직접 호출 |
+| WP1 | APG showcase App export 표준화 | 7 patterns App export + 15 patterns testConfig 표준화 | ⬜ | — |
+| WP2 | setupZone 제거 + goto(url) 전환 | setupZone 삭제, goto(url) + App mount → zone 자동 등록 | ⬜ | WP1 완료 후 |
 
 ## Unresolved
 
-- ~~331 fail → 0 fail 원인~~ **규명 완료**: createOsPage.goto가 role-resolved config로 zone 등록 후, basePage.goto(zoneId)를 재호출 → page.ts의 zone path가 role defaults 없이 재등록 → config 덮어씀. setupZone 전환 시 basePage.goto 호출을 os.setState 직접 호출로 교체 → 이중 등록 제거 → 올바른 config 보존.
-- WP1: 7개 showcase App export 미전환
-- Stage 3: setupZone 제거 시점 — WP1 완료 후
+| # | Question | Impact |
+|---|----------|--------|
+| U1 | 7개 showcase App export 미전환 (listbox, toolbar, menu, dialog, dropdown-menu, combobox, navtree) | WP1 블로커 |
+| U2 | setupZone 제거 시점 — WP1 완료 후 | WP2 순서 의존 |
