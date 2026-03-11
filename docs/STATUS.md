@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-11T22:00
+> Last updated: 2026-03-12T12:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-**harness / pipeline / meta-pipeline** — Meta 파이프라인 분기
+없음 (양 프로젝트 아카이브 완료)
 
 ---
 
@@ -63,9 +63,9 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | skill | — | — | — |
-| agent | design-review-agent: T1-T4 Done (archive 대기) | ⚠️ Hold | 03-12 |
+| agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
-| **pipeline** | meta-pipeline: T1-T3 | 🔥 Active | 03-12 |
+| pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
 
 ### agent-activity
 > 에이전트 활동 관리 도구 (`src/apps/docs-viewer/` → 진화 중)
@@ -81,7 +81,7 @@
 
 ## ⚠️ Active Migrations
 
-1-project 구조 재편 진행 중 (os/project-restructure)
+없음
 
 ---
 
@@ -91,9 +91,9 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 1 (meta-pipeline) |
+| Active Projects | 0 |
 | Hold Projects | 7 |
-| Archived (this session) | 5 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity) |
+| Archived (this session) | 7 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
