@@ -181,7 +181,7 @@ TodoApp (defineApp)
 
 ## 5. Headless 검증 패턴
 
-> 공식 문서: `docs/2-area/official/os/headless-page.md`
+> 공식 문서: `docs/2-area/os/headless-page.md`
 
 ### createPage — DOM 없는 Playwright 동형 테스트
 
@@ -225,20 +225,20 @@ test("Enter activates item", () => {
 
 | 상황 | 참조 |
 |------|------|
-| Role별 키보드 동작이 궁금할 때 | `docs/2-area/official/os/SPEC.md` §7 Role Preset Matrix |
-| 커맨드 목록/페이로드 확인 | `docs/2-area/official/os/SPEC.md` §3 Commands |
-| 키맵(어떤 키 → 어떤 커맨드) 확인 | `docs/2-area/official/os/SPEC.md` §6 Keymap |
-| Focus/Selection/Expand 상태 구조 | `docs/2-area/official/os/SPEC.md` §2 State |
-| OS가 왜 이 기능을 직접 하는지 | `docs/2-area/official/os/why-*.md` (focus, navigation, clipboard 등) |
+| Role별 키보드 동작이 궁금할 때 | `docs/2-area/os/SPEC.md` §7 Role Preset Matrix |
+| 커맨드 목록/페이로드 확인 | `docs/2-area/os/SPEC.md` §3 Commands |
+| 키맵(어떤 키 → 어떤 커맨드) 확인 | `docs/2-area/os/SPEC.md` §6 Keymap |
+| Focus/Selection/Expand 상태 구조 | `docs/2-area/os/SPEC.md` §2 State |
+| OS가 왜 이 기능을 직접 하는지 | `docs/2-area/os/why-*.md` (focus, navigation, clipboard 등) |
 
 ### 커널 API
 
 | 상황 | 참조 |
 |------|------|
-| createKernel, defineCommand 기초 | `docs/2-area/official/kernel/01-getting-started.md` |
-| Command, Effect, Scope 개념 | `docs/2-area/official/kernel/02-core-concepts.md` |
-| 미들웨어 작성법 | `docs/2-area/official/kernel/06-middleware.md` |
-| 테스트 패턴 (격리, 트랜잭션 어설션) | `docs/2-area/official/kernel/08-patterns.md` |
+| createKernel, defineCommand 기초 | `docs/2-area/kernel/01-getting-started.md` |
+| Command, Effect, Scope 개념 | `docs/2-area/kernel/02-core-concepts.md` |
+| 미들웨어 작성법 | `docs/2-area/kernel/06-middleware.md` |
+| 테스트 패턴 (격리, 트랜잭션 어설션) | `docs/2-area/kernel/08-patterns.md` |
 
 ### 앱 구현 패턴
 
@@ -246,14 +246,14 @@ test("Enter activates item", () => {
 |------|------|
 | CRUD/Clipboard/Ordering 전체 패턴 | `src/apps/todo/app.ts` (벤치마크) |
 | Tree 네비게이션, 계층 구조 | `src/apps/builder/app.ts` + `src/docs-viewer/app.ts` |
-| Dialog/Menu/Overlay 패턴 | `docs/2-area/official/os/SPEC.md` §7 Role Preset Matrix |
-| ZIFT 스펙 | `docs/2-area/official/os/zift-spec.md` |
+| Dialog/Menu/Overlay 패턴 | `docs/2-area/os/SPEC.md` §7 Role Preset Matrix |
+| ZIFT 스펙 | `docs/2-area/os/zift-spec.md` |
 
 ### 테스트
 
 | 상황 | 참조 |
 |------|------|
-| HeadlessPage 전체 API | `docs/2-area/official/os/headless-page.md` |
+| HeadlessPage 전체 API | `docs/2-area/os/headless-page.md` |
 | APG 계약 테스트 사례 | `tests/apg/*.apg.test.ts` |
 | 앱 통합 테스트 사례 | `tests/headless/apps/todo/` |
 

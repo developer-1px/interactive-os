@@ -81,7 +81,7 @@ app.ts         ← 앱 정의 (상태, 커맨드, Zone 바인딩)
 
 "그럴 것 같은" 동작이 아니라 "스펙이 요구하는" 동작을 구현한다.
 
-**참조**: `CLAUDE.md` Project #10, 검증 #10, `.agent/rules.md` Project #10, 검증 #10, `docs/2-area/official/os/aria-checklist.md`
+**참조**: `CLAUDE.md` Project #10, 검증 #10, `.agent/rules.md` Project #10, 검증 #10, `docs/2-area/os/aria-checklist.md`
 
 ---
 

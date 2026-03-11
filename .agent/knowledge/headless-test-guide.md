@@ -1,7 +1,7 @@
 # Headless Test 작성 가이드
 
 > **이 프로젝트 고유 개념.** headless test = DOM 없이 OS 상태만으로 상호작용을 검증하는 테스트.
-> API 레퍼런스: `docs/2-area/official/os/headless-page.md`
+> API 레퍼런스: `docs/2-area/os/headless-page.md`
 > 도구 선택 기준: `.agent/knowledge/testing-tools.md`
 > 이 파일은 **실전 작성 패턴과 함정**에 집중한다. API 목록은 위 문서 참조.
 

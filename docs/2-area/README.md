@@ -1,20 +1,23 @@
-# Interactive OS — 공식 기술 문서
+# Interactive OS — Area (확정된 기술 문서)
 
-> Interactive OS 프로젝트의 기술 문서
+> 개념적으로 확정되고 거의 변하지 않을 내용만 이곳에 둔다.
+> 1-project와 동일한 도메인 구조. 프로젝트 완료 시 산출물이 같은 도메인의 area로 환류된다.
 
 ---
 
-## 비전
+## 교차관심사
 
 | 문서 | 설명 |
 |---|---|
 | [VISION](./VISION.md) | Interactive OS의 존재 이유 — Problem, Pipeline, Module Ecosystem |
+| [project-standard](./project-standard.md) | 프로젝트 폴더 구조 표준 |
+| [coding-standards](./coding-standards.md) | 코딩 표준 (네이밍, export, 약어) |
 
 ---
 
-## Kernel
+## kernel/
 
-인터랙티브 애플리케이션을 위한 범용 커맨드 처리 엔진
+인터랙티브 애플리케이션을 위한 범용 커맨드 처리 엔진 (`@frozen 2026-02-11`)
 
 | 문서 | 설명 |
 |---|---|
@@ -28,10 +31,13 @@
 | [상태 관리](./kernel/07-state-management.md) | 단일 상태 트리, Store, 상태 렌즈 |
 | [패턴 & 레시피](./kernel/08-patterns.md) | 모범 사례와 일반적인 패턴 |
 | [용어집](./kernel/09-glossary.md) | 정식 용어와 동결된 설계 결정 |
+| [Inspector API](./kernel/inspector-api.md) | Inspector 통합 API |
 
-## OS
+---
 
-인터랙티브 웹 애플리케이션을 위한 행동 인프라
+## os/
+
+인터랙티브 웹 애플리케이션을 위한 행동 인프라 (🚧 개발 중)
 
 ### Why — 문제 공간
 
@@ -54,6 +60,14 @@
 | 문서 | 설명 |
 |---|---|
 | [SPEC](./os/SPEC.md) | Single Source of Truth — State, Commands, Keymaps, ARIA Role Presets, Components |
+| [os-guarantees](./os/os-guarantees.md) | OS 상태 보장 계약 (delete, clipboard, multi-select, undo/redo 등) |
+| [commands-architecture](./os/commands-architecture.md) | 커맨드 아키텍처 |
+| [focus-overview](./os/focus-overview.md) | 포커스 시스템 개요 |
+| [headless-page](./os/headless-page.md) | Headless Page 가이드 |
+| [zift-spec](./os/zift-spec.md) | ZIFT 상세 스펙 |
+| [zone-data-model](./os/zone-data-model.md) | Zone 데이터 모델 |
+
+---
 
 ## 아키텍처
 
@@ -69,12 +83,3 @@
 │  dispatch, defineCommand, defineEffect       │
 └──────────────────────────────────────────────┘
 ```
-
----
-
-## 상태
-
-| 패키지 | 상태 | 문서 |
-|---|---|---|
-| Kernel | `@frozen 2026-02-11` | ✅ 완료 |
-| OS | 개발 중 | 🚧 SPEC 완료 |

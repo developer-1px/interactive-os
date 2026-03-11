@@ -131,7 +131,7 @@ Cynefin은 **조직적 의사결정의 sensemaking framework**이지, 코드 수
 | 4 | `.agent/knowledge/*.md` | 판례/선례 |
 | 5 | `docs/2-area/praxis/` | 실천 지혜 |
 | 6 | `docs/2-area/references/` | 기법 레퍼런스 |
-| 7 | `docs/2-area/official/` | 시스템 공식 지식 |
+| 7 | `docs/2-area/` | 시스템 공식 지식 |
 
 "grep 한 번이면 모든 연결이 보여야 한다" (Project #9) — "엔트로피 감소"를 grep하면 3파일이 뜬다. "어디가 진짜인가?"를 LLM이 판단해야 한다.
 

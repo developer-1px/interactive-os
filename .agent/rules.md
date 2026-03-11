@@ -117,14 +117,14 @@
 | 성능 패턴·코딩 함정 | `.agent/knowledge/coding-rules.md` |
 | 계약 위반 자가 점검 | `.agent/knowledge/contract-checklist.md` |
 | 스코프·가설 검증 | `.agent/knowledge/working-standards.md` |
-| OS 전체 비전 | `docs/2-area/official/VISION.md` |
-| OS 스펙 | `docs/2-area/official/os/SPEC.md` |
-| ZIFT 상세 스펙 | `docs/2-area/official/os/zift-spec.md` |
-| 커맨드 아키텍처 | `docs/2-area/official/os/commands-architecture.md` |
-| 포커스 시스템 | `docs/2-area/official/os/focus-overview.md` |
-| headless page 가이드 | `docs/2-area/official/os/headless-page.md` |
-| Zone 데이터 모델 | `docs/2-area/official/os/zone-data-model.md` |
-| Kernel API 레퍼런스 | `docs/2-area/official/kernel/03-api-reference.md` |
+| OS 전체 비전 | `docs/2-area/VISION.md` |
+| OS 스펙 | `docs/2-area/os/SPEC.md` |
+| ZIFT 상세 스펙 | `docs/2-area/os/zift-spec.md` |
+| 커맨드 아키텍처 | `docs/2-area/os/commands-architecture.md` |
+| 포커스 시스템 | `docs/2-area/os/focus-overview.md` |
+| headless page 가이드 | `docs/2-area/os/headless-page.md` |
+| Zone 데이터 모델 | `docs/2-area/os/zone-data-model.md` |
+| Kernel API 레퍼런스 | `docs/2-area/kernel/03-api-reference.md` |
 
 
 ## Cynefin — 코드 전에 도메인을 판단한다

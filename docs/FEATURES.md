@@ -232,7 +232,7 @@
 
 **If** — 없으면: `react-dnd` 같은 라이브러리를 직접 통합하되, OS의 포커스/선택 시스템과 충돌. 있으면: DnD가 OS 커맨드로 통합되어 포커스/선택/접근성이 일관.
 
-> 📋 [VISION.md §5.2](2-area/official/VISION.md) 제안 모듈
+> 📋 [VISION.md §5.2](2-area/VISION.md) 제안 모듈
 
 | Feature | Status | Tests | Source | Notes |
 |---------|--------|-------|--------|-------|
@@ -432,7 +432,7 @@
 
 ## Proposed Modules (미착수)
 
-> 출처: [VISION.md §5.2](2-area/official/VISION.md)
+> 출처: [VISION.md §5.2](2-area/VISION.md)
 
 | Module | Pipeline | Dependency | Priority | Notes |
 |--------|----------|------------|----------|-------|

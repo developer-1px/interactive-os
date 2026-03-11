@@ -409,6 +409,6 @@ const { Zone, Item, Field, triggers } = todoZone.bind({
 ZIFT의 React 컴포넌트 외에, **defineApp 수준의 데이터 바인딩 + 모듈 합성 API**가 있다.
 `app.zone()` API로 Zone의 데이터 흐름(from/to), 스키마(entity), 기능(with[])을 선언한다.
 
-> 상세: `docs/2-area/official/os/zone-data-model.md`
+> 상세: `docs/2-area/os/zone-data-model.md`
 
 *Interaction OS v8.160 ZIFT Specification (2026-02-06)*
