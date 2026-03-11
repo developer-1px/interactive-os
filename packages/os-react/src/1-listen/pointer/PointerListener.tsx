@@ -19,11 +19,9 @@ import {
   findFocusableItem,
   setDispatching,
 } from "@os-core/1-listen/_shared/domQuery";
-import {
-  getDropPosition,
-  senseClickTarget,
-  senseMouseDown,
-} from "@os-core/1-listen/_shared/senseMouse";
+import { senseClickTarget } from "@os-core/1-listen/_shared/senseClickTarget";
+import { senseDropPosition } from "@os-core/1-listen/_shared/senseDropPosition";
+import { senseMouseDown } from "@os-core/1-listen/_shared/senseMouseDown";
 import { resolveClick } from "@os-core/1-listen/mouse/resolveClick";
 import { resolveMouse } from "@os-core/1-listen/mouse/resolveMouse";
 import { resolveTriggerClick } from "@os-core/1-listen/mouse/resolveTriggerClick";
@@ -285,7 +283,7 @@ export function PointerListener() {
         ) as HTMLElement | null;
         if (!zoneEl) return;
 
-        const drop = getDropPosition(e, zoneEl);
+        const drop = senseDropPosition(e, zoneEl);
         os.dispatch(
           drop
             ? OS_DRAG_OVER({
@@ -383,6 +381,7 @@ export function PointerListener() {
               if (activeZoneId) {
                 const zone = state.os.focus.zones[activeZoneId];
                 const entry = ZoneRegistry.get(activeZoneId);
+                // biome-ignore lint/complexity/useLiteralKeys: TS4111 noPropertyAccessFromIndexSignature
                 const clickCommands = entry?.config?.inputmap?.["click"] ?? [];
 
                 const clickResult = resolveClick({

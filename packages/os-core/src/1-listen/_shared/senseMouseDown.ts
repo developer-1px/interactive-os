@@ -1,15 +1,14 @@
 /**
- * Shared DOM sense functions for mouse-like interactions.
+ * senseMouseDown — DOM → MouseInput for pointerdown path.
  *
- * These functions read DOM state and produce typed inputs
- * for pure resolve functions. No side effects, no dispatch.
+ * Reads DOM attributes (data-item, data-zone, data-trigger-id, data-label)
+ * and registry state to produce a typed MouseInput for resolve functions.
  *
- * Used by: PointerListener (and headless simulateClick)
+ * Pipeline: PointerEvent target → senseMouseDown → resolveMouse/resolveClick → dispatch
  */
 
 import { os } from "@os-core/engine/kernel";
 import { TriggerOverlayRegistry } from "@os-core/engine/registries/triggerRegistry";
-import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { findFocusableItem, resolveFocusTarget } from "../_shared/domQuery";
 import type { MouseInput } from "../mouse/resolveMouse";
 
@@ -197,138 +196,4 @@ export function senseMouseDown(
     ctrlKey: e.ctrlKey,
     altKey: e.altKey,
   });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Pure Interface: DropSenseInput
-// ═══════════════════════════════════════════════════════════════════
-
-export interface DropSenseInput {
-  clientY: number;
-  items: Array<{ itemId: string; top: number; bottom: number }>;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Extract: DropSenseInput → Drop result
-// ═══════════════════════════════════════════════════════════════════
-
-export function extractDropPosition(
-  input: DropSenseInput,
-): { overItemId: string; position: "before" | "after" } | null {
-  for (const item of input.items) {
-    if (input.clientY >= item.top && input.clientY <= item.bottom) {
-      const mid = item.top + (item.bottom - item.top) / 2;
-      return {
-        overItemId: item.itemId,
-        position: input.clientY < mid ? "before" : "after",
-      };
-    }
-  }
-  return null;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// DOM Adapter: reads DOM → DropSenseInput → extractDropPosition
-// ═══════════════════════════════════════════════════════════════════
-
-export function getDropPosition(
-  e: { clientY: number },
-  zoneEl: HTMLElement,
-): { overItemId: string; position: "before" | "after" } | null {
-  const nodeList = zoneEl.querySelectorAll("[data-item]");
-  const items: DropSenseInput["items"] = [];
-
-  for (const node of nodeList) {
-    if (node.closest("[data-zone]") !== zoneEl) continue;
-    const rect = node.getBoundingClientRect();
-    const itemId = (node as HTMLElement).id;
-    if (!itemId) continue;
-    items.push({ itemId, top: rect.top, bottom: rect.bottom });
-  }
-
-  return extractDropPosition({ clientY: e.clientY, items });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ClickTarget — Discriminated union for pointerup click routing
-// ═══════════════════════════════════════════════════════════════════
-
-export type ClickTarget =
-  | {
-      type: "trigger";
-      triggerId: string;
-      overlayId: string;
-      overlayType: string;
-      isOpen: boolean;
-    }
-  | { type: "simple-trigger"; triggerId: string; payload: string | null }
-  | { type: "expand"; itemId: string; zoneId: string }
-  | { type: "check"; itemId: string; zoneId: string }
-  | { type: "item"; itemId: string | null; isCurrentPage: boolean }
-  | { type: "none" };
-
-/**
- * senseClickTarget — DOM → ClickTarget for pointerup click routing.
- *
- * Classifies what the user clicked on by reading DOM attributes
- * and registry/state. Symmetric to senseMouseDown (pointerdown path).
- *
- * Pipeline: PointerEvent target → senseClickTarget → resolveClick/resolveTriggerClick → dispatch
- */
-export function senseClickTarget(target: HTMLElement): ClickTarget {
-  // Trigger: overlay toggle or simple (non-overlay) trigger
-  const triggerEl = target.closest("[data-trigger-id]") as HTMLElement;
-  if (triggerEl) {
-    const triggerId = triggerEl.getAttribute("data-trigger-id");
-    if (triggerId) {
-      const triggerMeta = TriggerOverlayRegistry.get(triggerId);
-      if (triggerMeta) {
-        const overlayStack = os.getState().os.overlays.stack;
-        const isOpen = overlayStack.some(
-          (o: { id: string }) => o.id === triggerMeta.overlayId,
-        );
-        return {
-          type: "trigger",
-          triggerId,
-          overlayId: triggerMeta.overlayId,
-          overlayType: triggerMeta.overlayType,
-          isOpen,
-        };
-      }
-      // Non-overlay trigger with registered callback
-      const itemCb = ZoneRegistry.findItemCallback(triggerId);
-      if (itemCb?.onActivate) {
-        const payload = triggerEl.getAttribute("data-trigger-payload");
-        return { type: "simple-trigger", triggerId, payload };
-      }
-    }
-  }
-
-  // Sub-item triggers: expand / check
-  if (
-    target.closest("[data-expand-trigger]") ||
-    target.closest("[data-check-trigger]")
-  ) {
-    const activeZoneId = os.getState().os.focus.activeZoneId;
-    if (!activeZoneId) return { type: "none" };
-    const itemEl = findFocusableItem(target);
-    const itemId = itemEl?.id ?? null;
-    if (!itemId) return { type: "none" };
-    const subType = target.closest("[data-expand-trigger]")
-      ? "expand"
-      : "check";
-    return {
-      type: subType as "expand" | "check",
-      itemId,
-      zoneId: activeZoneId,
-    };
-  }
-
-  // Normal item click
-  const itemEl = findFocusableItem(target);
-  return {
-    type: "item",
-    itemId: itemEl?.id ?? null,
-    isCurrentPage: itemEl?.getAttribute("aria-current") === "page",
-  };
 }
