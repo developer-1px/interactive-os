@@ -22,3 +22,26 @@
 ## 라우팅
 
 승인 후 → `/project` — 새 프로젝트 `condition-auto-disabled`. Light 규모 (6 tasks, OS primitive 1개 수정 + SDK 연결).
+
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide (전제 검증)
+- **입력**: 6-step 변환 명세의 현재 유효성
+- **결과**:
+  - **concept 유효**: condition→disabled 자동 inject는 여전히 가치 있음
+  - **implementation 전제 변경**: `createSimpleTrigger`/`createDynamicTrigger` 없음. Trigger가 3-Layer 아키텍처로 재구성됨 (L0 headless, L1 data-attr, L2 React)
+  - `flatHandlerRegistry`는 `defineApp/index.ts`에 존재 확인
+  - **6-step 명세표가 stale** — 현재 Trigger 구조에 맞게 재작성 필요
+- **Cynefin**: Complicated — concept Clear, implementation path needs rewrite
+
+### Open Gaps
+
+- [ ] Q1: 현재 Trigger 3-Layer에서 condition→disabled를 어디에 주입하는가? (L0? L1?) — 해소 시 명세표 재작성 가능
+
+### 다음 /wip 시 시작점
+
+Q1 해소 → 6-step 명세표 재작성 → `/project` 생성 가능
