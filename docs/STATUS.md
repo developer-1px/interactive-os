@@ -67,6 +67,7 @@
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
+| pipeline | pipeline-leak-audit: ✅ Archived (W11) | Archive | 03-12 |
 
 ### agent-activity
 > 에이전트 활동 관리 도구 (`src/apps/docs-viewer/` → 진화 중)
@@ -94,7 +95,7 @@
 | Epics (confirmed) | 21 |
 | Active Projects | 0 |
 | Hold Projects | 7 |
-| Archived (this session) | 9 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority) |
+| Archived (this session) | 10 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
