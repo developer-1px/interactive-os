@@ -72,6 +72,31 @@
 
 **os, app, page 삼각 구조 정의**가 먼저 완료되어야 한다. 현재 discussion에서 진행 중.
 
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide
+- **입력**: 완료 조건 6개 vs 현재 상태
+- **결과** — 부분 해소 확인:
+  - ✅ `page.ts` God Object → **해소됨** (883→99줄, lib/ 5모듈 분리 완료 03-10)
+  - ❓ `createBrowserPage.ts` 847줄 — 여전히 대형. TestBot UI Satellite 분리 미완
+  - ❓ `simulate.ts` registerHeadlessZone → VitestAdapter 이동 여부 미확인
+  - ❓ AppPageInternal extends AppPage 제거 여부 미확인
+  - ❓ 선행 조건 "os, app, page 삼각 구조 정의" 진행 상태 불명
+- **Cynefin**: Complicated — 방향 명확, 부분 해소, 잔여 범위 재조사 필요
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q1: page.ts 해체 후 남은 완료 조건 중 어디까지 우선인가? createBrowserPage.ts(847줄) 분해가 핵심 잔여
+- [ ] Q2: "os, app, page 삼각 구조 정의" discussion 결론이 있는가?
+
+### 다음 /wip 시 시작점
+
+Q1+Q2 해소 → 완료 조건 재작성 (해소된 항목 제거) → `/project` 재생성 가능
+
 ## 관련 항목
 
 - `docs/0-inbox/2026-0310-1105-[analysis]-headless-test-concept.md` — 개념 정의
