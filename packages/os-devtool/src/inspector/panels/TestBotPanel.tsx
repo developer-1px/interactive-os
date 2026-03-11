@@ -31,10 +31,12 @@ import {
   executeAll,
   executeSuite,
   initSuites,
+  populateDryRun,
   progress,
   type SuiteState,
   TestBotApp,
 } from "@os-devtool/testbot/app";
+import { dryRunAll } from "@os-devtool/testbot/createDryRunPage";
 import type { BrowserStep } from "@os-devtool/testing";
 import { TestBotRegistry } from "@os-devtool/testing";
 import { useDispatch } from "@os-react/6-project/accessors/useDispatch";
@@ -344,7 +346,7 @@ export function TestBotPanel() {
     scriptsRef.current = activeScripts;
   });
 
-  // When scripts change, init suites as "planned"
+  // When scripts change, init suites as "planned" + dry-run for step preview
   useEffect(() => {
     dispatch(
       initSuites({
@@ -354,6 +356,17 @@ export function TestBotPanel() {
         })),
       }),
     );
+
+    // Async dry-run to populate step previews for planned suites
+    if (activeScripts.length > 0) {
+      dryRunAll(activeScripts).then((stepMap) => {
+        const stepsByName: Record<string, BrowserStep[]> = {};
+        for (const [name, steps] of stepMap) {
+          stepsByName[name] = steps;
+        }
+        dispatch(populateDryRun({ stepsByName }));
+      });
+    }
   }, [activeScripts, dispatch]);
 
   // ── Handlers (stable refs — never change) ──
@@ -640,7 +653,11 @@ export function TestBotPanel() {
                           <p className="text-[11px] font-semibold text-slate-700 line-clamp-2">
                             {suite.name}
                           </p>
-                          {!isPending && (
+                          {isPending && suite.steps.length > 0 ? (
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              {suite.steps.length} steps preview
+                            </p>
+                          ) : !isPending ? (
                             <p className="text-[10px] text-slate-400 mt-0.5">
                               {suite.steps.length} steps ·{" "}
                               {
@@ -649,7 +666,7 @@ export function TestBotPanel() {
                               }{" "}
                               failed
                             </p>
-                          )}
+                          ) : null}
                         </div>
 
                         <CopyButton

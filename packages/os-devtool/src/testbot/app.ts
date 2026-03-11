@@ -15,12 +15,12 @@ import {
   resetFocusState,
   TestBotRegistry,
 } from "@os-devtool/testing";
+import { defineApp } from "@os-sdk/app/defineApp";
+import { os } from "@os-sdk/os";
 import { expect } from "@os-testing/expect";
 import { formatDiagnostics } from "@os-testing/page";
 import type { TestScript } from "@os-testing/scripts";
 import { getZoneItems } from "@os-testing/zoneItems";
-import { defineApp } from "@os-sdk/app/defineApp";
-import { os } from "@os-sdk/os";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -163,6 +163,22 @@ export const suiteDone = TestBotApp.command(
         draft.suites[payload.index]!.steps = payload.steps;
         if (payload.diagnostics) {
           draft.suites[payload.index]!.diagnostics = payload.diagnostics;
+        }
+      }
+    }),
+  }),
+);
+
+/** Populate dry-run steps for planned suites (step preview before execution).
+ *  Only writes to suites that are still "planned" — never overwrites execution results. */
+export const populateDryRun = TestBotApp.command(
+  "testbot:populateDryRun",
+  (ctx, payload: { stepsByName: Record<string, BrowserStep[]> }) => ({
+    state: produce(ctx.state, (draft) => {
+      for (const suite of draft.suites) {
+        const steps = payload.stepsByName[suite.name];
+        if (suite.status === "planned" && steps) {
+          suite.steps = steps as BrowserStep[];
         }
       }
     }),
