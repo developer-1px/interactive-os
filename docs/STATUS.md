@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T12:00
+> Last updated: 2026-03-12T18:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-없음 (양 프로젝트 아카이브 완료)
+**harness/skill/wip-skill** — `/wip` 스킬 생성 (Meta)
 
 ---
 
@@ -62,7 +62,7 @@
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
-| skill | — | — | — |
+| **skill** | wip-skill: `/wip` 스킬 생성 | 🔥 Active | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
@@ -91,7 +91,7 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 0 |
+| Active Projects | 1 |
 | Hold Projects | 7 |
 | Archived (this session) | 7 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
