@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-**harness / agent / design-review-agent** — T1-T4 Done, Meta 프로젝트
+**harness / pipeline / meta-pipeline** — Meta 파이프라인 분기
 
 ---
 
@@ -63,9 +63,9 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | skill | — | — | — |
-| **agent** | design-review-agent: T1-T4 Done | 🔥 Active | 03-12 |
+| agent | design-review-agent: T1-T4 Done (archive 대기) | ⚠️ Hold | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
-| pipeline | — | — | — |
+| **pipeline** | meta-pipeline: T1-T3 | 🔥 Active | 03-12 |
 
 ### agent-activity
 > 에이전트 활동 관리 도구 (`src/apps/docs-viewer/` → 진화 중)
@@ -91,7 +91,7 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 1 (design-review-agent) |
+| Active Projects | 1 (meta-pipeline) |
 | Hold Projects | 7 |
 | Archived (this session) | 5 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
