@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-**harness/skill/wip-skill** — `/wip` 스킬 생성 (Meta)
+없음
 
 ---
 
@@ -62,7 +62,7 @@
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
-| **skill** | wip-skill: `/wip` 스킬 생성 | 🔥 Active | 03-12 |
+| **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
@@ -91,9 +91,9 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 1 |
+| Active Projects | 0 |
 | Hold Projects | 7 |
-| Archived (this session) | 7 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline) |
+| Archived (this session) | 8 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
