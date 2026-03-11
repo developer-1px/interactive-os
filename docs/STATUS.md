@@ -63,7 +63,7 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | skill | — | — | — |
-| agent | — | — | — |
+| agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | — | — | — |
 
 ### agent-activity
@@ -91,7 +91,7 @@
 | Epics (confirmed) | 21 |
 | Active Projects | 1 (sdk-role-factory Phase 2) |
 | Hold Projects | 7 |
-| Archived (this session) | 3 (devtool-split, agent-recent, archive-cleanup) |
+| Archived (this session) | 4 (devtool-split, agent-recent, archive-cleanup, qa-agent) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
