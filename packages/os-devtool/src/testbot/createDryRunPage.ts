@@ -9,22 +9,11 @@
  * - locator → returns recording locator
  * - expect → records assert step
  * - keyboard → records press step
- *
- * Items parameter workaround: scripts that use `items[N]` receive
- * dummy IDs ("$1", "$2", ...) so selectors read as "#$1" in previews.
  */
 
 import type { BrowserStep } from "@os-devtool/testing";
 import type { ExpectLocator, TestScript } from "@os-testing/scripts";
 import type { Locator, LocatorAssertions, Page } from "@os-testing/types";
-
-/** Max dummy items to generate for scripts that use items parameter */
-const DUMMY_ITEM_COUNT = 20;
-
-/** Generate dummy item IDs: ["$1", "$2", ..., "$N"] */
-function createDummyItems(): string[] {
-  return Array.from({ length: DUMMY_ITEM_COUNT }, (_, i) => `$${i + 1}`);
-}
 
 /** Create a recording locator that captures actions as BrowserStep */
 function createRecordingLocator(
@@ -115,6 +104,18 @@ function createRecordingLocator(
     inputValue() {
       return "";
     },
+    nth(index: number): Locator {
+      return createRecordingLocator(`${selector}:nth(${index})`, steps);
+    },
+    first(): Locator {
+      return createRecordingLocator(`${selector}:first`, steps);
+    },
+    last(): Locator {
+      return createRecordingLocator(`${selector}:last`, steps);
+    },
+    count(): number {
+      return 0;
+    },
     ...noop,
   };
 }
@@ -180,10 +181,9 @@ const dryRunExpect: ExpectLocator = (locator: Locator) => locator;
  */
 export async function dryRunScript(script: TestScript): Promise<BrowserStep[]> {
   const { page, steps } = createDryRunPage();
-  const dummyItems = createDummyItems();
 
   try {
-    await script.run(page, dryRunExpect, dummyItems);
+    await script.run(page, dryRunExpect);
   } catch {
     // Script may fail in dry-run (e.g., conditional logic on getAttribute).
     // Return whatever steps were recorded before the error.

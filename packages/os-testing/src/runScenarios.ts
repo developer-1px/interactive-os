@@ -20,9 +20,9 @@ import type { AppHandle } from "@os-sdk/app/defineApp/types";
 import type { FC } from "react";
 import { describe, it } from "vitest";
 import { expect } from "./expect";
+import { setActiveZoneFilter } from "./lib/locator";
 import { createPage } from "./page";
 import type { TestScenario } from "./scripts";
-import { getZoneItems } from "./zoneItems";
 
 /**
  * Register TestScenario[] as vitest describe/it blocks.
@@ -51,12 +51,11 @@ export function runScenarios<S>(
         it(script.name, async () => {
           const { page, cleanup } = createPage(app, component);
           page.goto("/");
-          const items = script.zone
-            ? getZoneItems(script.zone)
-            : getZoneItems(scenario.zone);
+          setActiveZoneFilter(scenario.zone);
           try {
-            await script.run(page, expect, items);
+            await script.run(page, expect);
           } finally {
+            setActiveZoneFilter(null);
             cleanup();
           }
         });

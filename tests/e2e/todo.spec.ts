@@ -18,11 +18,7 @@ for (const scenario of scenarios) {
         await page
           .locator(`[data-zone="${scenario.zone}"]`)
           .waitFor({ state: "visible" });
-        // Discover items from real DOM (same as ZoneRegistry in headless)
-        const items = await page
-          .locator(`[data-zone="${scenario.zone}"] [data-item]`)
-          .evaluateAll((els) => els.map((el) => el.id));
-        await script.run(page, expect, items);
+        await script.run(page, expect);
       });
     }
   });

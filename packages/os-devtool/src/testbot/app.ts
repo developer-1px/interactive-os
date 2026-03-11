@@ -20,7 +20,6 @@ import { os } from "@os-sdk/os";
 import { expect } from "@os-testing/expect";
 import { formatDiagnostics } from "@os-testing/page";
 import type { TestScript } from "@os-testing/scripts";
-import { getZoneItems } from "@os-testing/zoneItems";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -256,8 +255,7 @@ export async function executeAll(
     let passed = true;
     try {
       resetFocusState();
-      const items = script?.zone ? getZoneItems(script.zone) : [];
-      await script?.run(page, expect, items);
+      await script?.run(page, expect);
     } catch (e) {
       passed = false;
       steps.push({
@@ -320,8 +318,7 @@ export async function executeSuite(
 
   let passed = true;
   try {
-    const items = script.zone ? getZoneItems(script.zone) : [];
-    await script.run(page, expect, items);
+    await script.run(page, expect);
   } catch (e) {
     passed = false;
     steps.push({

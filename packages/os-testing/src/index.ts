@@ -30,6 +30,3 @@ export {
   toolbarScript,
 } from "./scripts";
 export type { Locator, LocatorAssertions, Page } from "./types";
-
-/** Resolve items for a zone from ZoneRegistry — for browser TestBot item injection */
-export { getZoneItems } from "./zoneItems";

@@ -12,9 +12,7 @@
  *   locator.getAttribute()
  *
  * Locator convention: always use "#id" selector (Playwright-compatible).
- *
- * Item IDs are resolved dynamically via getItems() pure functions —
- * no hardcoded fixture IDs. Scripts receive items as 3rd parameter.
+ * Items are discovered via page.locator('[data-item]').nth(n) — no injection.
  */
 
 import type { TestScenario, TestScript } from "@os-testing/scripts";
@@ -38,33 +36,36 @@ export const sidebarNavScripts: TestScript[] = [
   {
     name: "§1a 사이드바: 클릭하면 포커스된다",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
     },
   },
 
   {
     name: "§1b 사이드바: ↓ 키로 다음 항목 이동",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toBeFocused();
 
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${items[1]}`)).toBeFocused();
+      await expect(items.nth(1)).toBeFocused();
     },
   },
 
   {
     name: "§1c 사이드바: ↑ 키로 이전 항목 이동",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[1]}`).click();
-      await expect(page.locator(`#${items[1]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(1).click();
+      await expect(items.nth(1)).toBeFocused();
 
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+      await expect(items.nth(0)).toBeFocused();
     },
   },
 
@@ -72,25 +73,27 @@ export const sidebarNavScripts: TestScript[] = [
     name: "§1d 사이드바: ↓ 연속으로 트리 순회",
     zone: "docs-sidebar",
     todo: true, // OS gap: tree nav consecutive ArrowDown doesn't advance
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toBeFocused();
 
       await page.keyboard.press("ArrowDown");
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${items[2]}`)).toBeFocused();
+      await expect(items.nth(2)).toBeFocused();
     },
   },
 
   {
     name: "§1e 사이드바: Home 키로 첫 항목 이동",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[2]}`).click();
-      await expect(page.locator(`#${items[2]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(2).click();
+      await expect(items.nth(2)).toBeFocused();
 
       await page.keyboard.press("Home");
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+      await expect(items.nth(0)).toBeFocused();
     },
   },
 
@@ -98,37 +101,39 @@ export const sidebarNavScripts: TestScript[] = [
     name: "§1f 사이드바: End 키로 마지막 항목 이동",
     zone: "docs-sidebar",
     todo: true, // OS gap: End key doesn't reach last item in tree
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toBeFocused();
 
       await page.keyboard.press("End");
-      await expect(page.locator(`#${items[items.length - 1]}`)).toBeFocused();
+      await expect(items.last()).toBeFocused();
     },
   },
 
   {
     name: "§1g 사이드바: 첫 항목에서 ↑ 키는 경계 클램프",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
 
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+      await expect(item0).toBeFocused();
     },
   },
 
   {
     name: "§1h 사이드바: 마지막 항목에서 ↓ 키는 경계 클램프",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      const lastId = items[items.length - 1];
-      await page.locator(`#${lastId}`).click();
-      await expect(page.locator(`#${lastId}`)).toBeFocused();
+    async run(page, expect) {
+      const lastItem = page.locator("[data-item]").last();
+      await lastItem.click();
+      await expect(lastItem).toBeFocused();
 
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${lastId}`)).toBeFocused();
+      await expect(lastItem).toBeFocused();
     },
   },
 ];
@@ -141,58 +146,53 @@ export const recentListScripts: TestScript[] = [
   {
     name: "§2a 최근 목록: 클릭하면 포커스·선택된다",
     zone: "docs-recent",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
+      await expect(item0).toHaveAttribute("aria-selected", "true");
     },
   },
 
   {
     name: "§2b 최근 목록: ↓ 이동 시 선택도 따라간다",
     zone: "docs-recent",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toBeFocused();
 
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${items[1]}`)).toBeFocused();
-      await expect(page.locator(`#${items[1]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      await expect(items.nth(1)).toBeFocused();
+      await expect(items.nth(1)).toHaveAttribute("aria-selected", "true");
       // 이전 항목 선택 해제
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "false",
-      );
+      await expect(items.nth(0)).toHaveAttribute("aria-selected", "false");
     },
   },
 
   {
     name: "§2c 최근 목록: ↑ 키로 위로 이동",
     zone: "docs-recent",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[1]}`).click();
-      await expect(page.locator(`#${items[1]}`)).toBeFocused();
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(1).click();
+      await expect(items.nth(1)).toBeFocused();
 
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+      await expect(items.nth(0)).toBeFocused();
     },
   },
 
   {
     name: "§2d 최근 목록: 첫 항목에서 ↑ 키는 경계 클램프",
     zone: "docs-recent",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
 
       await page.keyboard.press("ArrowUp");
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+      await expect(item0).toBeFocused();
     },
   },
 
@@ -200,23 +200,15 @@ export const recentListScripts: TestScript[] = [
     name: "§2e 최근 목록: 다른 항목 클릭 시 이전 선택 해제",
     zone: "docs-recent",
     todo: true, // OS gap: projection cache invalidation timing
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toHaveAttribute("aria-selected", "true");
 
-      await page.locator(`#${items[2]}`).click();
-      await expect(page.locator(`#${items[2]}`)).toBeFocused();
-      await expect(page.locator(`#${items[2]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "false",
-      );
+      await items.nth(2).click();
+      await expect(items.nth(2)).toBeFocused();
+      await expect(items.nth(2)).toHaveAttribute("aria-selected", "true");
+      await expect(items.nth(0)).toHaveAttribute("aria-selected", "false");
     },
   },
 ];
@@ -229,32 +221,25 @@ export const favoritesScripts: TestScript[] = [
   {
     name: "§3a 즐겨찾기: 클릭하면 포커스·선택된다",
     zone: "docs-favorites",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
+      await expect(item0).toHaveAttribute("aria-selected", "true");
     },
   },
 
   {
     name: "§3b 즐겨찾기: 포커스 이동 시 선택도 따라간다",
     zone: "docs-favorites",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+    async run(page, expect) {
+      const items = page.locator("[data-item]");
+      await items.nth(0).click();
+      await expect(items.nth(0)).toHaveAttribute("aria-selected", "true");
 
       await page.keyboard.press("ArrowDown");
-      await expect(page.locator(`#${items[1]}`)).toBeFocused();
-      await expect(page.locator(`#${items[1]}`)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      await expect(items.nth(1)).toBeFocused();
+      await expect(items.nth(1)).toHaveAttribute("aria-selected", "true");
     },
   },
 ];
@@ -271,26 +256,28 @@ export const tabNavigationScripts: TestScript[] = [
     name: "§4a Tab: 사이드바에서 Tab → 다른 zone으로 escape",
     zone: "docs-sidebar",
     todo: true, // OS gap: OS_TAB doesn't clear old zone focus
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
 
       await page.keyboard.press("Tab");
 
-      await expect(page.locator(`#${items[0]}`)).not.toBeFocused();
+      await expect(item0).not.toBeFocused();
     },
   },
 
   {
     name: "§4b Tab: 사이드바에서 Shift+Tab → 역방향 zone escape",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
 
       await page.keyboard.press("Shift+Tab");
 
-      await expect(page.locator(`#${items[0]}`)).not.toBeFocused();
+      await expect(item0).not.toBeFocused();
     },
   },
 
@@ -298,27 +285,28 @@ export const tabNavigationScripts: TestScript[] = [
     name: "§4c Tab: 최근 목록에서 Tab → 다른 zone escape",
     zone: "docs-recent",
     todo: true, // OS gap: OS_TAB doesn't clear old zone focus
-    async run(page, expect, items = []) {
-      await page.locator(`#${items[0]}`).click();
-      await expect(page.locator(`#${items[0]}`)).toBeFocused();
+    async run(page, expect) {
+      const item0 = page.locator("[data-item]").nth(0);
+      await item0.click();
+      await expect(item0).toBeFocused();
 
       await page.keyboard.press("Tab");
 
-      await expect(page.locator(`#${items[0]}`)).not.toBeFocused();
+      await expect(item0).not.toBeFocused();
     },
   },
 
   {
     name: "§4d Tab: 사이드바 마지막→Tab→escape",
     zone: "docs-sidebar",
-    async run(page, expect, items = []) {
-      const lastId = items[items.length - 1];
-      await page.locator(`#${lastId}`).click();
-      await expect(page.locator(`#${lastId}`)).toBeFocused();
+    async run(page, expect) {
+      const lastItem = page.locator("[data-item]").last();
+      await lastItem.click();
+      await expect(lastItem).toBeFocused();
 
       await page.keyboard.press("Tab");
 
-      await expect(page.locator(`#${lastId}`)).not.toBeFocused();
+      await expect(lastItem).not.toBeFocused();
     },
   },
 ];

@@ -30,6 +30,18 @@ export interface Locator extends LocatorAssertions {
 
   /** Get the input value (contenteditable / input). */
   inputValue(): string | Promise<string>;
+
+  /** Return a locator for the nth matching element (0-indexed). @see https://playwright.dev/docs/api/class-locator#locator-nth */
+  nth(index: number): Locator;
+
+  /** Return a locator for the first matching element. @see https://playwright.dev/docs/api/class-locator#locator-first */
+  first(): Locator;
+
+  /** Return a locator for the last matching element. @see https://playwright.dev/docs/api/class-locator#locator-last */
+  last(): Locator;
+
+  /** Return the number of matching elements. @see https://playwright.dev/docs/api/class-locator#locator-count */
+  count(): number | Promise<number>;
 }
 
 // ═══════════════════════════════════════════════════════════════════

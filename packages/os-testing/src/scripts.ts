@@ -32,7 +32,7 @@ export interface TestScript {
   zone?: string;
   /** Mark as todo — runScenarios registers it.todo() instead of it() */
   todo?: boolean;
-  run: (page: Page, expect: ExpectLocator, items?: string[]) => Promise<void>;
+  run: (page: Page, expect: ExpectLocator) => Promise<void>;
 }
 
 // ═══════════════════════════════════════════════════════════════════

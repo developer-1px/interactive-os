@@ -2,12 +2,16 @@
  * locator — Playwright Locator factory for headless environment.
  *
  * Creates a locator that resolves element attributes from OS state.
- * Supports :focus pseudo-selector and #id selectors.
+ * Supports :focus pseudo-selector, #id selectors, and [data-item] multi-element selectors.
+ *
+ * Multi-element selectors (e.g., [data-item]) resolve all matching items
+ * from ZoneRegistry. Use .nth(n), .first(), .last() to narrow to a single element.
  */
 
 import { readFocusedItemId, resolveElement } from "@os-core/3-inject/compute";
 import { os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
+import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { simulateClick } from "../simulate";
 import type { Locator, LocatorAssertions } from "../types";
 import type { Projection } from "./projection";
@@ -27,11 +31,45 @@ export interface HeadlessLocator extends Locator {
   ): void;
 }
 
+// ─── Active zone filter for scoped item resolution ───────────────
+// When set, resolveAllItems("[data-item]") returns items from this zone only.
+// Used by runScenarios to scope per-scenario tests.
+// null = return items from all zones (E2E/browser behavior).
+
+let _activeZoneFilter: string | null = null;
+
+/** Scope [data-item] resolution to a specific zone. null = all zones. */
+export function setActiveZoneFilter(zoneId: string | null): void {
+  _activeZoneFilter = zoneId;
+}
+
+// ─── Resolve all item IDs matching a CSS-like selector ─────────────
+
+function resolveAllItems(selector: string): string[] {
+  if (selector === "[data-item]") {
+    if (_activeZoneFilter) {
+      // Scoped: return items from the active zone only
+      const entry = ZoneRegistry.get(_activeZoneFilter);
+      return entry?.getItems?.() ?? [];
+    }
+    // Unscoped: collect items from ALL registered zones
+    const allItems: string[] = [];
+    for (const zoneId of ZoneRegistry.keys()) {
+      const entry = ZoneRegistry.get(zoneId);
+      const items = entry?.getItems?.() ?? [];
+      allItems.push(...items);
+    }
+    return allItems;
+  }
+  // Unsupported multi-element selector
+  return [];
+}
+
+// ─── Assertion helpers ─────────────────────────────────────────────
+
 function createNegatedLocator(elementId: string): LocatorAssertions {
   return {
-    toHaveAttribute(_name: string, _value?: string | RegExp) {
-      // Negated assertion — used via expect(locator).not.toHaveAttribute()
-    },
+    toHaveAttribute(_name: string, _value?: string | RegExp) {},
     toBeFocused() {},
     toBeChecked() {},
     toBeDisabled() {},
@@ -43,9 +81,7 @@ function createNegatedLocator(elementId: string): LocatorAssertions {
 
 function createPositiveLocator(elementId: string): LocatorAssertions {
   return {
-    toHaveAttribute(_name: string, _value?: string | RegExp) {
-      // Positive assertion — used via expect(locator).toHaveAttribute()
-    },
+    toHaveAttribute(_name: string, _value?: string | RegExp) {},
     toBeFocused() {},
     toBeChecked() {},
     toBeDisabled() {},
@@ -54,6 +90,94 @@ function createPositiveLocator(elementId: string): LocatorAssertions {
     },
   };
 }
+
+// ─── Multi-element locator (for [data-item] etc.) ──────────────────
+
+function createMultiLocator(
+  selector: string,
+  projection: Projection | null,
+): HeadlessLocator {
+  // Resolve items lazily (zone state may change between locator creation and use)
+  function getItems(): string[] {
+    return resolveAllItems(selector);
+  }
+
+  function resolveFirst(): HeadlessLocator {
+    const items = getItems();
+    if (items.length === 0) {
+      throw new Error(
+        `locator("${selector}"): no matching elements found`,
+      );
+    }
+    return createLocator(`#${items[0]}`, projection);
+  }
+
+  // Multi-element locator: click/getAttribute/assertions operate on FIRST match
+  // Use .nth(n), .first(), .last() to target specific elements
+  const firstProxy = (): HeadlessLocator => resolveFirst();
+
+  return {
+    get attrs() {
+      return firstProxy().attrs;
+    },
+    getAttribute(name: string) {
+      return firstProxy().getAttribute(name);
+    },
+    click(opts?: { modifiers?: ("Meta" | "Shift" | "Control")[] }) {
+      return firstProxy().click(opts);
+    },
+    toHaveAttribute(name: string, value?: string | RegExp) {
+      return firstProxy().toHaveAttribute(name, value);
+    },
+    toBeFocused() {
+      return firstProxy().toBeFocused();
+    },
+    toBeChecked() {
+      return firstProxy().toBeChecked();
+    },
+    toBeDisabled() {
+      return firstProxy().toBeDisabled();
+    },
+    inputValue() {
+      return firstProxy().inputValue();
+    },
+    get not(): LocatorAssertions {
+      return firstProxy().not;
+    },
+    nth(index: number): Locator {
+      const items = getItems();
+      if (index < 0 || index >= items.length) {
+        throw new Error(
+          `locator("${selector}").nth(${index}): index out of range (${items.length} items)`,
+        );
+      }
+      return createLocator(`#${items[index]}`, projection);
+    },
+    first(): Locator {
+      return resolveFirst();
+    },
+    last(): Locator {
+      const items = getItems();
+      if (items.length === 0) {
+        throw new Error(
+          `locator("${selector}").last(): no matching elements`,
+        );
+      }
+      return createLocator(`#${items[items.length - 1]}`, projection);
+    },
+    count(): number {
+      return getItems().length;
+    },
+    _toBeFocused(negated?: boolean) {
+      return firstProxy()._toBeFocused(negated);
+    },
+    _toHaveAttribute(name: string, value?: string | RegExp, negated?: boolean) {
+      return firstProxy()._toHaveAttribute(name, value, negated);
+    },
+  };
+}
+
+// ─── Single-element locator (for #id) ──────────────────────────────
 
 export function createLocator(
   selector: string,
@@ -68,7 +192,12 @@ export function createLocator(
     return createLocator("#" + focusedId, projection);
   }
 
-  const elementId = selector.startsWith("#") ? selector.slice(1) : selector;
+  // Multi-element selector (e.g., [data-item])
+  if (!selector.startsWith("#")) {
+    return createMultiLocator(selector, projection);
+  }
+
+  const elementId = selector.slice(1);
   if (projection) projection.assertElement(elementId);
 
   return {
@@ -92,9 +221,7 @@ export function createLocator(
         ctrl: mods.includes("Control"),
       });
     },
-    toHaveAttribute(_name: string, _value?: string | RegExp) {
-      // Direct assertion on locator — actual checking done via _toHaveAttribute in expect()
-    },
+    toHaveAttribute(_name: string, _value?: string | RegExp) {},
     toBeFocused() {},
     toBeChecked() {},
     toBeDisabled() {},
@@ -103,6 +230,23 @@ export function createLocator(
     },
     get not(): LocatorAssertions {
       return createNegatedLocator(elementId);
+    },
+    nth(index: number): Locator {
+      if (index !== 0) {
+        throw new Error(
+          `locator("#${elementId}").nth(${index}): ID selector matches exactly one element`,
+        );
+      }
+      return createLocator(`#${elementId}`, projection);
+    },
+    first(): Locator {
+      return createLocator(`#${elementId}`, projection);
+    },
+    last(): Locator {
+      return createLocator(`#${elementId}`, projection);
+    },
+    count(): number {
+      return 1;
     },
     _toBeFocused(negated?: boolean) {
       const focused = readFocusedItemId(os) === elementId;

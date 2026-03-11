@@ -422,6 +422,48 @@ export function createBrowserPage(
 
   // ── Browser Locator ──
 
+  /** Multi-element locator for CSS selectors like [data-item] */
+  function createMultiBrowserLocator(
+    cssSelector: string,
+  ): Locator & LocatorAssertions {
+    function getElements(): Element[] {
+      return Array.from(document.querySelectorAll(cssSelector));
+    }
+
+    function resolveNth(index: number): Locator & LocatorAssertions {
+      const els = getElements();
+      const el = els[index];
+      if (!el || !el.id) {
+        throw new Error(
+          `locator("${cssSelector}").nth(${index}): ${!el ? `index out of range (${els.length} items)` : "matched element has no id"}`,
+        );
+      }
+      return createBrowserLocator(el.id);
+    }
+
+    const multi: Locator & LocatorAssertions = {
+      click(opts?) { return resolveNth(0).click(opts); },
+      async getAttribute(name: string) { return resolveNth(0).getAttribute(name); },
+      async inputValue() { return resolveNth(0).inputValue(); },
+      toHaveAttribute(name: string, value?: string | RegExp) { return resolveNth(0).toHaveAttribute(name, value); },
+      toBeFocused() { return resolveNth(0).toBeFocused(); },
+      toBeChecked() { return resolveNth(0).toBeChecked(); },
+      toBeDisabled() { return resolveNth(0).toBeDisabled(); },
+      get not(): LocatorAssertions { return resolveNth(0).not; },
+      nth(index: number): Locator { return resolveNth(index); },
+      first(): Locator { return resolveNth(0); },
+      last(): Locator {
+        const els = getElements();
+        if (els.length === 0) {
+          throw new Error(`locator("${cssSelector}").last(): no matching elements`);
+        }
+        return resolveNth(els.length - 1);
+      },
+      count(): number { return getElements().length; },
+    };
+    return multi;
+  }
+
   function createBrowserLocator(
     elementId: string,
   ): Locator & LocatorAssertions {
@@ -644,6 +686,25 @@ export function createBrowserPage(
           },
         };
       },
+
+      // Playwright-compatible nth/first/last/count
+      nth(index: number): Locator {
+        if (index !== 0) {
+          throw new Error(
+            `locator("#${elementId}").nth(${index}): ID selector matches exactly one element`,
+          );
+        }
+        return createBrowserLocator(elementId);
+      },
+      first(): Locator {
+        return createBrowserLocator(elementId);
+      },
+      last(): Locator {
+        return createBrowserLocator(elementId);
+      },
+      count(): number {
+        return 1;
+      },
     };
 
     return loc;
@@ -666,6 +727,24 @@ export function createBrowserPage(
           throw new Error('locator(":focus"): no element is currently focused');
         }
         return createBrowserLocator(focusedId);
+      }
+      // Multi-element CSS selector (e.g., [data-item])
+      if (selector.startsWith("[")) {
+        return createMultiBrowserLocator(selector);
+      }
+      // Compound selector (e.g., #id [data-trigger-id="name"]) — use querySelector
+      if (selector.includes(" ")) {
+        const el = document.querySelector(selector);
+        if (el?.id) {
+          return createBrowserLocator(el.id);
+        }
+        // Fallback: assign temp id for elements without one
+        if (el instanceof HTMLElement) {
+          const tempId = `__testbot_${Date.now()}`;
+          el.id = tempId;
+          return createBrowserLocator(tempId);
+        }
+        throw new Error(`locator("${selector}"): no matching element found`);
       }
       const id = selector.startsWith("#") ? selector.slice(1) : selector;
       return createBrowserLocator(id);
