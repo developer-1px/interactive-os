@@ -1,5 +1,5 @@
 /**
- * TestBot Panel E2E — Verify eager-load + route/zone filtering.
+ * TestBot Panel E2E — Verify eager-load + route/zone filtering + dry-run step preview.
  *
  * L1.5 verification: TestBot panel is browser-runtime infrastructure,
  * not testable via headless createPage(). Playwright E2E is the only
@@ -102,5 +102,38 @@ test.describe("TestBot Panel — eager load + route filtering", () => {
       expect(sameList).toBe(false);
     }
     // If empty, that's also valid — docs route didn't match any manifest entry
+  });
+
+  test("T3: planned suites show dry-run step preview", async ({ page }) => {
+    await activateTestBotPanel(page, "/todo");
+
+    // Wait for suites to appear
+    const suites = page.locator('[data-testbot-suite][data-testbot-status="planned"]');
+    await expect(suites.first()).toBeVisible({ timeout: 10_000 });
+
+    // Wait for dry-run to populate steps (async — give it time)
+    // Step preview text appears as "N steps preview"
+    const stepPreview = page.locator("text=steps preview");
+    await expect(stepPreview.first()).toBeVisible({ timeout: 10_000 });
+
+    // Click on a suite to expand it — should show step details
+    await suites.first().click();
+
+    // Verify step elements appear (dry-run populated BrowserStep[])
+    const steps = page.locator("[data-testbot-step]");
+    await expect(steps.first()).toBeVisible({ timeout: 5_000 });
+
+    // Verify step actions are present (click/press/assert from dry-run)
+    const stepActions = await steps.evaluateAll((els) =>
+      els.map((el) => el.getAttribute("data-testbot-action")),
+    );
+    expect(stepActions.length).toBeGreaterThan(0);
+
+    // At least one step should be a recognized action type
+    const validActions = new Set(["click", "press", "assert"]);
+    const hasValidAction = stepActions.some(
+      (a) => a !== null && validActions.has(a),
+    );
+    expect(hasValidAction).toBe(true);
   });
 });
