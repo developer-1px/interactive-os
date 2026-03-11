@@ -152,46 +152,255 @@ find [범위] -name "*.ts" -o -name "*.tsx" | xargs wc -l | sort -rn | head -30
 
 ---
 
+### 리포트 품질 원칙
+
+> **결론이 아니라 과정을 보여준다.** 요약만 던지는 리포트는 무가치하다.
+> 모든 Gate에서 **원시 데이터 → 분석 과정 → 판정 근거 → 결론**을 빠짐없이 기록한다.
+> 읽는 사람이 리포트만 보고 같은 결론에 도달할 수 있어야 한다.
+
+### 리포트 저장
+
+리포트를 **반드시 파일로 저장**한다. 대화 본문에만 남기는 것은 산출물 누락이다.
+- 저장 위치: `docs/0-inbox/{순번}-[analysis]design-review-{범위요약}.md`
+- 순번: `docs/0-inbox/` 내 마지막 번호 + 1
+
+---
+
 ### 최종 산출물: Design Tension Report
 
-```markdown
-# Design Tension Report
+아래 템플릿의 **모든 섹션을 빠짐없이** 채운다. `[...]` 플레이스홀더를 남기지 않는다.
 
-> 범위: [path]
+```markdown
+# Design Tension Report: [범위]
+
 > 생성일: YYYY-MM-DD HH:mm
 > Agent: /design-review (fresh context)
+> 범위: [absolute path]
+> 파일 수: [N]개, 총 LOC: [N]
+
+---
 
 ## Executive Summary
 
-| Gate | Findings | Severity |
-|------|----------|----------|
-| Folder Structure | N건 | 🔴/🟡/🟢 |
-| LOC Analysis     | N건 | 🔴/🟡/🟢 |
-| Naming           | N건 | 🔴/🟡/🟢 |
-| Dependencies     | N건 | 🔴/🟡/🟢 |
-| Design Tensions  | N건 | 🔴/🟡/🟢 |
+| Gate | Findings | 🔴 | 🟡 | 🟢 |
+|------|----------|-----|-----|-----|
+| 1. Folder Structure | | | | |
+| 2. LOC Analysis | | | | |
+| 3. Naming | | | | |
+| 4. Dependencies | | | | |
+| 5. Design Tensions | | | | |
+| **Total** | | | | |
 
-## 최종 판정: ✅ PASS / ❌ FAIL (🔴 N건)
+**최종 판정**: ✅ PASS / ❌ FAIL
+
+---
 
 ## Gate 1: Folder Structure
-[진단표]
+
+### 1.1 디렉토리 트리 (전문)
+
+실제 `ls -R` 또는 Glob 결과를 그대로 붙여넣는다. 트리 전체.
+
+### 1.2 검사 항목별 점검
+
+각 검사 항목을 하나씩 순회하며 "해당/비해당 + 근거"를 기록한다:
+
+| 검사 항목 | 결과 | 근거 |
+|-----------|------|------|
+| 빈 디렉토리 | ✅ 없음 / ❌ 발견 | [구체적 경로와 상태] |
+| 깊이 과잉 (>5) | ✅ / ❌ | [최대 depth와 해당 경로] |
+| 고아 파일 | ✅ / ❌ | [단일 파일 폴더 목록] |
+| 네이밍 불일치 | ✅ / ❌ | [같은 레벨의 컨벤션 혼재 사례] |
+| barrel export | ✅ / ❌ | [index.ts 존재 여부] |
+| 순환 참조 후보 | ✅ / ❌ | [폴더 간 양방향 import 패턴] |
+
+### 1.3 Findings
+
+각 발견 사항을 **F1, F2, ...** 번호로 기록. 발견 없으면 "발견 없음" 명시.
+
+---
 
 ## Gate 2: LOC Analysis
-[분포표 + 핫스팟]
 
-## Gate 3: Naming
-[Key Pool + 이상 패턴]
+### 2.1 파일별 LOC 전수 목록
+
+범위 내 **모든 파일**의 LOC를 나열한다. 생략 금지.
+
+| # | File | LOC | Classification | 비고 |
+|---|------|-----|----------------|------|
+| 1 | [path] | [N] | God/Hotspot/Balanced/Anemic | [해당 시 관심사 나열] |
+| ... | | | | |
+
+### 2.2 모듈별 집계
+
+| Module (폴더) | Files | Total LOC | Avg LOC | Max LOC (file) |
+|---------------|-------|-----------|---------|----------------|
+
+### 2.3 git 변경 빈도 (Hotspot 판정용)
+
+```bash
+git log --oneline --since="3 months ago" -- [범위] | wc -l
+git log --name-only --since="3 months ago" -- [범위] | sort | uniq -c | sort -rn | head -10
+```
+
+실행 결과를 그대로 붙여넣는다.
+
+### 2.4 Findings
+
+**L1, L2, ...** 번호. God File은 내부 관심사를 전수 나열하여 "왜 God인지" 증명.
+
+---
+
+## Gate 3: Naming Consistency
+
+### 3.1 Export 식별자 전수 목록
+
+범위 내 **모든 export**를 수집한다. 생략 금지.
+
+| # | Identifier | File | Type (fn/type/const/class) |
+|---|-----------|------|---------------------------|
+| 1 | [name] | [file:line] | fn |
+| ... | | | |
+
+### 3.2 형태소 분해
+
+각 식별자를 Key 단위로 분해한다:
+
+| Identifier | Keys | 분해 |
+|-----------|------|------|
+| resolveKeyboard | resolve + Keyboard | 동사 + 명사 |
+| ... | | |
+
+### 3.3 Key Pool 표
+
+| Category | Key | Meaning | Count | Appears In |
+|----------|-----|---------|-------|------------|
+| Verb | resolve | 입력→커맨드 결정 | N | [파일 목록] |
+| Verb | sense | DOM→데이터 추출 | N | [파일 목록] |
+| ... | | | | |
+
+### 3.4 이상 패턴 분석
+
+각 패턴을 하나씩 점검:
+
+**동의어 충돌**: [있으면 구체적 사례 + 어떤 Key들이 같은 의미인지. 없으면 "없음"]
+**고아 Key**: [1회만 등장하는 Key 목록 + 해당 식별자. 없으면 "없음"]
+**의미 과적**: [하나의 Key가 다른 의미로 쓰이는 사례 + 각 의미. 없으면 "없음"]
+**2-tier 위반**: [OS 커맨드 camelCase 또는 앱 커맨드 SCREAMING 사례. 없으면 "없음"]
+
+### 3.5 Findings
+
+**N1, N2, ...** 번호. 각 finding에 "현재 이름 → 규칙 위반 내용 → 대안 제안" 포함.
+
+---
 
 ## Gate 4: Dependencies
-[Mermaid 다이어그램 + 이상 탐지]
+
+### 4.1 Import 문 전수 수집
+
+범위 내 **모든 import 문**을 파일별로 나열한다:
+
+#### [파일명]
+```
+import { X } from "..."
+import { Y } from "..."
+```
+
+(범위 내 모든 파일에 대해 반복)
+
+### 4.2 의존성 매트릭스
+
+| From \ To | [모듈A] | [모듈B] | [외부C] | ... |
+|-----------|---------|---------|---------|-----|
+| [파일1] | ✓ | | ✓ | |
+| [파일2] | | ✓ | | |
+
+### 4.3 Mermaid 의존성 다이어그램
+
+```mermaid
+graph TD
+  ...
+```
+
+범위 내부 + 직접 외부 의존을 모두 포함. 역방향은 빨간 점선(`-.->`)으로 표시.
+
+### 4.4 이상 패턴 점검
+
+| 패턴 | 결과 | 근거 |
+|------|------|------|
+| 순환 의존 | ✅ / ❌ | [구체적 사이클 경로] |
+| 역방향 의존 | ✅ / ❌ | [어떤 파일이 어떤 상위 모듈을 import하는지] |
+| 허브 노드 (≥10 의존) | ✅ / ❌ | [피의존 횟수 상위 5개 파일] |
+| 고립 노드 | ✅ / ❌ | [export는 있지만 범위 내외 어디서도 import 안 되는 것] |
+
+### 4.5 Findings
+
+**D1, D2, ...** 번호. 역방향 의존은 **구체적 import 문**을 인용.
+
+---
 
 ## Gate 5: Design Tensions
-[Tension Report]
 
-## Recommendations (우선순위)
-1. 🔴 즉시: [...]
-2. 🟡 중기: [...]
-3. 🟢 모니터링: [...]
+### 5.1 Gate 1~4 발견 종합
+
+Gate 1~4의 모든 Finding을 한 표로 모은다:
+
+| Finding | Gate | Severity | 관련 Tension |
+|---------|------|----------|-------------|
+| F1 | 1 | 🟡 | → T1 |
+| L1 | 2 | 🟡 | → T2 |
+| ... | | | |
+
+### 5.2 코드 냄새 탐색
+
+다음 패턴을 grep으로 검색하고 결과를 **그대로** 붙여넣는다:
+
+```bash
+grep -rn "TODO\|FIXME\|HACK\|XXX" [범위]
+grep -rn "eslint-disable\|as any\|as unknown as\|@ts-ignore\|@ts-expect-error" [범위]
+```
+
+### 5.3 Tension 진단
+
+각 Tension을 **T1, T2, ...** 번호로 기록. 각각에 대해:
+
+#### T[N]: [충돌 이름]
+
+**유형**: Value / Pattern / Direction / Boundary
+
+**충돌 선언**: "[공통 목표]를 위해 [A]가 필요하다. 동시에 [B]도 필요하다. A와 B가 양립 불가능해 보인다."
+
+**Thesis (A) Steel-man**:
+- 주장: ...
+- 근거 (코드 증거): [파일:줄] + 인용
+- 전제: ...
+- 대가 (A 포기 시): ...
+
+**Antithesis (B) Steel-man**:
+- 주장: ...
+- 근거 (코드 증거): [파일:줄] + 인용
+- 전제: ...
+- 대가 (B 포기 시): ...
+
+**충돌 지점**: [구체적 코드 위치 또는 설계 결정]
+
+---
+
+## Recommendations
+
+우선순위별로 정리. 각 항목에 **관련 Finding 번호**를 명시:
+
+### 🔴 즉시 해소
+
+1. [F/L/N/D/T 번호] — [구체적 조치] — [왜 즉시인가]
+
+### 🟡 중기 (다음 프로젝트에서)
+
+1. [번호] — [조치] — [이유]
+
+### 🟢 모니터링
+
+1. [번호] — [무엇을 관찰할 것인가]
 ```
 
 ---
