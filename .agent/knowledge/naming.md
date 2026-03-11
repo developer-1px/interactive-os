@@ -191,3 +191,13 @@ grep -rn "비슷한키워드" src/ --include="*.ts"
 | `onNavigate()` | `resolveNavigate()` + `onAction` callback | on* 은 이벤트 핸들러, 판단 로직은 resolve |
 | `updateZone()` | `ensureZone()` + Immer draft | update는 너무 일반적 |
 | `getZoneConfig()` | `createZoneConfig()` | config를 새로 만드는 것이라 create |
+
+## 7. 스킬/워크플로우 네이밍
+
+**역방향 회상력 기준**: 이름만 보고 기능을 떠올릴 수 있어야 한다.
+
+| 원칙 | 설명 | 예시 |
+|------|------|------|
+| 메커니즘(how)이 아니라 상태/목적(what)을 담는다 | `/pop`(어떻게)보다 `/wip`(무엇) | `/wip` > `/pop` > `/pick` |
+| 개발자의 기존 어휘를 활용한다 | 이미 체화된 개념이면 설명이 불필요 | WIP, TDD, PR 등 |
+| 역방향 테스트: 이름 → 기능 회상 | "이 이름을 보고 바로 기능이 떠오르는가?" | `/advance` ❌ (뭘?), `/wip` ✅ |
