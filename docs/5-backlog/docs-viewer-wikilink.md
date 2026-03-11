@@ -7,3 +7,22 @@
 - 사이드바 또는 문서 하단에 "이 문서를 참조하는 문서" 표시
 
 Origin: docs-viewer-features Ideas
+
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide
+- **입력**: wikilink + backlink 기능 on DocsViewer
+- **결과**: DocsViewer os-migration T8 (ArrowDown gap) Hold 상태. DocsViewer 기반 기능 → 같은 blocker
+- **Cynefin**: Complex — T8 미해소
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q1: DocsViewer os-migration T8 해소 후 진행 가능 — docs-dashboard Q1과 동일 blocker
+
+### 다음 /wip 시 시작점
+
+T8 해소 후 → `/divide`로 wikilink 파싱 + 백링크 수집 + UI 표시를 WP로 분해
