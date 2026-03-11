@@ -49,30 +49,16 @@ import { TableOfContents } from "./TableOfContents";
 // Project File Helpers — for agent activity log files
 // ═══════════════════════════════════════════════════════════════════
 
-/** Non-docs paths from agent activity (e.g. "src/apps/todo/app.ts") */
+/** Any path with a file extension is a project file (not a docs tree node) */
 function isProjectFile(filePath: string): boolean {
-  // Docs paths look like "0-inbox/foo" or "2-area/bar" — no file extension
-  // Project files have extensions like .ts, .tsx, .json, .sh
-  return /\.\w+$/.test(filePath) && !filePath.endsWith(".md");
+  return /\.\w+$/.test(filePath);
 }
 
-/** Fetch a project file via Vite's dev server transform pipeline */
+/** Fetch a project file via /api/file middleware (raw fs.readFile) */
 async function fetchProjectFile(relativePath: string): Promise<string> {
-  // Use ?raw to get untransformed content
-  const res = await fetch(`/${relativePath}?raw`);
+  const res = await fetch(`/api/file?path=${encodeURIComponent(relativePath)}`);
   if (!res.ok) throw new Error(`Failed to load ${relativePath}`);
-  // Vite wraps ?raw in export default — extract the string
-  const text = await res.text();
-  // ?raw response is a JS module: export default "..."
-  const match = text.match(/export default "([\s\S]*)"/);
-  if (match) {
-    return match[1]!
-      .replace(/\\n/g, "\n")
-      .replace(/\\t/g, "\t")
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, "\\");
-  }
-  return text;
+  return res.text();
 }
 
 // ═══════════════════════════════════════════════════════════════════
