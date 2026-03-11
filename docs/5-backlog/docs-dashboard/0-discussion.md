@@ -59,3 +59,28 @@
 
 ### 한 줄 요약
 **기존 docs 시스템에 검색·페이지네이션·알림을 얹어, 에이전트 산출물의 소비 경험을 자연스럽게 향상시킨다.**
+
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide
+- **입력**: 3 sub-features(검색, 페이지네이션, 알림) + DocsViewer 기반 가정
+- **결과**:
+  - **Blocking dependency 발견**: DocsViewer os-migration T8 (ArrowDown gap) Hold 상태. 3개 기능 모두 DocsViewer 위에 구축 → 기반 불안정
+  - **검색**: CommandPalette 확장 → 검색 결과가 listbox zone 통합 필요. T8 gap과 직결 (dialog zone inputmap 문제)
+  - **페이지네이션**: ←/→ 키보드 → OS inputmap/navigate와 충돌 가능성. Zone 통합 필요
+  - **알림**: HMR 인프라 이미 존재 (vite-plugin-agent-activity). GlobalNav red dot은 비교적 독립적 — T8 gap과 무관할 수 있음
+- **Cynefin**: Complex — DocsViewer os-migration T8 미해소가 blocking dependency
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q1: DocsViewer os-migration T8 (ArrowDown gap)을 먼저 해소할 것인가? — 해소 시 3개 기능 모두 진행 가능
+- [ ] Q2: 알림 기능만 독립 진행 가능한가? (HMR 인프라 존재 + GlobalNav는 DocsViewer 밖) — 해소 시 부분 진행 가능
+- [ ] Q3: 검색/페이지네이션의 키보드 핸들링이 OS Zone과 어떻게 통합되는가? — 해소 시 설계 구체화 가능
+
+### 다음 /wip 시 시작점
+
+Q1 해소 후(T8 fix) → `/divide`로 3개 기능 각각을 WP로 분해. Q2가 "독립 가능"이면 알림부터 `/project` 생성 가능.
