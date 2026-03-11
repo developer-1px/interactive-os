@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-없음
+**harness/skill/conflict-principle-priority** — `/conflict` 원칙 우선순위 프레임워크 (Meta)
 
 ---
 
@@ -63,6 +63,7 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
+| **skill** | conflict-principle-priority | 🔥 Active | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
@@ -91,7 +92,7 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 0 |
+| Active Projects | 1 |
 | Hold Projects | 7 |
 | Archived (this session) | 8 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
