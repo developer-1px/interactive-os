@@ -15,11 +15,8 @@
 | T1 | AGENT.md 작성 — 5 Gate 정의 (Folder, LOC, Naming, Dependency, Tension) | 5 Gate 절차 + 판정 기준 존재 | ✅ Done | `.claude/agents/design-review/AGENT.md` 441줄 |
 | T2 | Agent↔Skill 구조 분리 — `.claude/agents/` + 런처 SKILL.md | agents/ 폴더 분리 + 런처 패턴 동작 | ✅ Done | `.claude/agents/README.md` + `.claude/skills/design-review/SKILL.md` |
 | T3 | 리포트 템플릿 개선 — 과정 전문을 담는 상세 템플릿 | 원시 데이터→분석→근거→결론 빠짐없이 | ✅ Done | `26ce0f36` commit |
-| T4 | 실행 검증 — `os-core/1-listen` 범위로 전수 분석 | PASS/FAIL 판정 + 파일 저장 | ✅ Done | `docs/0-inbox/32-[analysis]design-review-1-listen.md` 558줄, PASS |
+| T4 | 실행 검증 — `os-core/1-listen` 범위로 전수 분석 | PASS/FAIL 판정 + 파일 저장 | ✅ Done | `discussions/32-[analysis]design-review-1-listen.md` 558줄, PASS |
 
 ## Unresolved
 
-| # | Question | Impact |
-|---|----------|--------|
-| U1 | 큰 범위(전체 os-core) 분석 시 컨텍스트 한계 — 분할 전략 필요 | 범위가 클수록 리포트 품질 저하 가능 |
-| U2 | /go 파이프라인 통합 시점 — QA처럼 자동 호출할지, 독립 호출만 유지할지 | 파이프라인 복잡도 vs 자동화 가치 |
+없음 (/doubt에서 U1, U2 제거 — 미래 가설이므로 겪을 때 해결)
