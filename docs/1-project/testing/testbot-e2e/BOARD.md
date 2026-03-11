@@ -12,8 +12,8 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-| T1 | E2E spec: /todo 이동 → Inspector TESTBOT 탭 → planned suites 즉시 노출 확인 | playwright test PASS | ⬜ | |
-| T2 | E2E spec: route 변경 시 매칭 스크립트가 바뀌는지 확인 (/todo → /docs) | playwright test PASS | ⬜ | |
+| T1 | E2E spec: /todo 이동 → Inspector TESTBOT 탭 → planned suites 즉시 노출 확인 | playwright test PASS | ✅ | 2 PASS \| 8.8s \| Chromium headless |
+| T2 | E2E spec: route 변경 시 매칭 스크립트가 바뀌는지 확인 (/todo → /docs) | playwright test PASS | ✅ | 2 PASS \| 8.8s \| Chromium headless |
 
 ## Unresolved
 
