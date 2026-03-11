@@ -79,30 +79,31 @@ export function agentActivityPlugin(): Plugin {
       return `export default ${JSON.stringify(entries)};`;
     },
 
-    // HMR: watch session-logs directory for changes
+    // HMR: watch session-logs directory and push updates via custom event
     configureServer(server) {
       // Ensure directory exists before watching
       if (!fs.existsSync(logsDir)) {
         fs.mkdirSync(logsDir, { recursive: true });
       }
 
+      const sendUpdate = () => {
+        const entries = collectAgentActivity(logsDir);
+        server.ws.send({
+          type: "custom",
+          event: "agent-activity-update",
+          data: entries,
+        });
+      };
+
       server.watcher.add(logsDir);
       server.watcher.on("change", (filePath) => {
         if (filePath.startsWith(logsDir) && filePath.endsWith(".jsonl")) {
-          const mod = server.moduleGraph.getModuleById(RESOLVED_ID);
-          if (mod) {
-            server.moduleGraph.invalidateModule(mod);
-            server.ws.send({ type: "full-reload" });
-          }
+          sendUpdate();
         }
       });
       server.watcher.on("add", (filePath) => {
         if (filePath.startsWith(logsDir) && filePath.endsWith(".jsonl")) {
-          const mod = server.moduleGraph.getModuleById(RESOLVED_ID);
-          if (mod) {
-            server.moduleGraph.invalidateModule(mod);
-            server.ws.send({ type: "full-reload" });
-          }
+          sendUpdate();
         }
       });
     },

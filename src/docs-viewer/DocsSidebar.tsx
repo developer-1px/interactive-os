@@ -1,4 +1,4 @@
-import agentActivity from "virtual:agent-activity";
+import initialAgentActivity from "virtual:agent-activity";
 import { useFlatTree } from "@os-react/6-project/accessors/useFlatTree";
 import { Item } from "@os-react/internal";
 import clsx from "clsx";
@@ -12,7 +12,7 @@ import {
   FileText,
   Star,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
   cleanLabel,
@@ -22,6 +22,26 @@ import {
   getAgentRecentFiles,
   getFavoriteFiles,
 } from "./docsUtils";
+import type { AgentActivityEntry } from "./vite-plugin-agent-activity";
+
+/** Subscribe to HMR custom events for live agent activity updates */
+function useAgentActivity(): AgentActivityEntry[] {
+  const [entries, setEntries] =
+    useState<AgentActivityEntry[]>(initialAgentActivity);
+
+  useEffect(() => {
+    if (import.meta.hot) {
+      import.meta.hot.on(
+        "agent-activity-update",
+        (data: AgentActivityEntry[]) => {
+          setEntries(data);
+        },
+      );
+    }
+  }, []);
+
+  return entries;
+}
 
 /** DocsSidebar flatten: level 0 folders = section headers */
 const flattenDocTree = (items: DocItem[], expanded: string[]) =>
@@ -55,14 +75,16 @@ function ToolBadge({ tool }: { tool: string }) {
 
 function RecentSection({
   activePath,
+  agentEntries,
 }: {
   allFiles: DocItem[];
   activePath: string | undefined;
+  agentEntries: AgentActivityEntry[];
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const recentFiles = useMemo(
-    () => getAgentRecentFiles(agentActivity, PROJECT_ROOT, 15),
-    [],
+    () => getAgentRecentFiles(agentEntries, PROJECT_ROOT, 15),
+    [agentEntries],
   );
 
   if (recentFiles.length === 0) return null;
@@ -284,6 +306,7 @@ export function DocsSidebar({
   header,
 }: DocsSidebarProps) {
   const [favVersion] = useState(0);
+  const agentEntries = useAgentActivity();
 
   const visibleNodes = useFlatTree("docs-sidebar", items, flattenDocTree);
 
@@ -316,7 +339,11 @@ export function DocsSidebar({
         />
 
         {/* Recent Section — OS Zone */}
-        <RecentSection allFiles={allFiles} activePath={activePath} />
+        <RecentSection
+          allFiles={allFiles}
+          activePath={activePath}
+          agentEntries={agentEntries}
+        />
 
         {/* Folder Tree — Flat rendering from OS state */}
         <DocsSidebarUI.Zone className="flex flex-col">
