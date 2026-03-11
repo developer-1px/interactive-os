@@ -74,3 +74,34 @@ docs-freshness에서 8개 WP를 실행하며 드러난 구조적 문제:
 - 패키지 재구조화 시 문서 갱신 대상이 `rules.md` 참조 테이블 1곳뿐
 - `/audit` 실행 시 SPEC ↔ 코드 드리프트가 자동 감지됨
 - 같은 지식을 2곳에 쓰는 것이 규칙 위반으로 인식됨
+
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide
+- **입력**: 3원칙 + T1-T5 Task Map의 현재 유효성 검증
+- **결과**:
+  - 원칙 1-3 자체는 **여전히 유효**
+  - **Task Map 전제 변경 발견**:
+    - `working-standards.md` 없음 → `coding-standards.md` 또는 `project-standard.md`가 현행
+    - `domain-glossary.md` 없음 → T5 대상 소멸
+    - `official/os/*.md` 경로 → `os/`로 변경 (03-10 3-tier restructure)
+    - SPEC.md는 `docs/2-area/os/SPEC.md`에 존재 확인
+  - T1: 대상 파일명 변경 필요
+  - T2: 유효 (SPEC.md 존재)
+  - T3: 경로 범위 재조사 필요
+  - T4: 유효 (/audit 확장)
+  - T5: **소멸** (domain-glossary.md 없음)
+- **Cynefin**: Complicated — 원칙 유효, Task Map만 업데이트하면 Clear
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q1: 원칙 1-2를 `coding-standards.md`에 넣을 것인가, `project-standard.md`에 넣을 것인가? — 해소 시 T1 즉시 실행 가능
+- [ ] Q2: 이 프로젝트를 지금 진행할 우선순위인가? (현재 Active 0, Hold 7) — 해소 시 /project 생성 가능
+
+### 다음 /wip 시 시작점
+
+Q1+Q2 해소 후 → Task Map 업데이트 (T5 제거, T1/T3 대상 수정) → `/project` → `/go`
