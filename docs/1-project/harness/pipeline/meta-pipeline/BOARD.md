@@ -12,9 +12,9 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-| T1 | /go SKILL.md에 Meta 분기 경로 추가 | #1 이후 Meta/Code 경로 분리, Meta는 audit 스킵 | | |
-| T2 | /qa AGENT.md에 Meta 4 Gate 추가 | Completeness, Consistency, Reference Integrity, Convention 게이트 정의 | | |
-| T3 | /verify SKILL.md에 --meta 모드 추가 | Meta일 때 regression만 확인 (신규 코드 검증 스킵) | | |
+| T1 | /go SKILL.md에 Meta 분기 경로 추가 | #1 이후 Meta/Code 경로 분리, Meta는 audit 스킵 | ✅ Done | `2486deb7` — M7-M12 경로 + §Meta QA 섹션 |
+| T2 | /qa AGENT.md에 Meta 4 Gate 추가 | Completeness, Consistency, Reference Integrity, Convention 게이트 정의 | ✅ Done | `d5882a4a` — 118줄 Meta QA 추가 |
+| T3 | /verify SKILL.md에 --meta 모드 추가 | Meta일 때 regression만 확인 (신규 코드 검증 스킵) | ✅ Done | `e4ec8252` — 모드 선택 테이블 + Meta 결과 보고 |
 
 ## Unresolved
 
