@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-**os / sdk-role-factory** — Phase 1 완료. Phase 2 미착수
+**harness / agent / design-review-agent** — T1-T4 Done, Meta 프로젝트
 
 ---
 
@@ -32,7 +32,7 @@
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
-| **sdk-role-factory** | Phase 1 ✅, Phase 2 미착수 | 🔥 Active | 03-11 |
+| **sdk-role-factory** | Phase 1 ✅, Phase 2 미착수 | ⚠️ Hold | 03-11 |
 | **ban-os-from-tsx** | T1-T8 scaffold | ⚠️ Hold | 03-09 |
 | **apg** | apg-suite: WP0 Done, WP1-2 미착수 | ⚠️ Hold | 03-07 |
 | **headless-page** | headless-simulator: P7 Done, P1-6 미착수 | ⚠️ Hold | 03-07 |
@@ -63,6 +63,7 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | skill | — | — | — |
+| **agent** | design-review-agent: T1-T4 Done | 🔥 Active | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | — | — | — |
 
@@ -90,7 +91,7 @@
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 1 (sdk-role-factory Phase 2) |
+| Active Projects | 1 (design-review-agent) |
 | Hold Projects | 7 |
 | Archived (this session) | 5 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
