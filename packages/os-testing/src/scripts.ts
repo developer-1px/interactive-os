@@ -30,6 +30,8 @@ export interface TestScript {
   group?: string;
   /** Zone this script targets — used by browser runner to resolve items from ZoneRegistry */
   zone?: string;
+  /** Mark as todo — runScenarios registers it.todo() instead of it() */
+  todo?: boolean;
   run: (page: Page, expect: ExpectLocator, items?: string[]) => Promise<void>;
 }
 

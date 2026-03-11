@@ -44,6 +44,10 @@ export function runScenarios<S>(
 
     describe(label, () => {
       for (const script of scenario.scripts) {
+        if (script.todo) {
+          it.todo(script.name);
+          continue;
+        }
         it(script.name, async () => {
           const { page, cleanup } = createPage(app, component);
           page.goto("/");
