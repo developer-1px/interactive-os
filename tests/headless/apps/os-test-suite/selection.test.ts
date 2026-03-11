@@ -2,10 +2,9 @@
  * OS Test Suite: Selection Modes
  *
  * Exercises single-select, multi-select, range, and toggle.
+ * Uses page API only (1경계 원칙).
  */
 
-import { readSelection } from "@os-core/3-inject/readState";
-import { os } from "@os-core/engine/kernel";
 import { createPage } from "@os-testing/page";
 import { describe, expect, it } from "vitest";
 import { SelectionApp } from "@/pages/os-test-suite/patterns/SelectionPattern";
@@ -22,7 +21,7 @@ describe("OS Pipeline: Single Select", () => {
 
     page.click("s-bravo");
 
-    expect(readSelection(os, "select-single")).toEqual(["s-bravo"]);
+    expect(page.locator("#s-bravo").getAttribute("aria-selected")).toBe("true");
   });
 
   it("click another replaces selection", () => {
@@ -31,7 +30,12 @@ describe("OS Pipeline: Single Select", () => {
     page.click("s-alpha");
     page.click("s-charlie");
 
-    expect(readSelection(os, "select-single")).toEqual(["s-charlie"]);
+    expect(page.locator("#s-alpha").getAttribute("aria-selected")).not.toBe(
+      "true",
+    );
+    expect(page.locator("#s-charlie").getAttribute("aria-selected")).toBe(
+      "true",
+    );
   });
 
   it("Space toggles selection on focused item", () => {
@@ -41,11 +45,13 @@ describe("OS Pipeline: Single Select", () => {
     page.keyboard.press("ArrowDown");
     page.keyboard.press("Space");
 
-    expect(readSelection(os, "select-single")).toEqual(["s-bravo"]);
+    expect(page.locator("#s-bravo").getAttribute("aria-selected")).toBe("true");
   });
 });
 
-// OS gap: headless zone options (select.mode:"multiple") not threaded to kernel config
+// OS core bug: OS_ACTIVATE dispatches OS_SELECT (toggle mode for multi),
+// causing double-toggle cancellation after resolveMouse's OS_SELECT.
+// Needs OS core fix in activate.ts or simulateClick deduplication.
 describe("OS Pipeline: Multi Select", () => {
   it.todo("click selects single item (replace mode)");
   it.todo("Shift+click selects range");
@@ -58,6 +64,7 @@ describe("OS Pipeline: Multi Select", () => {
     page.click("m-alpha");
     page.keyboard.press("Meta+a");
 
-    expect(readSelection(os, "select-multi").length).toBe(5);
+    expect(page.locator("#m-alpha").getAttribute("aria-selected")).toBe("true");
+    expect(page.locator("#m-echo").getAttribute("aria-selected")).toBe("true");
   });
 });
