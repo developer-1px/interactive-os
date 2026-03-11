@@ -111,6 +111,9 @@ retry > 3 → ⛔ 보고하고 정지. 사용자에게 상황 설명.
 | Red→Green + regression 없음 | `[x] T명 — tsc 0 | +N tests | build OK ✅` |
 | Meta (코드 없음) | `[x] T명 — [증빙 요약] ✅` |
 | 수정했지만 검증 미통과 | `[ ] T명 — 검증 미완` |
+| QA 대기 중 | `🔍 QA 대기` (Now 섹션 하단) |
+| QA 실패 | `❌ QA FAIL: [게이트명] — [요약]` |
+| QA 통과 | `✅ QA PASS` → `/retrospect` → `/archive` 진행 |
 
 증빙 없이 `✅`만 찍는 것은 금지.
 

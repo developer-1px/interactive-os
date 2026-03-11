@@ -34,7 +34,7 @@
 
 - [x] T1: `/qa` 스킬 SKILL.md 생성 — `.claude/skills/qa/SKILL.md` 4게이트 정의 ✅
 - [x] T2: `/go` 파이프라인에 QA agent 단계 삽입 — #10~#14 재구성 + §QA Agent 섹션 ✅
-- [ ] T3: BOARD.md QA 상태 표기 규칙을 `/go` DoD에 추가 — 크기: S, 의존: →T2
+- [x] T3: BOARD.md QA 상태 표기 규칙을 `/go` DoD에 추가 — DoD 표 3행 추가 ✅
 
 ## Done
 
