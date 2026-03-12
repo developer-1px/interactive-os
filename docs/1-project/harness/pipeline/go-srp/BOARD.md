@@ -12,7 +12,9 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-<!-- /plan이 채운다 -->
+| T1 | `/self-check` 스킬 생성 | SKILL.md 존재 + spec→import chain 추적 절차 완전 | ⬜ | |
+| T2 | `/go` 슬림화 — 파이프라인 재작성 + 프로토콜/검증표 제거 | /go에 절차/프로토콜 0줄 + 참조 정합 | ⬜ | |
+| T3 | `/plan`에 `/divide` 전제 추가 | /plan에 /divide Step 0 존재 | ⬜ | |
 
 ## Unresolved
 
