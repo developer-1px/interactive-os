@@ -10,17 +10,17 @@
 
 ## Now
 
-- [ ] T1: OS_TAB null guard → DOM_ZONE_ORDER[0] 자동 진입 — S, 의존: —
-- [ ] T2: OS_NAVIGATE null guard → 동일 패턴 — S, 의존: →T1
-- [ ] T3: headless 테스트 — Tab/ArrowDown activeZoneId null 동작 확인 — S, 의존: →T1,T2
+- [x] T1: OS_TAB null guard → DOM_ZONE_ORDER[0] 자동 진입 — tsc 0 | 801 tests PASS ✅
+- [x] T2: OS_NAVIGATE null guard → 동일 패턴 — tsc 0 | 801 tests PASS ✅
+- [x] T3: headless 테스트 — +4 tests GREEN | 801 total PASS ✅
 
 ## Tasks
 
 | # | Task | Before | After | AC | Status | Evidence |
 |---|------|--------|-------|----|--------|----------|
-| T1 | OS_TAB null guard → 자동 진입 | tab.ts:28-31 `if (!activeZoneId) return` | DOM_ZONE_ORDER[0] 첫 Zone+Item으로 OS_FOCUS 후 return | tsc 0, 기존 tests 유지 | | |
-| T2 | OS_NAVIGATE null guard → 자동 진입 | navigate/index.ts:38-39 `if (!activeZoneId) return` | 동일 패턴 | tsc 0, 기존 tests 유지 | | |
-| T3 | headless 테스트 작성 | 테스트 없음 | activeZoneId null 상태에서 Tab→첫Zone, Arrow→첫Zone 동작 확인 | +N tests PASS | | |
+| T1 | OS_TAB null guard → 자동 진입 | tab.ts:28-31 `if (!activeZoneId) return` | DOM_ZONE_ORDER[0] 첫 Zone+Item으로 자동 진입 | tsc 0, 기존 tests 유지 | ✅ | commit 7b5e97c4 |
+| T2 | OS_NAVIGATE null guard → 자동 진입 | navigate/index.ts:38-39 `if (!activeZoneId) return` | 동일 패턴 | tsc 0, 기존 tests 유지 | ✅ | commit 7b5e97c4 |
+| T3 | headless 테스트 작성 | 테스트 없음 | activeZoneId null 상태에서 Tab→첫Zone, Arrow→첫Zone 동작 확인 | +4 tests PASS | ✅ | cross-zone.test.ts +4 |
 
 ## Unresolved
 
