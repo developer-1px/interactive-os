@@ -8,14 +8,24 @@
 | Size | Light |
 | Risk | git-log 파싱 성능 (N개 제한으로 완화). vite plugin에서 child_process 사용 시 HMR 지연 가능 |
 
+## Now
+
+- [ ] T1: `AgentActivityEntry`에 `commitMessage?` 추가 + `collectAgentActivity()`에서 git-log 파싱 — S, 의존: —
+- [ ] T2: RecentSection 각 항목에 커밋 메시지 1줄 표시 — S, 의존: →T1
+- [ ] T3: RecentSection 세션별 그루핑 토글 — S, 의존: →T1
+- [ ] T4: `DocsViewer.tsx` .md 파일은 MarkdownRenderer로 렌더링 — S, 의존: —
+
 ## Tasks
 
-| # | Task | AC | Status | Evidence |
-|---|------|----|--------|----------|
-<!-- /plan이 채운다 -->
+| # | Task | Before | After | AC | Status | Evidence |
+|---|------|--------|-------|----|--------|----------|
+| T1 | `AgentActivityEntry.commitMessage?` + git-log 파싱 | `{ ts, session, tool, detail }` — commitMessage 없음 | `execSync('git log')` → 파일경로→커밋메시지 매핑 → entry에 주입 | tsc 0 | ⬜ | |
+| T2 | RecentSection 커밋 메시지 표시 | FileIcon + name + ToolBadge | + 하단 commitMessage 1줄 (text-[10px] text-slate-400) | tsc 0, 화면 확인 | ⬜ | |
+| T3 | 세션별 그루핑 토글 | flat list (세션 구분 없음) | session UUID 기준 접이식 그룹 헤더 + flat/grouped 토글 | tsc 0, 화면 확인 | ⬜ | |
+| T4 | .md 프로젝트 파일 → MarkdownRenderer | `<pre>{content}</pre>` (plain text) | `.md` → `<MarkdownRenderer>`, 그 외 → `<pre>` 유지 | tsc 0, .md 렌더링 확인 | ⬜ | |
 
 ## Unresolved
 
 | # | Question | Impact |
 |---|----------|--------|
-| 1 | git-log를 vite plugin 내에서 동기/비동기 어떻게 호출할지 | HMR 성능에 영향 |
+| ~~1~~ | ~~git-log 동기/비동기~~ | ~~해소: execSync 동기 호출. N개 제한으로 성능 OK. 필요 시 sendUpdate에서만 비동기 분리~~ |
