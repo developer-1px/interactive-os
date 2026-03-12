@@ -108,7 +108,9 @@ test.describe("TestBot Panel — eager load + route filtering", () => {
     await activateTestBotPanel(page, "/todo");
 
     // Wait for suites to appear
-    const suites = page.locator('[data-testbot-suite][data-testbot-status="planned"]');
+    const suites = page.locator(
+      '[data-testbot-suite][data-testbot-status="planned"]',
+    );
     await expect(suites.first()).toBeVisible({ timeout: 10_000 });
 
     // Wait for dry-run to populate steps (async — give it time)

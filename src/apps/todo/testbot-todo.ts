@@ -97,10 +97,7 @@ export const listNavScripts: TestScript[] = [
       const items = page.locator("[data-item]");
       await items.nth(0).click();
       await page.keyboard.press("Shift+ArrowDown");
-      await expect(items.nth(1)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      await expect(items.nth(1)).toHaveAttribute("aria-selected", "true");
     },
   },
 ];
@@ -135,7 +132,9 @@ export const triggerClickScripts: TestScript[] = [
       const item1 = items.nth(1);
       const item0Id = await item0.getAttribute("id");
       await item0.click();
-      await page.locator(`#${item0Id} [data-trigger-id="move-item-down"]`).click();
+      await page
+        .locator(`#${item0Id} [data-trigger-id="move-item-down"]`)
+        .click();
       // After moving items[0] down, items[1] is now first → Home lands on item1
       await page.keyboard.press("Home");
       await expect(item1).toBeFocused();
@@ -149,7 +148,9 @@ export const triggerClickScripts: TestScript[] = [
       const item1 = items.nth(1);
       const item1Id = await item1.getAttribute("id");
       await item1.click();
-      await page.locator(`#${item1Id} [data-trigger-id="move-item-up"]`).click();
+      await page
+        .locator(`#${item1Id} [data-trigger-id="move-item-up"]`)
+        .click();
       // After moving items[1] up, items[1] is now first → Home lands on item1
       await page.keyboard.press("Home");
       await expect(item1).toBeFocused();
@@ -222,10 +223,7 @@ export const sidebarScripts: TestScript[] = [
       const items = page.locator("[data-item]");
       await items.nth(0).click();
       await page.keyboard.press("ArrowDown");
-      await expect(items.nth(1)).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      await expect(items.nth(1)).toHaveAttribute("aria-selected", "true");
     },
   },
 ];

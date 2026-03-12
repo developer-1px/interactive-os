@@ -10,6 +10,7 @@ export interface AgentActivityEntry {
   session: string;
   tool: string;
   detail: string;
+  commitMessage?: string;
 }
 
 /**

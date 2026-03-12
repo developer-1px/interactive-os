@@ -167,6 +167,7 @@ export const getRecentFiles = (
   const files = allFiles ?? _allFiles;
   return files.map((f, i) => ({ ...f, mtime: Date.now() - i * 1000 }));
 };
+export const isProjectMarkdown = (path: string) => path.endsWith(".md");
 export const getAgentRecentFiles = () =>
   _allFiles.map((f, i) => ({
     name: f.name,
@@ -174,6 +175,8 @@ export const getAgentRecentFiles = () =>
     ext: "md",
     tool: i % 2 === 0 ? "Read" : "Edit",
     ts: new Date(Date.now() - i * 60000).toISOString(),
+    session: i < 4 ? "sess-aaa" : "sess-bbb",
+    ...(i === 0 ? { commitMessage: "feat: add new feature" } : {}),
   }));
 export const loadDocContent = async (path: string) => {
   const map: Record<string, string> = {

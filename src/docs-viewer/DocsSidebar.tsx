@@ -13,8 +13,9 @@ import {
   Star,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
+import { DocsApp, DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
+  type AgentRecentFile,
   cleanLabel,
   type DocItem,
   type FlatTreeNode,
@@ -73,6 +74,68 @@ function ToolBadge({ tool }: { tool: string }) {
   return null;
 }
 
+function RecentFileItem({
+  file,
+  activePath,
+}: {
+  file: AgentRecentFile;
+  activePath: string | undefined;
+}) {
+  const isActive = file.path === activePath;
+  return (
+    <DocsRecentUI.Item key={file.path} id={file.path}>
+      {({ isFocused }: { isFocused: boolean }) => (
+        <div
+          className={clsx(
+            "flex flex-col px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
+            "text-left w-full group/recent cursor-pointer",
+            isActive
+              ? "bg-blue-50 text-blue-700 font-medium"
+              : isFocused
+                ? "bg-indigo-50 text-indigo-700"
+                : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
+          )}
+          style={{ paddingLeft: "20px" }}
+        >
+          <div className="flex items-center gap-2">
+            <FileIcon
+              ext={file.ext}
+              className={clsx(
+                "shrink-0",
+                isActive ? "text-blue-400" : "text-slate-300",
+              )}
+            />
+            <span className="truncate flex-1" title={file.path}>
+              {file.name}
+            </span>
+            <ToolBadge tool={file.tool} />
+          </div>
+          {file.commitMessage && (
+            <span
+              data-testid="commit-message"
+              className="text-[10px] text-slate-400 truncate mt-0.5 pl-4"
+            >
+              {file.commitMessage}
+            </span>
+          )}
+        </div>
+      )}
+    </DocsRecentUI.Item>
+  );
+}
+
+function SessionGroupHeader({ sessionId }: { sessionId: string }) {
+  return (
+    <div
+      data-session-group={sessionId}
+      id={`session-group-${sessionId}`}
+      className="px-3 py-1 mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+    >
+      {sessionId.slice(0, 6)}
+    </div>
+  );
+}
+
 function RecentSection({
   activePath,
   agentEntries,
@@ -82,67 +145,85 @@ function RecentSection({
   agentEntries: AgentActivityEntry[];
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const isGrouped = DocsApp.useComputed((s) => s.isGrouped);
   const recentFiles = useMemo(
     () => getAgentRecentFiles(agentEntries, PROJECT_ROOT, 15),
     [agentEntries],
   );
 
+  const groupedFiles = useMemo(() => {
+    if (!isGrouped) return null;
+    const groups = new Map<string, AgentRecentFile[]>();
+    for (const file of recentFiles) {
+      const session = file.session ?? "unknown";
+      const list = groups.get(session);
+      if (list) {
+        list.push(file);
+      } else {
+        groups.set(session, [file]);
+      }
+    }
+    return groups;
+  }, [isGrouped, recentFiles]);
+
   if (recentFiles.length === 0) return null;
 
   return (
     <div className="mb-4 pb-3 border-b border-slate-100">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1 w-full text-left group"
-      >
-        <Clock size={12} className="text-blue-400" />
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
-          Agent Activity
-        </span>
-        <span className="text-[9px] text-slate-300 tabular-nums mr-1">
-          {recentFiles.length}
-        </span>
-        <span className="text-slate-300 transition-transform">
-          {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        </span>
-      </button>
+      <div className="flex items-center gap-1.5 px-3 py-1 w-full">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1.5 flex-1 text-left group"
+        >
+          <Clock size={12} className="text-blue-400" />
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+            Agent Activity
+          </span>
+          <span className="text-[9px] text-slate-300 tabular-nums mr-1">
+            {recentFiles.length}
+          </span>
+          <span className="text-slate-300 transition-transform">
+            {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </span>
+        </button>
+        <button
+          type="button"
+          data-testid="session-group-toggle"
+          {...DocsRecentUI.triggers.ToggleGrouping()}
+          className={clsx(
+            "text-[9px] px-1.5 py-0.5 rounded transition-colors",
+            isGrouped
+              ? "bg-blue-100 text-blue-600"
+              : "text-slate-400 hover:text-slate-600",
+          )}
+        >
+          {isGrouped ? "Flat" : "Group"}
+        </button>
+      </div>
 
       {isOpen && (
         <DocsRecentUI.Zone className="mt-1 flex flex-col">
-          {recentFiles.map((file) => {
-            const isActive = file.path === activePath;
-            return (
-              <DocsRecentUI.Item key={file.path} id={file.path}>
-                {({ isFocused }: { isFocused: boolean }) => (
-                  <div
-                    className={clsx(
-                      "flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
-                      "text-left w-full group/recent cursor-pointer",
-                      isActive
-                        ? "bg-blue-50 text-blue-700 font-medium"
-                        : isFocused
-                          ? "bg-indigo-50 text-indigo-700"
-                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
-                    )}
-                    style={{ paddingLeft: "20px" }}
-                  >
-                    <FileIcon
-                      ext={file.ext}
-                      className={clsx(
-                        "shrink-0",
-                        isActive ? "text-blue-400" : "text-slate-300",
-                      )}
+          {isGrouped && groupedFiles
+            ? Array.from(groupedFiles.entries()).map(([session, files]) => (
+                <div key={session}>
+                  <SessionGroupHeader sessionId={session} />
+                  {files.map((file) => (
+                    <RecentFileItem
+                      key={file.path}
+                      file={file}
+                      activePath={activePath}
                     />
-                    <span className="truncate flex-1" title={file.path}>
-                      {file.name}
-                    </span>
-                    <ToolBadge tool={file.tool} />
-                  </div>
-                )}
-              </DocsRecentUI.Item>
-            );
-          })}
+                  ))}
+                </div>
+              ))
+            : recentFiles.map((file) => (
+                <RecentFileItem
+                  key={file.path}
+                  file={file}
+                  activePath={activePath}
+                />
+              ))}
         </DocsRecentUI.Zone>
       )}
     </div>

@@ -226,11 +226,14 @@ export function getRecentFiles(
   limit = 7,
 ): RecentDocItem[] {
   if (!allFiles) return [];
-  return allFiles
-    .filter((f) => docsMeta[f.path] != null)
-    .map((f) => ({ ...f, mtime: docsMeta[f.path]!.mtime }))
-    .sort((a, b) => b.mtime - a.mtime)
-    .slice(0, limit);
+  return (
+    allFiles
+      .filter((f) => docsMeta[f.path] != null)
+      // biome-ignore lint/style/noNonNullAssertion: filtered above — docsMeta[f.path] is guaranteed non-null
+      .map((f) => ({ ...f, mtime: docsMeta[f.path]!.mtime }))
+      .sort((a, b) => b.mtime - a.mtime)
+      .slice(0, limit)
+  );
 }
 
 // --------------- Agent Recent Files ---------------
@@ -246,6 +249,15 @@ export interface AgentRecentFile {
   tool: string;
   /** ISO timestamp of last access */
   ts: string;
+  /** Git commit message (first line) if available */
+  commitMessage?: string;
+  /** Session UUID */
+  session?: string;
+}
+
+/** Check if a project file path is a Markdown file (.md extension) */
+export function isProjectMarkdown(path: string): boolean {
+  return path.endsWith(".md");
 }
 
 /**
@@ -253,7 +265,13 @@ export interface AgentRecentFile {
  * Filters to file operations only, normalizes paths, deduplicates.
  */
 export function getAgentRecentFiles(
-  entries: Array<{ ts: string; session: string; tool: string; detail: string }>,
+  entries: Array<{
+    ts: string;
+    session: string;
+    tool: string;
+    detail: string;
+    commitMessage?: string;
+  }>,
   projectRoot: string,
   limit = 20,
 ): AgentRecentFile[] {
@@ -291,6 +309,10 @@ export function getAgentRecentFiles(
       ext,
       tool: entry.tool,
       ts: entry.ts,
+      ...(entry.commitMessage !== undefined
+        ? { commitMessage: entry.commitMessage }
+        : {}),
+      ...(entry.session !== undefined ? { session: entry.session } : {}),
     });
   }
 
@@ -441,11 +463,11 @@ export function parseStatusMd(content: string): StatusData {
       const match = line.match(
         /^\*\*(\S+)\s*\/\s*(\S+)\*\*\s*—\s*(.+?)\.?\s*(Meta|Heavy|Light)?\s*\.?\s*$/,
       );
-      if (match) {
+      if (match?.[1] && match[2] && match[3]) {
         activeFocus.push({
-          domain: match[1]!,
-          project: match[2]!,
-          description: match[3]!.trim(),
+          domain: match[1],
+          project: match[2],
+          description: match[3].trim(),
           weight: match[4] ?? "",
         });
       }
@@ -598,9 +620,9 @@ export function extractHeadings(content: string): TocHeading[] {
     if (inCodeBlock) continue;
 
     const match = line.match(/^(#{1,4})\s+(.+)$/);
-    if (match) {
-      const depth = match[1]!.length;
-      const text = match[2]!
+    if (match?.[1] && match[2]) {
+      const depth = match[1].length;
+      const text = match[2]
         .replace(/\*\*/g, "") // strip bold
         .replace(/\*/g, "") // strip italic
         .replace(/`/g, "") // strip inline code

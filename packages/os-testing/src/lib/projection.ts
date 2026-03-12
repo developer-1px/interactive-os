@@ -9,11 +9,18 @@ import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
 import { createElement, type FC } from "react";
 import { renderToString } from "react-dom/server";
 
+export interface ProjectionElement {
+  id: string | null;
+  getAttribute(name: string): string | null;
+}
+
 export interface Projection {
   render(): string;
   invalidate(zonesWithBindingGetItems: Set<string>): void;
   sync(zonesWithBindingGetItems: Set<string>): void;
   assertElement(elementId: string): void;
+  /** Query rendered HTML for elements matching an arbitrary CSS selector. Always re-renders fresh. */
+  queryElements(selector: string): ProjectionElement[];
 }
 
 export function createProjection(Component: FC): Projection {
@@ -84,5 +91,19 @@ export function createProjection(Component: FC): Projection {
     }
   }
 
-  return { render, invalidate, sync, assertElement };
+  function queryElements(selector: string): ProjectionElement[] {
+    // Always re-render to capture latest state (after clicks/dispatches)
+    htmlCache = null;
+    itemsCache = null;
+    const html = render();
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    const els = container.querySelectorAll(selector);
+    return Array.from(els).map((el) => ({
+      id: el.id || null,
+      getAttribute: (name: string) => el.getAttribute(name),
+    }));
+  }
+
+  return { render, invalidate, sync, assertElement, queryElements };
 }

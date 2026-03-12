@@ -91,6 +91,106 @@ function createPositiveLocator(elementId: string): LocatorAssertions {
   };
 }
 
+// ─── Projection element locator (for non-OS elements in rendered HTML) ───
+
+function createProjectionElementLocator(
+  selector: string,
+  index: number,
+  proj: Projection,
+): HeadlessLocator {
+  function getElement(): {
+    id: string | null;
+    getAttribute(name: string): string | null;
+  } {
+    const elements = proj.queryElements(selector);
+    if (index < 0 || index >= elements.length) {
+      throw new Error(
+        `locator("${selector}").nth(${index}): index out of range (${elements.length} elements)`,
+      );
+    }
+    return elements[index]!;
+  }
+
+  return {
+    get attrs() {
+      return {} as import("@os-core/3-inject/headless.types").ElementAttrs;
+    },
+    getAttribute(name: string) {
+      return getElement().getAttribute(name);
+    },
+    click() {
+      const el = getElement();
+      const triggerId = el.getAttribute("data-trigger-id");
+      const clickId = triggerId ?? el.id;
+      if (clickId) {
+        simulateClick(os, clickId);
+      }
+    },
+    toHaveAttribute() {},
+    toBeFocused() {},
+    toBeChecked() {},
+    toBeDisabled() {},
+    inputValue() {
+      return "";
+    },
+    get not(): LocatorAssertions {
+      return createNegatedLocator(getElement().id ?? "");
+    },
+    nth(i: number): Locator {
+      return createProjectionElementLocator(selector, i, proj);
+    },
+    first(): Locator {
+      return createProjectionElementLocator(selector, 0, proj);
+    },
+    last(): Locator {
+      const count = proj.queryElements(selector).length;
+      return createProjectionElementLocator(selector, count - 1, proj);
+    },
+    count(): number {
+      return proj.queryElements(selector).length;
+    },
+    _toBeFocused(negated?: boolean) {
+      const el = getElement();
+      const focusedId = readFocusedItemId(os);
+      const focused = el.id ? focusedId === el.id : false;
+      const passed = negated ? !focused : focused;
+      if (!passed) {
+        throw new Error(
+          negated
+            ? "Expected projection element NOT to be focused but it was"
+            : `Expected projection element to be focused but focused is #${focusedId}`,
+        );
+      }
+    },
+    _toHaveAttribute(name: string, value?: string | RegExp, negated?: boolean) {
+      const el = getElement();
+      const actual = el.getAttribute(name);
+      if (value === undefined) {
+        const exists = actual != null;
+        const passed = negated ? !exists : exists;
+        if (!passed) {
+          throw new Error(
+            negated
+              ? `Expected [${name}] to be absent but it exists (value: "${actual}")`
+              : `Expected [${name}] to exist on projection element but it was absent`,
+          );
+        }
+        return;
+      }
+      const expected = typeof value === "string" ? value : undefined;
+      const matches = actual === expected;
+      const passed = negated ? !matches : matches;
+      if (!passed) {
+        throw new Error(
+          negated
+            ? `Expected [${name}] NOT to be "${expected}" but it was`
+            : `Expected [${name}] to be "${expected}" but got "${actual}"`,
+        );
+      }
+    },
+  };
+}
+
 // ─── Multi-element locator (for [data-item] etc.) ──────────────────
 
 function createMultiLocator(
@@ -102,14 +202,19 @@ function createMultiLocator(
     return resolveAllItems(selector);
   }
 
+  function getProjectionCount(): number {
+    return projection?.queryElements(selector).length ?? 0;
+  }
+
   function resolveFirst(): HeadlessLocator {
     const items = getItems();
-    if (items.length === 0) {
-      throw new Error(
-        `locator("${selector}"): no matching elements found`,
-      );
+    if (items.length > 0) {
+      return createLocator(`#${items[0]}`, projection);
     }
-    return createLocator(`#${items[0]}`, projection);
+    if (projection && getProjectionCount() > 0) {
+      return createProjectionElementLocator(selector, 0, projection);
+    }
+    throw new Error(`locator("${selector}"): no matching elements found`);
   }
 
   // Multi-element locator: click/getAttribute/assertions operate on FIRST match
@@ -146,27 +251,45 @@ function createMultiLocator(
     },
     nth(index: number): Locator {
       const items = getItems();
-      if (index < 0 || index >= items.length) {
-        throw new Error(
-          `locator("${selector}").nth(${index}): index out of range (${items.length} items)`,
-        );
+      if (items.length > 0) {
+        if (index < 0 || index >= items.length) {
+          throw new Error(
+            `locator("${selector}").nth(${index}): index out of range (${items.length} items)`,
+          );
+        }
+        return createLocator(`#${items[index]}`, projection);
       }
-      return createLocator(`#${items[index]}`, projection);
+      if (projection) {
+        return createProjectionElementLocator(selector, index, projection);
+      }
+      throw new Error(
+        `locator("${selector}").nth(${index}): no matching elements found`,
+      );
     },
     first(): Locator {
       return resolveFirst();
     },
     last(): Locator {
       const items = getItems();
-      if (items.length === 0) {
-        throw new Error(
-          `locator("${selector}").last(): no matching elements`,
-        );
+      if (items.length > 0) {
+        return createLocator(`#${items[items.length - 1]}`, projection);
       }
-      return createLocator(`#${items[items.length - 1]}`, projection);
+      if (projection) {
+        const count = getProjectionCount();
+        if (count > 0) {
+          return createProjectionElementLocator(
+            selector,
+            count - 1,
+            projection,
+          );
+        }
+      }
+      throw new Error(`locator("${selector}").last(): no matching elements`);
     },
     count(): number {
-      return getItems().length;
+      const items = getItems();
+      if (items.length > 0) return items.length;
+      return getProjectionCount();
     },
     _toBeFocused(negated?: boolean) {
       return firstProxy()._toBeFocused(negated);
@@ -189,7 +312,7 @@ export function createLocator(
     if (!focusedId) {
       throw new Error('locator(":focus"): no element is currently focused');
     }
-    return createLocator("#" + focusedId, projection);
+    return createLocator(`#${focusedId}`, projection);
   }
 
   // Multi-element selector (e.g., [data-item])

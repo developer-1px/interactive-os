@@ -24,12 +24,9 @@ export const TypingEntryApp = defineApp<TypingEntryState>(
 // Zone WITH typingEntry
 const typingZone = TypingEntryApp.createZone("typing-zone");
 
-const recordAction = typingZone.command(
-  "recordAction",
-  (ctx) => ({
-    state: { ...ctx.state, actionCount: ctx.state.actionCount + 1 },
-  }),
-);
+const recordAction = typingZone.command("recordAction", (ctx) => ({
+  state: { ...ctx.state, actionCount: ctx.state.actionCount + 1 },
+}));
 
 const TypingUI = typingZone.bind("grid", {
   getItems: () => ["box-a", "box-b", "box-c"],
@@ -42,12 +39,9 @@ const TypingUI = typingZone.bind("grid", {
 // Zone WITHOUT typingEntry (control group)
 const normalZone = TypingEntryApp.createZone("normal-zone");
 
-const recordActionNormal = normalZone.command(
-  "recordActionNormal",
-  (ctx) => ({
-    state: { ...ctx.state, actionCount: ctx.state.actionCount + 1 },
-  }),
-);
+const recordActionNormal = normalZone.command("recordActionNormal", (ctx) => ({
+  state: { ...ctx.state, actionCount: ctx.state.actionCount + 1 },
+}));
 
 const NormalUI = normalZone.bind("listbox", {
   getItems: () => ["item-x", "item-y", "item-z"],

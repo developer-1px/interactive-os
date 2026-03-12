@@ -442,24 +442,48 @@ export function createBrowserPage(
     }
 
     const multi: Locator & LocatorAssertions = {
-      click(opts?) { return resolveNth(0).click(opts); },
-      async getAttribute(name: string) { return resolveNth(0).getAttribute(name); },
-      async inputValue() { return resolveNth(0).inputValue(); },
-      toHaveAttribute(name: string, value?: string | RegExp) { return resolveNth(0).toHaveAttribute(name, value); },
-      toBeFocused() { return resolveNth(0).toBeFocused(); },
-      toBeChecked() { return resolveNth(0).toBeChecked(); },
-      toBeDisabled() { return resolveNth(0).toBeDisabled(); },
-      get not(): LocatorAssertions { return resolveNth(0).not; },
-      nth(index: number): Locator { return resolveNth(index); },
-      first(): Locator { return resolveNth(0); },
+      click(opts?) {
+        return resolveNth(0).click(opts);
+      },
+      async getAttribute(name: string) {
+        return resolveNth(0).getAttribute(name);
+      },
+      async inputValue() {
+        return resolveNth(0).inputValue();
+      },
+      toHaveAttribute(name: string, value?: string | RegExp) {
+        return resolveNth(0).toHaveAttribute(name, value);
+      },
+      toBeFocused() {
+        return resolveNth(0).toBeFocused();
+      },
+      toBeChecked() {
+        return resolveNth(0).toBeChecked();
+      },
+      toBeDisabled() {
+        return resolveNth(0).toBeDisabled();
+      },
+      get not(): LocatorAssertions {
+        return resolveNth(0).not;
+      },
+      nth(index: number): Locator {
+        return resolveNth(index);
+      },
+      first(): Locator {
+        return resolveNth(0);
+      },
       last(): Locator {
         const els = getElements();
         if (els.length === 0) {
-          throw new Error(`locator("${cssSelector}").last(): no matching elements`);
+          throw new Error(
+            `locator("${cssSelector}").last(): no matching elements`,
+          );
         }
         return resolveNth(els.length - 1);
       },
-      count(): number { return getElements().length; },
+      count(): number {
+        return getElements().length;
+      },
     };
     return multi;
   }
