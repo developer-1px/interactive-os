@@ -1,13 +1,16 @@
-import type React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createZone } from "../../spike/pit-of-success/createZone";
 import {
+  addTodo,
+  deleteTodo,
   getTodoOrder,
   getTodos,
   resetState,
+  toggleTodo,
 } from "../../spike/pit-of-success/state";
 import { TodoListV2 } from "../../spike/pit-of-success/TodoListV2";
 
-// ── createZone config (bind-less) ──
+// ── createZone config (bind-less, pure projection) ──
 
 const TodoList = createZone({
   role: "listbox",
@@ -48,10 +51,55 @@ const Toolbar = createZone({
 // ── Page ──
 
 const PitOfSuccessPage: React.FC = () => {
-  resetState();
+  const [, setTick] = useState(0);
+  const rerender = useCallback(() => setTick((t) => t + 1), []);
+  const draftRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    resetState();
+    rerender();
+  }, [rerender]);
+
+  // Event delegation: intercept clicks on data-trigger-id buttons
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = (e.target as HTMLElement).closest<HTMLElement>(
+        "[data-trigger-id]",
+      );
+      if (!target) return;
+
+      const trigger = target.getAttribute("data-trigger-id");
+      const payload = target.getAttribute("data-trigger-payload");
+
+      switch (trigger) {
+        case "Toggle":
+          if (payload) toggleTodo(payload);
+          break;
+        case "Delete":
+          if (payload) deleteTodo(payload);
+          break;
+        case "Reset":
+          resetState();
+          break;
+        case "Add": {
+          const input = draftRef.current;
+          if (input) {
+            addTodo(input.value);
+            input.value = "";
+          }
+          break;
+        }
+      }
+      rerender();
+    },
+    [rerender],
+  );
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: "0 auto" }}>
+    <div
+      style={{ padding: 32, maxWidth: 800, margin: "0 auto" }}
+      onClick={handleClick}
+    >
       <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
         Pit of Success — Projection Spike
       </h1>
@@ -61,7 +109,7 @@ const PitOfSuccessPage: React.FC = () => {
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-        {/* Left: bind2 (v2) */}
+        {/* Left: bind2 (v2) — static projection only */}
         <Section
           title="bind2 (v2)"
           subtitle="item.field('text'), item.trigger('Delete', '×')"
@@ -69,7 +117,7 @@ const PitOfSuccessPage: React.FC = () => {
           <TodoListV2 />
         </Section>
 
-        {/* Right: createZone (final) */}
+        {/* Right: createZone (final) — interactive via event delegation */}
         <Section
           title="createZone (final)"
           subtitle="item.text, item.Delete('×')"
@@ -102,16 +150,29 @@ const PitOfSuccessPage: React.FC = () => {
         </Section>
       </div>
 
-      {/* Toolbar demo */}
+      {/* Toolbar demo — uncontrolled input + event delegation */}
       <Section title="Zone-level features" subtitle="zone.DRAFT(), zone.Add()">
-        <Toolbar.Zone>
-          {(zone) => (
-            <div style={{ display: "flex", gap: 8 }}>
-              {zone.DRAFT({ placeholder: "Add a task..." })}
-              {zone.Add("+")}
-            </div>
-          )}
-        </Toolbar.Zone>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            ref={draftRef}
+            type="text"
+            placeholder="Add a task..."
+            style={{ flex: 1, padding: "4px 8px" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const input = draftRef.current;
+                if (input) {
+                  addTodo(input.value);
+                  input.value = "";
+                  rerender();
+                }
+              }
+            }}
+          />
+          <Toolbar.Zone>
+            {(zone) => <>{zone.Add("+")}</>}
+          </Toolbar.Zone>
+        </div>
       </Section>
     </div>
   );

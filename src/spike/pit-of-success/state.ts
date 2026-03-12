@@ -33,3 +33,24 @@ export function resetState(
   todos = newTodos ?? { ...DEFAULT_TODOS };
   todoOrder = newOrder ?? Object.keys(todos);
 }
+
+export function toggleTodo(id: string) {
+  const todo = todos[id];
+  if (todo) {
+    todos = { ...todos, [id]: { ...todo, completed: !todo.completed } };
+  }
+}
+
+export function deleteTodo(id: string) {
+  const { [id]: _, ...rest } = todos;
+  todos = rest;
+  todoOrder = todoOrder.filter((i) => i !== id);
+}
+
+let nextId = 4;
+export function addTodo(text: string) {
+  if (!text.trim()) return;
+  const id = `todo-${nextId++}`;
+  todos = { ...todos, [id]: { id, text: text.trim(), completed: false } };
+  todoOrder = [...todoOrder, id];
+}
