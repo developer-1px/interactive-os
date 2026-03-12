@@ -12,9 +12,9 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-| T1 | `/self-check` 스킬 생성 | SKILL.md 존재 + spec→import chain 추적 절차 완전 | ⬜ | |
-| T2 | `/go` 슬림화 — 파이프라인 재작성 + 프로토콜/검증표 제거 | /go에 절차/프로토콜 0줄 + 참조 정합 | ⬜ | |
-| T3 | `/plan`에 `/divide` 전제 추가 | /plan에 /divide Step 0 존재 | ⬜ | |
+| T1 | `/self-check` 스킬 생성 | SKILL.md 존재 + spec→import chain 추적 절차 완전 | ✅ | `.claude/skills/self-check/SKILL.md` 생성 (88줄) ✅ |
+| T2 | `/go` 슬림화 — 파이프라인 재작성 + 프로토콜/검증표 제거 | /go에 절차/프로토콜 0줄 + 참조 정합 | ✅ | 320→160줄, §절차/§프로토콜/§검증표 제거, -410 +90 lines ✅ |
+| T3 | `/plan`에 `/divide` 전제 추가 | /plan에 /divide Step 0 존재 | ✅ | SKILL.md + workflows/plan.md 양쪽 Step 0 추가 ✅ |
 
 ## Unresolved
 
