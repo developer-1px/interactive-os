@@ -1,0 +1,181 @@
+{
+  "description": "적응형 18개 스킬 auto-trigger 정확도 평가 케이스",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": "TC01",
+      "query": "/green 끝나고 코드 정리하려는데, 중복 함수가 3개 보인다",
+      "expected_skill": "refactor",
+      "should_trigger": true,
+      "category": "cleanup"
+    },
+    {
+      "id": "TC02",
+      "query": "같은 테스트를 4번째 돌리는데 계속 실패한다. 뭔가 근본적으로 잘못된 것 같다",
+      "expected_skill": "why",
+      "should_trigger": true,
+      "category": "stuck"
+    },
+    {
+      "id": "TC03",
+      "query": "이 resolveKeyboard 함수가 왜 이렇게 복잡하게 되어있는지 모르겠다. 히스토리를 봐야 할 것 같다",
+      "expected_skill": "diagnose",
+      "should_trigger": true,
+      "category": "archaeology"
+    },
+    {
+      "id": "TC04",
+      "query": "Zone 분리 원칙이랑 단일 Zone 편의성이 충돌한다. 어느 쪽이 맞지?",
+      "expected_skill": "conflict",
+      "should_trigger": true,
+      "category": "tension"
+    },
+    {
+      "id": "TC05",
+      "query": "listbox에서 item 삭제 기능을 어떻게 구현할지 설계도를 먼저 그려야겠다",
+      "expected_skill": "blueprint",
+      "should_trigger": true,
+      "category": "design"
+    },
+    {
+      "id": "TC06",
+      "query": "overlay 시스템을 만들어야 하는데 어디서부터 분해해야 할지 모르겠다",
+      "expected_skill": "divide",
+      "should_trigger": true,
+      "category": "decomposition"
+    },
+    {
+      "id": "TC07",
+      "query": "ContextToken을 branded string으로 할지 wrapper object로 할지 니가 판단해봐",
+      "expected_skill": "solve",
+      "should_trigger": true,
+      "category": "decision"
+    },
+    {
+      "id": "TC08",
+      "query": "이 previewMode 기능 진짜 필요한가? 아무도 안 쓰는 것 같은데",
+      "expected_skill": "doubt",
+      "should_trigger": true,
+      "category": "subtraction"
+    },
+    {
+      "id": "TC09",
+      "query": "전체 코드를 한번 점검하자. 계약 위반이랑 불필요한 코드 다 잡아야 한다",
+      "expected_skill": "review",
+      "should_trigger": true,
+      "category": "quality"
+    },
+    {
+      "id": "TC10",
+      "query": "import 경로가 깨져서 tsc가 실패한다. @os-core/command가 못 찾는다",
+      "expected_skill": "fix",
+      "should_trigger": true,
+      "category": "form-error"
+    },
+    {
+      "id": "TC11",
+      "query": "키보드로 리스트 탐색할 때 화살표 키가 너무 느리다. 체감 200ms 이상 걸린다",
+      "expected_skill": "perf",
+      "should_trigger": true,
+      "category": "performance"
+    },
+    {
+      "id": "TC12",
+      "query": "resolveKeyboard.ts 커버리지가 40%밖에 안 된다. 올려야 한다",
+      "expected_skill": "coverage",
+      "should_trigger": true,
+      "category": "testing"
+    },
+    {
+      "id": "TC13",
+      "query": "브라우저에서 Tab 키 누르면 포커스가 엉뚱한 곳으로 간다. 재현 테스트 만들어야 한다",
+      "expected_skill": "repro",
+      "should_trigger": true,
+      "category": "bug"
+    },
+    {
+      "id": "TC14",
+      "query": "방금 커밋한 건데, 원래 의도대로 된 건지 잠깐 점검해보자",
+      "expected_skill": "reflect",
+      "should_trigger": true,
+      "category": "checkpoint"
+    },
+    {
+      "id": "TC15",
+      "query": "새로 만들 Zone 관련 함수 이름을 먼저 정해야 한다. createZone? defineZone?",
+      "expected_skill": "naming",
+      "should_trigger": true,
+      "category": "naming"
+    },
+    {
+      "id": "TC16",
+      "query": "새 Field 타입을 설계하려는데, 이상적인 API 사용 코드를 먼저 써보자",
+      "expected_skill": "usage",
+      "should_trigger": true,
+      "category": "api-design"
+    },
+    {
+      "id": "TC17",
+      "query": "dev server가 안 뜬다. Vite 캐시 문제인 것 같다",
+      "expected_skill": "ready",
+      "should_trigger": true,
+      "category": "environment"
+    },
+    {
+      "id": "TC18",
+      "query": "더 이상 방법이 없다. 컨텍스트가 꼬여서 새 세션으로 넘겨야 한다",
+      "expected_skill": "ban",
+      "should_trigger": true,
+      "category": "termination"
+    },
+    {
+      "id": "TC19",
+      "query": "dispatch 체인에서 같은 버그가 세 번째 발생한다. 구조적 문제가 있는 것 같다",
+      "expected_skill": "diagnose",
+      "should_trigger": true,
+      "category": "recurring-bug"
+    },
+    {
+      "id": "TC20",
+      "query": "Immer produce 패턴으로 A를 B로 바꿔야 하는데 설계 방향이 두 갈래다",
+      "expected_skill": "blueprint",
+      "should_trigger": true,
+      "category": "design"
+    },
+    {
+      "id": "TC21",
+      "query": "테스트 전부 GREEN이다. 이제 중복된 헬퍼 함수들을 하나로 합치자",
+      "expected_skill": "refactor",
+      "should_trigger": true,
+      "category": "cleanup"
+    },
+    {
+      "id": "TC22",
+      "query": "진전이 없다. 10분째 같은 에러만 보고 있다",
+      "expected_skill": "why",
+      "should_trigger": true,
+      "category": "stuck"
+    },
+    {
+      "id": "TC23",
+      "query": "이 helper 함수에 새 기능을 넣을지, 독립 모듈로 뺄지 판단이 안 선다",
+      "expected_skill": "solve",
+      "should_trigger": true,
+      "category": "decision"
+    },
+    {
+      "id": "TC24",
+      "query": "새 커맨드를 추가하려는데 어떤 scope에 넣을지 Goal부터 역추적해보자",
+      "expected_skill": "divide",
+      "should_trigger": true,
+      "category": "decomposition"
+    },
+    {
+      "id": "TC25",
+      "query": "방금 bind에서 리팩토링했는데 의도한 대로 변경된 건지 확인하고 싶다",
+      "expected_skill": "reflect",
+      "should_trigger": true,
+      "category": "checkpoint"
+    }
+  ]
+}
