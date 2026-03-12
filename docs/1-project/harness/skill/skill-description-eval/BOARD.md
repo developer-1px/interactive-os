@@ -25,3 +25,7 @@
 | U1 | ~~한영 비교~~ **Kill**: 당분간 한국어 유지. 사용자가 읽고 수정 방향을 지시할 수 있어야 함 | Kill |
 | U2 | ~~eval 인프라~~ **해소**: `anthropics/skills` repo clone → `scripts/run_eval.py --eval-set eval-set.json --skill-path .claude/skills/{name} --runs-per-query 3`. 자동 최적화는 `run_loop.py --holdout 0.4 --max-iterations 5`. 자체 스크립트 불필요 | 해소됨 |
 | U3 | ~~Phase 2~~ **보류**: eval 실행 후 판단 | 보류 |
+
+## QA
+
+✅ QA PASS (4/4) — `qa-report-2026-0312-2330.md`
