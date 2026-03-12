@@ -35,6 +35,7 @@
 | OG-029 | 2026-03-06 | os-sdk | AppPage zone() accessor 없음 | `page.zone("list")` TypeError. OsPage에만 zone() accessor 존재. AppPage는 개별 메서드(focusedItemId, selection)만 제공. API 불일치. | 개별 메서드 사용 |
 | OG-030 | 2026-03-06 | os-testing | Field without fieldName → headless 등록 누락 | `goto()` field 등록이 `fieldName` 필수. bind에 fieldName 없는 zone은 headless에서 완전 비활성. Zero Drift 위반. | bind에 fieldName 추가 |
 | OG-031 | 2026-03-06 | os-testing | keyboard.type() silent failure | field 미등록 시 `keyboard.type()` 무반응 + 에러/경고 없음. 디버깅 난이도 상승. | — |
+| OG-032 | 2026-03-12 | os-core | Multi-select double dispatch | OS_ACTIVATE가 내부적으로 OS_SELECT를 디스패치 → resolveMouse의 OS_SELECT와 이중 발생 → multi-select toggle이 2번 → 원래 상태로 복귀. `selection.test.ts` 4 tests blocked. | `it.todo()` 전환 |
 
 ## 해결됨
 
