@@ -176,6 +176,14 @@ QA 진행 상태를 BOARD.md에 기록한다:
 - `❌ QA FAIL: [요약]` — 실패 시
 - `✅ QA PASS` — 통과 시
 
+### QA 리포트 저장 (PASS/FAIL 무관)
+
+QA agent 결과를 프로젝트 폴더에 저장한다:
+- 파일명: `qa-report-YYYY-MMDD-HHmm.md`
+- 위치: 프로젝트 BOARD.md와 같은 폴더
+- 내용: agent가 반환한 전체 리포트 (게이트별 판정 + 상세 검증 과정)
+- BOARD.md QA 섹션에 파일 참조를 남긴다
+
 ---
 
 ## §Meta QA — 문서 계약 검증 (#M10)
