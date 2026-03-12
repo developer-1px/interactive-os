@@ -12,6 +12,7 @@ import {
   createCollectionZone,
   fromEntities,
 } from "@os-sdk/library/collection/createCollectionZone";
+import { OS_CHECK } from "@os-sdk/os";
 import { produce } from "immer";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -55,6 +56,8 @@ const listCollection = createCollectionZone(PitApp, "pit-todo-list", {
   ),
 });
 
+const listBindings = listCollection.collectionBindings();
+
 export const toggleTodo = listCollection.command(
   "toggleTodo",
   (ctx, payload: { id: string }) => ({
@@ -66,6 +69,9 @@ export const toggleTodo = listCollection.command(
 );
 
 export const PitListUI = listCollection.bind("listbox", {
-  onCheck: (cursor) => toggleTodo({ id: cursor.focusId }),
+  ...listBindings,
+  options: {
+    inputmap: { Space: [OS_CHECK()] },
+  },
   onDelete: (cursor) => listCollection.remove({ id: cursor.focusId }),
 });
