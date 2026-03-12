@@ -9,7 +9,6 @@ import {
   resetState,
   toggleTodo,
 } from "../../spike/pit-of-success/state";
-import { TodoListV2 } from "../../spike/pit-of-success/TodoListV2";
 
 // Reset spike state on module load (not during render)
 resetState();
@@ -107,20 +106,8 @@ const PitOfSuccessPage: React.FC = () => {
         in scope.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-        {/* Left: bind2 (v2) — static projection only */}
-        <Section
-          title="bind2 (v2)"
-          subtitle="item.field('text'), item.trigger('Delete', '×')"
-        >
-          <TodoListV2 />
-        </Section>
-
-        {/* Right: createZone (final) — interactive via event delegation */}
-        <Section
-          title="createZone (final)"
-          subtitle="item.text, item.Delete('×')"
-        >
+      <div style={{ display: "grid", gap: 32 }}>
+        <Section title="createZone" subtitle="item.text, item.Delete('×')">
           <TodoList.Zone>
             {(zone) => (
               <>
