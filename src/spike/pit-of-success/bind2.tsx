@@ -6,6 +6,8 @@
  *   - item.field(name) → unstyled component with ARIA baked in
  *   - item.when(name) → boolean (condition-based)
  *   - item.trigger(name) → unstyled button with data-trigger attrs
+ *   - zone.field(name) → zone-level unstyled input (draft, search)
+ *   - zone.trigger(name) → zone-level unstyled button (toolbar)
  *
  * This is a SPIKE: standalone, does not modify existing defineApp/bind.
  */
@@ -20,7 +22,6 @@ import React, { type ReactNode } from "react";
 export interface FieldSchema {
   [fieldName: string]: {
     type: "string" | "boolean" | "number";
-    /** Resolve field value from entity. Called at render time. */
     resolve: (entityId: string) => unknown;
   };
 }
@@ -28,7 +29,6 @@ export interface FieldSchema {
 /** Condition schema: maps condition names to item-level boolean predicates */
 export interface ConditionSchema {
   [conditionName: string]: {
-    /** Resolve condition for a specific item */
     resolve: (entityId: string) => boolean;
   };
 }
@@ -36,53 +36,51 @@ export interface ConditionSchema {
 /** Trigger schema: maps trigger names to their callbacks */
 export interface TriggerSchema {
   [triggerName: string]: {
-    /** Label for the trigger button */
+    label?: string;
+  };
+}
+
+/** Zone-level field schema */
+export interface ZoneFieldSchema {
+  [fieldName: string]: {
+    type: "string" | "boolean" | "number";
+    resolve: () => unknown;
+    placeholder?: string;
+  };
+}
+
+/** Zone-level trigger schema */
+export interface ZoneTriggerSchema {
+  [triggerName: string]: {
     label?: string;
   };
 }
 
 /** The item context passed to the items() callback — the ONLY data exit */
 export interface ItemContext {
-  /** The item's ID */
   readonly id: string;
-
-  /**
-   * Returns an unstyled component that renders the field value with correct ARIA.
-   * - string → <span>{value}</span>
-   * - boolean → <input type="checkbox" checked aria-checked />
-   * - number → <span>{value}</span>
-   */
   field(name: string): React.ReactElement;
-
-  /**
-   * Returns a boolean from a named condition.
-   * Used for conditional rendering without entity scope leak.
-   */
   when(name: string): boolean;
-
-  /**
-   * Returns an unstyled button element with data-trigger attrs.
-   * The button dispatches the named trigger on click.
-   */
   trigger(name: string, children?: ReactNode): React.ReactElement;
 }
 
 /** bind2 config */
 export interface Bind2Config {
   role: string;
-  fields: FieldSchema;
+  fields?: FieldSchema;
   conditions?: ConditionSchema;
   triggers?: TriggerSchema;
-  /** Provide the list of item IDs to render */
-  getItems: () => string[];
+  zoneFields?: ZoneFieldSchema;
+  zoneTriggers?: ZoneTriggerSchema;
+  getItems?: () => string[];
 }
 
 /** bind2 return value */
 export interface Bind2Result {
-  /** Zone wrapper component */
   Zone: React.FC<{ className?: string; children?: ReactNode }>;
-  /** Item iterator — the pit of success pattern */
   items: (callback: (item: ItemContext) => ReactNode) => React.ReactElement;
+  field: (name: string) => React.ReactElement;
+  trigger: (name: string, children?: ReactNode) => React.ReactElement;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -127,7 +125,15 @@ function renderField(
 // ═══════════════════════════════════════════════════════════════════
 
 export function bind2(config: Bind2Config): Bind2Result {
-  const { role, fields, conditions, triggers, getItems } = config;
+  const {
+    role,
+    fields,
+    conditions,
+    triggers,
+    zoneFields,
+    zoneTriggers,
+    getItems,
+  } = config;
 
   // ── Zone component ──
   const Zone: React.FC<{ className?: string; children?: ReactNode }> = ({
@@ -141,22 +147,57 @@ export function bind2(config: Bind2Config): Bind2Result {
     );
   };
 
+  // ── zone-level field() ──
+  function zoneField(name: string): React.ReactElement {
+    const schema = zoneFields?.[name];
+    if (!schema) {
+      throw new Error(
+        `[bind2] Unknown zone field "${name}". Available: ${Object.keys(zoneFields ?? {}).join(", ")}`,
+      );
+    }
+    const value = schema.resolve();
+    if (schema.type === "string") {
+      return React.createElement("input", {
+        type: "text",
+        value: String(value ?? ""),
+        placeholder: schema.placeholder,
+        "data-zone-field": name,
+        readOnly: true,
+      });
+    }
+    return renderField(name, schema.type, value, "zone");
+  }
+
+  // ── zone-level trigger() ──
+  function zoneTrigger(name: string, children?: ReactNode): React.ReactElement {
+    const t = zoneTriggers?.[name];
+    if (!t) {
+      throw new Error(
+        `[bind2] Unknown zone trigger "${name}". Available: ${Object.keys(zoneTriggers ?? {}).join(", ")}`,
+      );
+    }
+    return React.createElement(
+      "button",
+      { "data-trigger-id": name },
+      children ?? t.label ?? name,
+    );
+  }
+
   // ── items() — iterator with entity scope closure ──
   function items(
     callback: (item: ItemContext) => ReactNode,
   ): React.ReactElement {
-    const itemIds = getItems();
+    const itemIds = getItems?.() ?? [];
 
     const elements = itemIds.map((itemId) => {
-      // Create ItemContext — the ONLY data exit for this item
       const ctx: ItemContext = {
         id: itemId,
 
         field(name: string): React.ReactElement {
-          const schema = fields[name];
+          const schema = fields?.[name];
           if (!schema) {
             throw new Error(
-              `[bind2] Unknown field "${name}". Available: ${Object.keys(fields).join(", ")}`,
+              `[bind2] Unknown field "${name}". Available: ${Object.keys(fields ?? {}).join(", ")}`,
             );
           }
           const value = schema.resolve(itemId);
@@ -174,8 +215,8 @@ export function bind2(config: Bind2Config): Bind2Result {
         },
 
         trigger(name: string, children?: ReactNode): React.ReactElement {
-          const trigger = triggers?.[name];
-          if (!trigger) {
+          const t = triggers?.[name];
+          if (!t) {
             throw new Error(
               `[bind2] Unknown trigger "${name}". Available: ${Object.keys(triggers ?? {}).join(", ")}`,
             );
@@ -186,7 +227,7 @@ export function bind2(config: Bind2Config): Bind2Result {
               "data-trigger-id": name,
               "data-trigger-payload": itemId,
             },
-            children ?? trigger.label ?? name,
+            children ?? t.label ?? name,
           );
         },
       };
@@ -201,5 +242,5 @@ export function bind2(config: Bind2Config): Bind2Result {
     return React.createElement(React.Fragment, null, ...elements);
   }
 
-  return { Zone, items };
+  return { Zone, items, field: zoneField, trigger: zoneTrigger };
 }

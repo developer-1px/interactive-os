@@ -10,8 +10,10 @@
  * 6. renderToString HTML is sufficient to verify all of the above
  */
 
+import type React from "react";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it } from "vitest";
+import { bind2 } from "../../../src/spike/pit-of-success/bind2";
 import { resetState } from "../../../src/spike/pit-of-success/state";
 import { TodoListV2 } from "../../../src/spike/pit-of-success/TodoListV2";
 
@@ -129,5 +131,125 @@ describe("pit-of-success spike", () => {
     expect(html).toContain("Updated task");
     expect(html).toContain('aria-checked="true"');
     expect(html).not.toContain("Buy milk");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Phase 2: Zone-level features
+// ═══════════════════════════════════════════════════════════════════
+
+describe("zone.field() — draft input pattern", () => {
+  it("zone.field('draft') renders input with placeholder", () => {
+    const draftValue = "";
+    const { Zone, field } = bind2({
+      role: "listbox",
+      zoneFields: {
+        draft: {
+          type: "string",
+          resolve: () => draftValue,
+          placeholder: "Add a task...",
+        },
+      },
+    });
+
+    const DraftZone: React.FC = () => <Zone>{field("draft")}</Zone>;
+
+    const html = renderToString(<DraftZone />);
+    expect(html).toContain('data-zone-field="draft"');
+    expect(html).toContain('placeholder="Add a task..."');
+    expect(html).toContain('type="text"');
+  });
+
+  it("zone.field('draft') reflects state changes", () => {
+    const draftValue = "Buy groceries";
+    const { Zone, field } = bind2({
+      role: "listbox",
+      zoneFields: {
+        draft: {
+          type: "string",
+          resolve: () => draftValue,
+          placeholder: "Add a task...",
+        },
+      },
+    });
+
+    const DraftZone: React.FC = () => <Zone>{field("draft")}</Zone>;
+
+    const html = renderToString(<DraftZone />);
+    expect(html).toContain('value="Buy groceries"');
+  });
+
+  it("zone.field() coexists with items() in same zone", () => {
+    resetState();
+    const { Zone, field, items } = bind2({
+      role: "listbox",
+      zoneFields: {
+        draft: {
+          type: "string",
+          resolve: () => "",
+          placeholder: "Add a task...",
+        },
+      },
+      fields: {
+        text: {
+          type: "string",
+          resolve: (id) => (id === "todo-1" ? "Buy milk" : "Other"),
+        },
+      },
+      getItems: () => ["todo-1"],
+    });
+
+    const Combined: React.FC = () => (
+      <Zone>
+        {field("draft")}
+        {items((item) => item.field("text"))}
+      </Zone>
+    );
+
+    const html = renderToString(<Combined />);
+    expect(html).toContain('data-zone-field="draft"');
+    expect(html).toContain("Buy milk");
+    expect(html).toContain('role="listbox"');
+  });
+});
+
+describe("zone.trigger() — toolbar pattern", () => {
+  it("toolbar with zone-level triggers only (no items)", () => {
+    const { Zone, trigger } = bind2({
+      role: "toolbar",
+      zoneTriggers: {
+        Bold: { label: "Bold" },
+        Italic: { label: "Italic" },
+        Underline: { label: "Underline" },
+      },
+    });
+
+    const Toolbar: React.FC = () => (
+      <Zone>
+        {trigger("Bold", "B")}
+        {trigger("Italic", "I")}
+        {trigger("Underline", "U")}
+      </Zone>
+    );
+
+    const html = renderToString(<Toolbar />);
+    expect(html).toContain('role="toolbar"');
+    expect(html).toContain('data-trigger-id="Bold"');
+    expect(html).toContain('data-trigger-id="Italic"');
+    expect(html).toContain('data-trigger-id="Underline"');
+    expect(html).toContain(">B</button>");
+    expect(html).toContain(">I</button>");
+    expect(html).toContain(">U</button>");
+  });
+
+  it("zone-level trigger has no data-trigger-payload", () => {
+    const { Zone, trigger } = bind2({
+      role: "toolbar",
+      zoneTriggers: { Clear: { label: "Clear" } },
+    });
+
+    const html = renderToString(<Zone>{trigger("Clear")}</Zone>);
+    expect(html).toContain('data-trigger-id="Clear"');
+    expect(html).not.toContain("data-trigger-payload");
   });
 });
