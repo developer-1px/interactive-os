@@ -22,6 +22,6 @@
 
 | # | Question | Impact |
 |---|----------|--------|
-| U1 | 한국어 description vs 영어 description — 어느 쪽이 트리거 정확도가 높은가? | eval 결과로 판단. 영어가 높으면 적응형 19개만 영어 description 사용 |
+| U1 | ~~한영 비교~~ **Kill**: 당분간 한국어 유지. 사용자가 읽고 수정 방향을 지시할 수 있어야 함 | Kill |
 | U2 | ~~eval 인프라~~ **해소**: `anthropics/skills` repo clone → `scripts/run_eval.py --eval-set eval-set.json --skill-path .claude/skills/{name} --runs-per-query 3`. 자동 최적화는 `run_loop.py --holdout 0.4 --max-iterations 5`. 자체 스크립트 불필요 | 해소됨 |
-| U3 | Phase 2(/go 모호함 프로토콜 개방)로 진행할지는 Phase 1 eval 결과 후 판단 | Phase 1 성공 시 후속 프로젝트 생성 여부 |
+| U3 | ~~Phase 2~~ **보류**: eval 실행 후 판단 | 보류 |
