@@ -1,5 +1,5 @@
 ---
-description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 Meta 4게이트 판정을 수행한다. 수정 금지, 판정만.
+description: 독립 QA 에이전트. fresh context에서 Code 3게이트(code-review, contract, simplicity) 또는 Meta 4게이트 판정을 수행한다. Spec 검증은 별도 spec-verifier agent가 담당. 수정 금지, 판정만.
 ---
 
 ## /qa — Independent Quality Assurance
@@ -12,7 +12,7 @@ description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 
 
 1. **자기 편향 제거** — 같은 세션이 만들고 검증하면 자기 코드에 관대하다
 2. **컨텍스트 절약** — 개발에 소모된 context window를 검증에 재사용하지 않는다
-3. **기계적 게이트와 분리** — tsc/lint/test/build는 개발 세션의 `/verify`가 담당. QA는 판단이 필요한 검증만
+3. **기계적 게이트와 분리** — tsc/lint/test/build는 개발 세션의 `/verify`가 담당. Spec 검증은 `spec-verifier` agent가 vitest로 기계적 판정. QA는 판단이 필요한 코드 품질 검증만
 
 ---
 
@@ -32,39 +32,17 @@ description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 
 ### Step 0: 부팅
 
 1. `.agent/rules.md`를 읽는다
-2. 대상 프로젝트의 `BOARD.md`를 읽는다 — Context, spec, 완료된 태스크 목록 확인
-3. **Size 필드를 확인한다**: `Meta`이면 → **Meta QA 4 Gate** (아래 §Meta QA). 그 외 → **Code QA 4 Gate** (아래)
-4. `spec.md`가 있으면 읽는다 (Code만)
+2. 대상 프로젝트의 `BOARD.md`를 읽는다 — Context, 완료된 태스크 목록 확인
+3. **Size 필드를 확인한다**: `Meta`이면 → **Meta QA 4 Gate** (아래 §Meta QA). 그 외 → **Code QA 3 Gate** (아래)
 
 ---
 
-## Code QA 4 Gate (Heavy/Light)
+## Code QA 3 Gate (Heavy/Light)
 
-### Gate 1: Spec Drift 검증
+> **Spec 검증은 별도 `spec-verifier` agent가 선행한다.**
+> QA는 spec-verifier PASS 후에 호출되며, 코드 품질만 판정한다.
 
-> spec.md의 BDD 시나리오가 실제 테스트와 1:1 매칭되는가?
-
-**절차**:
-1. `spec.md`의 모든 `Given/When/Then` 시나리오를 열거한다
-2. 대응하는 테스트 파일의 `it()` / `test()` 블록을 열거한다
-3. 1:1 대조표를 만든다:
-
-```
-| # | Spec 시나리오 | 테스트 it() | 매칭 |
-|---|-------------|------------|------|
-| 1 | Given X When Y Then Z | it("should Z when Y") | ✅/❌ |
-```
-
-**판정**:
-- 모든 시나리오에 대응 테스트 존재 → ✅ PASS
-- 누락된 시나리오 있음 → ❌ FAIL (누락 목록 리포트)
-- 테스트는 있지만 시나리오에 없음 → ⚠️ WARNING (스펙 누락 가능성)
-
-**spec.md가 없는 경우** (Meta 프로젝트 등): 이 게이트를 SKIP한다.
-
----
-
-### Gate 2: Code Review (Fresh Eyes)
+### Gate 1: Code Review (Fresh Eyes)
 
 > rules.md와 knowledge/의 기준으로, fresh context에서 코드를 리뷰한다.
 
@@ -84,7 +62,7 @@ description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 
 
 ---
 
-### Gate 3: Contract Compliance (독립 재검사)
+### Gate 2: Contract Compliance (독립 재검사)
 
 > 개발 세션의 `/audit`과 같은 체크리스트를 fresh context에서 독립 실행한다.
 
@@ -99,7 +77,7 @@ description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 
 
 ---
 
-### Gate 4: Simplicity Assessment
+### Gate 3: Simplicity Assessment
 
 > 불필요한 복잡성이 남아있는가? Occam Gate 기준으로 판정한다.
 
@@ -124,7 +102,6 @@ description: 독립 QA 에이전트. fresh context에서 Code 4게이트 또는 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 | Gate | Result |
 |------|--------|
-| Spec Drift        | ✅/❌/⏭ SKIP |
 | Code Review        | ✅/❌ |
 | Contract Compliance | ✅/❌ |
 | Simplicity         | ✅/❌ |
