@@ -46,7 +46,7 @@
 | navigate | — | — | — |
 | overlay | — | — | — |
 | trigger | — | — | — |
-| zift | — | — | — |
+| zift | zone-typing-entry: ✅ Archived (W11) | Archive | 03-12 |
 
 ### apps
 > `src/apps/`
@@ -96,7 +96,7 @@
 | Epics (confirmed) | 21 |
 | Active Projects | 0 |
 | Hold Projects | 7 |
-| Archived (this session) | 11 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit, auto-wip) |
+| Archived (this session) | 12 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit, auto-wip, zone-typing-entry) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |

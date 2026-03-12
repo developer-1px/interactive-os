@@ -61,6 +61,7 @@ interface ZoneProps {
     navigate?: { orientation?: 'vertical' | 'horizontal' | 'both'; loop?: boolean; seamless?: boolean };
     tab?: { behavior?: 'trap' | 'escape' | 'flow' };
     select?: { followFocus?: boolean; mode?: 'single' | 'multiple' };
+    typingEntry?: boolean;  // printable chars (a-z, 0-9) trigger onAction
   };
 
   // Command Binding (Bridge)
