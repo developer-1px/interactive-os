@@ -18,6 +18,7 @@
 
 import type { BaseCommand } from "@kernel";
 import { defineScope, type ScopeToken } from "@kernel";
+import { OS_ACTIVATE } from "@os-core/4-command/activate";
 import type { ZoneRole } from "@os-core/engine/registries/roleRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
 import type {
@@ -87,7 +88,35 @@ export function createZoneConfig(
   role?: ZoneRole | string,
   options?: ZoneOptions,
 ): FocusGroupConfig {
-  return resolveRole(role, options ?? {});
+  const config = resolveRole(role, options ?? {});
+
+  // typingEntry: inject A-Z, 0-9, Shift+A-Z into inputmap
+  if (options?.typingEntry) {
+    injectTypingEntryInputmap(config);
+  }
+
+  return config;
+}
+
+/**
+ * Inject printable character entries (A-Z, 0-9, Shift+A-Z) into zone's inputmap.
+ * Each key maps to [OS_ACTIVATE()] so printable chars trigger onAction.
+ * Keys use canonical form: uppercase letters (normalizeKeyDefinition convention).
+ */
+function injectTypingEntryInputmap(config: FocusGroupConfig): void {
+  const inputmap = { ...config.inputmap };
+  const activate = [OS_ACTIVATE()];
+  for (let i = 65; i <= 90; i++) {
+    const key = String.fromCharCode(i); // A-Z
+    if (!(key in inputmap)) inputmap[key] = activate;
+    const shiftKey = `Shift+${key}`;
+    if (!(shiftKey in inputmap)) inputmap[shiftKey] = activate;
+  }
+  for (let i = 0; i <= 9; i++) {
+    const key = String(i); // 0-9
+    if (!(key in inputmap)) inputmap[key] = activate;
+  }
+  config.inputmap = inputmap;
 }
 
 // ═══════════════════════════════════════════════════════════════════
