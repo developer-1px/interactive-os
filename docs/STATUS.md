@@ -63,6 +63,7 @@
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
+| **skill** | auto-wip: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | conflict-principle-priority: ✅ Archived (W11) | Archive | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
@@ -95,7 +96,7 @@
 | Epics (confirmed) | 21 |
 | Active Projects | 0 |
 | Hold Projects | 7 |
-| Archived (this session) | 10 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit) |
+| Archived (this session) | 11 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit, auto-wip) |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
