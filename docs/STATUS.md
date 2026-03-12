@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T23:00
+> Last updated: 2026-03-12T23:30
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-pit-of-success (os/projection)
+recsection-enhance (agent-activity/activity-feed)
 
 ---
 
@@ -38,7 +38,7 @@ pit-of-success (os/projection)
 | **headless-page** | headless-simulator: P7 Done, P1-6 미착수 | ⚠️ Hold | 03-07 |
 | **headless-page** | headless-test-gaps | ⚠️ Hold | 03-11 |
 | **testbot** | testbot-e2e | ⚠️ Hold | 03-11 |
-| **projection** | pit-of-success | 🔥 Active | 03-12 |
+| **projection** | pit-of-success | ⚠️ Hold | 03-12 |
 | collection | — | — | — |
 | command | — | — | — |
 | devtool-split | ✅ Archived (W11) | Archive | 03-11 |
@@ -80,7 +80,7 @@ pit-of-success (os/projection)
 |------|---------|--------|---------------|
 | **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
 | **docs-viewer** | hmr-activity: ✅ Archived (W11) | Archive | 03-12 |
-| activity-feed | — | — | — |
+| **activity-feed** | recsection-enhance: 커밋 맥락 + 세션 그루핑 + 뷰어 라우팅 | 🔥 Active | 03-12 |
 | dashboard | — | — | — |
 
 ---
@@ -97,7 +97,7 @@ pit-of-success (os/projection)
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 22 |
-| Active Projects | 1 (pit-of-success) |
+| Active Projects | 2 (recsection-enhance, pit-of-success) |
 | Hold Projects | 8 |
 | Archived (this session) | 12 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
