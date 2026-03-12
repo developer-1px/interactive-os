@@ -19,7 +19,7 @@ export interface AgentActivityEntry {
  */
 function collectAgentActivity(
   logsDir: string,
-  limit = 30,
+  limit = 100,
 ): AgentActivityEntry[] {
   if (!fs.existsSync(logsDir)) return [];
 
@@ -30,7 +30,6 @@ function collectAgentActivity(
     .reverse(); // newest day first
 
   const entries: AgentActivityEntry[] = [];
-  const seen = new Set<string>();
 
   for (const file of files) {
     if (entries.length >= limit) break;
@@ -42,12 +41,8 @@ function collectAgentActivity(
       if (!line.trim()) continue;
       try {
         const entry = JSON.parse(line) as AgentActivityEntry;
-        // Deduplicate by detail (keep most recent occurrence)
-        if (!seen.has(entry.detail)) {
-          seen.add(entry.detail);
-          entries.push(entry);
-          if (entries.length >= limit) break;
-        }
+        entries.push(entry);
+        if (entries.length >= limit) break;
       } catch {
         // Skip malformed lines
       }

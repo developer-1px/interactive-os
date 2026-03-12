@@ -241,6 +241,8 @@ export function getRecentFiles(
 export interface AgentRecentFile {
   /** Display name (filename without path) */
   name: string;
+  /** Directory part of the relative path (e.g. "src/docs-viewer/") */
+  dir: string;
   /** Relative path from project root */
   path: string;
   /** File extension (e.g. "ts", "md") */
@@ -303,8 +305,12 @@ export function getAgentRecentFiles(
     const extMatch = filename.match(/\.(\w+)$/);
     const ext = extMatch ? extMatch[1]! : "";
 
+    // Extract directory part
+    const dir = parts.length > 1 ? `${parts.slice(0, -1).join("/")}/` : "";
+
     result.push({
       name: filename,
+      dir,
       path: relativePath,
       ext,
       tool: entry.tool,
@@ -316,6 +322,84 @@ export function getAgentRecentFiles(
     });
   }
 
+  return result;
+}
+
+/** Activity entry input shape (from vite plugin) */
+type ActivityEntry = {
+  ts: string;
+  session: string;
+  tool: string;
+  detail: string;
+  commitMessage?: string;
+};
+
+/**
+ * Get the single most recent Read entry (for the "Reading:" indicator).
+ */
+export function getLatestRead(
+  entries: ActivityEntry[],
+  projectRoot: string,
+): AgentRecentFile | null {
+  const files = getAgentRecentFiles(entries, projectRoot, 1000);
+  return files.find((f) => f.tool === "Read") ?? null;
+}
+
+/** A session group with its files and latest timestamp */
+export interface SessionGroup {
+  sessionId: string;
+  files: AgentRecentFile[];
+  latestTs: string;
+  isActive: boolean;
+}
+
+/**
+ * Get Edit/Write entries grouped by session, sorted newest session first.
+ * `activeThresholdMs` — sessions with activity within this window are marked active (default 2 min).
+ */
+export function getWrittenFilesBySession(
+  entries: ActivityEntry[],
+  projectRoot: string,
+  activeThresholdMs = 2 * 60 * 1000,
+): SessionGroup[] {
+  const allFiles = getAgentRecentFiles(entries, projectRoot, 1000);
+  const writeFiles = allFiles.filter(
+    (f) => f.tool === "Edit" || f.tool === "Write",
+  );
+
+  // Group by session
+  const groups = new Map<string, AgentRecentFile[]>();
+  for (const file of writeFiles) {
+    const session = file.session ?? "unknown";
+    const list = groups.get(session);
+    if (list) {
+      list.push(file);
+    } else {
+      groups.set(session, [file]);
+    }
+  }
+
+  const now = Date.now();
+
+  // Convert to SessionGroup[], sorted by latest timestamp desc
+  const result: SessionGroup[] = [];
+  for (const [sessionId, files] of groups) {
+    const first = files[0];
+    if (!first) continue;
+    const latestTs = files.reduce(
+      (max, f) => (f.ts > max ? f.ts : max),
+      first.ts,
+    );
+    const elapsed = now - new Date(latestTs).getTime();
+    result.push({
+      sessionId,
+      files,
+      latestTs,
+      isActive: elapsed < activeThresholdMs,
+    });
+  }
+
+  result.sort((a, b) => (a.latestTs > b.latestTs ? -1 : 1));
   return result;
 }
 

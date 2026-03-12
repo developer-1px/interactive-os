@@ -171,6 +171,9 @@ export const isProjectMarkdown = (path: string) => path.endsWith(".md");
 export const getAgentRecentFiles = () =>
   _allFiles.map((f, i) => ({
     name: f.name,
+    dir: f.path.includes("/")
+      ? f.path.slice(0, f.path.lastIndexOf("/") + 1)
+      : "",
     path: f.path,
     ext: "md",
     tool: i % 2 === 0 ? "Read" : "Edit",
@@ -178,6 +181,8 @@ export const getAgentRecentFiles = () =>
     session: i < 4 ? "sess-aaa" : "sess-bbb",
     ...(i === 0 ? { commitMessage: "feat: add new feature" } : {}),
   }));
+export const getLatestRead = () => null;
+export const getWrittenFilesBySession = () => [];
 export const loadDocContent = async (path: string) => {
   const map: Record<string, string> = {
     STATUS: "# STATUS\n\nDashboard content",

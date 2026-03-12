@@ -5,7 +5,6 @@ import clsx from "clsx";
 import {
   ChevronDown,
   ChevronRight,
-  Clock,
   Code,
   Edit3,
   Eye,
@@ -13,15 +12,17 @@ import {
   Star,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { DocsApp, DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
+import { DocsFavoritesUI, DocsRecentUI, DocsSidebarUI } from "./app";
 import {
   type AgentRecentFile,
   cleanLabel,
   type DocItem,
   type FlatTreeNode,
   flattenVisibleTree,
-  getAgentRecentFiles,
   getFavoriteFiles,
+  getLatestRead,
+  getWrittenFilesBySession,
+  type SessionGroup,
 } from "./docsUtils";
 import type { AgentActivityEntry } from "./vite-plugin-agent-activity";
 
@@ -56,7 +57,7 @@ export interface DocsSidebarProps {
   header?: React.ReactNode;
 }
 
-// --------------- Recent Section (Agent activity log) ---------------
+// --------------- Agent Activity Section ---------------
 
 /** Project root for path normalization — stripped from absolute paths */
 const PROJECT_ROOT = "/Users/user/Desktop/interactive-os/";
@@ -67,14 +68,20 @@ function FileIcon({ ext, className }: { ext: string; className?: string }) {
   return <FileText size={12} className={className} />;
 }
 
-function ToolBadge({ tool }: { tool: string }) {
-  if (tool === "Read") return <Eye size={9} className="text-slate-300" />;
-  if (tool === "Edit" || tool === "Write")
-    return <Edit3 size={9} className="text-amber-400" />;
-  return null;
+/** Format relative time string from ISO timestamp */
+function relativeTime(ts: string): string {
+  const diff = Date.now() - new Date(ts).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return "just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  return `${Math.floor(hr / 24)}d ago`;
 }
 
-function RecentFileItem({
+/** Single file row: filename (bold) + directory (small) */
+function WriteFileItem({
   file,
   activePath,
 }: {
@@ -87,35 +94,29 @@ function RecentFileItem({
       {({ isFocused }: { isFocused: boolean }) => (
         <div
           className={clsx(
-            "flex flex-col px-3 py-1.5 text-[12px] rounded-md transition-all duration-150",
-            "text-left w-full group/recent cursor-pointer",
+            "flex flex-col px-3 py-1 text-[12px] rounded-md transition-all duration-150",
+            "text-left w-full cursor-pointer",
             isActive
-              ? "bg-blue-50 text-blue-700 font-medium"
+              ? "bg-amber-50 text-amber-800"
               : isFocused
                 ? "bg-indigo-50 text-indigo-700"
                 : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
           )}
-          style={{ paddingLeft: "20px" }}
+          style={{ paddingLeft: "28px" }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <FileIcon
               ext={file.ext}
               className={clsx(
                 "shrink-0",
-                isActive ? "text-blue-400" : "text-slate-300",
+                isActive ? "text-amber-400" : "text-slate-300",
               )}
             />
-            <span className="truncate flex-1" title={file.path}>
-              {file.name}
-            </span>
-            <ToolBadge tool={file.tool} />
+            <span className="truncate flex-1 font-medium">{file.name}</span>
           </div>
-          {file.commitMessage && (
-            <span
-              data-testid="commit-message"
-              className="text-[10px] text-slate-400 truncate mt-0.5 pl-4"
-            >
-              {file.commitMessage}
+          {file.dir && (
+            <span className="text-[10px] text-slate-400 truncate pl-[18px]">
+              {file.dir}
             </span>
           )}
         </div>
@@ -124,107 +125,147 @@ function RecentFileItem({
   );
 }
 
-function SessionGroupHeader({ sessionId }: { sessionId: string }) {
+/** Collapsible session group header with activity indicator */
+function SessionHeader({
+  group,
+  isExpanded,
+  onToggle,
+}: {
+  group: SessionGroup;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <div
-      data-session-group={sessionId}
-      id={`session-group-${sessionId}`}
-      className="px-3 py-1 mt-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex items-center gap-1.5 px-3 py-1 mt-1 w-full text-left group"
     >
-      {sessionId.slice(0, 6)}
-    </div>
+      <span
+        className={clsx(
+          "w-1.5 h-1.5 rounded-full shrink-0",
+          group.isActive ? "bg-green-400" : "bg-slate-300",
+        )}
+      />
+      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+        {group.sessionId.slice(0, 6)}
+      </span>
+      <span className="text-[9px] text-slate-300 flex-1">
+        {relativeTime(group.latestTs)}
+      </span>
+      <span className="text-[9px] text-slate-300 tabular-nums mr-0.5">
+        {group.files.length}
+      </span>
+      <span className="text-slate-300 transition-transform">
+        {isExpanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+      </span>
+    </button>
   );
 }
 
-function RecentSection({
+function AgentActivitySection({
   activePath,
   agentEntries,
 }: {
-  allFiles: DocItem[];
   activePath: string | undefined;
   agentEntries: AgentActivityEntry[];
 }) {
-  const [isOpen, setIsOpen] = useState(true);
-  const isGrouped = DocsApp.useComputed((s) => s.isGrouped);
-  const recentFiles = useMemo(
-    () => getAgentRecentFiles(agentEntries, PROJECT_ROOT, 15),
+  const latestRead = useMemo(
+    () => getLatestRead(agentEntries, PROJECT_ROOT),
+    [agentEntries],
+  );
+  const sessionGroups = useMemo(
+    () => getWrittenFilesBySession(agentEntries, PROJECT_ROOT),
     [agentEntries],
   );
 
-  const groupedFiles = useMemo(() => {
-    if (!isGrouped) return null;
-    const groups = new Map<string, AgentRecentFile[]>();
-    for (const file of recentFiles) {
-      const session = file.session ?? "unknown";
-      const list = groups.get(session);
-      if (list) {
-        list.push(file);
-      } else {
-        groups.set(session, [file]);
-      }
-    }
-    return groups;
-  }, [isGrouped, recentFiles]);
+  // Track which sessions are manually collapsed/expanded by user
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  if (recentFiles.length === 0) return null;
+  const toggleSession = (sessionId: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) {
+        next.delete(sessionId);
+      } else {
+        next.add(sessionId);
+      }
+      return next;
+    });
+  };
+
+  if (!latestRead && sessionGroups.length === 0) return null;
 
   return (
     <div className="mb-4 pb-3 border-b border-slate-100">
-      <div className="flex items-center gap-1.5 px-3 py-1 w-full">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1.5 flex-1 text-left group"
-        >
-          <Clock size={12} className="text-blue-400" />
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
-            Agent Activity
-          </span>
-          <span className="text-[9px] text-slate-300 tabular-nums mr-1">
-            {recentFiles.length}
-          </span>
-          <span className="text-slate-300 transition-transform">
-            {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          </span>
-        </button>
-        <button
-          type="button"
-          data-testid="session-group-toggle"
-          {...DocsRecentUI.triggers.ToggleGrouping()}
-          className={clsx(
-            "text-[9px] px-1.5 py-0.5 rounded transition-colors",
-            isGrouped
-              ? "bg-blue-100 text-blue-600"
-              : "text-slate-400 hover:text-slate-600",
+      {/* Read Indicator — single file */}
+      {latestRead && (
+        <div className="px-3 py-1.5">
+          <div className="flex items-center gap-1.5">
+            <Eye size={10} className="text-slate-300 shrink-0" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Reading
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5 pl-[18px]">
+            <FileIcon
+              ext={latestRead.ext}
+              className="text-slate-300 shrink-0"
+            />
+            <span className="text-[11px] text-slate-500 truncate font-medium">
+              {latestRead.name}
+            </span>
+          </div>
+          {latestRead.dir && (
+            <span className="text-[10px] text-slate-400 truncate pl-[18px] block">
+              {latestRead.dir}
+            </span>
           )}
-        >
-          {isGrouped ? "Flat" : "Group"}
-        </button>
-      </div>
+        </div>
+      )}
 
-      {isOpen && (
-        <DocsRecentUI.Zone className="mt-1 flex flex-col">
-          {isGrouped && groupedFiles
-            ? Array.from(groupedFiles.entries()).map(([session, files]) => (
-                <div key={session}>
-                  <SessionGroupHeader sessionId={session} />
-                  {files.map((file) => (
-                    <RecentFileItem
-                      key={file.path}
-                      file={file}
-                      activePath={activePath}
-                    />
-                  ))}
+      {/* Write List — session groups */}
+      {sessionGroups.length > 0 && (
+        <div className={clsx(latestRead && "mt-2")}>
+          <div className="flex items-center gap-1.5 px-3 py-1">
+            <Edit3 size={10} className="text-amber-400 shrink-0" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+              Modified
+            </span>
+          </div>
+
+          <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
+            {sessionGroups.map((group) => {
+              // Active sessions are expanded by default, unless user manually collapsed
+              const isExpanded = group.isActive
+                ? !collapsed.has(group.sessionId)
+                : false;
+
+              return (
+                <div key={group.sessionId}>
+                  <SessionHeader
+                    group={group}
+                    isExpanded={isExpanded}
+                    onToggle={() => toggleSession(group.sessionId)}
+                  />
+                  {isExpanded &&
+                    group.files.map((file) => (
+                      <WriteFileItem
+                        key={file.path}
+                        file={file}
+                        activePath={activePath}
+                      />
+                    ))}
+                  {!isExpanded && (
+                    <span className="text-[9px] text-slate-300 pl-[28px]">
+                      ({group.files.length} files)
+                    </span>
+                  )}
                 </div>
-              ))
-            : recentFiles.map((file) => (
-                <RecentFileItem
-                  key={file.path}
-                  file={file}
-                  activePath={activePath}
-                />
-              ))}
-        </DocsRecentUI.Zone>
+              );
+            })}
+          </DocsRecentUI.Zone>
+        </div>
       )}
     </div>
   );
@@ -419,9 +460,8 @@ export function DocsSidebar({
           favVersion={favVersion}
         />
 
-        {/* Recent Section — OS Zone */}
-        <RecentSection
-          allFiles={allFiles}
+        {/* Agent Activity — Read indicator + Write session groups */}
+        <AgentActivitySection
           activePath={activePath}
           agentEntries={agentEntries}
         />

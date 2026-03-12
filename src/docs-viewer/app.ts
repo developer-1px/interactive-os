@@ -104,13 +104,11 @@ function getInitialPath(): string | null {
 export interface DocsState {
   activePath: string | null;
   favVersion: number;
-  isGrouped: boolean;
 }
 
 export const DocsApp = defineApp<DocsState>("docs-viewer", {
   activePath: getInitialPath(),
   favVersion: 0,
-  isGrouped: false,
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -173,13 +171,6 @@ export const toggleFav = DocsApp.command("TOGGLE_FAVORITE", (ctx) => {
     }),
   };
 });
-
-/** TOGGLE_GROUPING — switches between flat list and session-grouped view. */
-export const toggleGrouping = DocsApp.command("TOGGLE_GROUPING", (ctx) => ({
-  state: produce(ctx.state, (draft) => {
-    draft.isGrouped = !draft.isGrouped;
-  }),
-}));
 
 // ═══════════════════════════════════════════════════════════════════
 // Navbar Zone — navigation toolbar (back, forward, breadcrumb, search)
@@ -245,9 +236,6 @@ export const DocsRecentUI = recentZone.bind("listbox", {
   options: {
     select: { followFocus: true },
     inputmap: { click: [OS_ACTIVATE()] },
-  },
-  triggers: {
-    ToggleGrouping: () => toggleGrouping(),
   },
 });
 
