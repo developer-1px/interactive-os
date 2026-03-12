@@ -135,5 +135,6 @@ DocsSidebar.tsx RecentSection
 구현 경로:
 1. `vite-plugin-agent-activity.ts`에 git-log 파싱 추가 → `AgentActivityEntry.commitMessage?` (S)
 2. `DocsSidebar.tsx` RecentSection에 커밋 맥락 1줄 표시 + 세션 그루핑 토글 (S)
+3. RecentSection 항목 클릭 시 기존 뷰어로 연결 — md는 markdown viewer, 코드는 code viewer. txt 폴백이 아닌 적절한 뷰어 라우팅 (S)
 
-예상 규모: Light (S+S)
+예상 규모: Light (S+S+S)
