@@ -2,6 +2,10 @@
 
 > OS의 headless → DOM 투영 모델을 재설계하여, LLM이 ARIA/데이터를 빠뜨리거나 틀리게 쓸 수 없는 구조를 만든다.
 
+## Approach
+
+**Spike 프로젝트** — 기존 `defineApp`/`bind()`를 수정하지 않는다. `defineApp2`, `bind2` 등 별도 구현체를 만들어 설계를 검증한다. 검증 완료 후 기존 API 교체 여부를 판단한다.
+
 ## Why
 
 현재 bind() API는 LLM이 entity를 직접 참조(`{todo.title}`)하고, ARIA를 수동으로 동기화해야 한다. LLM의 pre-trained habit으로 인해 ARIA 환각, 데이터 경로 이중화, 동기화 누락이 발생한다. headless test는 E2E 비용 절감이 목표인데, entity 데이터가 OS에 도달하지 않으면 검증 불가 → E2E가 여전히 필요.

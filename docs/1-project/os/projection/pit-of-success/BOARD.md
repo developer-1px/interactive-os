@@ -7,6 +7,7 @@
 | After | `item.field()` + `item.when()` + `item.trigger()` 세 축이 유일한 데이터 출구. renderToString으로 100% 검증 |
 | Size | Heavy |
 | Risk | 기존 bind() API 전면 재설계. 25+ showcase 앱 마이그레이션 필요. 디자인 자유도 제약 가능성 |
+| Approach | **Spike** — 기존 defineApp/bind 수정 금지. `defineApp2`, `bind2` 등 별도 구현으로 설계 검증. 검증 완료 후 기존 API 교체 판단 |
 
 ## Tasks
 
