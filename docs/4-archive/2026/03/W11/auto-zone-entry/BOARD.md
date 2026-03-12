@@ -22,6 +22,17 @@
 | T2 | OS_NAVIGATE null guard → 자동 진입 | navigate/index.ts:38-39 `if (!activeZoneId) return` | 동일 패턴 | tsc 0, 기존 tests 유지 | ✅ | commit 7b5e97c4 |
 | T3 | headless 테스트 작성 | 테스트 없음 | activeZoneId null 상태에서 Tab→첫Zone, Arrow→첫Zone 동작 확인 | +4 tests PASS | ✅ | cross-zone.test.ts +4 |
 
+## Verification
+
+| Gate | Result |
+|------|--------|
+| /audit | ✅ 0건 위반 |
+| /doubt | ✅ 1라운드 수렴, 변경 0 |
+| /verify | ✅ tsc 0 · lint 0 · 783 tests · build OK · dev smoke OK |
+| /explain | ✅ docs/0-inbox/36-[explain]auto-zone-entry.md |
+| spec-verifier | ✅ ALL PASS (7/7) |
+| /qa | ✅ ALL PASS (3/3: code-review, contract, simplicity) |
+
 ## Unresolved
 
 | # | Question | Impact |

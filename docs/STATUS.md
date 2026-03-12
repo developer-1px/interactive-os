@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T20:40
+> Last updated: 2026-03-12T21:25
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-(없음 — 직전 완료: recsection-enhance)
+(없음 — 직전 완료: auto-zone-entry)
 
 ---
 
@@ -45,7 +45,7 @@
 | devtool-split | ✅ Archived (W11) | Archive | 03-11 |
 | field | — | — | — |
 | inspector | — | — | — |
-| navigate | — | — | — |
+| **navigate** | auto-zone-entry: ✅ Archived (W11) | Archive | 03-12 |
 | overlay | — | — | — |
 | trigger | — | — | — |
 | zift | zone-typing-entry: ✅ Archived (W11) | Archive | 03-12 |
@@ -72,6 +72,7 @@
 | **agent** | spec-verifier: T1-T3 ✅ | Active | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
+| **pipeline** | go-srp: Meta, SRP 리팩토링 진행 중 | ⚠️ Hold | 03-12 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
 | pipeline | pipeline-leak-audit: ✅ Archived (W11) | Archive | 03-12 |
 
@@ -101,8 +102,8 @@
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 22 |
 | Active Projects | 0 |
-| Hold Projects | 8 |
-| Archived (this session) | 15 |
+| Hold Projects | 9 |
+| Archived (this session) | 16 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
