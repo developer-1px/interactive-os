@@ -6,6 +6,7 @@
 
 import { Keybindings } from "@os-core/2-resolve/keybindings";
 import type { ZoneOptions } from "@os-core/3-inject/zoneContext";
+import { OS_ACTIVATE } from "@os-core/4-command/activate";
 import { type AppState, os } from "@os-core/engine/kernel";
 import { FieldRegistry } from "@os-core/engine/registries/fieldRegistry";
 import { resolveRole } from "@os-core/engine/registries/roleRegistry";
@@ -32,6 +33,11 @@ function registerZoneFromBinding(
   const { bindings } = bindingEntry;
   const overrides = { ...bindings.options } as ZoneOptions;
   const config = resolveRole(bindingEntry.role, overrides);
+
+  // typingEntry: inject a-z, 0-9 into inputmap so printable chars trigger OS_ACTIVATE
+  if (bindings.options?.typingEntry) {
+    injectTypingEntryInputmap(config);
+  }
   const entry: import("@os-core/engine/registries/zoneRegistry").ZoneEntry = {
     config,
     element: null,
@@ -167,4 +173,28 @@ export function seedInitialState(zoneName: string): void {
       }),
     );
   }
+}
+
+/**
+ * Inject printable character entries (A-Z, 0-9, Shift+A-Z) into zone's inputmap.
+ * Each key maps to [OS_ACTIVATE()] so printable chars trigger onAction.
+ * Keys use canonical form: uppercase letters (normalizeKeyDefinition convention).
+ */
+function injectTypingEntryInputmap(
+  config: import("@os-core/schema/types/focus/config/FocusGroupConfig").FocusGroupConfig,
+): void {
+  const inputmap = { ...config.inputmap };
+  const activate = [OS_ACTIVATE()];
+  for (let i = 65; i <= 90; i++) {
+    const key = String.fromCharCode(i); // A-Z (canonical uppercase)
+    if (!(key in inputmap)) inputmap[key] = activate;
+    // Shift+letter = uppercase typing, also printable
+    const shiftKey = `Shift+${key}`;
+    if (!(shiftKey in inputmap)) inputmap[shiftKey] = activate;
+  }
+  for (let i = 0; i <= 9; i++) {
+    const key = String(i); // 0-9
+    if (!(key in inputmap)) inputmap[key] = activate;
+  }
+  config.inputmap = inputmap;
 }
