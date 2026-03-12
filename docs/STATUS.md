@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T19:40
+> Last updated: 2026-03-12T20:40
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -69,6 +69,7 @@
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | auto-wip: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | conflict-principle-priority: ✅ Archived (W11) | Archive | 03-12 |
+| **agent** | spec-verifier: T1-T3 ✅ | Active | 03-12 |
 | agent | design-review-agent: ✅ Archived (W11) | Archive | 03-12 |
 | agent | qa-agent: ✅ Archived (W11) | Archive | 03-11 |
 | pipeline | meta-pipeline: ✅ Archived (W11) | Archive | 03-12 |
@@ -81,6 +82,7 @@
 |------|---------|--------|---------------|
 | **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
 | **docs-viewer** | hmr-activity: ✅ Archived (W11) | Archive | 03-12 |
+| **docs-viewer** | url-routing: ✅ Archived (W11) | Archive | 03-12 |
 | **activity-feed** | recsection-enhance: ✅ Archived (W11) | Archive | 03-12 |
 | dashboard | — | — | — |
 
@@ -100,7 +102,7 @@
 | Epics (confirmed) | 22 |
 | Active Projects | 0 |
 | Hold Projects | 8 |
-| Archived (this session) | 14 |
+| Archived (this session) | 15 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
