@@ -86,6 +86,8 @@
 
 32. **useLayoutEffect는 DOM API 호출 전용. OS→OS init dispatch 금지.** (Added: 2026-03-05, Refined: 2026-03-05) useLayoutEffect의 정당한 용도: (a) DOM API 호출 (`el.focus()`, `el.innerText = x`), (b) **DOM→OS sync** — DOM에만 존재하는 값(contentEditable innerText 등)을 OS로 올리는 dispatch. 이것은 `<input onChange>`와 같은 패턴이다. **금지**: OS가 이미 아는 정보를 mount 타이밍에 다시 kernel로 dispatch하는 것(OS→OS init). 근거: OS_ZONE_INIT 타이밍 버그(2026-03-05). "mount 시 실행"이 필요한 의도는 `config.initial` 선언형으로 표현한다.
 
+32-a. **activeZoneId null → 3-inject의 DOM_ZONE_ORDER[0]로 주입.** (Added: 2026-03-12) activeZoneId는 Zone 내부 상태가 아니라 Zone 간 전역 상태이므로 config.initial로 해결할 수 없다. mount-time dispatch(#32 위반)도 아니고 user-action 전용(OS_TAB 수정)도 아닌, 기존 inject 메커니즘에서 DOM을 읽어 보강한다. 근거: eb2f8b2a에서 Zone mount OS_FOCUS 제거 후 regression 발생(2026-03-05~03-12).
+
 33. **OS_INIT_* command는 잘못된 전제의 산물. Zone state는 bind() 시점에 eager 생성한다.** (Added: 2026-03-05) `OS_ZONE_INIT`, `OS_INIT_SELECTION` 등 "mount 시 state가 없으니 미리 만들어야 한다"는 전제에서 파생된 command. bind() 시점에 zone state를 eager로 생성하면 전제 소멸 → command 불필요. `ensureZone`은 초기화가 아니라 방어 코드(빈 그릇). 의미 있는 초기 상태(selection, focus)는 첫 번째 command(OS_FOCUS의 followFocus)가 자연스럽게 만든다.
 
 34. **Key는 Command의 속성이다.** (Added: 2026-03-06) 키바인딩은 별도 배열이 아니라 `command("name", handler, { key: "Meta+K" })`로 커맨드와 co-locate 선언한다. OS 커맨드(ArrowUp→NAVIGATE 등)의 키바인딩은 ARIA 스펙이 결정하므로 osDefaults.ts에 위치. 앱 커맨드의 키바인딩은 개발자가 command() 정의 시 key 옵션으로 선언. Keybindings 레지스트리는 앱에 노출되지 않는 OS 내부 구현(facade에서 export 금지).

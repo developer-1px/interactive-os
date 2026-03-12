@@ -10,6 +10,8 @@
 **OS에서 닫을 수 있으면 무조건 OS가 닫는다.**
 컴포넌트 개발자가 올바르게 해야 하는 것은 OS의 실패다.
 
+**headless ≠ DOM 없음.** goal은 e2e를 vitest에서 올리는 것이지 DOM에 의존하지 않는 것이 아니다. headless 환경도 DOM(jsdom/happy-dom)을 가진다. inject 단계에서 DOM_ZONE_ORDER를 읽는 것은 정당하다.
+
 ---
 
 ## 경계: OS 소유 vs DOM 전용
