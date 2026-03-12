@@ -40,8 +40,46 @@
 
 ### Open Gaps
 
-- [ ] Q1: 현재 Trigger 3-Layer에서 condition→disabled를 어디에 주입하는가? (L0? L1?) — 해소 시 명세표 재작성 가능
+- [x] Q1: 현재 Trigger 3-Layer에서 condition→disabled를 어디에 주입하는가? → **해소됨** (아래 턴 2 참조)
+- [ ] Q2: bind2 프로젝트에서 이 요구사항을 어떤 우선순위로 포함할 것인가?
 
 ### 다음 /wip 시 시작점
 
 Q1 해소 → 6-step 명세표 재작성 → `/project` 생성 가능
+
+---
+
+## /wip 분석 이력 #2 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide (Trigger 3-Layer 구조 탐색 — Q1 해소)
+- **입력**: Q1 "현재 Trigger 3-Layer에서 condition→disabled를 어디에 주입하는가?"
+- **결과**:
+  - **L0**: `ZoneRegistry`에 item disabled 추적 있음 (`setDisabled`/`isDisabled`). Trigger용은 없음
+  - **L1**: `computeTrigger()`는 overlay 관련 attrs만 반환 (`aria-haspopup`, `aria-expanded`, `aria-controls`). disabled 없음
+  - **L1**: `computeItem()`은 `ZoneRegistry.isDisabled()` → `aria-disabled` 투영. Trigger에는 이 경로가 없음
+  - **L2**: trigger prop-getter는 `data-trigger-id` + `data-trigger-payload`만 반환. disabled 없음
+  - **Gap 핵심**: `flatHandlerRegistry`의 `when` 조건이 `ZoneRegistry`나 `computeTrigger()`와 전혀 연결되지 않음
+  - **주입점 분석**: 3가지 옵션 존재 — (A) ZoneRegistry 확장, (B) computeTrigger() 확장, (C) prop-getter 확장
+- **Cynefin**: Complicated → **Complex** (아래 이유)
+
+#### Complex 판정 이유
+
+현재 bind 구조 위에 condition→disabled를 넣으려면 3-Layer 전체를 관통하는 배관이 필요:
+1. `flatHandlerRegistry` → `ZoneRegistry` 연결 (L0)
+2. `computeTrigger()` disabled 투영 (L1)
+3. prop-getter disabled 전달 (L2)
+4. `PointerListener` click 차단 (L2)
+
+이 배관은 **bind 자체의 설계**에 의존한다. bind2에서 bind를 재설계하면 이 배관의 형태가 완전히 달라진다.
+→ 현재 bind 위에 덧대면 bind2에서 다시 뜯어야 하는 반창고가 된다.
+
+### 결론
+
+**이 항목은 bind2 프로젝트의 하위 요구사항으로 흡수**되어야 한다.
+bind2에서 condition→trigger disabled 배관을 처음부터 설계에 포함시키는 것이 Pit of Success.
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q2: bind2 프로젝트 스코프에 condition→disabled를 포함할 것인가? — 포함 시 별도 백로그 불필요
