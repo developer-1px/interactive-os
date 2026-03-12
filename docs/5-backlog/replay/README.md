@@ -34,33 +34,88 @@ LLM이 작성한 테스트 코드가 `PASS`를 반환해도, 인간은 "이 PASS
 
 ## Unresolved Questions
 
-- createPage의 동기 실행을 어떻게 step-by-step 재생으로 변환하는가? (instrumentation/recording)
-- Replay 앱은 별도 라우트(`/replay`)인가, Inspector 탭인가?
-- 기존 가상 마우스/키보드 컴포넌트를 재사용할 수 있는가, 처음부터 만드는가?
+- ~~createPage의 동기 실행을 어떻게 step-by-step 재생으로 변환하는가?~~ → **해소됨** (기존 hook 조합)
+- Replay 앱은 별도 라우트(`/replay`)인가, Inspector 탭인가? → **미해소 (Q2)**
+- ~~기존 가상 마우스/키보드 컴포넌트를 재사용할 수 있는가?~~ → **해소됨** (전부 재사용 가능)
 
 ---
 
-## /wip 분석 이력 (2026-03-12)
+## /wip 분석 이력
 
-### 분석 과정
+### Round 1 (2026-03-12) — Complex 판정
 
 #### 턴 1: /divide
 - **입력**: Goal(createPage 시각 재생) + 현재 인프라 조사
-- **결과**:
-  - **인프라 부재 확인**: os-testing에 instrumentation/recording 메커니즘 없음. 설계 필요
-  - **시각화 자산**: `createBrowserPage.ts`에 `VisualEffects` 인터페이스만 존재 (847줄 God Object 내부). 독립 가상 키보드/마우스 컴포넌트 없음
-  - **Backward Chain 5갈래**: A(instrumentation) + B(replay engine) + C(visualization) + D(UI shell) + E(test content)
-  - **규모**: Heavy 프로젝트. 최소 5개 독립 서브시스템
-  - **BOARD T1 의문**: todo-bdd.test.ts 전환은 Replay의 "콘텐츠" 확보이지 Replay 자체 아님
-- **Cynefin**: Complex — 핵심 설계 질문 3개 미해소, 인프라 0에서 시작
+- **결과**: 5갈래 분해(A~E), 인프라 부재 판단
+- **Cynefin**: Complex — 핵심 설계 질문 3개 미해소
+
+---
+
+### Round 2 (2026-03-12) — Complicated 판정 (Clear 직전)
+
+#### 턴 1: /divide (심화) — 코드베이스 instrumentation 포인트 탐색
+- **입력**: Q1(instrumentation) 기술적 실현 가능성 조사
+- **결과 — 3개 recording hook 이미 존재**:
+  1. **`BrowserPage.onStep`** (`createBrowserPage.ts:45,420`): `BrowserStep { action, detail, result, timestamp }` — 매 action마다 fire. **가장 자연스러운 recording point**
+  2. **`InteractionObserver`** (`simulate.ts:56-59`): `setInteractionObserver()` → `{ type, label, stateBefore, stateAfter, timestamp }` — headless+browser 양쪽 동작, 전체 OS state snapshot
+  3. **Kernel middleware** (`historyKernelMiddleware.ts:119-300`): command + patches + focus/selection — 이미 history system이 사용 중
+- **Q1 해소**: Proxy/Decorator 불필요. `onStep` + middleware 조합이면 충분
+- **Cynefin**: Complex → **Complicated**
+
+#### 턴 2: /usage — 시각화 자산 재사용성 조사
+- **입력**: 기존 시각 컴포넌트 재사용 가능 여부
+- **결과 — 전부 존재하며 재사용 가능**:
+  - **Cursor overlay** — Popover API, SVG pointer + spotlight (`createBrowserPage.ts:157-386`)
+  - **Ripple** — 60px, 0.4s CSS keyframe (`testbot-overlays.css`)
+  - **Key badge** — keycap 스타일, modifier 지원 (`testbot-overlays.css`)
+  - **PASS/FAIL stamp** — pop rotation 애니메이션 (`testbot-overlays.css`)
+  - **Step timeline UI** — `SuiteDetails` + `StepIcon` (`TestBotPanel.tsx`)
+  - **Kbd 컴포넌트** — OS별 기호, 3 size, 4 variant (`Kbd.tsx`)
+  - **Speed control** — `STEP_DELAY = 400/speed` 이미 구현
+- **Q4 해소**: `createVisualEffects()`가 이미 독립 함수. God Object 분해 불필요
+- **Cynefin**: Complicated 유지
+
+#### 턴 3: 최종 판정
+- **빌딩블록 매핑**:
+
+| 계층 | 있는 것 | 새로 만들 것 (크기) |
+|------|---------|-------------------|
+| Recording | `onStep`, `InteractionObserver`, kernel middleware | Step 직렬화 adapter (S) |
+| Visual Effects | cursor, ripple, keybadge, stamp, bubble | 없음 |
+| Step Timeline UI | `SuiteDetails`, `StepIcon` | Play/Pause/Step 컨트롤 (S) |
+| Speed Control | `BrowserPageOptions.speed` | 없음 |
+| Storage | — | 녹화 저장/로드 (S) |
+| Replay Engine | `createBrowserPage()` + visual effects | Step→action dispatcher (M) |
+| UI Shell | Inspector panel 인프라 | **Q2: 배치 결정 필요** |
 
 ### Open Gaps (인간 입력 필요)
 
-- [ ] Q1: Instrumentation 접근 — createPage에 Proxy 패턴? Middleware? Recording decorator? 동기 실행→step 배열 변환의 핵심 설계 — 해소 시 A(기록 계층) 구현 시작 가능
-- [ ] Q2: Inspector 통합 vs 독립 라우트 — 해소 시 D(UI shell) 설계 시작 가능
-- [ ] Q3: TestBot v1(Playwright Shim)/v2(OS 시그널)의 실패 교훈을 어떻게 반영하는가 — 해소 시 같은 실수 방지
-- [ ] Q4: createBrowserPage.ts 847줄 God Object에서 VisualEffects를 분리하는 것이 선행 조건인가, Replay에서 독립적으로 구현하는가 — 해소 시 C(시각화) 방향 결정
+- [x] ~~Q1: Instrumentation 접근~~ → `onStep` + kernel middleware 조합
+- [ ] **Q2: Inspector 탭 vs 별도 라우트 (`/replay`)** — 제품 결정. Inspector에 넣으면 개발 도구와 통합, 별도 라우트면 standalone 경험. 해소 시 UI shell 설계 가능
+- [x] ~~Q3: TestBot v1/v2 실패 교훈~~ → 부분 해소. v1 Shim 제거 완료, v2의 VisualEffects는 이미 재사용 가능 형태. Replay는 기존 `createBrowserPage` 위에 adapter만 추가하므로 복잡성 낮음
+- [x] ~~Q4: createBrowserPage God Object 분리~~ → `createVisualEffects()`가 이미 독립 함수. 선행 조건 아님
+
+### 기술 아키텍처 (확정)
+
+```
+TestScript.run(page, expect)
+        │
+        ▼
+  createBrowserPage({ onStep })  ── 기존 코드
+        │
+        ├─ onStep fires ────► StepRecorder (새로 만들 것, S)
+        │                          │
+        │                          ▼
+        │                    BrowserStep[] → JSON 직렬화
+        │
+        ▼
+  Replay Mode: JSON → step-by-step dispatcher (새로 만들 것, M)
+        │
+        ├─ page.click(detail) ─► createVisualEffects() 자동 실행
+        ├─ page.keyboard.press(detail)
+        └─ assert → showStamp()
+```
 
 ### 다음 /wip 시 시작점
 
-Q1 해소 후 → `/blueprint`로 instrumentation 설계. Q2 해소 후 → `/usage`로 Replay API 이상적 사용 코드 설계
+Q2 해소 후 → `/blueprint`로 Replay Engine + UI Shell 설계. 기술적으로는 Clear — Q2 결정만 남음
