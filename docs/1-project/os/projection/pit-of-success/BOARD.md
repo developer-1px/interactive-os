@@ -24,3 +24,4 @@
 | 3 | `item.when(name)` condition이 item-level 파생 데이터까지 포함하는가 (e.g. `isFirstInCategory`) | Zone iterate 콜백에서 index/prev 접근 방법 |
 | 4 | 기존 `<Item>{(state) => JSX}</Item>` render props에서 새 `zone.items((item) => JSX)` 패턴으로의 마이그레이션 경로 | 점진적 전환 vs 일괄 전환 전략 |
 | 5 | headless locator 확장 — renderToString HTML에서 콘텐츠(`textContent`) 검증 API | `page.locator("#id").textContent()` 등 Playwright 호환 인터페이스 |
+| 6 | command의 `when` condition → `item.trigger()` disabled 자동 투영 | condition false일 때 trigger에 `aria-disabled` + click 차단이 자동으로 걸려야 함 |
