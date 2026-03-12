@@ -9,17 +9,23 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { getAgentRecentFiles } from "@/docs-viewer/docsUtils";
+import * as docsUtils from "@/docs-viewer/docsUtils";
 
-// T4: isProjectMarkdown is not yet implemented — import will be undefined
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-let isProjectMarkdown: ((path: string) => boolean) | undefined;
-try {
-  // @ts-expect-error — Red test: isProjectMarkdown not yet exported
-  // biome-ignore lint/style/noCommaOperator: dynamic import for Red test
-  ({ isProjectMarkdown } = await import("@/docs-viewer/docsUtils"));
-} catch {
-  // expected: function not exported yet
+const { getAgentRecentFiles } = docsUtils;
+
+// T4: resolve isProjectMarkdown via bracket access to avoid TS4111
+const PM = "isProjectMarkdown";
+const docsUtilsMap = docsUtils as unknown as Record<string, unknown>;
+const isProjectMarkdown =
+  typeof docsUtilsMap[PM] === "function"
+    ? (docsUtilsMap[PM] as (path: string) => boolean)
+    : undefined;
+
+// T1: resolve commitMessage via bracket access (field not yet in type)
+const CM = "commitMessage";
+function getCommitMessage(obj: unknown): unknown {
+  if (obj == null) return undefined;
+  return (obj as Record<string, unknown>)[CM];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -38,8 +44,7 @@ describe("T1: commitMessage enrichment", () => {
       },
     ];
     const result = getAgentRecentFiles(entries, "/project/", 10);
-    // @ts-expect-error — Red test: commitMessage not yet in AgentRecentFile
-    expect(result[0]?.commitMessage).toBe("feat: add new feature");
+    expect(getCommitMessage(result[0])).toBe("feat: add new feature");
   });
 
   it("commitMessage가 없는 entry → AgentRecentFile.commitMessage는 undefined", () => {
@@ -52,8 +57,7 @@ describe("T1: commitMessage enrichment", () => {
       },
     ];
     const result = getAgentRecentFiles(entries, "/project/", 10);
-    // @ts-expect-error — Red test: commitMessage not yet in AgentRecentFile
-    expect(result[0]?.commitMessage).toBeUndefined();
+    expect(getCommitMessage(result[0])).toBeUndefined();
   });
 
   it("git 저장소가 아닌 환경 → 모든 commitMessage는 undefined", () => {
@@ -73,8 +77,7 @@ describe("T1: commitMessage enrichment", () => {
     ];
     const result = getAgentRecentFiles(entries, "/project/", 10);
     for (const file of result) {
-      // @ts-expect-error — Red test: commitMessage not yet in AgentRecentFile
-      expect(file.commitMessage).toBeUndefined();
+      expect(getCommitMessage(file)).toBeUndefined();
     }
   });
 });
@@ -86,19 +89,19 @@ describe("T1: commitMessage enrichment", () => {
 describe("T4: .md 프로젝트 파일 뷰어 라우팅", () => {
   it(".md 파일은 MarkdownRenderer 경로로 판별된다", () => {
     expect(isProjectMarkdown).toBeDefined();
-    expect(isProjectMarkdown!("src/docs-viewer/README.md")).toBe(true);
-    expect(isProjectMarkdown!("docs/1-project/spec.md")).toBe(true);
+    expect(isProjectMarkdown?.("src/docs-viewer/README.md")).toBe(true);
+    expect(isProjectMarkdown?.("docs/1-project/spec.md")).toBe(true);
   });
 
   it(".ts/.tsx 파일은 코드 뷰어 경로로 판별된다", () => {
     expect(isProjectMarkdown).toBeDefined();
-    expect(isProjectMarkdown!("src/app.ts")).toBe(false);
-    expect(isProjectMarkdown!("src/DocsViewer.tsx")).toBe(false);
+    expect(isProjectMarkdown?.("src/app.ts")).toBe(false);
+    expect(isProjectMarkdown?.("src/DocsViewer.tsx")).toBe(false);
   });
 
   it("확장자 없는 파일은 코드 뷰어 경로로 판별된다", () => {
     expect(isProjectMarkdown).toBeDefined();
-    expect(isProjectMarkdown!("Makefile")).toBe(false);
-    expect(isProjectMarkdown!(".gitignore")).toBe(false);
+    expect(isProjectMarkdown?.("Makefile")).toBe(false);
+    expect(isProjectMarkdown?.(".gitignore")).toBe(false);
   });
 });
