@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T21:00
+> Last updated: 2026-03-12T23:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-skill-description-eval (harness/skill)
+pit-of-success (os/projection)
 
 ---
 
@@ -38,6 +38,7 @@ skill-description-eval (harness/skill)
 | **headless-page** | headless-simulator: P7 Done, P1-6 미착수 | ⚠️ Hold | 03-07 |
 | **headless-page** | headless-test-gaps | ⚠️ Hold | 03-11 |
 | **testbot** | testbot-e2e | ⚠️ Hold | 03-11 |
+| **projection** | pit-of-success | 🔥 Active | 03-12 |
 | collection | — | — | — |
 | command | — | — | — |
 | devtool-split | ✅ Archived (W11) | Archive | 03-11 |
@@ -63,7 +64,7 @@ skill-description-eval (harness/skill)
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
-| **skill** | skill-description-eval | 🔥 Active | 03-12 |
+| **skill** | skill-description-eval | ⚠️ Hold | 03-12 |
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | auto-wip: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | conflict-principle-priority: ✅ Archived (W11) | Archive | 03-12 |
@@ -95,9 +96,9 @@ skill-description-eval (harness/skill)
 | Metric | Count |
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
-| Epics (confirmed) | 21 |
-| Active Projects | 1 (skill-description-eval) |
-| Hold Projects | 7 |
+| Epics (confirmed) | 22 |
+| Active Projects | 1 (pit-of-success) |
+| Hold Projects | 8 |
 | Archived (this session) | 12 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
