@@ -75,6 +75,22 @@ export function parseHashToPath(
   return stripped;
 }
 
+/** Convert a docs path to a hash string. Inverse of parseHashToPath. */
+export function pathToHash(path: string | null): string {
+  if (!path) return "";
+  return `#/${path}`;
+}
+
+/** Check if hashchange should trigger a selectDoc (loop guard). */
+export function shouldSyncFromHash(
+  currentPath: string | null,
+  hash: string,
+): boolean {
+  const hashPath = parseHashToPath(hash);
+  if (hashPath === null) return false;
+  return hashPath !== currentPath;
+}
+
 /** Read initial activePath from window.location.hash (SSR-safe). */
 function getInitialPath(): string | null {
   if (typeof window === "undefined") return null;
@@ -101,7 +117,7 @@ export const DocsApp = defineApp<DocsState>("docs-viewer", {
 // App-level Command — shared by all sidebar zones
 // ═══════════════════════════════════════════════════════════════════
 
-/** SELECT_DOC — sets activePath. Router middleware handles URL sync. */
+/** SELECT_DOC — sets activePath. Hash sync in register.ts pushes to URL. */
 export const selectDoc = DocsApp.command(
   "SELECT_DOC",
   (ctx, payload: { id: string }) => ({
@@ -118,7 +134,7 @@ export const resetDoc = DocsApp.command("RESET_DOC", (ctx) => ({
   }),
 }));
 
-/** GO_BACK — router middleware delegates to TanStack Router history. */
+/** GO_BACK — register.ts delegates to history.back(). */
 export const goBack = DocsApp.command(
   "GO_BACK",
   (ctx) => ({
@@ -127,7 +143,7 @@ export const goBack = DocsApp.command(
   { key: "Alt+ArrowLeft" },
 );
 
-/** GO_FORWARD — router middleware delegates to TanStack Router history. */
+/** GO_FORWARD — register.ts delegates to history.forward(). */
 export const goForward = DocsApp.command(
   "GO_FORWARD",
   (ctx) => ({

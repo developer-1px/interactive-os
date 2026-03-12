@@ -276,7 +276,7 @@ export function DocsViewer() {
   );
 
   // --- React to activePath changes (content load) ---
-  // URL sync is handled by router() middleware — no manual pushState/popstate.
+  // URL hash sync is handled by register.ts (T1: state→URL, T2: URL→state, T3: history).
   useEffect(() => {
     if (!activePath) return;
     const ext = externalRef.current;

@@ -10,7 +10,13 @@
 
 import type { Middleware, MiddlewareContext } from "@kernel";
 import { NOOP, os } from "@os-sdk/os";
-import { DocsApp } from "./app";
+import {
+  DocsApp,
+  type DocsState,
+  pathToHash,
+  selectDoc,
+  shouldSyncFromHash,
+} from "./app";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -133,3 +139,41 @@ const docsNavigateMiddleware: Middleware = {
 };
 
 os.use(docsNavigateMiddleware);
+
+// ── Hash Routing (T1/T2/T3) ──────────────────────────────────────
+// T1: State→URL — sync activePath to location.hash
+// T2: URL→State — hashchange → selectDoc (with loop guard)
+// T3: History — GO_BACK/GO_FORWARD → history.back()/forward()
+
+if (typeof window !== "undefined") {
+  // T1: Watch activePath changes → push to location.hash
+  let lastSyncedPath: string | null = null;
+  os.subscribe(() => {
+    const appState = os.getState().apps["docs-viewer"] as DocsState | undefined;
+    const activePath = appState?.activePath ?? null;
+    if (activePath === lastSyncedPath) return;
+    lastSyncedPath = activePath;
+    const hash = pathToHash(activePath);
+    if (window.location.hash !== hash) {
+      window.location.hash = hash;
+    }
+  });
+
+  // T2: hashchange → selectDoc (loop guard via shouldSyncFromHash)
+  window.addEventListener("hashchange", () => {
+    const appState = os.getState().apps["docs-viewer"] as DocsState | undefined;
+    const currentPath = appState?.activePath ?? null;
+    if (shouldSyncFromHash(currentPath, window.location.hash)) {
+      const newPath = window.location.hash.replace(/^#\/?/, "");
+      os.dispatch(selectDoc({ id: newPath }));
+    }
+  });
+
+  // T3: GO_BACK/GO_FORWARD → history.back()/forward()
+  os.subscribe(() => {
+    const tx = os.inspector.getLastTransaction();
+    if (!tx) return;
+    if (tx.command.type === "GO_BACK") window.history.back();
+    if (tx.command.type === "GO_FORWARD") window.history.forward();
+  });
+}
