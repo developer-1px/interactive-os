@@ -77,6 +77,49 @@ describe("OS Pipeline: Cross-Zone — Tab Navigation", () => {
   });
 });
 
+describe("OS Pipeline: Cross-Zone — Auto Zone Entry (null activeZoneId)", () => {
+  it("Tab auto-enters first zone when activeZoneId is null", () => {
+    const page = setup();
+    expect(readActiveZoneId(os)).toBeNull(); // precondition
+
+    page.keyboard.press("Tab");
+
+    // Should auto-enter first zone from DOM_ZONE_ORDER
+    expect(readActiveZoneId(os)).not.toBeNull();
+    expect(readFocusedItemId(os)).not.toBeNull();
+  });
+
+  it("Tab auto-enters first zone with correct zone and item", () => {
+    const page = setup();
+
+    page.keyboard.press("Tab");
+
+    // cross-toolbar is the first zone in registry order
+    expect(readActiveZoneId(os)).toBe("cross-toolbar");
+    expect(readFocusedItemId(os)).toBe("btn-bold");
+  });
+
+  it("ArrowDown auto-enters first zone when activeZoneId is null", () => {
+    const page = setup();
+    expect(readActiveZoneId(os)).toBeNull();
+
+    page.keyboard.press("ArrowDown");
+
+    expect(readActiveZoneId(os)).not.toBeNull();
+    expect(readFocusedItemId(os)).not.toBeNull();
+  });
+
+  it("after auto-entry, subsequent Tab works normally", () => {
+    const page = setup();
+
+    page.keyboard.press("Tab"); // auto-enter first zone
+    expect(readActiveZoneId(os)).toBe("cross-toolbar");
+
+    page.keyboard.press("Tab"); // should move to next zone
+    expect(readActiveZoneId(os)).toBe("cross-list");
+  });
+});
+
 describe("OS Pipeline: Cross-Zone — Click Transfer", () => {
   it("click item in zone B while zone A is active", () => {
     const page = setup();
