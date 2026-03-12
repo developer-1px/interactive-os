@@ -245,6 +245,104 @@ export const favoritesScripts: TestScript[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════
+// §5 세션별 그루핑 — T3 Decision Table (DT1-DT5)
+// ═══════════════════════════════════════════════════════════════════
+
+export const sessionGroupScripts: TestScript[] = [
+  {
+    name: "§5a DT1: flat→grouped 전환 (≥2세션) → 세션별 그룹 헤더",
+    zone: "docs-recent",
+    async run(page, expect) {
+      const toggle = page.locator("[data-testid='session-group-toggle']");
+      await toggle.click();
+      // ≥2 세션이면 그룹 헤더가 2개 이상 나타나야 한다
+      const header1 = page.locator("[data-session-group]").nth(1);
+      await expect(header1).toHaveAttribute("data-session-group");
+    },
+  },
+
+  {
+    name: "§5b DT2: flat→grouped 전환 (1세션) → 그룹 1개",
+    zone: "docs-recent",
+    async run(page, expect) {
+      const toggle = page.locator("[data-testid='session-group-toggle']");
+      await toggle.click();
+      // 단일 세션이어도 그룹 헤더가 최소 1개 표시
+      const header0 = page.locator("[data-session-group]").nth(0);
+      await expect(header0).toHaveAttribute("data-session-group");
+    },
+  },
+
+  {
+    name: "§5c DT3: grouped→flat 전환 → 시간순 flat list",
+    zone: "docs-recent",
+    async run(page, expect) {
+      const toggle = page.locator("[data-testid='session-group-toggle']");
+      await toggle.click(); // → grouped
+      await toggle.click(); // → flat
+      // flat 모드 복귀: 첫 항목 클릭 시 정상 동작
+      const item = page.locator("[data-item]").nth(0);
+      await item.click();
+      await expect(item).toBeFocused();
+      await expect(item).toHaveAttribute("aria-selected", "true");
+    },
+  },
+
+  {
+    name: "§5d DT4: flat 모드 항목 클릭 → selectDoc 동작 보존",
+    zone: "docs-recent",
+    async run(page, expect) {
+      // 기본(flat) 모드에서 항목 클릭
+      const item = page.locator("[data-item]").nth(0);
+      await item.click();
+      await expect(item).toBeFocused();
+      await expect(item).toHaveAttribute("aria-selected", "true");
+    },
+  },
+
+  {
+    name: "§5e DT5: grouped 모드 항목 클릭 → selectDoc 동작 보존",
+    zone: "docs-recent",
+    async run(page, expect) {
+      const toggle = page.locator("[data-testid='session-group-toggle']");
+      await toggle.click(); // → grouped
+      const item = page.locator("[data-item]").nth(0);
+      await item.click();
+      await expect(item).toBeFocused();
+      await expect(item).toHaveAttribute("aria-selected", "true");
+    },
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// §6 커밋 메시지 표시 — T2 BDD Scenarios
+// ═══════════════════════════════════════════════════════════════════
+
+export const commitMessageScripts: TestScript[] = [
+  {
+    name: "§6a T2: commitMessage 있는 항목 → 커밋 메시지 1줄 표시",
+    zone: "docs-recent",
+    async run(page, expect) {
+      // commitMessage가 있는 항목은 data-testid='commit-message' 요소를 가져야 한다
+      const commitMsg = page.locator("[data-testid='commit-message']").nth(0);
+      await expect(commitMsg).toHaveAttribute("data-testid", "commit-message");
+    },
+  },
+
+  {
+    name: "§6b T2: commitMessage 없는 항목 → 기존 표시 유지",
+    zone: "docs-recent",
+    async run(page, expect) {
+      // commitMessage 없는 항목: 기존 파일명+ToolBadge 표시 정상 동작
+      const item = page.locator("[data-item]").nth(0);
+      await item.click();
+      await expect(item).toBeFocused();
+      await expect(item).toHaveAttribute("aria-selected", "true");
+    },
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
 // §4 Tab Navigation — Zone 간 전환 (cross-zone)
 //
 // Tier 2 auto-runner (createPage(app) + goto("/"))에서
@@ -334,7 +432,12 @@ export const scenarios: TestScenario[] = [
   {
     zone: "docs-recent",
     role: "listbox",
-    scripts: [...recentListScripts, ...recentTabScripts],
+    scripts: [
+      ...recentListScripts,
+      ...recentTabScripts,
+      ...sessionGroupScripts,
+      ...commitMessageScripts,
+    ],
   },
   {
     zone: "docs-favorites",
@@ -352,4 +455,6 @@ export const docsViewerScripts: TestScript[] = [
   ...recentListScripts,
   ...favoritesScripts,
   ...tabNavigationScripts,
+  ...sessionGroupScripts,
+  ...commitMessageScripts,
 ];

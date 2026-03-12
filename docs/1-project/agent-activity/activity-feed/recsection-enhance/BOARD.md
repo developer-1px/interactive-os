@@ -19,10 +19,10 @@
 
 | # | Task | Before | After | AC | Status | Evidence |
 |---|------|--------|-------|----|--------|----------|
-| T1 | `AgentActivityEntry.commitMessage?` + git-log 파싱 | `{ ts, session, tool, detail }` — commitMessage 없음 | `execSync('git log')` → 파일경로→커밋메시지 매핑 → entry에 주입 | tsc 0 | ⬜ | |
-| T2 | RecentSection 커밋 메시지 표시 | FileIcon + name + ToolBadge | + 하단 commitMessage 1줄 (text-[10px] text-slate-400) | tsc 0, 화면 확인 | ⬜ | |
-| T3 | 세션별 그루핑 토글 | flat list (세션 구분 없음) | session UUID 기준 접이식 그룹 헤더 + flat/grouped 토글 | tsc 0, 화면 확인 | ⬜ | |
-| T4 | .md 프로젝트 파일 → MarkdownRenderer | `<pre>{content}</pre>` (plain text) | `.md` → `<MarkdownRenderer>`, 그 외 → `<pre>` 유지 | tsc 0, .md 렌더링 확인 | ⬜ | |
+| T1 | `AgentActivityEntry.commitMessage?` + git-log 파싱 | `{ ts, session, tool, detail }` — commitMessage 없음 | `execSync('git log')` → 파일경로→커밋메시지 매핑 → entry에 주입 | tsc 0 | 🔴 | recsection-enhance.test.ts: 1 FAIL |
+| T2 | RecentSection 커밋 메시지 표시 | FileIcon + name + ToolBadge | + 하단 commitMessage 1줄 (text-[10px] text-slate-400) | tsc 0, 화면 확인 | 🔴 | §6a FAIL (commit-message 요소 없음) |
+| T3 | 세션별 그루핑 토글 | flat list (세션 구분 없음) | session UUID 기준 접이식 그룹 헤더 + flat/grouped 토글 | tsc 0, 화면 확인 | 🔴 | §5a-§5c,§5e FAIL (toggle 없음) |
+| T4 | .md 프로젝트 파일 → MarkdownRenderer | `<pre>{content}</pre>` (plain text) | `.md` → `<MarkdownRenderer>`, 그 외 → `<pre>` 유지 | tsc 0, .md 렌더링 확인 | 🔴 | recsection-enhance.test.ts: 3 FAIL |
 
 ## Unresolved
 
