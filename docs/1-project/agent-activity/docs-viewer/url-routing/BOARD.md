@@ -22,6 +22,8 @@
 | T2 | hashchange → selectDoc | 브라우저 뒤로가기/URL 직접 입력 시 반응 없음 | hashchange 이벤트 → `parseHashToPath` → `selectDoc` (무한루프 guard) | tsc 0, +N tests | ✅ | tsc 0 ∣ +10 tests ∣ register.ts T2 hashchange listener |
 | T3 | goBack/goForward 연결 | 커맨드 선언만, noop | `goBack` → `history.back()`, `goForward` → `history.forward()` | tsc 0 | ✅ | tsc 0 ∣ register.ts T3 subscribe |
 
+✅ QA PASS — [qa-report-2026-0312-2030.md](qa-report-2026-0312-2030.md)
+
 ## Unresolved
 
 | # | Question | Impact |
