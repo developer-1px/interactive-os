@@ -22,6 +22,7 @@
 | **OS 커맨드 래핑** | 순수함수 → `App.command()` 래핑 → state 반환. 이 순서 유지 | 2026-02-25 |
 | **최소 구현** | Red 테스트가 요구하는 것만. 테스트 없는 로직 추가 금지 | 2026-02-25 |
 | **Zone 태스크 체크** | Green 완료 후 "Zone이 있는가?" 확인. 있으면 /bind 필요. 여기서 멈추면 안 됨 | 2026-02-25 |
+| **Projection locator** | OS item이 아닌 HTML 요소(`[data-testid]`, `[data-session-group]` 등)를 headless에서 관찰·클릭. `page.locator(selector)`가 OS items에 없으면 `projection.queryElements(selector)`로 fallback. click은 `data-trigger-id` 경유 | 2026-03-12 |
 
 ## Hazards
 
@@ -48,7 +49,9 @@
 | **공유 mock은 `__mocks__/` 폴더** | 여러 테스트 파일이 같은 모듈을 mock → inline mock 중복 170줄+ | `__mocks__/moduleName.ts`로 추출, `vi.mock(path, () => import("./__mocks__/moduleName"))` 한 줄로 사용 | Red |
 | **testbot 수동 getItems = drift** | testbot에서 `getSidebarItems()` 등 수동 items → headless/browser items 불일치 | `TestScenario.items`/`getItems` 필드 제거. `runScenarios`가 `getZoneItems(zoneId)` → ZoneRegistry 단일 경로 | Red |
 | **biome vs tsc index signature** | biome가 `obj?.["run"]`을 `obj?.run`으로 자동 변환 → tsc `noPropertyAccessFromIndexSignature` 위반으로 빌드 실패 | `Record<string, unknown>` 대신 `{ run?: unknown }` 타입 단언으로 우회 | Green |
-| **biome --write --unsafe ! → ?. 변환** | pre-commit hook의 `biome check --write --unsafe`가 non-null assertion(`!`)을 optional chaining(`?.`)으로 변환 → 반환 타입이 `T \| undefined`가 되어 tsc 에러 발생. 자기 코드가 아닌 **다른 파일**도 변환됨 | staged 파일만 lint되지만 tsc는 전체 프로젝트 검사 → 다른 파일의 pre-existing `!`가 `?.`로 변환되면 tsc 실패. commit 실패 시 원인이 자기 코드인지 lint 변환인지 먼저 확인 | Green |
+| **biome --write --unsafe ! → ?. 변환** | pre-commit hook의 `biome check --write --unsafe`가 non-null assertion(`!`)을 optional chaining(`?.`)으로 변환 → 반환 타입이 `T \| undefined`가 되어 tsc 에러 발생. 자기 코드가 아닌 **다른 파일**도 변환됨 | staged 파일만 lint되지만 tsc는 전체 프로젝트 검사 → 다른 파일의 pre-existing `!`가 `?.`로 변환되면 tsc 실패. commit 실패 시 원인이 자기 코드인지 lint 변환인지 먼저 확인. **근본 해결: `!` 대신 type narrowing guard (`match && match[1] && match[2]`)** | Green |
+| **biome-ignore 스코프 = 1줄** | `biome-ignore` 주석은 **다음 1줄만** 보호. 블록 전체를 보호하지 않음. `if (match) { ... match[1]! ... match[2]! }` 같은 블록에서 첫 줄만 보호되고 나머지 `!`는 `?.`로 변환됨 | `biome-ignore`로 블록 보호 시도 금지. non-null assertion 자체를 제거하고 narrowing guard 사용 | Green |
+| **projection queryElements 캐시** | `projection.queryElements(selector)` 호출 시 htmlCache를 무효화하지 않으면 이전 상태의 HTML 반환 → click으로 OS 상태 변경 후 stale 결과 | `queryElements()` 구현에서 `htmlCache = null; itemsCache = null;` 선행 필수 | Green |
 
 ## Precedents
 
