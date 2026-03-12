@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T18:00
+> Last updated: 2026-03-12T21:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-builder-typing-entry-migration (apps/builder)
+adaptive-auto-trigger (harness/skill)
 
 ---
 
@@ -55,7 +55,7 @@ builder-typing-entry-migration (apps/builder)
 |------|---------|--------|---------------|
 | **builder** | builder-v2: T12, T13, T20 | ⚠️ Hold | 03-05 |
 | **builder** | builder-v3: 기획 완료, 개발 보류 | ⚠️ Hold | 03-05 |
-| **builder** | builder-typing-entry-migration | 🔥 Active | 03-12 |
+| **builder** | builder-typing-entry-migration | ⚠️ Hold | 03-12 |
 | todo | — | — | — |
 
 ### harness
@@ -63,6 +63,7 @@ builder-typing-entry-migration (apps/builder)
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
+| **skill** | adaptive-auto-trigger | 🔥 Active | 03-12 |
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | auto-wip: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | conflict-principle-priority: ✅ Archived (W11) | Archive | 03-12 |
@@ -95,9 +96,9 @@ builder-typing-entry-migration (apps/builder)
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 0 |
+| Active Projects | 1 (adaptive-auto-trigger) |
 | Hold Projects | 7 |
-| Archived (this session) | 12 (devtool-split, agent-recent, archive-cleanup, qa-agent, hmr-activity, design-review-agent, meta-pipeline, wip-skill, conflict-principle-priority, pipeline-leak-audit, auto-wip, zone-typing-entry) |
+| Archived (this session) | 12 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
