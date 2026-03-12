@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-없음
+builder-typing-entry-migration (apps/builder)
 
 ---
 
@@ -55,6 +55,7 @@
 |------|---------|--------|---------------|
 | **builder** | builder-v2: T12, T13, T20 | ⚠️ Hold | 03-05 |
 | **builder** | builder-v3: 기획 완료, 개발 보류 | ⚠️ Hold | 03-05 |
+| **builder** | builder-typing-entry-migration | 🔥 Active | 03-12 |
 | todo | — | — | — |
 
 ### harness
