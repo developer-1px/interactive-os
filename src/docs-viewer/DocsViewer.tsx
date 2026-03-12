@@ -516,9 +516,9 @@ export function DocsViewer() {
                   {activePath && isProjectMarkdown(activePath) ? (
                     <MarkdownRenderer content={content} />
                   ) : (
-                    <pre className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-[13px] leading-relaxed font-mono text-slate-800 overflow-x-auto max-w-4xl mx-auto whitespace-pre">
-                      {content}
-                    </pre>
+                    <MarkdownRenderer
+                      content={`\`\`\`${activePath?.split(".").pop() ?? ""}\n${content}\n\`\`\``}
+                    />
                   )}
                   <div className="h-40" />
                 </article>
