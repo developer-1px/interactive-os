@@ -10,6 +10,7 @@ import { DocsViewer } from "./DocsViewer";
 // OS plugin registrations (side-effect imports)
 import "@inspector/register";
 import "@/command-palette/register";
+import "@/docs-viewer/register";
 
 function DocsRoot() {
   const isInspectorOpen = useInspectorStore(
