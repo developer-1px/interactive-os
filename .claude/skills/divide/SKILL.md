@@ -1,5 +1,5 @@
 ---
-description: 논의 도구. 복잡한 문제를 이해하기 위해 Goal에서 역추적하여 분해한다. 실행 계획은 /plan이 담당.
+description: 목표는 명확하지만 분해 경로가 불명확할 때 사용. Goal에서 역추적하여 전제조건을 코드 증거 기반으로 분해한다.
 ---
 
 ## /divide — Goal-Driven Backward Chaining

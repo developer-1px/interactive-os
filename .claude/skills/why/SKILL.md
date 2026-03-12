@@ -1,5 +1,5 @@
 ---
-description: 막혔을 때 멈추고, 근본 원인을 찾아 공유한다. LLM의 잘못된 컨텍스트 탈출용.
+description: 에이전트가 같은 문제를 3회+ 재시도하거나 진전 없이 루프에 빠졌을 때 사용. 코드를 수정하지 않고 근본 원인 리포트를 작성한다.
 ---
 
 > **이론적 기반**: Argyris Double-loop Learning, Toyota 5 Whys, Chesterton's Fence, Klotz Subtract

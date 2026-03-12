@@ -1,8 +1,8 @@
-# skill-description-eval — 적응형 스킬 19개 description 재작성 + 트리거 정확도 평가
+# skill-description-eval — 적응형 스킬 18개 description 재작성 + 트리거 정확도 평가
 
 | Key | Value |
 |-----|-------|
-| Claim | 적응형 19개 스킬의 description을 "언제 호출" 중심으로 재작성하면, Claude가 상황에 맞는 스킬을 자동 제안할 수 있다 |
+| Claim | 적응형 18개 스킬의 description을 "언제 호출" 중심으로 재작성하면, Claude가 상황에 맞는 스킬을 자동 제안할 수 있다 |
 | Before | 52개 스킬 전부 수동 호출(`/skillname`). description은 UI 표시용. auto-trigger 미사용. /go 모호함 프로토콜은 conflict→blueprint→divide 3개 하드코딩 |
 | After | 적응형 19개 스킬이 auto-trigger 가능. Claude가 "여기서 /diagnose 쓸까요?" 자동 제안. eval 케이스로 트리거 정확도 측정·최적화 가능 |
 | Size | Meta |
@@ -12,7 +12,11 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-<!-- /plan이 Task Map으로 채운다 -->
+| T1 | 적응형 스킬 분류 확정 — simplify 제외, 최종 18개 목록 확정 | BOARD 분류표 정합 | ✅ | simplify 미존재 확인, 19→18 갱신 (BOARD+README+memory) |
+| T2 | 18개 SKILL.md description 재작성 — "언제 호출" 트리거 조건 중심 | 18개 SKILL.md 갱신 | ⬜ | |
+| T3 | 18개 .agent/workflows/ 동기화 | 18개 workflow 파일 갱신 | ⬜ | |
+| T4 | eval-set.json 작성 (20+ 테스트 케이스) | JSON 파싱 가능 + ≥20 케이스 | ⬜ | |
+| T5 | U2 해소 — eval 실행 환경 조사 + 결론 기록 | U2에 결론 기록 | ⬜ | |
 
 ## Unresolved
 
