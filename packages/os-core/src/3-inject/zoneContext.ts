@@ -69,6 +69,8 @@ export interface ZoneOptions {
       >
     | undefined;
   inputmap?: InputMap | undefined;
+  /** When true, printable characters (a-z, 0-9) trigger onAction during navigation. */
+  typingEntry?: boolean | undefined;
 }
 
 // ═══════════════════════════════════════════════════════════════════
