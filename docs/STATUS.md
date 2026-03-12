@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-adaptive-auto-trigger (harness/skill)
+skill-description-eval (harness/skill)
 
 ---
 
@@ -63,7 +63,7 @@ adaptive-auto-trigger (harness/skill)
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
-| **skill** | adaptive-auto-trigger | 🔥 Active | 03-12 |
+| **skill** | skill-description-eval | 🔥 Active | 03-12 |
 | **skill** | wip-skill: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | auto-wip: ✅ Archived (W11) | Archive | 03-12 |
 | **skill** | conflict-principle-priority: ✅ Archived (W11) | Archive | 03-12 |
@@ -96,7 +96,7 @@ adaptive-auto-trigger (harness/skill)
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 21 |
-| Active Projects | 1 (adaptive-auto-trigger) |
+| Active Projects | 1 (skill-description-eval) |
 | Hold Projects | 7 |
 | Archived (this session) | 12 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |

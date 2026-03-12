@@ -1,4 +1,4 @@
-# adaptive-auto-trigger
+# skill-description-eval — 적응형 스킬 19개 description 재작성 + 트리거 정확도 평가
 
 | Key | Value |
 |-----|-------|
