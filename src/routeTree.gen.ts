@@ -17,6 +17,7 @@ import { Route as MinimalDocsRouteImport } from './routes/_minimal/docs'
 import { Route as MinimalBuilderListRouteImport } from './routes/_minimal/builder-list'
 import { Route as MinimalBuilderRouteImport } from './routes/_minimal/builder'
 import { Route as MinimalDocsIndexRouteImport } from './routes/_minimal/docs/index'
+import { Route as MinimalPlaygroundPitOfSuccessRouteImport } from './routes/_minimal/playground.pit-of-success'
 import { Route as MinimalPlaygroundOsTestRouteImport } from './routes/_minimal/playground.os-test'
 import { Route as MinimalPlaygroundLayersRouteImport } from './routes/_minimal/playground.layers'
 import { Route as MinimalPlaygroundFocusRouteImport } from './routes/_minimal/playground.focus'
@@ -63,6 +64,12 @@ const MinimalDocsIndexRoute = MinimalDocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MinimalDocsRoute,
 } as any)
+const MinimalPlaygroundPitOfSuccessRoute =
+  MinimalPlaygroundPitOfSuccessRouteImport.update({
+    id: '/playground/pit-of-success',
+    path: '/playground/pit-of-success',
+    getParentRoute: () => MinimalRoute,
+  } as any)
 const MinimalPlaygroundOsTestRoute = MinimalPlaygroundOsTestRouteImport.update({
   id: '/playground/os-test',
   path: '/playground/os-test',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
   '/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
+  '/playground/pit-of-success': typeof MinimalPlaygroundPitOfSuccessRoute
   '/docs/': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
   '/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
@@ -126,6 +134,7 @@ export interface FileRoutesByTo {
   '/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
   '/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
+  '/playground/pit-of-success': typeof MinimalPlaygroundPitOfSuccessRoute
   '/docs': typeof MinimalDocsIndexRoute
   '/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
   '/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/_minimal/playground/focus': typeof MinimalPlaygroundFocusRoute
   '/_minimal/playground/layers': typeof MinimalPlaygroundLayersRouteWithChildren
   '/_minimal/playground/os-test': typeof MinimalPlaygroundOsTestRouteWithChildren
+  '/_minimal/playground/pit-of-success': typeof MinimalPlaygroundPitOfSuccessRoute
   '/_minimal/docs/': typeof MinimalDocsIndexRoute
   '/_minimal/playground/apg/$pattern': typeof MinimalPlaygroundApgPatternRoute
   '/_minimal/playground/layers/$pattern': typeof MinimalPlaygroundLayersPatternRoute
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/playground/focus'
     | '/playground/layers'
     | '/playground/os-test'
+    | '/playground/pit-of-success'
     | '/docs/'
     | '/playground/apg/$pattern'
     | '/playground/layers/$pattern'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/playground/focus'
     | '/playground/layers'
     | '/playground/os-test'
+    | '/playground/pit-of-success'
     | '/docs'
     | '/playground/apg/$pattern'
     | '/playground/layers/$pattern'
@@ -192,6 +204,7 @@ export interface FileRouteTypes {
     | '/_minimal/playground/focus'
     | '/_minimal/playground/layers'
     | '/_minimal/playground/os-test'
+    | '/_minimal/playground/pit-of-success'
     | '/_minimal/docs/'
     | '/_minimal/playground/apg/$pattern'
     | '/_minimal/playground/layers/$pattern'
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/'
       preLoaderRoute: typeof MinimalDocsIndexRouteImport
       parentRoute: typeof MinimalDocsRoute
+    }
+    '/_minimal/playground/pit-of-success': {
+      id: '/_minimal/playground/pit-of-success'
+      path: '/playground/pit-of-success'
+      fullPath: '/playground/pit-of-success'
+      preLoaderRoute: typeof MinimalPlaygroundPitOfSuccessRouteImport
+      parentRoute: typeof MinimalRoute
     }
     '/_minimal/playground/os-test': {
       id: '/_minimal/playground/os-test'
@@ -373,6 +393,7 @@ interface MinimalRouteChildren {
   MinimalPlaygroundFocusRoute: typeof MinimalPlaygroundFocusRoute
   MinimalPlaygroundLayersRoute: typeof MinimalPlaygroundLayersRouteWithChildren
   MinimalPlaygroundOsTestRoute: typeof MinimalPlaygroundOsTestRouteWithChildren
+  MinimalPlaygroundPitOfSuccessRoute: typeof MinimalPlaygroundPitOfSuccessRoute
 }
 
 const MinimalRouteChildren: MinimalRouteChildren = {
@@ -384,6 +405,7 @@ const MinimalRouteChildren: MinimalRouteChildren = {
   MinimalPlaygroundFocusRoute: MinimalPlaygroundFocusRoute,
   MinimalPlaygroundLayersRoute: MinimalPlaygroundLayersRouteWithChildren,
   MinimalPlaygroundOsTestRoute: MinimalPlaygroundOsTestRouteWithChildren,
+  MinimalPlaygroundPitOfSuccessRoute: MinimalPlaygroundPitOfSuccessRoute,
 }
 
 const MinimalRouteWithChildren =
