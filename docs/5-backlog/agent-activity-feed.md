@@ -99,6 +99,29 @@ DocsSidebar.tsx RecentSection
   └─ 세션 그루핑 토글: session UUID → 접이식 그룹 헤더
 ```
 
+---
+
+### Round 3 (2026-03-12) — Complex 유지 (코드 검증 완료)
+
+#### 턴 1: 코드 현황 확인
+- **입력**: RecentSection + vite-plugin-agent-activity.ts 실제 코드
+- **결과**:
+  - `AgentActivityEntry { ts, session, tool, detail }` — commitMessage 필드 없음 확인
+  - RecentSection: 15개 항목, ToolBadge(Read/Edit/Write), HMR 실시간 — 동작 중
+  - 구현 스케치(Round 2)가 코드 구조와 **정확히 일치** — git-log 파싱 → entry 매칭 → commitMessage 추가 경로 타당
+  - 세션 그루핑: `entry.session` 필드 이미 존재 → UI 그루핑만 추가하면 됨
+- **Cynefin**: Complex 유지 — Q3(제품 방향)만 남음
+
+#### 턴 2: 최종 판정
+- 추가 분석 가치 없음. 기술적으로 Clear, 제품 방향만 인간 판단 필요.
+
+### Open Gaps (인간 입력 필요)
+
+- [x] ~~Q1: JSONL vs git-log~~ → **보완적 사용**
+- [x] ~~Q2: os-migration 블로커~~ → **독립 구현 가능**
+- [ ] **Q3: 기존 RecentSection 개선이면 충분한가?** — 코드 검증 완료. 동의 시 즉시 `/project` → `/go`
+
 ### 다음 /wip 시 시작점
 
 Q3 동의 후 → `/project`로 프로젝트 생성 → `/go`로 실행. 예상 규모: Light (S+S = 반나절)
+- 구현 경로: `vite-plugin-agent-activity.ts`에 git-log 파싱 추가 → `AgentActivityEntry.commitMessage?` → `DocsSidebar.tsx` RecentSection에 맥락 표시 + 세션 그루핑 토글
