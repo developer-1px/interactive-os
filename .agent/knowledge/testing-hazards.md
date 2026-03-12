@@ -48,6 +48,7 @@
 | **공유 mock은 `__mocks__/` 폴더** | 여러 테스트 파일이 같은 모듈을 mock → inline mock 중복 170줄+ | `__mocks__/moduleName.ts`로 추출, `vi.mock(path, () => import("./__mocks__/moduleName"))` 한 줄로 사용 | Red |
 | **testbot 수동 getItems = drift** | testbot에서 `getSidebarItems()` 등 수동 items → headless/browser items 불일치 | `TestScenario.items`/`getItems` 필드 제거. `runScenarios`가 `getZoneItems(zoneId)` → ZoneRegistry 단일 경로 | Red |
 | **biome vs tsc index signature** | biome가 `obj?.["run"]`을 `obj?.run`으로 자동 변환 → tsc `noPropertyAccessFromIndexSignature` 위반으로 빌드 실패 | `Record<string, unknown>` 대신 `{ run?: unknown }` 타입 단언으로 우회 | Green |
+| **biome --write --unsafe ! → ?. 변환** | pre-commit hook의 `biome check --write --unsafe`가 non-null assertion(`!`)을 optional chaining(`?.`)으로 변환 → 반환 타입이 `T \| undefined`가 되어 tsc 에러 발생. 자기 코드가 아닌 **다른 파일**도 변환됨 | staged 파일만 lint되지만 tsc는 전체 프로젝트 검사 → 다른 파일의 pre-existing `!`가 `?.`로 변환되면 tsc 실패. commit 실패 시 원인이 자기 코드인지 lint 변환인지 먼저 확인 | Green |
 
 ## Precedents
 
