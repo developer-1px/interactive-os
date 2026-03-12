@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useRef, useState } from "react";
 import { createZone } from "../../spike/pit-of-success/createZone";
 import {
   addTodo,
@@ -9,6 +10,9 @@ import {
   toggleTodo,
 } from "../../spike/pit-of-success/state";
 import { TodoListV2 } from "../../spike/pit-of-success/TodoListV2";
+
+// Reset spike state on module load (not during render)
+resetState();
 
 // ── createZone config (bind-less, pure projection) ──
 
@@ -54,11 +58,6 @@ const PitOfSuccessPage: React.FC = () => {
   const [, setTick] = useState(0);
   const rerender = useCallback(() => setTick((t) => t + 1), []);
   const draftRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    resetState();
-    rerender();
-  }, [rerender]);
 
   // Event delegation: intercept clicks on data-trigger-id buttons
   const handleClick = useCallback(
@@ -169,9 +168,7 @@ const PitOfSuccessPage: React.FC = () => {
               }
             }}
           />
-          <Toolbar.Zone>
-            {(zone) => <>{zone.Add("+")}</>}
-          </Toolbar.Zone>
+          <Toolbar.Zone>{(zone) => <>{zone.Add("+")}</>}</Toolbar.Zone>
         </div>
       </Section>
     </div>
