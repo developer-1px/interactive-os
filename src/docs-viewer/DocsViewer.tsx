@@ -39,6 +39,7 @@ import {
   flattenTree,
   formatRelativeTime,
   isFavorite,
+  isProjectMarkdown,
   loadDocContent,
 } from "./docsUtils";
 import { type ExternalFolderSource, openExternalFolder } from "./fsAccessUtils";
@@ -512,9 +513,13 @@ export function DocsViewer() {
                       </div>
                     ))}
                   </div>
-                  <pre className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-[13px] leading-relaxed font-mono text-slate-800 overflow-x-auto max-w-4xl mx-auto whitespace-pre">
-                    {content}
-                  </pre>
+                  {activePath && isProjectMarkdown(activePath) ? (
+                    <MarkdownRenderer content={content} />
+                  ) : (
+                    <pre className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-[13px] leading-relaxed font-mono text-slate-800 overflow-x-auto max-w-4xl mx-auto whitespace-pre">
+                      {content}
+                    </pre>
+                  )}
                   <div className="h-40" />
                 </article>
               ) : (
