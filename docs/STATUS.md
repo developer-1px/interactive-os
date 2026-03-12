@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T19:15
+> Last updated: 2026-03-12T19:40
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -14,7 +14,7 @@
 
 ## 🔥 Active Focus
 
-recsection-enhance (agent-activity/activity-feed)
+(없음 — 직전 완료: recsection-enhance)
 
 ---
 
@@ -38,6 +38,7 @@ recsection-enhance (agent-activity/activity-feed)
 | **headless-page** | headless-simulator: P7 Done, P1-6 미착수 | ⚠️ Hold | 03-07 |
 | **headless-page** | headless-test-gaps | ⚠️ Hold | 03-11 |
 | **testbot** | testbot-e2e | ⚠️ Hold | 03-11 |
+| **testbot** | testbot-step-preview | ⚠️ Hold | 03-12 |
 | **projection** | pit-of-success: ✅ Archived (W11) | Archive | 03-12 |
 | collection | — | — | — |
 | command | — | — | — |
@@ -80,7 +81,7 @@ recsection-enhance (agent-activity/activity-feed)
 |------|---------|--------|---------------|
 | **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
 | **docs-viewer** | hmr-activity: ✅ Archived (W11) | Archive | 03-12 |
-| **activity-feed** | recsection-enhance: 커밋 맥락 + 세션 그루핑 + 뷰어 라우팅 | 🔥 Active | 03-12 |
+| **activity-feed** | recsection-enhance: ✅ Archived (W11) | Archive | 03-12 |
 | dashboard | — | — | — |
 
 ---
@@ -97,9 +98,9 @@ recsection-enhance (agent-activity/activity-feed)
 |--------|-------|
 | Domains | 5 (kernel, os, apps, harness, agent-activity) |
 | Epics (confirmed) | 22 |
-| Active Projects | 1 (recsection-enhance) |
+| Active Projects | 0 |
 | Hold Projects | 8 |
-| Archived (this session) | 13 |
+| Archived (this session) | 14 |
 | Backlog (demoted) | 3 (replay, test-observability, condition-auto-disabled) |
 | Inbox | docs/0-inbox/ |
 | Backlog | docs/5-backlog/ |
