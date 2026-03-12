@@ -22,7 +22,13 @@ fi
 
 # 이 세션의 /auto 파이프라인이 활성 상태면 멈추지 않는다
 if [ -f "$MARKER" ]; then
-  echo "/auto 파이프라인 진행 중. /go 판별표 #0부터 재판별하세요." >&2
+  TARGET=$(cat "$MARKER" 2>/dev/null)
+  # target 내용에 따라 재개 메시지 분기
+  if [ "$TARGET" = "wip" ]; then
+    echo "/auto /wip 파이프라인 진행 중. /wip을 다시 실행하세요 (새 백로그 항목 선택)." >&2
+  else
+    echo "/auto 파이프라인 진행 중. /go 판별표 #0부터 재판별하세요." >&2
+  fi
   exit 2
 fi
 
