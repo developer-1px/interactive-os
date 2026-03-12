@@ -26,8 +26,18 @@ export const OS_TAB = os.defineCommand(
   (ctx) => (payload: TabPayload) => {
     const { activeZoneId } = ctx.state.os.focus;
     if (!activeZoneId) {
-      console.log("[OS_TAB] ❌ no activeZoneId");
-      return;
+      // Auto-enter first zone from DOM_ZONE_ORDER (design-principles #32-a)
+      const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
+      const first = zoneOrder[0];
+      if (!first?.firstItemId) return;
+      return {
+        state: produce(ctx.state, (draft) => {
+          draft.os.focus.activeZoneId = first.zoneId;
+          const z = ensureZone(draft.os, first.zoneId);
+          z.focusedItemId = first.firstItemId;
+          z.lastFocusedId = first.firstItemId;
+        }) as typeof ctx.state,
+      };
     }
 
     const zone = ctx.state.os.focus.zones[activeZoneId];

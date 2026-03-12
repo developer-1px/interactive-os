@@ -13,6 +13,7 @@ import {
   DOM_ITEMS,
   DOM_RECTS,
   DOM_TREE_LEVELS,
+  DOM_ZONE_ORDER,
   ZONE_CONFIG,
 } from "@os-core/3-inject";
 import { ZoneRegistry } from "@os-core/engine/registries/zoneRegistry";
@@ -33,10 +34,30 @@ interface NavigatePayload {
 
 export const OS_NAVIGATE = os.defineCommand(
   "OS_NAVIGATE",
-  [DOM_ITEMS, DOM_RECTS, ZONE_CONFIG, DOM_EXPANDABLE_ITEMS, DOM_TREE_LEVELS],
+  [
+    DOM_ITEMS,
+    DOM_RECTS,
+    ZONE_CONFIG,
+    DOM_EXPANDABLE_ITEMS,
+    DOM_TREE_LEVELS,
+    DOM_ZONE_ORDER,
+  ],
   (ctx) => (payload: NavigatePayload) => {
     const { activeZoneId } = ctx.state.os.focus;
-    if (!activeZoneId) return;
+    if (!activeZoneId) {
+      // Auto-enter first zone from DOM_ZONE_ORDER (design-principles #32-a)
+      const zoneOrder = ctx.inject(DOM_ZONE_ORDER);
+      const first = zoneOrder[0];
+      if (!first?.firstItemId) return;
+      return {
+        state: produce(ctx.state, (draft) => {
+          draft.os.focus.activeZoneId = first.zoneId;
+          const z = ensureZone(draft.os, first.zoneId);
+          z.focusedItemId = first.firstItemId;
+          z.lastFocusedId = first.firstItemId;
+        }) as typeof ctx.state,
+      };
+    }
 
     const zone = ctx.state.os.focus.zones[activeZoneId];
     if (!zone) return;
