@@ -37,3 +37,30 @@ LLM이 작성한 테스트 코드가 `PASS`를 반환해도, 인간은 "이 PASS
 - createPage의 동기 실행을 어떻게 step-by-step 재생으로 변환하는가? (instrumentation/recording)
 - Replay 앱은 별도 라우트(`/replay`)인가, Inspector 탭인가?
 - 기존 가상 마우스/키보드 컴포넌트를 재사용할 수 있는가, 처음부터 만드는가?
+
+---
+
+## /wip 분석 이력 (2026-03-12)
+
+### 분석 과정
+
+#### 턴 1: /divide
+- **입력**: Goal(createPage 시각 재생) + 현재 인프라 조사
+- **결과**:
+  - **인프라 부재 확인**: os-testing에 instrumentation/recording 메커니즘 없음. 설계 필요
+  - **시각화 자산**: `createBrowserPage.ts`에 `VisualEffects` 인터페이스만 존재 (847줄 God Object 내부). 독립 가상 키보드/마우스 컴포넌트 없음
+  - **Backward Chain 5갈래**: A(instrumentation) + B(replay engine) + C(visualization) + D(UI shell) + E(test content)
+  - **규모**: Heavy 프로젝트. 최소 5개 독립 서브시스템
+  - **BOARD T1 의문**: todo-bdd.test.ts 전환은 Replay의 "콘텐츠" 확보이지 Replay 자체 아님
+- **Cynefin**: Complex — 핵심 설계 질문 3개 미해소, 인프라 0에서 시작
+
+### Open Gaps (인간 입력 필요)
+
+- [ ] Q1: Instrumentation 접근 — createPage에 Proxy 패턴? Middleware? Recording decorator? 동기 실행→step 배열 변환의 핵심 설계 — 해소 시 A(기록 계층) 구현 시작 가능
+- [ ] Q2: Inspector 통합 vs 독립 라우트 — 해소 시 D(UI shell) 설계 시작 가능
+- [ ] Q3: TestBot v1(Playwright Shim)/v2(OS 시그널)의 실패 교훈을 어떻게 반영하는가 — 해소 시 같은 실수 방지
+- [ ] Q4: createBrowserPage.ts 847줄 God Object에서 VisualEffects를 분리하는 것이 선행 조건인가, Replay에서 독립적으로 구현하는가 — 해소 시 C(시각화) 방향 결정
+
+### 다음 /wip 시 시작점
+
+Q1 해소 후 → `/blueprint`로 instrumentation 설계. Q2 해소 후 → `/usage`로 Replay API 이상적 사용 코드 설계
