@@ -1,5 +1,5 @@
 ---
-description: Design Spike. 컴파일되지 않는 이상적 Usage 코드를 먼저 작성하고, 컨셉맵 18개로 완전성을 탁상 검증한다.
+description: 새 OS 기능이나 앱 유형의 설계 초기에 사용. 컴파일되지 않는 이상적 API 사용 코드를 먼저 작성하고 18개 컨셉맵으로 완전성을 검증한다.
 ---
 
 ## /usage — Usage Spec (Design Spike)

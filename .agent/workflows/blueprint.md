@@ -1,5 +1,5 @@
 ---
-description: 코드 수정 전 TOC 기반 실행 설계도. Goal → Why → Challenge → Ideal → Inputs → Gap → Divide.
+description: 구현 경로가 불명확하거나 경쟁 접근법이 있을 때, 코드 작성 전 사용. TOC 기반 실행 설계도(Goal→Why→Challenge→Ideal→Inputs→Gap)를 작성한다.
 ---
 
 ## /blueprint — 실행 설계도

@@ -1,5 +1,5 @@
 ---
-description: Unit 커버리지 측정 → 갭 분석 → /tdd + /go 자동 실행으로 커버리지를 올린다.
+description: 순수 로직 파일(resolver, middleware, utils)의 단위 테스트 커버리지가 낮을 때 사용. 갭을 측정하고 파일별 ≥80% 달성까지 루프한다.
 ---
 
 > **분류**: 오케스트레이터. 내부에서 /tdd, /go를 사용한다.

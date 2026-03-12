@@ -1,5 +1,5 @@
 ---
-description: 프로젝트 철학 준수 및 네이밍/구조 일관성을 코드 리뷰하여 위반 사항을 리포트한다
+description: 코드 전수 품질 점검이 필요할 때 사용. /audit(OS 계약 grep) → /doubt(감산 필터)를 순차 실행하는 복합 워크플로우.
 ---
 
 ## /review = /audit + /doubt

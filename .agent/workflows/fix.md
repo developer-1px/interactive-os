@@ -1,5 +1,5 @@
 ---
-description: LLM 산출물의 well-formedness를 intent-preserving하게 보장하는 품질 게이트.
+description: 코드가 컴파일되지 않는 형식 오류(누락 import, 깨진 경로, 미정의 참조, 주석 stub)일 때 사용. 형식만 수정하고 로직은 절대 변경하지 않는다.
 ---
 
 ## /fix — Well-formedness 검증 & 정정

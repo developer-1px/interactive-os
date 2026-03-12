@@ -1,5 +1,5 @@
 ---
-description: 관찰된 버그를 headless 재현 테스트로 전환한다. 산출물은 🔴 FAIL하는 TestScript다.
+description: 브라우저에서 버그가 관찰되었고 재현 테스트가 필요할 때 사용. 산출물은 올바른 이유로 FAIL하는 TestScript다.
 ---
 
 ## /repro — 버그 재현 테스트 작성
