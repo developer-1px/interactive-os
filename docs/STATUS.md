@@ -1,6 +1,6 @@
 # Project Dashboard
 
-> Last updated: 2026-03-12T21:25
+> Last updated: 2026-03-13T12:00
 >
 > 이 파일은 **단일 진실 원천(Single Source of Truth)**이다.
 > 워크플로우가 읽고, `/status`가 갱신한다. 과거 기록은 git log가 담당한다.
@@ -81,6 +81,7 @@
 
 | Epic | Project | Status | Last Activity |
 |------|---------|--------|---------------|
+| **docs-viewer** | activity-usability: ✅ Archived (W11) | Archive | 03-13 |
 | **docs-viewer** | os-migration: T7 OS gap 발견 후 멈춤 | ⚠️ Hold | 03-10 |
 | **docs-viewer** | hmr-activity: ✅ Archived (W11) | Archive | 03-12 |
 | **docs-viewer** | url-routing: ✅ Archived (W11) | Archive | 03-12 |
