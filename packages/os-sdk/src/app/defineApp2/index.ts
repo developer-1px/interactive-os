@@ -152,11 +152,10 @@ export function defineApp2<S>(appId: string, initialState: S): AppHandle2<S> {
 
     // ── Zone FC — Projection v2.2 asChild render prop ──
 
-    let triggerCounter = 0;
-
     const Zone: React.FC<{
       children: (zone: ZoneRenderContext<E, C>) => React.ReactElement;
     }> = ({ children }) => {
+      let triggerCounter = 0;
       // Read entities from data accessor using initial state
       // (reactive state reading via useComputed is a future concern)
       const entities = config.data(initialState);
@@ -200,13 +199,16 @@ export function defineApp2<S>(appId: string, initialState: S): AppHandle2<S> {
         return React.createElement(React.Fragment, null, ...itemElements);
       };
 
-      // Trigger: inject data-trigger-id via cloneElement
+      // Trigger: inject data-trigger-id + onClick dispatch via mergeProps
       const Trigger: React.FC<{
         onPress: (cmd: C) => unknown;
         children: React.ReactElement;
-      }> = ({ children: child }) => {
+      }> = ({ onPress, children: child }) => {
         const triggerId = `${name}-trigger-${++triggerCounter}`;
-        return mergeProps(child, { "data-trigger-id": triggerId });
+        return mergeProps(child, {
+          "data-trigger-id": triggerId,
+          onClick: () => onPress(config.commands),
+        });
       };
 
       // Call render prop with zone context
