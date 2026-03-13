@@ -161,17 +161,7 @@ source ~/.nvm/nvm.sh && nvm use && npx vitest run tests/qc/[project-name].qc.tes
 
 ## Meta QC
 
-> Meta 프로젝트는 코드가 없으므로 빌드 게이트를 축소하고 문서 계약을 검증한다.
-
-### 빌드 게이트 (축소)
-
-```bash
-# tsc만 (regression 확인)
-npm run typecheck
-
-# unit test만 (regression 확인)
-source ~/.nvm/nvm.sh && nvm use && npx vitest run 2>&1 | tail -30
-```
+> Meta 프로젝트는 코드를 건드리지 않으므로 **빌드 게이트를 스킵**하고 문서 계약만 검증한다.
 
 ### 문서 4게이트
 
@@ -187,8 +177,6 @@ source ~/.nvm/nvm.sh && nvm use && npx vitest run 2>&1 | tail -30
 ```
 | 출하 조건 | 위치 (file:loc) | 근거 | P/F |
 |----------|----------------|------|-----|
-| tsc 통과 | — | exit 0 | |
-| 기존 테스트 GREEN | — | N/N passed | |
 | Completeness | BOARD.md:T1-TN | AC-Evidence 대조표 | |
 | Consistency | rules.md:L42 | 모순 0건 | |
 | Reference Integrity | — | 깨진 참조 0건 | |
