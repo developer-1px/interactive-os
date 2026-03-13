@@ -31,9 +31,27 @@ interface ZoneConfig<S, E, C extends Record<string, (...args: any[]) => any>> {
   data: (state: S) => E[];
 }
 
+/** Render prop context provided by Zone FC */
+interface ZoneRenderContext<E, C> {
+  Items: React.FC<{
+    children: (item: Readonly<E>, Item: FieldWrappers<E>) => React.ReactElement;
+  }>;
+  Trigger: React.FC<{
+    onPress: (cmd: C) => unknown;
+    children: React.ReactElement;
+  }>;
+}
+
+/** Mapped type: entity keys (except id) → asChild FC */
+type FieldWrappers<E> = {
+  [K in Exclude<keyof E, "id">]: React.FC<{ children: React.ReactElement }>;
+};
+
 /** Zone handle returned by createZone */
-interface ZoneHandle<_E, _C> {
-  Zone: React.FC;
+interface ZoneHandle<E, C> {
+  Zone: React.FC<{
+    children: (zone: ZoneRenderContext<E, C>) => React.ReactElement;
+  }>;
 }
 
 /** Zone binding entry for defineApp2 — stored in __zoneBindings */
