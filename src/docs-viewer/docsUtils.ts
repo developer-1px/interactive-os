@@ -334,73 +334,87 @@ type ActivityEntry = {
   commitMessage?: string;
 };
 
-/**
- * Get the single most recent Read entry (for the "Reading:" indicator).
- */
-export function getLatestRead(
-  entries: ActivityEntry[],
-  projectRoot: string,
-): AgentRecentFile | null {
-  const files = getAgentRecentFiles(entries, projectRoot, 1000);
-  return files.find((f) => f.tool === "Read") ?? null;
-}
-
-/** A session group with its files and latest timestamp */
+/** A session group: latest read (active only) + writes, sorted newest first */
 export interface SessionGroup {
   sessionId: string;
-  files: AgentRecentFile[];
+  latestRead: AgentRecentFile | null;
+  writes: AgentRecentFile[];
   latestTs: string;
   isActive: boolean;
 }
 
 /**
- * Get Edit/Write entries grouped by session, sorted newest session first.
- * `activeThresholdMs` — sessions with activity within this window are marked active (default 2 min).
+ * Group all activity by session. Each session gets:
+ * - `latestRead`: most recent Read file (only for active sessions)
+ * - `writes`: Edit/Write files, newest first (deduped by path)
+ * Sorted by latest activity timestamp, newest session first.
  */
-export function getWrittenFilesBySession(
+export function getActivityBySession(
   entries: ActivityEntry[],
   projectRoot: string,
   activeThresholdMs = 2 * 60 * 1000,
 ): SessionGroup[] {
   const allFiles = getAgentRecentFiles(entries, projectRoot, 1000);
-  const writeFiles = allFiles.filter(
-    (f) => f.tool === "Edit" || f.tool === "Write",
-  );
 
-  // Group by session
-  const groups = new Map<string, AgentRecentFile[]>();
-  for (const file of writeFiles) {
+  // Collect reads and writes per session
+  const sessionReads = new Map<string, AgentRecentFile>();
+  const sessionWrites = new Map<string, AgentRecentFile[]>();
+
+  for (const file of allFiles) {
     const session = file.session ?? "unknown";
-    const list = groups.get(session);
-    if (list) {
-      list.push(file);
-    } else {
-      groups.set(session, [file]);
+
+    if (file.tool === "Read") {
+      // Keep only the latest read per session (allFiles is newest-first)
+      if (!sessionReads.has(session)) {
+        sessionReads.set(session, file);
+      }
+    } else if (file.tool === "Edit" || file.tool === "Write") {
+      const list = sessionWrites.get(session);
+      if (list) {
+        list.push(file);
+      } else {
+        sessionWrites.set(session, [file]);
+      }
     }
   }
 
-  const now = Date.now();
+  // Merge all session IDs
+  const allSessionIds = new Set([
+    ...sessionReads.keys(),
+    ...sessionWrites.keys(),
+  ]);
 
-  // Convert to SessionGroup[], sorted by latest timestamp desc
+  const now = Date.now();
   const result: SessionGroup[] = [];
-  for (const [sessionId, files] of groups) {
-    const first = files[0];
-    if (!first) continue;
-    const latestTs = files.reduce(
-      (max, f) => (f.ts > max ? f.ts : max),
-      first.ts,
-    );
+
+  for (const sessionId of allSessionIds) {
+    const writes = sessionWrites.get(sessionId) ?? [];
+    const read = sessionReads.get(sessionId) ?? null;
+
+    // Latest timestamp across all activity in this session
+    let latestTs = "";
+    if (read && read.ts > latestTs) latestTs = read.ts;
+    for (const w of writes) {
+      if (w.ts > latestTs) latestTs = w.ts;
+    }
+    if (!latestTs) continue;
+
     const elapsed = now - new Date(latestTs).getTime();
+    const isActive = elapsed < activeThresholdMs;
+
     result.push({
       sessionId,
-      files,
+      latestRead: isActive ? read : null,
+      writes,
       latestTs,
-      isActive: elapsed < activeThresholdMs,
+      isActive,
     });
   }
 
-  result.sort((a, b) => (a.latestTs > b.latestTs ? -1 : 1));
-  return result;
+  // Only include sessions that have writes (read-only sessions are noise)
+  const filtered = result.filter((g) => g.writes.length > 0);
+  filtered.sort((a, b) => (a.latestTs > b.latestTs ? -1 : 1));
+  return filtered;
 }
 
 // --------------- Favorites ---------------

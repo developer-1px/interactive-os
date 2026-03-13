@@ -19,9 +19,8 @@ import {
   type DocItem,
   type FlatTreeNode,
   flattenVisibleTree,
+  getActivityBySession,
   getFavoriteFiles,
-  getLatestRead,
-  getWrittenFilesBySession,
   type SessionGroup,
 } from "./docsUtils";
 import type { AgentActivityEntry } from "./vite-plugin-agent-activity";
@@ -154,7 +153,7 @@ function SessionHeader({
         {relativeTime(group.latestTs)}
       </span>
       <span className="text-[9px] text-slate-300 tabular-nums mr-0.5">
-        {group.files.length}
+        {group.writes.length}
       </span>
       <span className="text-slate-300 transition-transform">
         {isExpanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
@@ -170,12 +169,8 @@ function AgentActivitySection({
   activePath: string | undefined;
   agentEntries: AgentActivityEntry[];
 }) {
-  const latestRead = useMemo(
-    () => getLatestRead(agentEntries, PROJECT_ROOT),
-    [agentEntries],
-  );
   const sessionGroups = useMemo(
-    () => getWrittenFilesBySession(agentEntries, PROJECT_ROOT),
+    () => getActivityBySession(agentEntries, PROJECT_ROOT),
     [agentEntries],
   );
 
@@ -194,79 +189,66 @@ function AgentActivitySection({
     });
   };
 
-  if (!latestRead && sessionGroups.length === 0) return null;
+  if (sessionGroups.length === 0) return null;
 
   return (
     <div className="mb-4 pb-3 border-b border-slate-100">
-      {/* Read Indicator — single file */}
-      {latestRead && (
-        <div className="px-3 py-1.5">
-          <div className="flex items-center gap-1.5">
-            <Eye size={10} className="text-slate-300 shrink-0" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Reading
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 mt-0.5 pl-[18px]">
-            <FileIcon
-              ext={latestRead.ext}
-              className="text-slate-300 shrink-0"
-            />
-            <span className="text-[11px] text-slate-500 truncate font-medium">
-              {latestRead.name}
-            </span>
-          </div>
-          {latestRead.dir && (
-            <span className="text-[10px] text-slate-400 truncate pl-[18px] block">
-              {latestRead.dir}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Section title */}
+      <div className="flex items-center gap-1.5 px-3 py-1">
+        <Edit3 size={10} className="text-amber-400 shrink-0" />
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
+          Agent Activity
+        </span>
+      </div>
 
-      {/* Write List — session groups */}
-      {sessionGroups.length > 0 && (
-        <div className={clsx(latestRead && "mt-2")}>
-          <div className="flex items-center gap-1.5 px-3 py-1">
-            <Edit3 size={10} className="text-amber-400 shrink-0" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-1">
-              Modified
-            </span>
-          </div>
+      {/* Session groups */}
+      <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
+        {sessionGroups.map((group) => {
+          const isExpanded = group.isActive
+            ? !collapsed.has(group.sessionId)
+            : false;
 
-          <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
-            {sessionGroups.map((group) => {
-              // Active sessions are expanded by default, unless user manually collapsed
-              const isExpanded = group.isActive
-                ? !collapsed.has(group.sessionId)
-                : false;
-
-              return (
-                <div key={group.sessionId}>
-                  <SessionHeader
-                    group={group}
-                    isExpanded={isExpanded}
-                    onToggle={() => toggleSession(group.sessionId)}
-                  />
-                  {isExpanded &&
-                    group.files.map((file) => (
-                      <WriteFileItem
-                        key={file.path}
-                        file={file}
-                        activePath={activePath}
+          return (
+            <div key={group.sessionId}>
+              <SessionHeader
+                group={group}
+                isExpanded={isExpanded}
+                onToggle={() => toggleSession(group.sessionId)}
+              />
+              {isExpanded && (
+                <>
+                  {/* Read indicator — active sessions only */}
+                  {group.latestRead && (
+                    <div className="flex items-center gap-1.5 px-3 py-0.5 pl-[28px]">
+                      <Eye size={10} className="text-slate-300 shrink-0" />
+                      <FileIcon
+                        ext={group.latestRead.ext}
+                        className="text-slate-300 shrink-0"
                       />
-                    ))}
-                  {!isExpanded && (
-                    <span className="text-[9px] text-slate-300 pl-[28px]">
-                      ({group.files.length} files)
-                    </span>
+                      <span className="text-[11px] text-slate-400 truncate">
+                        {group.latestRead.name}
+                      </span>
+                    </div>
                   )}
-                </div>
-              );
-            })}
-          </DocsRecentUI.Zone>
-        </div>
-      )}
+                  {/* Write files — newest first */}
+                  {group.writes.map((file) => (
+                    <WriteFileItem
+                      key={file.path}
+                      file={file}
+                      activePath={activePath}
+                    />
+                  ))}
+                </>
+              )}
+              {!isExpanded && (
+                <span className="text-[9px] text-slate-300 pl-[28px]">
+                  ({group.writes.length} files)
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </DocsRecentUI.Zone>
     </div>
   );
 }
