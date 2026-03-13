@@ -9,7 +9,7 @@
 import { defineScope } from "@kernel";
 import type { CommandFactory } from "@kernel/core/tokens";
 import { registerAppSlice } from "@os-core/engine/appState";
-import type React from "react";
+import React from "react";
 import type { FlatHandler, Selector } from "../defineApp/types";
 
 // ═══════════════════════════════════════════════════════════════════
@@ -84,6 +84,28 @@ interface AppHandle2<S> {
   readonly __zoneBindings: Map<string, ZoneBinding2Entry>;
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: cloneElement type erasure at asChild boundary
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- asChild cloneElement requires any
+type AnyElement = React.ReactElement<any>;
+
+/** Merge props into a ReactElement via cloneElement (asChild pattern) */
+function mergeProps(
+  element: React.ReactElement,
+  props: Record<string, unknown>,
+): React.ReactElement {
+  return React.cloneElement(element as AnyElement, props);
+}
+
+/** Container role → item role mapping */
+const ITEM_ROLE_MAP: Record<string, string> = {
+  listbox: "option",
+  tree: "treeitem",
+  grid: "row",
+  treegrid: "row",
+  menu: "menuitem",
+  tablist: "tab",
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // defineApp2
 // ═══════════════════════════════════════════════════════════════════
@@ -128,8 +150,74 @@ export function defineApp2<S>(appId: string, initialState: S): AppHandle2<S> {
       data: config.data as (state: unknown) => unknown[],
     });
 
-    // Stub Zone FC — real implementation in T9 (Projection React)
-    const Zone: React.FC = () => null;
+    // ── Zone FC — Projection v2.2 asChild render prop ──
+
+    let triggerCounter = 0;
+
+    const Zone: React.FC<{
+      children: (zone: ZoneRenderContext<E, C>) => React.ReactElement;
+    }> = ({ children }) => {
+      // Read entities from data accessor using initial state
+      // (reactive state reading via useComputed is a future concern)
+      const entities = config.data(initialState);
+
+      // Items: iterate entities, call (item, Item) callback, inject ARIA
+      const Items: React.FC<{
+        children: (
+          item: Readonly<E>,
+          Item: FieldWrappers<E>,
+        ) => React.ReactElement;
+      }> = ({ children: itemCallback }) => {
+        const itemElements = entities.map((entity) => {
+          const entityObj = entity as Record<string, unknown> & { id: string };
+
+          // Build field wrappers from entity keys (excluding "id")
+          const fieldWrappers: Record<
+            string,
+            React.FC<{ children: React.ReactElement }>
+          > = {};
+          for (const key of Object.keys(entityObj)) {
+            if (key === "id") continue;
+            const fieldName = key;
+            fieldWrappers[fieldName] = ({ children: child }) =>
+              mergeProps(child, { "data-field": fieldName });
+          }
+
+          const element = itemCallback(
+            entity,
+            fieldWrappers as FieldWrappers<E>,
+          );
+
+          // Inject item ARIA attrs via mergeProps
+          return mergeProps(element, {
+            key: entityObj.id,
+            id: entityObj.id,
+            role: ITEM_ROLE_MAP[config.role.name] ?? "option",
+            "data-item": "",
+          });
+        });
+
+        return React.createElement(React.Fragment, null, ...itemElements);
+      };
+
+      // Trigger: inject data-trigger-id via cloneElement
+      const Trigger: React.FC<{
+        onPress: (cmd: C) => unknown;
+        children: React.ReactElement;
+      }> = ({ children: child }) => {
+        const triggerId = `${name}-trigger-${++triggerCounter}`;
+        return mergeProps(child, { "data-trigger-id": triggerId });
+      };
+
+      // Call render prop with zone context
+      const zoneContext: ZoneRenderContext<E, C> = { Items, Trigger };
+      const element = children(zoneContext);
+
+      // Inject container ARIA via cloneElement (asChild — 0 wrapper elements)
+      return mergeProps(element, {
+        role: config.role.name,
+      });
+    };
 
     return { Zone };
   }
