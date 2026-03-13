@@ -23,6 +23,7 @@
 | **최소 구현** | Red 테스트가 요구하는 것만. 테스트 없는 로직 추가 금지 | 2026-02-25 |
 | **Zone 태스크 체크** | Green 완료 후 "Zone이 있는가?" 확인. 있으면 /bind 필요. 여기서 멈추면 안 됨 | 2026-02-25 |
 | **Projection locator** | OS item이 아닌 HTML 요소(`[data-testid]`, `[data-session-group]` 등)를 headless에서 관찰·클릭. `page.locator(selector)`가 OS items에 없으면 `projection.queryElements(selector)`로 fallback. click은 `data-trigger-id` 경유 | 2026-03-12 |
+| **mergeProps for cloneElement** | `React.cloneElement`는 `ReactElement<unknown>`에 arbitrary props 거부 (overload 미스매치). `type AnyElement = ReactElement<any>; function mergeProps(el, props) { return cloneElement(el as AnyElement, props) }` wrapper로 해결. asChild 패턴 전반에 적용 | 2026-03-13 |
 
 ## Hazards
 
