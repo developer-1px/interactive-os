@@ -220,17 +220,20 @@ function AgentActivitySection({
     [agentEntries],
   );
 
-  // Track which sessions are manually collapsed/expanded by user
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  // User overrides for expand/collapse state.
+  // If a session is NOT in the map → use default (active=expanded, inactive=collapsed).
+  // If a session IS in the map → use the stored value (persists across HMR).
+  const [expandOverrides, setExpandOverrides] = useState<Map<string, boolean>>(
+    new Map(),
+  );
 
   const toggleSession = (sessionId: string) => {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(sessionId)) {
-        next.delete(sessionId);
-      } else {
-        next.add(sessionId);
-      }
+    setExpandOverrides((prev) => {
+      const next = new Map(prev);
+      const group = sessionGroups.find((g) => g.sessionId === sessionId);
+      const defaultExpanded = group?.isActive ?? false;
+      const current = next.get(sessionId) ?? defaultExpanded;
+      next.set(sessionId, !current);
       return next;
     });
   };
@@ -250,7 +253,9 @@ function AgentActivitySection({
       {/* Session groups */}
       <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
         {sessionGroups.map((group) => {
-          const isExpanded = !collapsed.has(group.sessionId);
+          const isExpanded = expandOverrides.has(group.sessionId)
+            ? expandOverrides.get(group.sessionId)!
+            : group.isActive;
 
           return (
             <div key={group.sessionId}>
