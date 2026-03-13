@@ -39,7 +39,9 @@
 
 - [x] T8: **defineApp2 SDK 팩토리** — `packages/os-sdk/src/app/defineApp2/`: AppHandle2 + createZone(ZoneConfig<E,C>) → ZoneHandle<E,C> + data accessor + __zoneBindings. [Evidence: 9 tests PASS, tsc 0] ✅
 - [x] T9: **Projection React 4컴포넌트** — Zone FC in defineApp2/createZone: asChild render prop(ZoneRenderContext), Items(data→(item,Item)+ARIA injection), Trigger(data-trigger-id), FieldWrapper(data-field). [Evidence: 9 tests PASS, tsc 0] ✅
-- [ ] T10: **Todo v2 + headless 검증** — `src/apps/todo-v2/`: defineApp2+fromEntities+widget + createPage headless tests. 크기: M, 의존: →T8,T9
+## Blocked
+
+- [ ] T10: **Todo v2 + headless 검증** — `src/apps/todo-v2/`: defineApp2+fromEntities+widget + createPage headless tests. 크기: M, 의존: →T8,T9. **Blocker**: defineApp2의 ZoneBinding2Entry(commands 기반)와 headless ZoneBindingEntry(callbacks 기반: onCheck, onAction, onDelete)가 비호환. command→callback 매핑 설계 필요 (별도 discussion).
 
 ## Unresolved
 
@@ -49,3 +51,4 @@
 | 2 | inline edit 모드 — `item.Field.text` 편집 시 OS가 DOM target 식별 방법 | Field 편집 | 미해소 — `data-field` attr로 해결 가정 |
 | 3 | cross-zone 키보드 (draft→list 화살표 이동) | UX | 미해소 — `linkZones()` vs combobox |
 | 4 | Grid column(gridcell) 경계 표현 | Grid/Treegrid | 미해소 — Field 변형 vs 별도 primitive |
+| 5 | defineApp2 → headless bridge: ZoneBinding2Entry(commands) → ZoneBindingEntry(callbacks) 변환 | Headless 테스트 | 미해소 — T10 blocker. command→callback 매핑 전략 필요 |
