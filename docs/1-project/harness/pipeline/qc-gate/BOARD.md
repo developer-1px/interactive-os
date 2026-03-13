@@ -34,10 +34,10 @@
 
 | # | Task | AC | Status | Evidence |
 |---|------|----|--------|----------|
-| T1 | QC AGENT.md 재작성 | 블랙박스 IV&V 프로토콜 + 체크리스트 3칸 + 독자 테스트 + 테스트 전달 | | |
-| T2 | /go SKILL.md 재작성 | PDCA 4 phase + QC gate 강제 + phase별 스킬 목록 | | |
-| T3 | /qa SKILL.md 교체 | 새 QC agent 호출 런처 | | |
-| T4 | spec-verifier 처리 | QC에 흡수 또는 역할 재정의 | | |
+| T1 | QC AGENT.md 재작성 | 블랙박스 IV&V 프로토콜 + 체크리스트 3칸 + 독자 테스트 + 테스트 전달 | ✅ | `.claude/agents/qa/AGENT.md` 재작성 (199줄→QC) ✅ |
+| T2 | /go SKILL.md 재작성 | PDCA 4 phase + QC gate 강제 + phase별 스킬 목록 | ✅ | `.claude/skills/go/SKILL.md` 재작성 (180줄→PDCA) ✅ |
+| T3 | /qa SKILL.md 교체 | 새 QC agent 호출 런처 | ✅ | `.claude/skills/qa/SKILL.md` 교체 (QC 런처) ✅ |
+| T4 | spec-verifier 처리 | QC에 흡수 또는 역할 재정의 | ✅ | `.claude/agents/spec-verifier/AGENT.md` DEPRECATED 마킹 ✅ |
 
 ## Unresolved
 
