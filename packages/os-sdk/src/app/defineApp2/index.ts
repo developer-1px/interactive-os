@@ -23,6 +23,7 @@ interface RolePreset {
 
 /** Zone config for createZone */
 // biome-ignore lint/suspicious/noExplicitAny: CommandFactory variance requires any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CommandFactory contravariance
 interface ZoneConfig<S, E, C extends Record<string, (...args: any[]) => any>> {
   role: RolePreset;
   entity: E;
@@ -39,6 +40,7 @@ interface ZoneHandle<_E, _C> {
 interface ZoneBinding2Entry {
   role: string;
   // biome-ignore lint/suspicious/noExplicitAny: heterogeneous command factories
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous command factories
   commands: Record<string, (...args: any[]) => any>;
   data: (state: unknown) => unknown[];
 }
@@ -51,6 +53,7 @@ interface AppHandle2<S> {
   ): CommandFactory<T, P>;
 
   // biome-ignore lint/suspicious/noExplicitAny: CommandFactory variance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CommandFactory contravariance
   createZone<E, C extends Record<string, (...args: any[]) => any>>(
     name: string,
     config: ZoneConfig<S, E, C>,
@@ -92,6 +95,7 @@ export function defineApp2<S>(appId: string, initialState: S): AppHandle2<S> {
   // ── createZone ──
 
   // biome-ignore lint/suspicious/noExplicitAny: CommandFactory variance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CommandFactory contravariance
   function createZone<E, C extends Record<string, (...args: any[]) => any>>(
     name: string,
     config: ZoneConfig<S, E, C>,
