@@ -230,9 +230,7 @@ function AgentActivitySection({
   const toggleSession = (sessionId: string) => {
     setExpandOverrides((prev) => {
       const next = new Map(prev);
-      const group = sessionGroups.find((g) => g.sessionId === sessionId);
-      const defaultExpanded = group?.isActive ?? false;
-      const current = next.get(sessionId) ?? defaultExpanded;
+      const current = next.get(sessionId) ?? true;
       next.set(sessionId, !current);
       return next;
     });
@@ -253,9 +251,7 @@ function AgentActivitySection({
       {/* Session groups */}
       <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
         {sessionGroups.map((group) => {
-          const isExpanded = expandOverrides.has(group.sessionId)
-            ? expandOverrides.get(group.sessionId)!
-            : group.isActive;
+          const isExpanded = expandOverrides.get(group.sessionId) ?? true;
 
           return (
             <div key={group.sessionId}>
