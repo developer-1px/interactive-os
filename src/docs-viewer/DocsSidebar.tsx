@@ -250,9 +250,7 @@ function AgentActivitySection({
       {/* Session groups */}
       <DocsRecentUI.Zone className="mt-0.5 flex flex-col">
         {sessionGroups.map((group) => {
-          const isExpanded = group.isActive
-            ? !collapsed.has(group.sessionId)
-            : false;
+          const isExpanded = !collapsed.has(group.sessionId);
 
           return (
             <div key={group.sessionId}>
