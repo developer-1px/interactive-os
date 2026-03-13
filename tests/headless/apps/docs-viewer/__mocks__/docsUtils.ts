@@ -181,8 +181,34 @@ export const getAgentRecentFiles = () =>
     session: i < 4 ? "sess-aaa" : "sess-bbb",
     ...(i === 0 ? { commitMessage: "feat: add new feature" } : {}),
   }));
-export const getLatestRead = () => null;
-export const getWrittenFilesBySession = () => [];
+export const getActivityBySession = () =>
+  [
+    {
+      sessionId: "sess-aaa",
+      latestRead: {
+        name: "STATUS",
+        dir: "",
+        path: "STATUS",
+        ext: "md",
+        tool: "Read",
+        ts: new Date(Date.now() - 30000).toISOString(),
+        session: "sess-aaa",
+      },
+      writes: _allFiles.slice(0, 3).map((f, i) => ({
+        name: f.name,
+        dir: f.path.includes("/")
+          ? f.path.slice(0, f.path.lastIndexOf("/") + 1)
+          : "",
+        path: f.path,
+        ext: "md",
+        tool: "Edit" as const,
+        ts: new Date(Date.now() - i * 60000).toISOString(),
+        session: "sess-aaa",
+      })),
+      latestTs: new Date(Date.now() - 30000).toISOString(),
+      isActive: true,
+    },
+  ] as import("../../../../../src/docs-viewer/docsUtils").SessionGroup[];
 export const loadDocContent = async (path: string) => {
   const map: Record<string, string> = {
     STATUS: "# STATUS\n\nDashboard content",
