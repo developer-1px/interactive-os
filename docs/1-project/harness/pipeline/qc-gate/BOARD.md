@@ -43,4 +43,8 @@
 
 | # | Question | Impact |
 |---|----------|--------|
-| U1 | Plan/Do/Act phase의 산출물 포맷 | 다음 사이클 |
+| U1 | Plan/Do/Act phase의 산출물 포맷 | 다음 사이클 — QC가 안정되면 점진적으로 |
+
+## 🟢 Done
+
+✅ QC 대기 (Meta 프로젝트이므로 자체 QC는 다음 프로젝트에서 검증)
