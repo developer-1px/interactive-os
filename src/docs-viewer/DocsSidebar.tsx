@@ -79,7 +79,53 @@ function relativeTime(ts: string): string {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-/** Single file row: filename (bold) + directory (small) */
+/** Read file row: Eye icon + filename, clickable */
+function ReadFileItem({
+  file,
+  activePath,
+}: {
+  file: AgentRecentFile;
+  activePath: string | undefined;
+}) {
+  const isActive = file.path === activePath;
+  return (
+    <DocsRecentUI.Item key={file.path} id={file.path}>
+      {({ isFocused }: { isFocused: boolean }) => (
+        <div
+          className={clsx(
+            "flex flex-col px-3 py-0.5 text-[12px] rounded-md transition-all duration-150",
+            "text-left w-full cursor-pointer",
+            isActive
+              ? "bg-blue-50 text-blue-700"
+              : isFocused
+                ? "bg-indigo-50 text-indigo-700"
+                : "text-slate-400 hover:text-slate-600 hover:bg-slate-50",
+          )}
+          style={{ paddingLeft: "28px" }}
+        >
+          <div className="flex items-center gap-1.5">
+            <Eye size={10} className="text-slate-300 shrink-0" />
+            <FileIcon
+              ext={file.ext}
+              className={clsx(
+                "shrink-0",
+                isActive ? "text-blue-400" : "text-slate-300",
+              )}
+            />
+            <span className="truncate flex-1">{file.name}</span>
+          </div>
+          {file.dir && (
+            <span className="text-[10px] text-slate-400 truncate pl-[22px]">
+              {file.dir}
+            </span>
+          )}
+        </div>
+      )}
+    </DocsRecentUI.Item>
+  );
+}
+
+/** Write file row: filename (bold) + directory (small) */
 function WriteFileItem({
   file,
   activePath,
@@ -217,18 +263,12 @@ function AgentActivitySection({
               />
               {isExpanded && (
                 <>
-                  {/* Read indicator — active sessions only */}
+                  {/* Read indicator — active sessions only, clickable */}
                   {group.latestRead && (
-                    <div className="flex items-center gap-1.5 px-3 py-0.5 pl-[28px]">
-                      <Eye size={10} className="text-slate-300 shrink-0" />
-                      <FileIcon
-                        ext={group.latestRead.ext}
-                        className="text-slate-300 shrink-0"
-                      />
-                      <span className="text-[11px] text-slate-400 truncate">
-                        {group.latestRead.name}
-                      </span>
-                    </div>
+                    <ReadFileItem
+                      file={group.latestRead}
+                      activePath={activePath}
+                    />
                   )}
                   {/* Write files — newest first */}
                   {group.writes.map((file) => (
